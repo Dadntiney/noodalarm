@@ -141,19 +141,19 @@
 
   .hint{ color:var(--text-faint); font-size:13px; margin:0; }
 
-  .profile-card, .form-card, .info-card, .actions-card, .entries-card, .tests-panel{
+  .form-card, .info-card, .actions-card, .entries-card, .tests-panel{
     width:100%; background:var(--surface); border:1px solid var(--border-soft);
     border-radius:var(--radius-md); padding:14px 16px; text-align:left;
   }
-  .profile-card label, .field label{
+  .field label{
     display:block; font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px;
   }
-  .profile-card input, .field input{
+  .field input{
     width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:9px;
     padding:9px 11px; font-size:14.5px; color:var(--text);
   }
-  .profile-card input:focus, .field input:focus{ outline:2px solid var(--red); outline-offset:1px; }
-  .profile-card input::placeholder, .field input::placeholder{ color:var(--text-faint); }
+  .field input:focus{ outline:2px solid var(--red); outline-offset:1px; }
+  .field input::placeholder{ color:var(--text-faint); }
 
   /* ---------- History / activity log ---------- */
   .history-header{ display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px; }
@@ -358,11 +358,6 @@
         </div>
 
         <p class="hint">Druk in en bevestig — er volgt eerst een korte aftelling</p>
-
-        <div class="profile-card">
-          <label for="userName">Jouw naam (wordt getoond als activator)</label>
-          <input type="text" id="userName" placeholder="Vul je naam in" autocomplete="name">
-        </div>
       </div>
 
       <!-- ARMING / CONFIRMATION -->
@@ -522,7 +517,6 @@
   function genId(){ return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
 
   const KEYS = {
-    user: 'noodalarm.user',
     testMode: 'noodalarm.testMode',
     activity: 'noodalarm.activity',
     contacts: 'noodalarm.contacts',
@@ -766,7 +760,6 @@
     screenContacts: document.getElementById('screen-contacts'),
 
     alarmButton: document.getElementById('alarmButton'),
-    userName: document.getElementById('userName'),
 
     viewIdle: document.getElementById('view-idle'),
     viewArming: document.getElementById('view-arming'),
@@ -853,7 +846,6 @@
   }
 
   /* ---------------- Init ---------------- */
-  els.userName.value = realStore.get(KEYS.user, '');
   els.testToggle.checked = realStore.get(KEYS.testMode, false);
   document.body.classList.toggle('test-mode', els.testToggle.checked);
   els.armingProgress.style.strokeDasharray = RING_CIRCUMFERENCE;
@@ -871,7 +863,6 @@
   renderHistory();
   renderContacts();
 
-  els.userName.addEventListener('input', () => realStore.set(KEYS.user, els.userName.value));
   els.testToggle.addEventListener('change', () => {
     realStore.set(KEYS.testMode, els.testToggle.checked);
     document.body.classList.toggle('test-mode', els.testToggle.checked);
@@ -922,10 +913,9 @@
   function activateAlarm(){
     if (currentAlarm && currentAlarm.status === 'active') return; // extra guard
     const isTest = els.testToggle.checked;
-    const activatorName = els.userName.value.trim() || 'Onbekende gebruiker';
     const contacts = Contacts.list();
 
-    currentAlarm = createAlarm(contacts, activatorName, isTest);
+    currentAlarm = createAlarm(contacts, null, isTest);
     els.alarmButton.disabled = true;
     if (navigator.vibrate) navigator.vibrate([80,40,80]);
 
