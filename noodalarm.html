@@ -280,14 +280,6 @@
   .ring-dot.active{ transform:scale(1.3); box-shadow:0 0 0 3px var(--amber-soft); }
   .ring-count{ font-variant-numeric:tabular-nums; font-weight:700; font-size:13px; color:var(--text-muted); }
 
-  .demo-controls{
-    width:100%; background:var(--amber-soft); border:1px dashed var(--amber); border-radius:var(--radius-md);
-    padding:12px 14px; display:flex; flex-direction:column; gap:8px;
-  }
-  .demo-controls.hidden{ display:none; }
-  .demo-controls-title{ font-size:11.5px; font-weight:700; color:var(--amber); text-transform:uppercase; letter-spacing:.04em; }
-  .demo-controls-buttons{ display:flex; gap:8px; flex-wrap:wrap; }
-
   /* ---------- Avatars ---------- */
   .avatar{
     width:44px; height:44px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border);
@@ -452,15 +444,6 @@
               <span class="ring-dot"></span><span class="ring-dot"></span><span class="ring-dot"></span><span class="ring-dot"></span><span class="ring-dot"></span>
             </div>
             <div class="ring-count" id="ringCountText">0/5</div>
-          </div>
-        </div>
-
-        <div class="demo-controls hidden" id="demoControls">
-          <div class="demo-controls-title">Demo-bediening — fictief bellen</div>
-          <div class="demo-controls-buttons">
-            <button type="button" id="simulateAnswerButton" class="small-btn">Simuleer opnemen</button>
-            <button type="button" id="skipContactButton" class="small-btn">Volgende contact</button>
-            <button type="button" id="restartCallButton" class="small-btn">Herstart belronde</button>
           </div>
         </div>
 
@@ -692,9 +675,9 @@
    *
    * Alle timing loopt via één enkele, expliciet bijgehouden "generatie" +
    * timer-referentie, zodat er nooit twee ronde-timers tegelijk actief zijn
-   * (voorkomt race conditions tussen ring-ticks, handmatig stoppen en de
-   * demo-bediening). `activeCallFlow` geeft de UI een handvat om in te
-   * grijpen (simuleer opnemen / overslaan / herstarten) tijdens de demo.
+   * (voorkomt race conditions tussen ring-ticks en handmatig stoppen).
+   * `activeCallFlow` geeft interne haken om direct in te grijpen (o.a.
+   * gebruikt door de testsuite om het bellen deterministisch te sturen).
    */
   function runCallFlow(alarm, hooks){
     return new Promise((resolve) => {
@@ -820,16 +803,6 @@
           if (entry.status !== STATUS.CALLING) return;
           handleNoAnswer(entry);
         },
-        restart(){
-          if (done) return;
-          clearTimer();
-          generation++;
-          entries.forEach(e => { if (e.status === STATUS.CALLING || e.status === STATUS.NO_ANSWER) e.status = STATUS.PENDING; });
-          index = 0;
-          alarm.lastNoAnswer = null;
-          hooks.onLog('Belronde handmatig herstart');
-          ringContact();
-        },
         stop(){
           finish();
         }
@@ -908,10 +881,6 @@
     callState: document.getElementById('callState'),
     ringDots: document.getElementById('ringDots'),
     ringCountText: document.getElementById('ringCountText'),
-    demoControls: document.getElementById('demoControls'),
-    simulateAnswerButton: document.getElementById('simulateAnswerButton'),
-    skipContactButton: document.getElementById('skipContactButton'),
-    restartCallButton: document.getElementById('restartCallButton'),
 
     historyList: document.getElementById('historyList'),
     historyEmpty: document.getElementById('historyEmpty'),
@@ -1006,10 +975,6 @@
   els.cancelButton.addEventListener('click', cancelArming);
   els.endAlarmButton.addEventListener('click', () => stopAlarm('manual'));
   els.clearHistoryButton.addEventListener('click', onClearHistory);
-
-  els.simulateAnswerButton.addEventListener('click', () => { if (activeCallFlow) activeCallFlow.simulateAnswer(); });
-  els.skipContactButton.addEventListener('click', () => { if (activeCallFlow) activeCallFlow.skipCurrent(); });
-  els.restartCallButton.addEventListener('click', () => { if (activeCallFlow) activeCallFlow.restart(); });
 
   els.toggleTestsButton.addEventListener('click', () => els.testsPanel.classList.toggle('hidden'));
   els.runTestsButton.addEventListener('click', () => runAllTests());
@@ -1145,7 +1110,6 @@
       els.callState.className = 'call-state';
       renderRingDots(flow.ringCount);
       els.ringCountText.textContent = flow.ringCount + '/' + flow.maxRings;
-      els.demoControls.classList.remove('hidden');
     } else if (alarm.callPhase === 'calling' && alarm.lastNoAnswer){
       els.callStatusCard.className = 'call-status-card no-answer';
       els.callAvatar.innerHTML = avatarInner(alarm.lastNoAnswer.photo);
@@ -1154,7 +1118,6 @@
       els.callState.className = 'call-state no-answer';
       renderRingDots(MAX_RINGS);
       els.ringCountText.textContent = MAX_RINGS + '/' + MAX_RINGS;
-      els.demoControls.classList.add('hidden');
     } else if (answeredEntry && alarm.callPhase === 'resolved'){
       els.callStatusCard.className = 'call-status-card connected';
       els.callAvatar.innerHTML = avatarInner(answeredEntry.photo);
@@ -1163,10 +1126,8 @@
       els.callState.className = 'call-state connected';
       renderRingDots(MAX_RINGS);
       els.ringCountText.textContent = 'Verbonden';
-      els.demoControls.classList.add('hidden');
     } else {
       els.callStatusCard.className = 'call-status-card hidden';
-      els.demoControls.classList.add('hidden');
     }
   }
 
