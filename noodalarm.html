@@ -300,6 +300,38 @@
   }
   .link-button:hover{ color:var(--red-bright); }
 
+  /* ---------- Uitleg / onboarding ---------- */
+  .onboarding-overlay{
+    position:fixed; inset:0; background:rgba(6,10,20,.92); backdrop-filter:blur(2px);
+    z-index:100; display:flex; align-items:center; justify-content:center; padding:22px;
+  }
+  .onboarding-overlay.hidden{ display:none; }
+  .onboarding-card{
+    width:100%; max-width:400px; background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg); padding:30px 26px 26px; text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+  }
+  .onboarding-skip{
+    align-self:flex-end; margin:-14px -10px -8px 0; background:none; border:none; color:var(--text-muted);
+    font-size:15px; font-weight:600; cursor:pointer; padding:8px 10px; text-decoration:underline; text-underline-offset:3px;
+  }
+  .onboarding-icon{
+    width:84px; height:84px; border-radius:50%; flex-shrink:0;
+    background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 12px 26px rgba(227,32,61,.35);
+  }
+  .onboarding-icon svg{ width:40px; height:40px; color:#fff; }
+  .onboarding-title{ font-size:22px; font-weight:800; margin:0; line-height:1.3; }
+  .onboarding-text{ font-size:17px; line-height:1.55; color:var(--text-muted); margin:0; }
+  .onboarding-text strong{ color:var(--text); }
+  .onboarding-dots{ display:flex; gap:9px; }
+  .onboarding-dot{ width:10px; height:10px; border-radius:50%; background:var(--border); }
+  .onboarding-dot.active{ background:var(--red-bright); }
+  .onboarding-actions{ width:100%; display:flex; flex-direction:column; gap:10px; margin-top:4px; }
+  .onboarding-actions .save-button{ width:100%; }
+  .onboarding-actions .cancel-button{ width:100%; }
+
   @media (max-width:360px){
     .app{ padding-left:14px; padding-right:14px; }
   }
@@ -308,6 +340,56 @@
 <body>
 
 <div class="app">
+
+  <!-- =========================== UITLEG (bij eerste keer inloggen) =========================== -->
+  <div id="onboardingOverlay" class="onboarding-overlay hidden">
+    <div class="onboarding-card">
+      <button type="button" id="onboardingSkip" class="onboarding-skip">Overslaan</button>
+
+      <div id="onboardingStep1" class="onboarding-step" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="onboarding-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        </div>
+        <h2 class="onboarding-title">Welkom bij NoodAlarm</h2>
+        <p class="onboarding-text">Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt.</p>
+      </div>
+
+      <div id="onboardingStep2" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="onboarding-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3.5-6 7-6s7 2 7 6"/><path d="M19 8v6"/><path d="M16 11h6"/></svg>
+        </div>
+        <h2 class="onboarding-title">Stap 1: Voeg iemand toe</h2>
+        <p class="onboarding-text">Ga naar <strong>"Noodcontacten"</strong>. Vraag de code van iemand die u vertrouwt en vul die in bij "Uitnodigen".</p>
+      </div>
+
+      <div id="onboardingStep3" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="onboarding-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2 class="onboarding-title">Stap 2: Die persoon bevestigt</h2>
+        <p class="onboarding-text">Diegene krijgt uw verzoek en drukt op het <strong>groene vinkje</strong>. Daarna staat die persoon in uw lijst.</p>
+      </div>
+
+      <div id="onboardingStep4" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="onboarding-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        </div>
+        <h2 class="onboarding-title">Stap 3: Druk op ALARM bij nood</h2>
+        <p class="onboarding-text">Al uw bevestigde contacten krijgen dan <strong>meteen een melding</strong> op hun telefoon.</p>
+      </div>
+
+      <div class="onboarding-dots">
+        <span class="onboarding-dot active" data-dot="1"></span>
+        <span class="onboarding-dot" data-dot="2"></span>
+        <span class="onboarding-dot" data-dot="3"></span>
+        <span class="onboarding-dot" data-dot="4"></span>
+      </div>
+
+      <div class="onboarding-actions">
+        <button type="button" id="onboardingNextButton" class="save-button">Volgende</button>
+      </div>
+    </div>
+  </div>
 
   <!-- =========================== INLOGSCHERM =========================== -->
   <section id="screen-auth" class="screen">
@@ -344,7 +426,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
         <span class="brand-name">NoodAlarm</span>
       </div>
-      <button type="button" id="logoutButton" class="logout-link">Uitloggen</button>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <button type="button" id="helpButton" class="logout-link">Hoe werkt dit?</button>
+        <button type="button" id="logoutButton" class="logout-link">Uitloggen</button>
+      </div>
     </header>
 
     <nav class="segmented" role="tablist">
@@ -493,7 +578,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { activity: 'noodalarm.activity' };
+  const KEYS = { activity: 'noodalarm.activity', onboarded: 'noodalarm.onboarded' };
 
   function genId(){ return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
 
@@ -536,6 +621,18 @@
     authSubmitButton: document.getElementById('authSubmitButton'),
     authMessage: document.getElementById('authMessage'),
     logoutButton: document.getElementById('logoutButton'),
+    helpButton: document.getElementById('helpButton'),
+
+    onboardingOverlay: document.getElementById('onboardingOverlay'),
+    onboardingSkip: document.getElementById('onboardingSkip'),
+    onboardingNextButton: document.getElementById('onboardingNextButton'),
+    onboardingSteps: [
+      document.getElementById('onboardingStep1'),
+      document.getElementById('onboardingStep2'),
+      document.getElementById('onboardingStep3'),
+      document.getElementById('onboardingStep4')
+    ],
+    onboardingDots: Array.from(document.querySelectorAll('.onboarding-dot')),
 
     tabAlarm: document.getElementById('tabAlarm'),
     tabContacts: document.getElementById('tabContacts'),
@@ -626,6 +723,37 @@
     await sb.auth.signOut();
   });
 
+  /* =========================================================================
+     UITLEG (onboarding) — verschijnt vanzelf bij de eerste keer inloggen,
+     en is daarna altijd terug te bekijken via "Hoe werkt dit?".
+     ========================================================================= */
+  let onboardingStep = 1;
+
+  function renderOnboardingStep(){
+    els.onboardingSteps.forEach((el, i) => el.classList.toggle('hidden', i !== onboardingStep - 1));
+    els.onboardingDots.forEach((dot, i) => dot.classList.toggle('active', i === onboardingStep - 1));
+    els.onboardingNextButton.textContent = onboardingStep === els.onboardingSteps.length ? 'Begrepen, aan de slag' : 'Volgende';
+  }
+  function showOnboarding(){
+    onboardingStep = 1;
+    renderOnboardingStep();
+    els.onboardingOverlay.classList.remove('hidden');
+  }
+  function hideOnboarding(){
+    els.onboardingOverlay.classList.add('hidden');
+    realStore.set(KEYS.onboarded, true);
+  }
+  els.onboardingNextButton.addEventListener('click', () => {
+    if (onboardingStep < els.onboardingSteps.length){
+      onboardingStep += 1;
+      renderOnboardingStep();
+    } else {
+      hideOnboarding();
+    }
+  });
+  els.onboardingSkip.addEventListener('click', hideOnboarding);
+  els.helpButton.addEventListener('click', showOnboarding);
+
   sb.auth.onAuthStateChange((_event, session) => {
     currentSession = session;
     if (session){
@@ -648,6 +776,10 @@
     renderHistory();
     await refreshContacts();
     await setupPush();
+
+    if (!realStore.get(KEYS.onboarded, false)){
+      showOnboarding();
+    }
   }
 
   /* =========================================================================
