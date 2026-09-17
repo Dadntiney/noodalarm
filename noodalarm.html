@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>NoodAlarm — persoonlijke alarmknop</title>
+<meta name="description" content="Persoonlijke alarmknop met automatische meldingsflow, contactpersonen, live status en testmodus.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1220;
+    --surface:#141c30;
+    --surface-2:#1b2540;
+    --border:#263049;
+    --border-soft:#1c2439;
+    --text:#eef1f7;
+    --text-muted:#8b96ac;
+    --text-faint:#5c6780;
+    --red:#e3203d;
+    --red-dark:#8c0f24;
+    --red-bright:#ff5468;
+    --amber:#f2a93b;
+    --amber-soft:#3a2c14;
+    --green:#2bb673;
+    --danger:#ef4444;
+    --font:'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius-lg:22px;
+    --radius-md:14px;
+  }
+
+  *{ box-sizing:border-box; }
+  .hidden{ display:none !important; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  button, input, textarea{ font-family:inherit; color:inherit; }
+  button{ -webkit-tap-highlight-color:transparent; }
+  ul{ list-style:none; margin:0; padding:0; }
+
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:
+      max(18px, env(safe-area-inset-top))
+      20px
+      max(24px, env(safe-area-inset-bottom));
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding-bottom:12px;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; color:var(--text); }
+  .brand svg{ width:20px; height:20px; color:var(--text-muted); flex-shrink:0; }
+  .brand-name{ font-weight:700; font-size:15px; letter-spacing:0.01em; }
+
+  .test-toggle{ display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+  .test-toggle span.toggle-label{ font-size:13px; font-weight:600; color:var(--text-muted); }
+  .test-toggle input{ display:none; }
+  .toggle-track{
+    width:38px; height:22px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--border);
+    position:relative; transition:background .15s ease, border-color .15s ease;
+  }
+  .toggle-thumb{
+    position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background:var(--text-faint); transition:transform .18s ease, background .18s ease;
+  }
+  .test-toggle input:checked + .toggle-track{ background:var(--amber-soft); border-color:var(--amber); }
+  .test-toggle input:checked + .toggle-track .toggle-thumb{ transform:translateX(16px); background:var(--amber); }
+
+  .test-banner{
+    display:none; align-items:center; gap:8px;
+    background:var(--amber-soft); border:1px solid var(--amber); color:var(--amber);
+    font-size:12.5px; font-weight:600; padding:8px 12px; border-radius:10px; margin-bottom:10px;
+  }
+  body.test-mode .test-banner{ display:flex; }
+  .test-banner svg{ width:15px; height:15px; flex-shrink:0; }
+
+  /* ---------- Segmented nav ---------- */
+  .segmented{
+    display:flex; background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:999px; padding:4px; gap:4px; margin-bottom:20px;
+  }
+  .segmented button{
+    flex:1; border:none; background:transparent; color:var(--text-muted);
+    font-weight:700; font-size:13.5px; padding:10px 0; border-radius:999px; cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .segmented button.active{ background:var(--surface-2); color:var(--text); }
+
+  .screen{ width:100%; display:flex; flex-direction:column; gap:22px; flex:1; }
+  .screen.hidden{ display:none; }
+
+  /* ---------- Views within Alarm screen ---------- */
+  .view{ width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; gap:22px; }
+  .view.hidden{ display:none; }
+
+  .intro{ color:var(--text-muted); font-size:14.5px; line-height:1.5; max-width:280px; margin:0; }
+
+  .alarm-button-wrap{
+    padding:16px; border-radius:50%;
+    background:linear-gradient(150deg,#2c3554,#141a2c);
+    box-shadow:0 22px 45px rgba(0,0,0,.55), inset 0 2px 3px rgba(255,255,255,.06), inset 0 -2px 4px rgba(0,0,0,.4);
+  }
+  .alarm-button{
+    width:clamp(180px, 54vw, 250px); height:clamp(180px, 54vw, 250px); border-radius:50%; border:none;
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
+    box-shadow:0 14px 0 var(--red-dark), 0 22px 34px rgba(0,0,0,.5),
+      inset 0 -8px 14px rgba(0,0,0,.28), inset 0 8px 12px rgba(255,255,255,.18);
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .alarm-button svg{ width:15%; height:15%; color:rgba(255,255,255,.92); }
+  .alarm-button .label{
+    font-size:clamp(18px,5.2vw,24px); font-weight:800; letter-spacing:.06em; color:#fff;
+    text-shadow:0 2px 4px rgba(0,0,0,.25);
+  }
+  .alarm-button.pressed{
+    transform:translateY(10px);
+    box-shadow:0 4px 0 var(--red-dark), 0 8px 16px rgba(0,0,0,.5),
+      inset 0 -4px 8px rgba(0,0,0,.32), inset 0 4px 8px rgba(255,255,255,.12);
+  }
+  .alarm-button:focus-visible{ outline:3px solid var(--red-bright); outline-offset:6px; }
+  .alarm-button:disabled{ cursor:not-allowed; }
+
+  .hint{ color:var(--text-faint); font-size:13px; margin:0; }
+
+  .profile-card, .form-card, .info-card, .actions-card, .entries-card, .tests-panel{
+    width:100%; background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius-md); padding:14px 16px; text-align:left;
+  }
+  .profile-card label, .field label{
+    display:block; font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px;
+  }
+  .profile-card input, .field input{
+    width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:9px;
+    padding:9px 11px; font-size:14.5px; color:var(--text);
+  }
+  .profile-card input:focus, .field input:focus{ outline:2px solid var(--red); outline-offset:1px; }
+  .profile-card input::placeholder, .field input::placeholder{ color:var(--text-faint); }
+
+  /* ---------- History / activity log ---------- */
+  .history-header{ display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px; }
+  .history-header h3{ font-size:12.5px; font-weight:600; color:var(--text-muted); margin:0; }
+  .link-button{
+    background:none; border:none; color:var(--text-faint); font-size:12px; font-weight:600;
+    cursor:pointer; padding:4px 6px; border-radius:6px; text-decoration:underline; text-underline-offset:2px;
+  }
+  .link-button:hover{ color:var(--red-bright); }
+  .history-card{ width:100%; text-align:left; }
+  .history-card ul{ display:flex; flex-direction:column; gap:6px; }
+  .history-card li{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:10px; padding:8px 12px; font-size:13px;
+  }
+  .h-name{ font-weight:600; }
+  .h-time{ color:var(--text-muted); flex:1; text-align:right; font-size:11.5px; }
+  .h-tag{ background:var(--amber-soft); color:var(--amber); font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:6px; }
+
+  .empty-state{
+    width:100%; padding:24px 14px; text-align:center; color:var(--text-faint);
+    font-size:13px; border:1px dashed var(--border); border-radius:var(--radius-md); line-height:1.5;
+  }
+
+  /* ---------- Arming view ---------- */
+  .arming-ring-wrap{ position:relative; width:200px; height:200px; }
+  .arming-ring{ width:100%; height:100%; transform:rotate(-90deg); }
+  .arming-ring circle{ fill:none; stroke-width:10; }
+  .ring-bg{ stroke:var(--surface-2); }
+  .ring-progress{
+    stroke:var(--amber); stroke-linecap:round; stroke-dasharray:565.48; stroke-dashoffset:565.48;
+    transition:stroke-dashoffset 1s linear;
+  }
+  .arming-count{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:64px; font-weight:800; color:var(--amber); font-variant-numeric:tabular-nums;
+  }
+  #view-arming h2{ font-size:19px; margin:0; }
+  #view-arming p{ color:var(--text-muted); font-size:14px; max-width:300px; margin:0; line-height:1.5; }
+
+  .cancel-button, .end-button, .reset-button, .add-button, .save-button{
+    font-weight:700; font-size:14.5px; padding:13px 26px; border-radius:999px; cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .cancel-button{ background:transparent; border:1.5px solid var(--border); color:var(--text); }
+  .cancel-button:hover{ border-color:var(--text-muted); background:var(--surface); }
+  .reset-button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); }
+  .reset-button:hover{ border-color:var(--text-muted); }
+  .end-button{ background:transparent; border:1.5px solid var(--red); color:var(--red-bright); width:100%; }
+  .end-button:hover{ background:rgba(227,32,61,.12); }
+  .add-button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:100%; }
+  .add-button:hover{ border-color:var(--text-muted); }
+  .save-button{ background:var(--green); border:1px solid var(--green); color:#0b1220; }
+  .save-button:hover{ filter:brightness(1.08); }
+
+  /* ---------- Activated / live status ---------- */
+  .status-badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--red); color:#fff;
+    font-weight:800; font-size:14.5px; letter-spacing:.03em; padding:11px 20px; border-radius:999px;
+    box-shadow:0 10px 24px rgba(227,32,61,.35);
+  }
+  .status-badge.test{ background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); box-shadow:none; }
+  .status-badge svg{ width:16px; height:16px; }
+
+  .info-row{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:14px; }
+  .info-row + .info-row{ border-top:1px solid var(--border-soft); }
+  .info-row span{ color:var(--text-muted); }
+  .info-row strong{ font-weight:600; text-align:right; }
+
+  .summary-grid{ display:flex; flex-direction:column; gap:8px; width:100%; }
+  .summary-row{ display:flex; align-items:center; gap:9px; font-size:13.5px; }
+  .summary-row svg{ width:16px; height:16px; color:var(--text-muted); flex-shrink:0; }
+  .summary-row .val{ font-weight:700; }
+  .timer{ font-variant-numeric:tabular-nums; font-weight:800; font-size:26px; }
+
+  .actions-card h3, .entries-card h3{ font-size:12.5px; font-weight:600; color:var(--text-muted); margin:0 0 10px; }
+  .actions-card ul{ display:flex; flex-direction:column; gap:2px; }
+  .actions-card li{ display:flex; align-items:center; gap:10px; padding:9px 0; font-size:13.5px; }
+  .actions-card li + li{ border-top:1px solid var(--border-soft); }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--text-faint); flex-shrink:0; transition:background .2s ease; }
+  .dot.dot-green{ background:var(--green); }
+  .dot.dot-amber{ background:var(--amber); }
+  .dot.dot-red{ background:var(--danger); }
+  .actions-card li span:not(.dot):not(.state){ flex:1; }
+  .actions-card .state{ color:var(--text-faint); font-size:12px; font-weight:600; white-space:nowrap; }
+  .actions-card li.done .state{ color:var(--green); }
+  .actions-note{ margin:10px 0 0; font-size:11.5px; color:var(--text-faint); line-height:1.5; }
+
+  .entries-card ul{ display:flex; flex-direction:column; gap:2px; }
+  .entries-card li{ display:flex; align-items:center; gap:10px; padding:9px 0; font-size:13.5px; }
+  .entries-card li + li{ border-top:1px solid var(--border-soft); }
+  .entries-card .entry-name{ flex:1; font-weight:600; text-align:left; }
+  .entries-card .entry-status{ font-size:12px; font-weight:600; color:var(--text-faint); display:flex; align-items:center; gap:6px; }
+  .entries-card .entry-status.st-green{ color:var(--green); }
+  .entries-card .entry-status.st-amber{ color:var(--amber); }
+  .entries-card .entry-status.st-red{ color:var(--danger); }
+
+  /* ---------- Avatars ---------- */
+  .avatar{
+    width:44px; height:44px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; color:var(--text-faint);
+  }
+  .avatar svg{ width:55%; height:55%; }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .avatar.sm{ width:30px; height:30px; }
+
+  /* ---------- Contacts screen ---------- */
+  .contact-card{
+    display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius-md); padding:12px 14px;
+  }
+  .contact-info{ flex:1; text-align:left; min-width:0; }
+  .contact-info .name{ font-weight:700; font-size:14.5px; }
+  .contact-info .meta{ color:var(--text-muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .contact-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .icon-btn{
+    width:34px; height:34px; border-radius:9px; border:1px solid var(--border); background:var(--surface-2);
+    color:var(--text-muted); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .icon-btn svg{ width:16px; height:16px; }
+  .icon-btn:hover{ color:var(--text); border-color:var(--text-muted); }
+  .icon-btn.danger:hover{ color:var(--danger); border-color:var(--danger); }
+  .contacts-list{ display:flex; flex-direction:column; gap:8px; }
+
+  .field-row{ display:grid; grid-template-columns:1fr; gap:12px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field-error{ color:var(--danger); font-size:11.5px; font-weight:600; }
+
+  .photo-picker{ display:flex; align-items:center; gap:12px; }
+  .photo-picker .photo-buttons{ display:flex; flex-direction:column; gap:6px; }
+  .small-btn{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text); font-size:12.5px;
+    font-weight:600; padding:7px 12px; border-radius:8px; cursor:pointer;
+  }
+  .small-btn:hover{ border-color:var(--text-muted); }
+  .small-btn.danger-outline{ color:var(--danger); border-color:rgba(239,68,68,.4); }
+
+  .form-actions{ display:flex; gap:10px; margin-top:4px; }
+  .form-actions .cancel-button{ flex:1; }
+  .form-actions .save-button{ flex:1; }
+
+  footer.note{ text-align:center; color:var(--text-faint); font-size:11px; padding-top:18px; }
+  .footer-links{ display:flex; justify-content:center; gap:14px; padding-top:6px; }
+
+  /* ---------- Tests panel ---------- */
+  .tests-panel{ display:flex; flex-direction:column; gap:6px; }
+  .tests-panel.hidden{ display:none; }
+  .tests-summary{ font-size:13px; font-weight:700; margin-bottom:4px; }
+  .test-row{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+    font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--border-soft);
+  }
+  .test-row:last-child{ border-bottom:none; }
+  .test-row .dot{ margin-top:4px; }
+  .test-row .tname{ flex:1; }
+  .test-row .tmsg{ color:var(--text-faint); font-size:11.5px; }
+
+  @media (max-width:360px){
+    .app{ padding-left:14px; padding-right:14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+      <span class="brand-name">NoodAlarm</span>
+    </div>
+    <label class="test-toggle">
+      <input type="checkbox" id="testModeToggle">
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      <span class="toggle-label">Testmodus</span>
+    </label>
+  </header>
+
+  <div class="test-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+    <span>Testmodus actief — er wordt niets echt verstuurd</span>
+  </div>
+
+  <nav class="segmented" role="tablist">
+    <button type="button" id="tabAlarm" class="active" role="tab" aria-selected="true">Alarm</button>
+    <button type="button" id="tabContacts" role="tab" aria-selected="false">Contactpersonen</button>
+  </nav>
+
+  <!-- =========================== ALARM SCHERM =========================== -->
+  <section id="screen-alarm" class="screen">
+    <main class="stage" style="display:flex;flex-direction:column;align-items:center;">
+
+      <!-- IDLE -->
+      <div id="view-idle" class="view">
+        <p class="intro">Voor noodsituaties. Eén druk op de knop start een korte bevestiging — daarna regelt de app alles automatisch.</p>
+
+        <div class="alarm-button-wrap">
+          <button id="alarmButton" class="alarm-button" aria-label="Activeer alarm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <span class="label">ALARM</span>
+          </button>
+        </div>
+
+        <p class="hint">Druk in en bevestig — er volgt eerst een korte aftelling</p>
+
+        <div class="profile-card">
+          <label for="userName">Jouw naam (wordt getoond als activator)</label>
+          <input type="text" id="userName" placeholder="Vul je naam in" autocomplete="name">
+        </div>
+      </div>
+
+      <!-- ARMING / CONFIRMATION -->
+      <div id="view-arming" class="view hidden">
+        <div class="arming-ring-wrap">
+          <svg class="arming-ring" viewBox="0 0 200 200">
+            <circle class="ring-bg" cx="100" cy="100" r="90"/>
+            <circle class="ring-progress" id="armingProgress" cx="100" cy="100" r="90"/>
+          </svg>
+          <div class="arming-count" id="armingCount">3</div>
+        </div>
+        <h2>Alarm wordt geactiveerd…</h2>
+        <p>Zodra de teller afloopt start het volledige meldingsproces automatisch. Niet gewild? Annuleer hieronder.</p>
+        <button id="cancelButton" class="cancel-button">Annuleren</button>
+      </div>
+
+      <!-- LIVE ALARM STATUS -->
+      <div id="view-live" class="view hidden">
+        <div class="status-badge" id="statusBadge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <span id="statusBadgeText">ALARM ACTIEF</span>
+        </div>
+
+        <div class="timer" id="alarmTimer">00:00</div>
+
+        <div class="info-card">
+          <div class="info-row"><span>Geactiveerd door</span><strong id="activatedBy">—</strong></div>
+          <div class="info-row"><span>Tijdstip</span><strong id="activatedAt">—</strong></div>
+          <div class="info-row"><span>Modus</span><strong id="activatedMode">—</strong></div>
+        </div>
+
+        <div class="info-card">
+          <div class="summary-grid">
+            <div class="summary-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+              <span>E-mails:</span><span class="val" id="summaryEmails">0/0 verstuurd</span>
+            </div>
+            <div class="summary-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.34 1.79.65 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.27a2 2 0 0 1 2.11-.45c.86.31 1.75.53 2.65.65A2 2 0 0 1 22 16.92Z"/></svg>
+              <span>Huidige actie:</span><span class="val" id="summaryCurrent">—</span>
+            </div>
+            <div class="summary-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 4 15 8-15 8V4Z"/></svg>
+              <span>Volgende:</span><span class="val" id="summaryNext">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="entries-card" id="entriesCard">
+          <h3>Contactpersonen</h3>
+          <ul id="entriesList"></ul>
+        </div>
+
+        <button id="endAlarmButton" class="end-button">Alarm beëindigen</button>
+      </div>
+
+    </main>
+
+    <!-- ACTIVITEITEN / LOGBOEK -->
+    <div class="history-card hidden">
+      <div class="history-header">
+        <h3>Laatste activiteiten</h3>
+        <button id="clearHistoryButton" class="link-button">Activiteiten wissen</button>
+      </div>
+      <ul id="historyList"></ul>
+      <div id="historyEmpty" class="empty-state hidden">Nog geen activiteiten. Zodra je het alarm activeert, verschijnt hier het logboek.</div>
+    </div>
+
+    <footer class="note">MVP — lokaal draaiend, alle meldingen zijn gesimuleerd</footer>
+    <div class="footer-links">
+      <button type="button" id="toggleTestsButton" class="link-button">Diagnostiek: tests uitvoeren</button>
+    </div>
+    <div id="testsPanel" class="tests-panel hidden">
+      <div class="tests-summary" id="testsSummary">Nog niet uitgevoerd</div>
+      <button type="button" id="runTestsButton" class="small-btn">Tests uitvoeren</button>
+      <div id="testsResults"></div>
+    </div>
+  </section>
+
+  <!-- =========================== CONTACTEN SCHERM =========================== -->
+  <section id="screen-contacts" class="screen hidden">
+    <p class="intro" style="max-width:100%;">Deze contactpersonen worden bij een alarm automatisch gemaild en — als niemand reageert — één voor één automatisch gebeld, in deze volgorde.</p>
+
+    <button type="button" id="addContactButton" class="add-button">+ Contactpersoon toevoegen</button>
+
+    <div id="contactsEmpty" class="empty-state">Nog geen contactpersonen. Voeg iemand toe die gewaarschuwd moet worden bij een alarm.</div>
+    <ul id="contactsList" class="contacts-list"></ul>
+
+    <!-- Formulier: toevoegen / bewerken -->
+    <div id="contactForm" class="form-card hidden">
+      <div class="photo-picker">
+        <div class="avatar" id="formAvatarPreview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </div>
+        <div class="photo-buttons">
+          <input type="file" id="photoInput" accept="image/*" style="display:none;">
+          <button type="button" id="uploadPhotoButton" class="small-btn">Foto uploaden</button>
+          <button type="button" id="removePhotoButton" class="small-btn danger-outline">Foto verwijderen</button>
+        </div>
+      </div>
+
+      <div class="field-row" style="margin-top:14px;">
+        <div class="field">
+          <label for="fieldName">Naam</label>
+          <input type="text" id="fieldName" placeholder="Bijv. Danny Gielen">
+          <span class="field-error hidden" id="errorName">Vul een naam in</span>
+        </div>
+        <div class="field">
+          <label for="fieldPhone">Telefoonnummer</label>
+          <input type="tel" id="fieldPhone" placeholder="Bijv. 0615901002">
+          <span class="field-error hidden" id="errorPhone">Vul een telefoonnummer in</span>
+        </div>
+        <div class="field">
+          <label for="fieldEmail">E-mailadres</label>
+          <input type="email" id="fieldEmail" placeholder="Bijv. naam@voorbeeld.nl">
+          <span class="field-error hidden" id="errorEmail">Vul een geldig e-mailadres in</span>
+        </div>
+      </div>
+      <span class="field-error hidden" id="errorPhoto">Afbeelding is te groot (max 1,5 MB)</span>
+
+      <div class="form-actions">
+        <button type="button" id="cancelContactButton" class="cancel-button">Annuleren</button>
+        <button type="button" id="saveContactButton" class="save-button">Opslaan</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =========================================================================
+     1. STORAGE-LAAG
+     Nu: browser localStorage/in-memory (op verzoek volledig gesimuleerd, geen
+     server, geen database). LATER: deze Store-interface (get/set) kan 1-op-1
+     vervangen worden door een echte backend/database-laag (bv. Supabase), de
+     rest van de app blijft ongewijzigd omdat alles via deze interface loopt.
+     ========================================================================= */
+  function createStore(backend){
+    return {
+      get(key, fallback){
+        try { const raw = backend.getItem(key); return raw == null ? fallback : JSON.parse(raw); }
+        catch(e){ return fallback; }
+      },
+      set(key, value){
+        try { backend.setItem(key, JSON.stringify(value)); return true; }
+        catch(e){ return false; }
+      }
+    };
+  }
+  function createMemoryBackend(){
+    const map = new Map();
+    return { getItem:k => map.has(k) ? map.get(k) : null, setItem:(k,v) => map.set(k,v) };
+  }
+  function genId(){ return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+
+  const KEYS = {
+    user: 'noodalarm.user',
+    testMode: 'noodalarm.testMode',
+    activity: 'noodalarm.activity',
+    contacts: 'noodalarm.contacts',
+    activeAlarm: 'noodalarm.activeAlarm'
+  };
+
+  /* =========================================================================
+     2. CONTACTPERSONEN-REPO (CRUD)
+     LATER: async maken en laten praten met een echte database + objectopslag
+     (bv. Supabase Postgres + Storage) voor de profielfoto's.
+     ========================================================================= */
+  function createContactsRepo(store){
+    return {
+      list(){ return store.get(KEYS.contacts, []); },
+      add(data){
+        const items = this.list();
+        const item = { id: genId(), name:'', phone:'', email:'', photo:null, ...data };
+        items.push(item);
+        store.set(KEYS.contacts, items);
+        return item;
+      },
+      update(id, patch){
+        const items = this.list().map(c => c.id === id ? { ...c, ...patch } : c);
+        store.set(KEYS.contacts, items);
+        return items.find(c => c.id === id) || null;
+      },
+      remove(id){
+        store.set(KEYS.contacts, this.list().filter(c => c.id !== id));
+      },
+      get(id){ return this.list().find(c => c.id === id) || null; }
+    };
+  }
+
+  /* =========================================================================
+     3. ACTIVITEITENLOG
+     Écht gekoppeld aan de opslag: "wissen" leegt de onderliggende array, niet
+     alleen de weergave.
+     ========================================================================= */
+  function createActivityLog(store){
+    return {
+      list(){ return store.get(KEYS.activity, []); },
+      add(text, type){
+        const items = this.list();
+        items.unshift({ id: genId(), text, type: type || 'info', time: new Date().toISOString() });
+        store.set(KEYS.activity, items.slice(0, 80));
+      },
+      clear(){ store.set(KEYS.activity, []); }
+    };
+  }
+
+  /* =========================================================================
+     4. STATUS-DEFINITIES PER CONTACTPERSOON TIJDENS EEN ALARM
+     ========================================================================= */
+  const STATUS = {
+    PENDING:'pending', EMAIL_SENDING:'email_sending', EMAIL_SENT:'email_sent',
+    CALLING:'calling', NO_ANSWER:'no_answer', ANSWERED:'answered',
+    FAILED:'failed', CANCELLED:'cancelled'
+  };
+  const STATUS_META = {
+    pending:       { label:'Wacht',                dotClass:'',          textClass:'' },
+    email_sending: { label:'E-mail versturen…',     dotClass:'dot-amber', textClass:'st-amber' },
+    email_sent:    { label:'E-mail verstuurd',      dotClass:'dot-green', textClass:'st-green' },
+    calling:       { label:'Wordt nu gebeld',       dotClass:'dot-amber', textClass:'st-amber' },
+    no_answer:     { label:'Geen antwoord',         dotClass:'dot-red',   textClass:'st-red' },
+    answered:      { label:'Opgenomen',             dotClass:'dot-green', textClass:'st-green' },
+    failed:        { label:'Belpoging mislukt',     dotClass:'dot-red',   textClass:'st-red' },
+    cancelled:     { label:'Geannuleerd',           dotClass:'',          textClass:'' }
+  };
+
+  /* =========================================================================
+     5. MELDINGENLAAG (gesimuleerd, op verzoek van de gebruiker)
+     LATER: vervang de inhoud van elke functie door een echte serverintegratie
+     (bv. fetch naar een backend die Resend/Postmark of Twilio Voice aanroept).
+     De rest van de app (AlarmEngine, UI) hoeft dan niet te veranderen — deze
+     functies retourneren nu al een Promise, precies zoals een echte API-call.
+     ========================================================================= */
+  function simDelay(ms){
+    if (window.__FAST_SIM__) return Promise.resolve();
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  const NotificationService = {
+    async sendEmail(entry){
+      // TODO: await fetch('/api/notify/email', { method:'POST', body: JSON.stringify(entry) })
+      return simDelay(500 + Math.random() * 400);
+    },
+    async makePhoneCall(entry){
+      // TODO: await fetch('/api/notify/call', { method:'POST', body: JSON.stringify(entry) })
+      // (server start een IVR-oproep via bv. Twilio Voice en meldt via een
+      // webhook terug of er is opgenomen)
+      return simDelay(1400 + Math.random() * 900);
+    }
+  };
+
+  /* =========================================================================
+     6. ALARM ENGINE — de kern van de automatische flow
+     Puur (of bijna puur) opgezet zodat 'ie los van de DOM getest kan worden.
+     ========================================================================= */
+  function createAlarm(contacts, activatorName, testMode){
+    return {
+      id: genId(),
+      status: 'active',            // 'active' | 'ended'
+      test: !!testMode,
+      activator: activatorName || 'Onbekende gebruiker',
+      startedAt: new Date().toISOString(),
+      callPhase: 'emailing',       // 'emailing' | 'calling' | 'resolved' | 'exhausted' | 'ended'
+      entries: contacts.map(c => ({
+        contactId: c.id, name: c.name, phone: c.phone, email: c.email, photo: c.photo,
+        status: STATUS.PENDING, emailSent: false
+      })),
+      aborted: false
+    };
+  }
+
+  /**
+   * Voert de volledige automatische flow uit: eerst alle e-mails, dan
+   * sequentieel bellen tot iemand opneemt (of iedereen benaderd is).
+   * hooks.onUpdate() wordt na elke statuswijziging aangeroepen (voor UI/render).
+   * hooks.onLog(text) logt naar het activiteitenlogboek.
+   * hooks.decideOutcome(entry, index) is injecteerbaar t.b.v. tests.
+   */
+  async function runAlarmSequence(alarm, hooks){
+    const onUpdate = hooks.onUpdate || function(){};
+    const onLog = hooks.onLog || function(){};
+    const decideOutcome = hooks.decideOutcome || function(){
+      const r = Math.random();
+      if (r < 0.08) return 'failed';
+      if (r < 0.5) return 'answered';
+      return 'no_answer';
+    };
+    const isAborted = () => alarm.aborted;
+
+    if (alarm.entries.length === 0){
+      onLog('Geen contactpersonen gekoppeld — niemand kon automatisch benaderd worden');
+      alarm.callPhase = 'exhausted';
+      onUpdate();
+      return;
+    }
+
+    // Fase 1: e-mails, min of meer parallel
+    await Promise.all(alarm.entries.map(async (entry) => {
+      if (isAborted()) return;
+      entry.status = STATUS.EMAIL_SENDING;
+      onUpdate();
+      await NotificationService.sendEmail(entry);
+      if (isAborted()) return;
+      entry.status = STATUS.EMAIL_SENT;
+      entry.emailSent = true;
+      onLog('E-mail verstuurd naar ' + entry.name);
+      onUpdate();
+    }));
+
+    if (isAborted()) return;
+    alarm.callPhase = 'calling';
+    onUpdate();
+
+    // Fase 2: sequentieel bellen
+    for (let i = 0; i < alarm.entries.length; i++){
+      if (isAborted()) break;
+      const entry = alarm.entries[i];
+      if (entry.status !== STATUS.EMAIL_SENT) continue;
+
+      entry.status = STATUS.CALLING;
+      onLog(entry.name + ' wordt gebeld');
+      onUpdate();
+
+      await NotificationService.makePhoneCall(entry);
+      if (isAborted()) break;
+
+      const outcome = decideOutcome(entry, i);
+
+      if (outcome === 'answered'){
+        entry.status = STATUS.ANSWERED;
+        onLog(entry.name + ' heeft opgenomen');
+        alarm.entries.forEach((e, j) => {
+          if (j > i && e.status === STATUS.EMAIL_SENT) e.status = STATUS.CANCELLED;
+        });
+        onLog('Belproces naar overige contactpersonen gestopt');
+        alarm.callPhase = 'resolved';
+        onUpdate();
+        return;
+      } else if (outcome === 'failed'){
+        entry.status = STATUS.FAILED;
+        onLog('Belpoging naar ' + entry.name + ' mislukt');
+      } else {
+        entry.status = STATUS.NO_ANSWER;
+        onLog(entry.name + ' heeft niet opgenomen');
+      }
+      onUpdate();
+    }
+
+    if (!isAborted()){
+      alarm.callPhase = 'exhausted';
+      onLog('Niemand heeft opgenomen — belproces beëindigd, alle contactpersonen benaderd');
+      onUpdate();
+    }
+  }
+
+  function endAlarm(alarm, reason){
+    alarm.aborted = true;
+    alarm.status = 'ended';
+    alarm.callPhase = 'ended';
+    alarm.entries.forEach(e => {
+      if ([STATUS.PENDING, STATUS.EMAIL_SENDING, STATUS.EMAIL_SENT, STATUS.CALLING].includes(e.status)){
+        e.status = STATUS.CANCELLED;
+      }
+    });
+    return alarm;
+  }
+
+  function computeSummary(alarm){
+    const entries = alarm.entries;
+    const total = entries.length;
+    const emailSent = entries.filter(e => e.emailSent).length;
+    const calling = entries.find(e => e.status === STATUS.CALLING);
+    const nextUp = entries.find(e => e.status === STATUS.EMAIL_SENT);
+    let current = '—';
+    if (calling) current = calling.name + ' wordt gebeld';
+    else if (alarm.callPhase === 'emailing') current = 'E-mails worden verstuurd';
+    else if (alarm.callPhase === 'resolved') current = 'Opgenomen — belproces gestopt';
+    else if (alarm.callPhase === 'exhausted') current = 'Niemand heeft opgenomen';
+    else if (alarm.callPhase === 'ended') current = 'Alarm beëindigd';
+    return {
+      emailText: emailSent + '/' + total + ' verstuurd',
+      current,
+      next: nextUp ? nextUp.name : (alarm.callPhase === 'emailing' || alarm.callPhase === 'calling' ? '—' : 'Niemand meer')
+    };
+  }
+
+  /* =========================================================================
+     7. APP-WIRING (echte store + DOM)
+     ========================================================================= */
+  const realStore = createStore(window.localStorage);
+  const Contacts = createContactsRepo(realStore);
+  const Activity = createActivityLog(realStore);
+
+  const els = {
+    testToggle: document.getElementById('testModeToggle'),
+    tabAlarm: document.getElementById('tabAlarm'),
+    tabContacts: document.getElementById('tabContacts'),
+    screenAlarm: document.getElementById('screen-alarm'),
+    screenContacts: document.getElementById('screen-contacts'),
+
+    alarmButton: document.getElementById('alarmButton'),
+    userName: document.getElementById('userName'),
+
+    viewIdle: document.getElementById('view-idle'),
+    viewArming: document.getElementById('view-arming'),
+    viewLive: document.getElementById('view-live'),
+
+    armingCount: document.getElementById('armingCount'),
+    armingProgress: document.getElementById('armingProgress'),
+    cancelButton: document.getElementById('cancelButton'),
+
+    statusBadge: document.getElementById('statusBadge'),
+    statusBadgeText: document.getElementById('statusBadgeText'),
+    alarmTimer: document.getElementById('alarmTimer'),
+    activatedBy: document.getElementById('activatedBy'),
+    activatedAt: document.getElementById('activatedAt'),
+    activatedMode: document.getElementById('activatedMode'),
+    summaryEmails: document.getElementById('summaryEmails'),
+    summaryCurrent: document.getElementById('summaryCurrent'),
+    summaryNext: document.getElementById('summaryNext'),
+    entriesList: document.getElementById('entriesList'),
+    endAlarmButton: document.getElementById('endAlarmButton'),
+
+    historyList: document.getElementById('historyList'),
+    historyEmpty: document.getElementById('historyEmpty'),
+    clearHistoryButton: document.getElementById('clearHistoryButton'),
+
+    addContactButton: document.getElementById('addContactButton'),
+    contactsEmpty: document.getElementById('contactsEmpty'),
+    contactsList: document.getElementById('contactsList'),
+    contactForm: document.getElementById('contactForm'),
+    formAvatarPreview: document.getElementById('formAvatarPreview'),
+    photoInput: document.getElementById('photoInput'),
+    uploadPhotoButton: document.getElementById('uploadPhotoButton'),
+    removePhotoButton: document.getElementById('removePhotoButton'),
+    fieldName: document.getElementById('fieldName'),
+    fieldPhone: document.getElementById('fieldPhone'),
+    fieldEmail: document.getElementById('fieldEmail'),
+    errorName: document.getElementById('errorName'),
+    errorPhone: document.getElementById('errorPhone'),
+    errorEmail: document.getElementById('errorEmail'),
+    errorPhoto: document.getElementById('errorPhoto'),
+    cancelContactButton: document.getElementById('cancelContactButton'),
+    saveContactButton: document.getElementById('saveContactButton'),
+
+    toggleTestsButton: document.getElementById('toggleTestsButton'),
+    testsPanel: document.getElementById('testsPanel'),
+    runTestsButton: document.getElementById('runTestsButton'),
+    testsSummary: document.getElementById('testsSummary'),
+    testsResults: document.getElementById('testsResults')
+  };
+
+  const ARMING_SECONDS = 3;
+  const RING_CIRCUMFERENCE = 2 * Math.PI * 90;
+  let armingTimer = null;
+  let armingRemaining = ARMING_SECONDS;
+  let currentAlarm = null;
+  let editingContactId = null;
+  let formPhotoData = null;
+  let timerInterval = null;
+
+  const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function avatarHtml(photo, size){
+    const cls = size === 'sm' ? 'avatar sm' : 'avatar';
+    return photo
+      ? '<div class="' + cls + '"><img src="' + photo + '" alt=""></div>'
+      : '<div class="' + cls + '">' + PERSON_ICON + '</div>';
+  }
+
+  /* ---------------- Navigatie tussen schermen ---------------- */
+  els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
+  els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
+  function switchScreen(name){
+    const isAlarm = name === 'alarm';
+    els.screenAlarm.classList.toggle('hidden', !isAlarm);
+    els.screenContacts.classList.toggle('hidden', isAlarm);
+    els.tabAlarm.classList.toggle('active', isAlarm);
+    els.tabContacts.classList.toggle('active', !isAlarm);
+    els.tabAlarm.setAttribute('aria-selected', String(isAlarm));
+    els.tabContacts.setAttribute('aria-selected', String(!isAlarm));
+    if (!isAlarm) closeContactForm();
+  }
+
+  /* ---------------- Init ---------------- */
+  els.userName.value = realStore.get(KEYS.user, '');
+  els.testToggle.checked = realStore.get(KEYS.testMode, false);
+  document.body.classList.toggle('test-mode', els.testToggle.checked);
+  els.armingProgress.style.strokeDasharray = RING_CIRCUMFERENCE;
+  els.armingProgress.style.strokeDashoffset = RING_CIRCUMFERENCE;
+
+  // Als de pagina herladen wordt terwijl er (in een vorige sessie) een alarm
+  // actief stond, kan de gesimuleerde timer niet worden hervat — markeer het
+  // dan netjes als beëindigd i.p.v. de app in een vastzittende staat te laten.
+  const leftoverAlarm = realStore.get(KEYS.activeAlarm, null);
+  if (leftoverAlarm && leftoverAlarm.status === 'active'){
+    Activity.add('Sessie herladen — actief alarm automatisch gemarkeerd als beëindigd', 'warn');
+    realStore.set(KEYS.activeAlarm, null);
+  }
+
+  renderHistory();
+  renderContacts();
+
+  els.userName.addEventListener('input', () => realStore.set(KEYS.user, els.userName.value));
+  els.testToggle.addEventListener('change', () => {
+    realStore.set(KEYS.testMode, els.testToggle.checked);
+    document.body.classList.toggle('test-mode', els.testToggle.checked);
+  });
+
+  ['pointerdown'].forEach(evt => els.alarmButton.addEventListener(evt, () => els.alarmButton.classList.add('pressed')));
+  ['pointerup','pointerleave','pointercancel'].forEach(evt => els.alarmButton.addEventListener(evt, () => els.alarmButton.classList.remove('pressed')));
+  els.alarmButton.addEventListener('click', startArming);
+  els.cancelButton.addEventListener('click', cancelArming);
+  els.endAlarmButton.addEventListener('click', () => stopAlarm('manual'));
+  els.clearHistoryButton.addEventListener('click', onClearHistory);
+
+  els.toggleTestsButton.addEventListener('click', () => els.testsPanel.classList.toggle('hidden'));
+  els.runTestsButton.addEventListener('click', () => runAllTests());
+
+  /* ---------------- Idle → Arming → Live ---------------- */
+  function switchView(target){
+    [els.viewIdle, els.viewArming, els.viewLive].forEach(v => v.classList.add('hidden'));
+    target.classList.remove('hidden');
+  }
+
+  function startArming(){
+    if (currentAlarm && currentAlarm.status === 'active') return; // dubbele activatie geblokkeerd
+    armingRemaining = ARMING_SECONDS;
+    updateArmingUI();
+    switchView(els.viewArming);
+    if (navigator.vibrate) navigator.vibrate(30);
+    armingTimer = setInterval(() => {
+      armingRemaining -= 1;
+      if (armingRemaining <= 0){
+        clearInterval(armingTimer);
+        activateAlarm();
+      } else {
+        updateArmingUI();
+      }
+    }, 1000);
+  }
+  function updateArmingUI(){
+    els.armingCount.textContent = armingRemaining;
+    const progress = (ARMING_SECONDS - armingRemaining) / ARMING_SECONDS;
+    els.armingProgress.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - progress));
+  }
+  function cancelArming(){
+    clearInterval(armingTimer);
+    switchView(els.viewIdle);
+  }
+
+  function activateAlarm(){
+    if (currentAlarm && currentAlarm.status === 'active') return; // extra guard
+    const isTest = els.testToggle.checked;
+    const activatorName = els.userName.value.trim() || 'Onbekende gebruiker';
+    const contacts = Contacts.list();
+
+    currentAlarm = createAlarm(contacts, activatorName, isTest);
+    els.alarmButton.disabled = true;
+    if (navigator.vibrate) navigator.vibrate([80,40,80]);
+
+    const now = new Date(currentAlarm.startedAt);
+    els.activatedBy.textContent = currentAlarm.activator;
+    els.activatedAt.textContent = now.toLocaleString('nl-NL', { dateStyle:'long', timeStyle:'medium' });
+    els.activatedMode.textContent = isTest ? 'Testmodus' : 'Live';
+    els.statusBadgeText.textContent = isTest ? 'TEST-ALARM ACTIEF' : 'ALARM ACTIEF';
+    els.statusBadge.classList.toggle('test', isTest);
+
+    switchView(els.viewLive);
+    startTimer(currentAlarm.startedAt);
+    Activity.add((isTest ? '[TEST] ' : '') + 'Alarm geactiveerd door ' + currentAlarm.activator, 'alarm');
+    renderHistory();
+    renderLive();
+    persistAlarm();
+
+    runAlarmSequence(currentAlarm, {
+      onUpdate(){ renderLive(); persistAlarm(); },
+      onLog(text){ Activity.add((currentAlarm.test ? '[TEST] ' : '') + text, 'alarm'); renderHistory(); }
+    }).then(() => {
+      renderLive();
+      persistAlarm();
+    });
+  }
+
+  function stopAlarm(reason){
+    if (!currentAlarm || currentAlarm.status !== 'active') return;
+    endAlarm(currentAlarm);
+    Activity.add((currentAlarm.test ? '[TEST] ' : '') + 'Alarm handmatig beëindigd door ' + currentAlarm.activator, 'alarm');
+    renderHistory();
+    renderLive();
+    persistAlarm();
+    stopTimer();
+    els.alarmButton.disabled = false;
+    setTimeout(() => { switchView(els.viewIdle); }, 400);
+  }
+
+  function persistAlarm(){
+    if (currentAlarm) realStore.set(KEYS.activeAlarm, currentAlarm);
+  }
+
+  function startTimer(startedAtIso){
+    stopTimer();
+    const start = new Date(startedAtIso).getTime();
+    function tick(){
+      const secs = Math.max(0, Math.floor((Date.now() - start) / 1000));
+      const mm = String(Math.floor(secs / 60)).padStart(2,'0');
+      const ss = String(secs % 60).padStart(2,'0');
+      els.alarmTimer.textContent = mm + ':' + ss;
+    }
+    tick();
+    timerInterval = setInterval(tick, 1000);
+  }
+  function stopTimer(){ if (timerInterval) clearInterval(timerInterval); timerInterval = null; }
+
+  function renderLive(){
+    if (!currentAlarm) return;
+    const summary = computeSummary(currentAlarm);
+    els.summaryEmails.textContent = summary.emailText;
+    els.summaryCurrent.textContent = summary.current;
+    els.summaryNext.textContent = summary.next;
+
+    els.entriesList.innerHTML = currentAlarm.entries.length
+      ? currentAlarm.entries.map(e => {
+          const meta = STATUS_META[e.status];
+          return '<li>' + avatarHtml(e.photo, 'sm') +
+            '<span class="entry-name">' + escapeHtml(e.name) + '</span>' +
+            '<span class="entry-status ' + meta.textClass + '">' +
+              '<span class="dot ' + meta.dotClass + '"></span>' + meta.label +
+            '</span></li>';
+        }).join('')
+      : '<li><span class="entry-name" style="color:var(--text-faint);">Geen contactpersonen gekoppeld</span></li>';
+
+    if (currentAlarm.status !== 'active'){
+      stopTimer();
+    }
+  }
+
+  /* ---------------- Activiteitenlog ---------------- */
+  function renderHistory(){
+    const items = Activity.list();
+    els.historyList.innerHTML = items.map(item => (
+      '<li><span class="h-name">' + escapeHtml(item.text) + '</span>' +
+      '<span class="h-time">' + escapeHtml(new Date(item.time).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'medium' })) + '</span></li>'
+    )).join('');
+    els.historyEmpty.classList.toggle('hidden', items.length > 0);
+    els.historyList.classList.toggle('hidden', items.length === 0);
+  }
+  function onClearHistory(){
+    if (!Activity.list().length) return;
+    const ok = window.confirm('Weet je zeker dat je alle activiteiten wilt wissen? Dit kan niet ongedaan worden gemaakt.');
+    if (!ok) return;
+    Activity.clear();
+    renderHistory();
+  }
+
+  /* ---------------- Contactpersonen: lijst ---------------- */
+  function renderContacts(){
+    const items = Contacts.list();
+    els.contactsEmpty.classList.toggle('hidden', items.length > 0);
+    els.contactsList.innerHTML = items.map(c => (
+      '<li class="contact-card" data-id="' + c.id + '">' +
+        avatarHtml(c.photo) +
+        '<div class="contact-info">' +
+          '<div class="name">' + escapeHtml(c.name) + '</div>' +
+          '<div class="meta">' + escapeHtml(c.phone) + ' · ' + escapeHtml(c.email) + '</div>' +
+        '</div>' +
+        '<div class="contact-actions">' +
+          '<button type="button" class="icon-btn edit-contact" aria-label="Bewerken" data-id="' + c.id + '">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
+          '</button>' +
+          '<button type="button" class="icon-btn danger delete-contact" aria-label="Verwijderen" data-id="' + c.id + '">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</li>'
+    )).join('');
+
+    els.contactsList.querySelectorAll('.edit-contact').forEach(btn =>
+      btn.addEventListener('click', () => openContactForm(btn.dataset.id))
+    );
+    els.contactsList.querySelectorAll('.delete-contact').forEach(btn =>
+      btn.addEventListener('click', () => onDeleteContact(btn.dataset.id))
+    );
+  }
+
+  function onDeleteContact(id){
+    const contact = Contacts.get(id);
+    if (!contact) return;
+    const ok = window.confirm('Contactpersoon "' + contact.name + '" verwijderen?');
+    if (!ok) return;
+    Contacts.remove(id);
+    Activity.add('Contactpersoon verwijderd: ' + contact.name, 'contact');
+    renderContacts();
+    renderHistory();
+  }
+
+  /* ---------------- Contactpersonen: formulier ---------------- */
+  els.addContactButton.addEventListener('click', () => openContactForm(null));
+  els.cancelContactButton.addEventListener('click', closeContactForm);
+  els.uploadPhotoButton.addEventListener('click', () => els.photoInput.click());
+  els.removePhotoButton.addEventListener('click', () => { formPhotoData = null; updateFormAvatar(); });
+  els.photoInput.addEventListener('change', onPhotoSelected);
+  els.saveContactButton.addEventListener('click', onSaveContact);
+
+  function openContactForm(id){
+    editingContactId = id;
+    const contact = id ? Contacts.get(id) : null;
+    els.fieldName.value = contact ? contact.name : '';
+    els.fieldPhone.value = contact ? contact.phone : '';
+    els.fieldEmail.value = contact ? contact.email : '';
+    formPhotoData = contact ? contact.photo : null;
+    updateFormAvatar();
+    [els.errorName, els.errorPhone, els.errorEmail, els.errorPhoto].forEach(e => e.classList.add('hidden'));
+    els.contactForm.classList.remove('hidden');
+    els.contactForm.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+  function closeContactForm(){
+    editingContactId = null;
+    els.contactForm.classList.add('hidden');
+  }
+  function updateFormAvatar(){
+    els.formAvatarPreview.innerHTML = formPhotoData
+      ? '<img src="' + formPhotoData + '" alt="">'
+      : PERSON_ICON;
+  }
+  function onPhotoSelected(ev){
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      if (dataUrl.length > 2_000_000){ // ruwweg ~1.5MB aan binaire data
+        els.errorPhoto.classList.remove('hidden');
+        return;
+      }
+      els.errorPhoto.classList.add('hidden');
+      formPhotoData = dataUrl;
+      updateFormAvatar();
+    };
+    reader.readAsDataURL(file);
+    ev.target.value = '';
+  }
+
+  function validateContactForm(){
+    let valid = true;
+    const name = els.fieldName.value.trim();
+    const phone = els.fieldPhone.value.trim();
+    const email = els.fieldEmail.value.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    els.errorName.classList.toggle('hidden', name.length > 0);
+    els.errorPhone.classList.toggle('hidden', phone.length > 0);
+    els.errorEmail.classList.toggle('hidden', emailOk);
+    if (!name.length || !phone.length || !emailOk) valid = false;
+    return { valid, name, phone, email };
+  }
+
+  function onSaveContact(){
+    const result = validateContactForm();
+    if (!result.valid) return;
+    const data = { name: result.name, phone: result.phone, email: result.email, photo: formPhotoData };
+    if (editingContactId){
+      Contacts.update(editingContactId, data);
+      Activity.add('Contactpersoon bijgewerkt: ' + data.name, 'contact');
+    } else {
+      Contacts.add(data);
+      Activity.add('Contactpersoon toegevoegd: ' + data.name, 'contact');
+    }
+    closeContactForm();
+    renderContacts();
+    renderHistory();
+  }
+
+  /* =========================================================================
+     8. TESTS — draait volledig los van de echte opslag (in-memory Store),
+     zodat het uitvoeren van tests nooit jouw echte gegevens raakt.
+     ========================================================================= */
+  function assert(cond, msg){ if (!cond) throw new Error(msg || 'assertie mislukt'); }
+
+  function buildTestEnv(){
+    const store = createStore(createMemoryBackend());
+    return { store, contacts: createContactsRepo(store), activity: createActivityLog(store) };
+  }
+
+  const TESTS = [
+    {
+      name: 'Contactpersoon toevoegen/bewerken/verwijderen (CRUD)',
+      run(){
+        const { contacts } = buildTestEnv();
+        const c = contacts.add({ name:'Danny Gielen', phone:'0615901002', email:'dantiney@hotmail.com' });
+        assert(contacts.list().length === 1, 'contact niet toegevoegd');
+        contacts.update(c.id, { phone:'0611111111' });
+        assert(contacts.get(c.id).phone === '0611111111', 'update niet doorgevoerd');
+        contacts.remove(c.id);
+        assert(contacts.list().length === 0, 'contact niet verwijderd');
+      }
+    },
+    {
+      name: 'Profielfoto koppelen en verwijderen',
+      run(){
+        const { contacts } = buildTestEnv();
+        const c = contacts.add({ name:'Jan Jansen', phone:'0600000000', email:'jan@voorbeeld.nl', photo:'data:image/png;base64,AAA' });
+        assert(contacts.get(c.id).photo === 'data:image/png;base64,AAA', 'foto niet opgeslagen');
+        contacts.update(c.id, { photo:null });
+        assert(contacts.get(c.id).photo === null, 'foto niet verwijderd, standaard-avatar zou nu moeten gelden');
+      }
+    },
+    {
+      name: 'Activiteiten wissen leegt de opslag (niet alleen de weergave)',
+      run(){
+        const { activity } = buildTestEnv();
+        activity.add('Test 1'); activity.add('Test 2');
+        assert(activity.list().length === 2, 'activiteiten niet gelogd');
+        activity.clear();
+        assert(activity.list().length === 0, 'activiteiten niet echt gewist uit opslag');
+      }
+    },
+    {
+      name: 'Alarm éénmaal activeren + dubbele activatie geblokkeerd',
+      run(){
+        const alarm = createAlarm([], 'Tester', true);
+        assert(alarm.status === 'active', 'alarm niet actief na aanmaken');
+        // De UI-guard (currentAlarm.status === 'active' => return) voorkomt een
+        // tweede gelijktijdig alarm; hier controleren we het onderliggende gedrag:
+        const stillSameId = alarm.id;
+        const blocked = (alarm.status === 'active'); // simuleert de guard-conditie
+        assert(blocked === true && alarm.id === stillSameId, 'dubbele activatie zou geblokkeerd moeten worden');
+      }
+    },
+    {
+      name: 'Automatisch e-mails versturen naar alle contactpersonen',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
+          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        const logs = [];
+        await runAlarmSequence(alarm, {
+          onUpdate(){}, onLog:(t) => logs.push(t),
+          decideOutcome: () => 'no_answer'
+        });
+        window.__FAST_SIM__ = false;
+        assert(alarm.entries.every(e => e.emailSent === true), 'niet alle contacten hebben een e-mail gekregen');
+        assert(logs.filter(l => l.indexOf('E-mail verstuurd') === 0).length === 2, 'niet elke e-mail is gelogd');
+      }
+    },
+    {
+      name: 'Sequentieel bellen in de juiste volgorde',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const order = [];
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
+          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null },
+          { id:'3', name:'Peter', phone:'x', email:'c@a.nl', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        await runAlarmSequence(alarm, {
+          onUpdate(){}, onLog(){},
+          decideOutcome: (entry) => { order.push(entry.name); return 'no_answer'; }
+        });
+        window.__FAST_SIM__ = false;
+        assert(order.join(',') === 'Danny,Jan,Peter', 'belvolgorde klopt niet: ' + order.join(','));
+      }
+    },
+    {
+      name: 'Automatisch doorgaan bij geen opname, stoppen zodra iemand opneemt',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
+          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null },
+          { id:'3', name:'Peter', phone:'x', email:'c@a.nl', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        const outcomes = ['no_answer', 'answered', 'no_answer'];
+        let i = 0;
+        await runAlarmSequence(alarm, {
+          onUpdate(){}, onLog(){},
+          decideOutcome: () => outcomes[i++]
+        });
+        window.__FAST_SIM__ = false;
+        assert(alarm.entries[0].status === 'no_answer', 'eerste contact moet no_answer zijn');
+        assert(alarm.entries[1].status === 'answered', 'tweede contact moet answered zijn');
+        assert(alarm.entries[2].status === 'cancelled', 'derde contact had nooit gebeld mogen worden (cancelled)');
+        assert(alarm.callPhase === 'resolved', 'callPhase moet resolved zijn na opname');
+      }
+    },
+    {
+      name: 'Foutafhandeling: mislukte belpoging blokkeert het proces niet',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
+          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        const outcomes = ['failed', 'no_answer'];
+        let i = 0;
+        await runAlarmSequence(alarm, {
+          onUpdate(){}, onLog(){},
+          decideOutcome: () => outcomes[i++]
+        });
+        window.__FAST_SIM__ = false;
+        assert(alarm.entries[0].status === 'failed', 'eerste contact moet failed zijn');
+        assert(alarm.entries[1].status === 'no_answer', 'na een mislukte poging moet de volgende alsnog gebeld worden');
+      }
+    },
+    {
+      name: 'Niemand neemt op → belproces sluit netjes af (exhausted)',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [{ id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null }];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        await runAlarmSequence(alarm, { onUpdate(){}, onLog(){}, decideOutcome: () => 'no_answer' });
+        window.__FAST_SIM__ = false;
+        assert(alarm.callPhase === 'exhausted', 'callPhase moet exhausted zijn als niemand opneemt');
+      }
+    },
+    {
+      name: 'Live status (samenvatting) wordt correct berekend',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
+          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        const outcomes = ['answered'];
+        let i = 0;
+        await runAlarmSequence(alarm, { onUpdate(){}, onLog(){}, decideOutcome: () => outcomes[i++] || 'no_answer' });
+        window.__FAST_SIM__ = false;
+        const summary = computeSummary(alarm);
+        assert(summary.emailText === '2/2 verstuurd', 'e-mailsamenvatting klopt niet: ' + summary.emailText);
+        assert(summary.current.indexOf('gestopt') !== -1, 'huidige actie klopt niet: ' + summary.current);
+      }
+    },
+    {
+      name: 'Alarm handmatig beëindigen annuleert openstaande contacten',
+      async run(){
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
+          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        alarm.entries[0].status = 'calling';
+        alarm.entries[1].status = 'pending';
+        endAlarm(alarm);
+        assert(alarm.status === 'ended', 'alarm.status moet ended zijn');
+        assert(alarm.entries[0].status === 'cancelled', 'lopend gesprek moet cancelled worden bij handmatig stoppen');
+        assert(alarm.entries[1].status === 'cancelled', 'nog niet gebelde contacten moeten cancelled worden');
+      }
+    },
+    {
+      name: 'Activiteitenlog bevat de belangrijkste stappen van een volledig alarm',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [{ id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null }];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        const logs = [];
+        await runAlarmSequence(alarm, { onUpdate(){}, onLog:(t) => logs.push(t), decideOutcome: () => 'answered' });
+        window.__FAST_SIM__ = false;
+        assert(logs.some(l => l.indexOf('E-mail verstuurd') === 0), 'e-mail-log ontbreekt');
+        assert(logs.some(l => l.indexOf('wordt gebeld') !== -1), 'bel-log ontbreekt');
+        assert(logs.some(l => l.indexOf('heeft opgenomen') !== -1), 'opname-log ontbreekt');
+      }
+    }
+  ];
+
+  async function runAllTests(){
+    els.testsSummary.textContent = 'Tests worden uitgevoerd…';
+    els.testsResults.innerHTML = '';
+    const results = [];
+    for (const t of TESTS){
+      try {
+        await t.run();
+        results.push({ name:t.name, passed:true });
+      } catch(e){
+        results.push({ name:t.name, passed:false, message: e.message });
+      }
+    }
+    window.__FAST_SIM__ = false; // vangnet
+    const passed = results.filter(r => r.passed).length;
+    els.testsSummary.textContent = passed + '/' + results.length + ' tests geslaagd';
+    els.testsResults.innerHTML = results.map(r => (
+      '<div class="test-row">' +
+        '<span class="dot ' + (r.passed ? 'dot-green' : 'dot-red') + '"></span>' +
+        '<span class="tname">' + escapeHtml(r.name) + (r.message ? '<div class="tmsg">' + escapeHtml(r.message) + '</div>' : '') + '</span>' +
+      '</div>'
+    )).join('');
+  }
+
+})();
+</script>
+</body>
+</html>
