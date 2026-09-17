@@ -251,6 +251,43 @@
   .entries-card .entry-status.st-amber{ color:var(--amber); }
   .entries-card .entry-status.st-red{ color:var(--danger); }
 
+  /* ---------- Belstatus (fictief bellen) ---------- */
+  .call-status-card{
+    width:100%; background:var(--surface); border:1px solid var(--amber); border-radius:var(--radius-md);
+    padding:14px 16px; display:flex; flex-direction:column; gap:12px;
+  }
+  .call-status-card.hidden{ display:none; }
+  @keyframes callPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(242,169,59,.35); }
+    50%{ box-shadow:0 0 0 7px rgba(242,169,59,0); }
+  }
+  .call-status-card.ringing{ animation:callPulse 1.1s ease-in-out infinite; }
+  .call-status-card.connected{ border-color:var(--green); }
+  .call-status-card.no-answer{ border-color:var(--danger); }
+  .call-status-header{ display:flex; align-items:center; gap:12px; }
+  .call-status-info{ flex:1; text-align:left; }
+  .call-name{ font-weight:700; font-size:15px; }
+  .call-state{ font-size:13px; color:var(--amber); font-weight:600; }
+  .call-state.connected{ color:var(--green); }
+  .call-state.no-answer{ color:var(--danger); }
+  .ring-indicator{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .ring-dots{ display:flex; gap:6px; }
+  .ring-dot{
+    width:12px; height:12px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border);
+    transition:background .15s ease, transform .15s ease;
+  }
+  .ring-dot.filled{ background:var(--amber); }
+  .ring-dot.active{ transform:scale(1.3); box-shadow:0 0 0 3px var(--amber-soft); }
+  .ring-count{ font-variant-numeric:tabular-nums; font-weight:700; font-size:13px; color:var(--text-muted); }
+
+  .demo-controls{
+    width:100%; background:var(--amber-soft); border:1px dashed var(--amber); border-radius:var(--radius-md);
+    padding:12px 14px; display:flex; flex-direction:column; gap:8px;
+  }
+  .demo-controls.hidden{ display:none; }
+  .demo-controls-title{ font-size:11.5px; font-weight:700; color:var(--amber); text-transform:uppercase; letter-spacing:.04em; }
+  .demo-controls-buttons{ display:flex; gap:8px; flex-wrap:wrap; }
+
   /* ---------- Avatars ---------- */
   .avatar{
     width:44px; height:44px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border);
@@ -392,10 +429,6 @@
         <div class="info-card">
           <div class="summary-grid">
             <div class="summary-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-              <span>E-mails:</span><span class="val" id="summaryEmails">0/0 verstuurd</span>
-            </div>
-            <div class="summary-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.34 1.79.65 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.27a2 2 0 0 1 2.11-.45c.86.31 1.75.53 2.65.65A2 2 0 0 1 22 16.92Z"/></svg>
               <span>Huidige actie:</span><span class="val" id="summaryCurrent">—</span>
             </div>
@@ -403,6 +436,31 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 4 15 8-15 8V4Z"/></svg>
               <span>Volgende:</span><span class="val" id="summaryNext">—</span>
             </div>
+          </div>
+        </div>
+
+        <div class="call-status-card hidden" id="callStatusCard">
+          <div class="call-status-header">
+            <div class="avatar" id="callAvatar"></div>
+            <div class="call-status-info">
+              <div class="call-name" id="callName">—</div>
+              <div class="call-state" id="callState">Bellen…</div>
+            </div>
+          </div>
+          <div class="ring-indicator">
+            <div class="ring-dots" id="ringDots">
+              <span class="ring-dot"></span><span class="ring-dot"></span><span class="ring-dot"></span><span class="ring-dot"></span><span class="ring-dot"></span>
+            </div>
+            <div class="ring-count" id="ringCountText">0/5</div>
+          </div>
+        </div>
+
+        <div class="demo-controls hidden" id="demoControls">
+          <div class="demo-controls-title">Demo-bediening — fictief bellen</div>
+          <div class="demo-controls-buttons">
+            <button type="button" id="simulateAnswerButton" class="small-btn">Simuleer opnemen</button>
+            <button type="button" id="skipContactButton" class="small-btn">Volgende contact</button>
+            <button type="button" id="restartCallButton" class="small-btn">Herstart belronde</button>
           </div>
         </div>
 
@@ -439,7 +497,7 @@
 
   <!-- =========================== CONTACTEN SCHERM =========================== -->
   <section id="screen-contacts" class="screen hidden">
-    <p class="intro" style="max-width:100%;">Deze contactpersonen worden bij een alarm automatisch gemaild en — als niemand reageert — één voor één automatisch gebeld, in deze volgorde.</p>
+    <p class="intro" style="max-width:100%;">Deze contactpersonen worden bij een alarm automatisch, één voor één, gebeld in deze volgorde — totdat iemand opneemt.</p>
 
     <button type="button" id="addContactButton" class="add-button">+ Contactpersoon toevoegen</button>
 
@@ -469,11 +527,6 @@
           <label for="fieldPhone">Telefoonnummer</label>
           <input type="tel" id="fieldPhone" placeholder="Bijv. 0615901002">
           <span class="field-error hidden" id="errorPhone">Vul een telefoonnummer in</span>
-        </div>
-        <div class="field">
-          <label for="fieldEmail">E-mailadres</label>
-          <input type="email" id="fieldEmail" placeholder="Bijv. naam@voorbeeld.nl">
-          <span class="field-error hidden" id="errorEmail">Vul een geldig e-mailadres in</span>
         </div>
       </div>
       <span class="field-error hidden" id="errorPhoto">Afbeelding is te groot (max 1,5 MB)</span>
@@ -533,7 +586,7 @@
       list(){ return store.get(KEYS.contacts, []); },
       add(data){
         const items = this.list();
-        const item = { id: genId(), name:'', phone:'', email:'', photo:null, ...data };
+        const item = { id: genId(), name:'', phone:'', photo:null, ...data };
         items.push(item);
         store.set(KEYS.contacts, items);
         return item;
@@ -571,47 +624,20 @@
      4. STATUS-DEFINITIES PER CONTACTPERSOON TIJDENS EEN ALARM
      ========================================================================= */
   const STATUS = {
-    PENDING:'pending', EMAIL_SENDING:'email_sending', EMAIL_SENT:'email_sent',
-    CALLING:'calling', NO_ANSWER:'no_answer', ANSWERED:'answered',
-    FAILED:'failed', CANCELLED:'cancelled'
+    PENDING:'pending', CALLING:'calling', NO_ANSWER:'no_answer',
+    ANSWERED:'answered', CANCELLED:'cancelled'
   };
   const STATUS_META = {
     pending:       { label:'Wacht',                dotClass:'',          textClass:'' },
-    email_sending: { label:'E-mail versturen…',     dotClass:'dot-amber', textClass:'st-amber' },
-    email_sent:    { label:'E-mail verstuurd',      dotClass:'dot-green', textClass:'st-green' },
     calling:       { label:'Wordt nu gebeld',       dotClass:'dot-amber', textClass:'st-amber' },
     no_answer:     { label:'Geen antwoord',         dotClass:'dot-red',   textClass:'st-red' },
     answered:      { label:'Opgenomen',             dotClass:'dot-green', textClass:'st-green' },
-    failed:        { label:'Belpoging mislukt',     dotClass:'dot-red',   textClass:'st-red' },
     cancelled:     { label:'Geannuleerd',           dotClass:'',          textClass:'' }
   };
+  const MAX_RINGS = 5;
 
   /* =========================================================================
-     5. MELDINGENLAAG (gesimuleerd, op verzoek van de gebruiker)
-     LATER: vervang de inhoud van elke functie door een echte serverintegratie
-     (bv. fetch naar een backend die Resend/Postmark of Twilio Voice aanroept).
-     De rest van de app (AlarmEngine, UI) hoeft dan niet te veranderen — deze
-     functies retourneren nu al een Promise, precies zoals een echte API-call.
-     ========================================================================= */
-  function simDelay(ms){
-    if (window.__FAST_SIM__) return Promise.resolve();
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-  const NotificationService = {
-    async sendEmail(entry){
-      // TODO: await fetch('/api/notify/email', { method:'POST', body: JSON.stringify(entry) })
-      return simDelay(500 + Math.random() * 400);
-    },
-    async makePhoneCall(entry){
-      // TODO: await fetch('/api/notify/call', { method:'POST', body: JSON.stringify(entry) })
-      // (server start een IVR-oproep via bv. Twilio Voice en meldt via een
-      // webhook terug of er is opgenomen)
-      return simDelay(1400 + Math.random() * 900);
-    }
-  };
-
-  /* =========================================================================
-     6. ALARM ENGINE — de kern van de automatische flow
+     5. ALARM ENGINE — de kern van de automatische flow
      Puur (of bijna puur) opgezet zodat 'ie los van de DOM getest kan worden.
      ========================================================================= */
   function createAlarm(contacts, activatorName, testMode){
@@ -621,31 +647,27 @@
       test: !!testMode,
       activator: activatorName || 'Onbekende gebruiker',
       startedAt: new Date().toISOString(),
-      callPhase: 'emailing',       // 'emailing' | 'calling' | 'resolved' | 'exhausted' | 'ended'
+      callPhase: 'calling',        // 'calling' | 'resolved' | 'exhausted' | 'ended'
+      callFlow: null,             // { contactId, name, photo, ringCount, maxRings, nextName } tijdens het bellen
+      lastNoAnswer: null,         // { name, photo } kort zichtbaar tussen twee belpogingen in
       entries: contacts.map(c => ({
-        contactId: c.id, name: c.name, phone: c.phone, email: c.email, photo: c.photo,
-        status: STATUS.PENDING, emailSent: false
+        contactId: c.id, name: c.name, phone: c.phone, photo: c.photo,
+        status: STATUS.PENDING
       })),
       aborted: false
     };
   }
 
   /**
-   * Voert de volledige automatische flow uit: eerst alle e-mails, dan
-   * sequentieel bellen tot iemand opneemt (of iedereen benaderd is).
+   * Voert de volledige automatische flow uit: rouleert automatisch door de
+   * contactpersonen (bellen) tot iemand opneemt.
    * hooks.onUpdate() wordt na elke statuswijziging aangeroepen (voor UI/render).
    * hooks.onLog(text) logt naar het activiteitenlogboek.
-   * hooks.decideOutcome(entry, index) is injecteerbaar t.b.v. tests.
+   * hooks.decideAnswerRing(entry, passIndex) is injecteerbaar t.b.v. tests.
    */
   async function runAlarmSequence(alarm, hooks){
     const onUpdate = hooks.onUpdate || function(){};
     const onLog = hooks.onLog || function(){};
-    const decideOutcome = hooks.decideOutcome || function(){
-      const r = Math.random();
-      if (r < 0.08) return 'failed';
-      if (r < 0.5) return 'answered';
-      return 'no_answer';
-    };
     const isAborted = () => alarm.aborted;
 
     if (alarm.entries.length === 0){
@@ -655,71 +677,177 @@
       return;
     }
 
-    // Fase 1: e-mails, min of meer parallel
-    await Promise.all(alarm.entries.map(async (entry) => {
-      if (isAborted()) return;
-      entry.status = STATUS.EMAIL_SENDING;
-      onUpdate();
-      await NotificationService.sendEmail(entry);
-      if (isAborted()) return;
-      entry.status = STATUS.EMAIL_SENT;
-      entry.emailSent = true;
-      onLog('E-mail verstuurd naar ' + entry.name);
-      onUpdate();
-    }));
-
-    if (isAborted()) return;
     alarm.callPhase = 'calling';
     onUpdate();
 
-    // Fase 2: sequentieel bellen
-    for (let i = 0; i < alarm.entries.length; i++){
-      if (isAborted()) break;
-      const entry = alarm.entries[i];
-      if (entry.status !== STATUS.EMAIL_SENT) continue;
+    await runCallFlow(alarm, { onUpdate, onLog, isAborted, decideAnswerRing: hooks.decideAnswerRing });
+  }
 
-      entry.status = STATUS.CALLING;
-      onLog(entry.name + ' wordt gebeld');
-      onUpdate();
+  /**
+   * Belstate-machine: belt de contactpersonen cyclisch, één voor één, elk
+   * fictief max. MAX_RINGS keer overgaand.
+   * Neemt niemand op, dan begint de roulatie gewoon opnieuw bij de eerste
+   * persoon. Zodra iemand opneemt stopt de flow direct en worden de overige
+   * (nog niet bereikte) contactpersonen geannuleerd.
+   *
+   * Alle timing loopt via één enkele, expliciet bijgehouden "generatie" +
+   * timer-referentie, zodat er nooit twee ronde-timers tegelijk actief zijn
+   * (voorkomt race conditions tussen ring-ticks, handmatig stoppen en de
+   * demo-bediening). `activeCallFlow` geeft de UI een handvat om in te
+   * grijpen (simuleer opnemen / overslaan / herstarten) tijdens de demo.
+   */
+  function runCallFlow(alarm, hooks){
+    return new Promise((resolve) => {
+      const RING_MS = window.__FAST_SIM__ ? 0 : 900;
+      const NEXT_MS = window.__FAST_SIM__ ? 0 : 1100;
+      const entries = alarm.entries.filter(e => e.status === STATUS.PENDING);
 
-      await NotificationService.makePhoneCall(entry);
-      if (isAborted()) break;
-
-      const outcome = decideOutcome(entry, i);
-
-      if (outcome === 'answered'){
-        entry.status = STATUS.ANSWERED;
-        onLog(entry.name + ' heeft opgenomen');
-        alarm.entries.forEach((e, j) => {
-          if (j > i && e.status === STATUS.EMAIL_SENT) e.status = STATUS.CANCELLED;
-        });
-        onLog('Belproces naar overige contactpersonen gestopt');
-        alarm.callPhase = 'resolved';
-        onUpdate();
+      if (!entries.length){
+        alarm.callPhase = 'exhausted';
+        hooks.onLog('Niemand kon gebeld worden — geen contactpersonen gekoppeld');
+        hooks.onUpdate();
+        resolve();
         return;
-      } else if (outcome === 'failed'){
-        entry.status = STATUS.FAILED;
-        onLog('Belpoging naar ' + entry.name + ' mislukt');
-      } else {
-        entry.status = STATUS.NO_ANSWER;
-        onLog(entry.name + ' heeft niet opgenomen');
       }
-      onUpdate();
-    }
 
-    if (!isAborted()){
-      alarm.callPhase = 'exhausted';
-      onLog('Niemand heeft opgenomen — belproces beëindigd, alle contactpersonen benaderd');
-      onUpdate();
-    }
+      const decideAnswerRing = hooks.decideAnswerRing || function(){
+        return Math.random() < 0.45 ? 1 + Math.floor(Math.random() * MAX_RINGS) : null;
+      };
+
+      let index = 0;
+      let ringCount = 0;
+      let answerAtRing = null;
+      let timerId = null;
+      let generation = 0;
+      let done = false;
+
+      function clearTimer(){ if (timerId){ clearTimeout(timerId); timerId = null; } }
+      function currentEntry(){ return entries[index % entries.length]; }
+
+      function finish(){
+        if (done) return;
+        done = true;
+        clearTimer();
+        alarm.callFlow = null;
+        activeCallFlow = null;
+        resolve();
+      }
+
+      // Belangrijk voor het voorkomen van race conditions: elke functie hieronder
+      // rondt EERST al zijn eigen state-mutaties en timer-planning af, en roept
+      // hooks.onLog/onUpdate() pas als allerlaatste stap aan. Die hooks kunnen
+      // namelijk synchroon terugkomen in deze module (bv. de demo-knoppen of een
+      // test die simulateAnswer()/skipCurrent() aanroept binnen onUpdate) — komt
+      // dat pas ná een volledige, consistente statusovergang, dan kan zo'n
+      // reentrant aanroep nooit een half-afgeronde overgang overschrijven.
+      function ringContact(){
+        if (hooks.isAborted()){ finish(); return; }
+        const entry = currentEntry();
+        entry.status = STATUS.CALLING;
+        ringCount = 0;
+        answerAtRing = decideAnswerRing(entry, index);
+        alarm.lastNoAnswer = null;
+        alarm.callFlow = {
+          contactId: entry.contactId, name: entry.name, photo: entry.photo, ringCount: 0, maxRings: MAX_RINGS,
+          nextName: entries.length > 1 ? entries[(index + 1) % entries.length].name : entry.name
+        };
+        generation++;
+        scheduleTick(generation, entry);
+        hooks.onLog(entry.name + ' wordt gebeld');
+        hooks.onUpdate();
+      }
+
+      function scheduleTick(gen, entry){
+        timerId = setTimeout(() => {
+          if (gen !== generation) return;
+          if (hooks.isAborted()){ finish(); return; }
+          ringCount++;
+          alarm.callFlow.ringCount = ringCount;
+          hooks.onUpdate();
+          if (gen !== generation) return; // reentrant demo-actie kan de overgang al hebben afgerond tijdens onUpdate()
+          if (answerAtRing && ringCount >= answerAtRing){
+            handleAnswer(entry);
+          } else if (ringCount >= MAX_RINGS){
+            handleNoAnswer(entry);
+          } else {
+            scheduleTick(gen, entry);
+          }
+        }, RING_MS);
+      }
+
+      function handleAnswer(entry){
+        clearTimer();
+        generation++;
+        entry.status = STATUS.ANSWERED;
+        alarm.entries.forEach(e => {
+          if (e !== entry && (e.status === STATUS.PENDING || e.status === STATUS.CALLING)){
+            e.status = STATUS.CANCELLED;
+          }
+        });
+        alarm.callFlow = null;
+        alarm.callPhase = 'resolved';
+        hooks.onLog(entry.name + ' heeft opgenomen');
+        hooks.onLog('Belproces gestopt — verbonden met ' + entry.name);
+        hooks.onUpdate();
+        finish();
+      }
+
+      function handleNoAnswer(entry){
+        clearTimer();
+        generation++;
+        entry.status = STATUS.NO_ANSWER;
+        alarm.callFlow = null;
+        alarm.lastNoAnswer = { name: entry.name, photo: entry.photo };
+        timerId = setTimeout(() => {
+          if (hooks.isAborted()){ finish(); return; }
+          index++;
+          ringContact();
+        }, NEXT_MS);
+        hooks.onLog(entry.name + ' heeft niet opgenomen');
+        hooks.onUpdate();
+      }
+
+      activeCallFlow = {
+        simulateAnswer(){
+          if (done) return;
+          const entry = currentEntry();
+          if (entry.status !== STATUS.CALLING) return;
+          handleAnswer(entry);
+        },
+        skipCurrent(){
+          if (done) return;
+          const entry = currentEntry();
+          if (entry.status !== STATUS.CALLING) return;
+          handleNoAnswer(entry);
+        },
+        restart(){
+          if (done) return;
+          clearTimer();
+          generation++;
+          entries.forEach(e => { if (e.status === STATUS.CALLING || e.status === STATUS.NO_ANSWER) e.status = STATUS.PENDING; });
+          index = 0;
+          alarm.lastNoAnswer = null;
+          hooks.onLog('Belronde handmatig herstart');
+          ringContact();
+        },
+        stop(){
+          finish();
+        }
+      };
+
+      ringContact();
+    });
   }
 
   function endAlarm(alarm, reason){
+    if (activeCallFlow) activeCallFlow.stop();
     alarm.aborted = true;
     alarm.status = 'ended';
     alarm.callPhase = 'ended';
+    alarm.callFlow = null;
+    alarm.lastNoAnswer = null;
     alarm.entries.forEach(e => {
-      if ([STATUS.PENDING, STATUS.EMAIL_SENDING, STATUS.EMAIL_SENT, STATUS.CALLING].includes(e.status)){
+      if ([STATUS.PENDING, STATUS.CALLING].includes(e.status)){
         e.status = STATUS.CANCELLED;
       }
     });
@@ -727,21 +855,15 @@
   }
 
   function computeSummary(alarm){
-    const entries = alarm.entries;
-    const total = entries.length;
-    const emailSent = entries.filter(e => e.emailSent).length;
-    const calling = entries.find(e => e.status === STATUS.CALLING);
-    const nextUp = entries.find(e => e.status === STATUS.EMAIL_SENT);
     let current = '—';
-    if (calling) current = calling.name + ' wordt gebeld';
-    else if (alarm.callPhase === 'emailing') current = 'E-mails worden verstuurd';
+    if (alarm.callFlow) current = alarm.callFlow.name + ' wordt gebeld (' + alarm.callFlow.ringCount + '/' + alarm.callFlow.maxRings + ')';
+    else if (alarm.callPhase === 'calling' && alarm.lastNoAnswer) current = alarm.lastNoAnswer.name + ': geen antwoord — volgende contactpersoon';
     else if (alarm.callPhase === 'resolved') current = 'Opgenomen — belproces gestopt';
     else if (alarm.callPhase === 'exhausted') current = 'Niemand heeft opgenomen';
     else if (alarm.callPhase === 'ended') current = 'Alarm beëindigd';
     return {
-      emailText: emailSent + '/' + total + ' verstuurd',
       current,
-      next: nextUp ? nextUp.name : (alarm.callPhase === 'emailing' || alarm.callPhase === 'calling' ? '—' : 'Niemand meer')
+      next: alarm.callFlow ? alarm.callFlow.nextName : 'Niemand meer'
     };
   }
 
@@ -775,11 +897,21 @@
     activatedBy: document.getElementById('activatedBy'),
     activatedAt: document.getElementById('activatedAt'),
     activatedMode: document.getElementById('activatedMode'),
-    summaryEmails: document.getElementById('summaryEmails'),
     summaryCurrent: document.getElementById('summaryCurrent'),
     summaryNext: document.getElementById('summaryNext'),
     entriesList: document.getElementById('entriesList'),
     endAlarmButton: document.getElementById('endAlarmButton'),
+
+    callStatusCard: document.getElementById('callStatusCard'),
+    callAvatar: document.getElementById('callAvatar'),
+    callName: document.getElementById('callName'),
+    callState: document.getElementById('callState'),
+    ringDots: document.getElementById('ringDots'),
+    ringCountText: document.getElementById('ringCountText'),
+    demoControls: document.getElementById('demoControls'),
+    simulateAnswerButton: document.getElementById('simulateAnswerButton'),
+    skipContactButton: document.getElementById('skipContactButton'),
+    restartCallButton: document.getElementById('restartCallButton'),
 
     historyList: document.getElementById('historyList'),
     historyEmpty: document.getElementById('historyEmpty'),
@@ -795,10 +927,8 @@
     removePhotoButton: document.getElementById('removePhotoButton'),
     fieldName: document.getElementById('fieldName'),
     fieldPhone: document.getElementById('fieldPhone'),
-    fieldEmail: document.getElementById('fieldEmail'),
     errorName: document.getElementById('errorName'),
     errorPhone: document.getElementById('errorPhone'),
-    errorEmail: document.getElementById('errorEmail'),
     errorPhoto: document.getElementById('errorPhoto'),
     cancelContactButton: document.getElementById('cancelContactButton'),
     saveContactButton: document.getElementById('saveContactButton'),
@@ -818,17 +948,19 @@
   let editingContactId = null;
   let formPhotoData = null;
   let timerInterval = null;
+  let activeCallFlow = null;
 
   const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  function avatarInner(photo){
+    return photo ? '<img src="' + photo + '" alt="">' : PERSON_ICON;
+  }
   function avatarHtml(photo, size){
     const cls = size === 'sm' ? 'avatar sm' : 'avatar';
-    return photo
-      ? '<div class="' + cls + '"><img src="' + photo + '" alt=""></div>'
-      : '<div class="' + cls + '">' + PERSON_ICON + '</div>';
+    return '<div class="' + cls + '">' + avatarInner(photo) + '</div>';
   }
 
   /* ---------------- Navigatie tussen schermen ---------------- */
@@ -874,6 +1006,10 @@
   els.cancelButton.addEventListener('click', cancelArming);
   els.endAlarmButton.addEventListener('click', () => stopAlarm('manual'));
   els.clearHistoryButton.addEventListener('click', onClearHistory);
+
+  els.simulateAnswerButton.addEventListener('click', () => { if (activeCallFlow) activeCallFlow.simulateAnswer(); });
+  els.skipContactButton.addEventListener('click', () => { if (activeCallFlow) activeCallFlow.skipCurrent(); });
+  els.restartCallButton.addEventListener('click', () => { if (activeCallFlow) activeCallFlow.restart(); });
 
   els.toggleTestsButton.addEventListener('click', () => els.testsPanel.classList.toggle('hidden'));
   els.runTestsButton.addEventListener('click', () => runAllTests());
@@ -975,7 +1111,6 @@
   function renderLive(){
     if (!currentAlarm) return;
     const summary = computeSummary(currentAlarm);
-    els.summaryEmails.textContent = summary.emailText;
     els.summaryCurrent.textContent = summary.current;
     els.summaryNext.textContent = summary.next;
 
@@ -990,9 +1125,56 @@
         }).join('')
       : '<li><span class="entry-name" style="color:var(--text-faint);">Geen contactpersonen gekoppeld</span></li>';
 
+    renderCallStatus(currentAlarm);
+
     if (currentAlarm.status !== 'active'){
       stopTimer();
     }
+  }
+
+  /* ---------------- Belstatus-kaart (fictief bellen) ---------------- */
+  function renderCallStatus(alarm){
+    const flow = alarm.callFlow;
+    const answeredEntry = alarm.entries.find(e => e.status === STATUS.ANSWERED);
+
+    if (flow){
+      els.callStatusCard.className = 'call-status-card ringing';
+      els.callAvatar.innerHTML = avatarInner(flow.photo);
+      els.callName.textContent = flow.name;
+      els.callState.textContent = 'Bellen…';
+      els.callState.className = 'call-state';
+      renderRingDots(flow.ringCount);
+      els.ringCountText.textContent = flow.ringCount + '/' + flow.maxRings;
+      els.demoControls.classList.remove('hidden');
+    } else if (alarm.callPhase === 'calling' && alarm.lastNoAnswer){
+      els.callStatusCard.className = 'call-status-card no-answer';
+      els.callAvatar.innerHTML = avatarInner(alarm.lastNoAnswer.photo);
+      els.callName.textContent = alarm.lastNoAnswer.name;
+      els.callState.textContent = 'Geen antwoord — volgende contactpersoon';
+      els.callState.className = 'call-state no-answer';
+      renderRingDots(MAX_RINGS);
+      els.ringCountText.textContent = MAX_RINGS + '/' + MAX_RINGS;
+      els.demoControls.classList.add('hidden');
+    } else if (answeredEntry && alarm.callPhase === 'resolved'){
+      els.callStatusCard.className = 'call-status-card connected';
+      els.callAvatar.innerHTML = avatarInner(answeredEntry.photo);
+      els.callName.textContent = answeredEntry.name;
+      els.callState.textContent = 'Verbonden — gesprek actief';
+      els.callState.className = 'call-state connected';
+      renderRingDots(MAX_RINGS);
+      els.ringCountText.textContent = 'Verbonden';
+      els.demoControls.classList.add('hidden');
+    } else {
+      els.callStatusCard.className = 'call-status-card hidden';
+      els.demoControls.classList.add('hidden');
+    }
+  }
+
+  function renderRingDots(count){
+    els.ringDots.querySelectorAll('.ring-dot').forEach((dot, i) => {
+      dot.classList.toggle('filled', i < count);
+      dot.classList.toggle('active', i === count - 1);
+    });
   }
 
   /* ---------------- Activiteitenlog ---------------- */
@@ -1022,7 +1204,7 @@
         avatarHtml(c.photo) +
         '<div class="contact-info">' +
           '<div class="name">' + escapeHtml(c.name) + '</div>' +
-          '<div class="meta">' + escapeHtml(c.phone) + ' · ' + escapeHtml(c.email) + '</div>' +
+          '<div class="meta">' + escapeHtml(c.phone) + '</div>' +
         '</div>' +
         '<div class="contact-actions">' +
           '<button type="button" class="icon-btn edit-contact" aria-label="Bewerken" data-id="' + c.id + '">' +
@@ -1067,10 +1249,9 @@
     const contact = id ? Contacts.get(id) : null;
     els.fieldName.value = contact ? contact.name : '';
     els.fieldPhone.value = contact ? contact.phone : '';
-    els.fieldEmail.value = contact ? contact.email : '';
     formPhotoData = contact ? contact.photo : null;
     updateFormAvatar();
-    [els.errorName, els.errorPhone, els.errorEmail, els.errorPhoto].forEach(e => e.classList.add('hidden'));
+    [els.errorName, els.errorPhone, els.errorPhoto].forEach(e => e.classList.add('hidden'));
     els.contactForm.classList.remove('hidden');
     els.contactForm.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
@@ -1105,20 +1286,17 @@
     let valid = true;
     const name = els.fieldName.value.trim();
     const phone = els.fieldPhone.value.trim();
-    const email = els.fieldEmail.value.trim();
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     els.errorName.classList.toggle('hidden', name.length > 0);
     els.errorPhone.classList.toggle('hidden', phone.length > 0);
-    els.errorEmail.classList.toggle('hidden', emailOk);
-    if (!name.length || !phone.length || !emailOk) valid = false;
-    return { valid, name, phone, email };
+    if (!name.length || !phone.length) valid = false;
+    return { valid, name, phone };
   }
 
   function onSaveContact(){
     const result = validateContactForm();
     if (!result.valid) return;
-    const data = { name: result.name, phone: result.phone, email: result.email, photo: formPhotoData };
+    const data = { name: result.name, phone: result.phone, photo: formPhotoData };
     if (editingContactId){
       Contacts.update(editingContactId, data);
       Activity.add('Contactpersoon bijgewerkt: ' + data.name, 'contact');
@@ -1147,7 +1325,7 @@
       name: 'Contactpersoon toevoegen/bewerken/verwijderen (CRUD)',
       run(){
         const { contacts } = buildTestEnv();
-        const c = contacts.add({ name:'Danny Gielen', phone:'0615901002', email:'dantiney@hotmail.com' });
+        const c = contacts.add({ name:'Danny Gielen', phone:'0615901002' });
         assert(contacts.list().length === 1, 'contact niet toegevoegd');
         contacts.update(c.id, { phone:'0611111111' });
         assert(contacts.get(c.id).phone === '0611111111', 'update niet doorgevoerd');
@@ -1159,7 +1337,7 @@
       name: 'Profielfoto koppelen en verwijderen',
       run(){
         const { contacts } = buildTestEnv();
-        const c = contacts.add({ name:'Jan Jansen', phone:'0600000000', email:'jan@voorbeeld.nl', photo:'data:image/png;base64,AAA' });
+        const c = contacts.add({ name:'Jan Jansen', phone:'0600000000', photo:'data:image/png;base64,AAA' });
         assert(contacts.get(c.id).photo === 'data:image/png;base64,AAA', 'foto niet opgeslagen');
         contacts.update(c.id, { photo:null });
         assert(contacts.get(c.id).photo === null, 'foto niet verwijderd, standaard-avatar zou nu moeten gelden');
@@ -1188,95 +1366,126 @@
       }
     },
     {
-      name: 'Automatisch e-mails versturen naar alle contactpersonen',
-      async run(){
-        window.__FAST_SIM__ = true;
-        const contactsList = [
-          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
-          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
-        ];
-        const alarm = createAlarm(contactsList, 'Tester', true);
-        const logs = [];
-        await runAlarmSequence(alarm, {
-          onUpdate(){}, onLog:(t) => logs.push(t),
-          decideOutcome: () => 'no_answer'
-        });
-        window.__FAST_SIM__ = false;
-        assert(alarm.entries.every(e => e.emailSent === true), 'niet alle contacten hebben een e-mail gekregen');
-        assert(logs.filter(l => l.indexOf('E-mail verstuurd') === 0).length === 2, 'niet elke e-mail is gelogd');
-      }
-    },
-    {
-      name: 'Sequentieel bellen in de juiste volgorde',
+      name: 'Contactpersonen rouleren automatisch, elk max. 5x overgaand',
       async run(){
         window.__FAST_SIM__ = true;
         const order = [];
+        const ringPeaks = {};
         const contactsList = [
-          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
-          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null },
-          { id:'3', name:'Peter', phone:'x', email:'c@a.nl', photo:null }
+          { id:'1', name:'Danny', phone:'x', photo:null },
+          { id:'2', name:'Jan', phone:'x', photo:null },
+          { id:'3', name:'Peter', phone:'x', photo:null }
         ];
         const alarm = createAlarm(contactsList, 'Tester', true);
         await runAlarmSequence(alarm, {
-          onUpdate(){}, onLog(){},
-          decideOutcome: (entry) => { order.push(entry.name); return 'no_answer'; }
+          onUpdate(){
+            if (alarm.callFlow) ringPeaks[alarm.callFlow.name] = Math.max(ringPeaks[alarm.callFlow.name] || 0, alarm.callFlow.ringCount);
+          },
+          onLog(){},
+          decideAnswerRing: (entry) => { order.push(entry.name); return entry.name === 'Peter' ? 1 : null; }
         });
         window.__FAST_SIM__ = false;
         assert(order.join(',') === 'Danny,Jan,Peter', 'belvolgorde klopt niet: ' + order.join(','));
-      }
-    },
-    {
-      name: 'Automatisch doorgaan bij geen opname, stoppen zodra iemand opneemt',
-      async run(){
-        window.__FAST_SIM__ = true;
-        const contactsList = [
-          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
-          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null },
-          { id:'3', name:'Peter', phone:'x', email:'c@a.nl', photo:null }
-        ];
-        const alarm = createAlarm(contactsList, 'Tester', true);
-        const outcomes = ['no_answer', 'answered', 'no_answer'];
-        let i = 0;
-        await runAlarmSequence(alarm, {
-          onUpdate(){}, onLog(){},
-          decideOutcome: () => outcomes[i++]
-        });
-        window.__FAST_SIM__ = false;
-        assert(alarm.entries[0].status === 'no_answer', 'eerste contact moet no_answer zijn');
-        assert(alarm.entries[1].status === 'answered', 'tweede contact moet answered zijn');
-        assert(alarm.entries[2].status === 'cancelled', 'derde contact had nooit gebeld mogen worden (cancelled)');
+        assert(ringPeaks.Danny === 5, 'Danny moet 5x overgaan voor de volgende: ' + ringPeaks.Danny);
+        assert(ringPeaks.Jan === 5, 'Jan moet 5x overgaan voor de volgende: ' + ringPeaks.Jan);
+        assert(alarm.entries[0].status === 'no_answer', 'Danny moet no_answer zijn');
+        assert(alarm.entries[1].status === 'no_answer', 'Jan moet no_answer zijn');
+        assert(alarm.entries[2].status === 'answered', 'Peter moet answered zijn');
         assert(alarm.callPhase === 'resolved', 'callPhase moet resolved zijn na opname');
       }
     },
     {
-      name: 'Foutafhandeling: mislukte belpoging blokkeert het proces niet',
+      name: 'Opnemen stopt de roulatie en annuleert nog niet gebelde contacten',
       async run(){
         window.__FAST_SIM__ = true;
         const contactsList = [
-          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
-          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
+          { id:'1', name:'Danny', phone:'x', photo:null },
+          { id:'2', name:'Jan', phone:'x', photo:null },
+          { id:'3', name:'Peter', phone:'x', photo:null }
         ];
         const alarm = createAlarm(contactsList, 'Tester', true);
-        const outcomes = ['failed', 'no_answer'];
-        let i = 0;
         await runAlarmSequence(alarm, {
           onUpdate(){}, onLog(){},
-          decideOutcome: () => outcomes[i++]
+          decideAnswerRing: (entry) => entry.name === 'Jan' ? 1 : null
         });
         window.__FAST_SIM__ = false;
-        assert(alarm.entries[0].status === 'failed', 'eerste contact moet failed zijn');
-        assert(alarm.entries[1].status === 'no_answer', 'na een mislukte poging moet de volgende alsnog gebeld worden');
+        assert(alarm.entries[0].status === 'no_answer', 'Danny moet no_answer zijn');
+        assert(alarm.entries[1].status === 'answered', 'Jan moet answered zijn');
+        assert(alarm.entries[2].status === 'cancelled', 'Peter had nooit gebeld mogen worden (cancelled): ' + alarm.entries[2].status);
+        assert(alarm.callPhase === 'resolved', 'callPhase moet resolved zijn na opname');
       }
     },
     {
-      name: 'Niemand neemt op → belproces sluit netjes af (exhausted)',
+      name: 'Belproces herhaalt cyclisch als niemand in de eerste ronde opneemt',
       async run(){
         window.__FAST_SIM__ = true;
-        const contactsList = [{ id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null }];
+        const order = [];
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', photo:null },
+          { id:'2', name:'Jan', phone:'x', photo:null }
+        ];
         const alarm = createAlarm(contactsList, 'Tester', true);
-        await runAlarmSequence(alarm, { onUpdate(){}, onLog(){}, decideOutcome: () => 'no_answer' });
+        await runAlarmSequence(alarm, {
+          onUpdate(){}, onLog(){},
+          decideAnswerRing: (entry) => { order.push(entry.name); return order.length === 3 ? 1 : null; }
+        });
         window.__FAST_SIM__ = false;
-        assert(alarm.callPhase === 'exhausted', 'callPhase moet exhausted zijn als niemand opneemt');
+        assert(order.join(',') === 'Danny,Jan,Danny', 'moet cyclisch terugkeren naar Danny: ' + order.join(','));
+        assert(alarm.callPhase === 'resolved', 'callPhase moet resolved zijn na cyclische opname');
+      }
+    },
+    {
+      name: 'Geen contactpersonen om te bellen → belproces sluit netjes af (exhausted)',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const alarm = createAlarm([], 'Tester', true);
+        await runAlarmSequence(alarm, { onUpdate(){}, onLog(){} });
+        window.__FAST_SIM__ = false;
+        assert(alarm.callPhase === 'exhausted', 'callPhase moet exhausted zijn zonder contactpersonen');
+      }
+    },
+    {
+      name: 'Demo: simuleer opnemen stopt de actieve belpoging direct',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', photo:null },
+          { id:'2', name:'Jan', phone:'x', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        await runAlarmSequence(alarm, {
+          onUpdate(){ if (alarm.callFlow && activeCallFlow) activeCallFlow.simulateAnswer(); },
+          onLog(){},
+          decideAnswerRing: () => null
+        });
+        window.__FAST_SIM__ = false;
+        assert(alarm.entries[0].status === 'answered', 'Danny moet direct als opgenomen gemarkeerd zijn: ' + alarm.entries[0].status);
+        assert(alarm.callPhase === 'resolved', 'callPhase moet resolved zijn na simuleren');
+      }
+    },
+    {
+      name: 'Demo: contact overslaan gaat direct door naar de volgende',
+      async run(){
+        window.__FAST_SIM__ = true;
+        const contactsList = [
+          { id:'1', name:'Danny', phone:'x', photo:null },
+          { id:'2', name:'Jan', phone:'x', photo:null }
+        ];
+        const alarm = createAlarm(contactsList, 'Tester', true);
+        let skipped = false;
+        await runAlarmSequence(alarm, {
+          onUpdate(){
+            if (!skipped && alarm.callFlow && alarm.callFlow.name === 'Danny' && activeCallFlow){
+              skipped = true;
+              activeCallFlow.skipCurrent();
+            }
+          },
+          onLog(){},
+          decideAnswerRing: (entry) => entry.name === 'Jan' ? 1 : null
+        });
+        window.__FAST_SIM__ = false;
+        assert(alarm.entries[0].status === 'no_answer', 'Danny moet overgeslagen zijn als no_answer: ' + alarm.entries[0].status);
+        assert(alarm.entries[1].status === 'answered', 'Jan moet answered zijn');
       }
     },
     {
@@ -1284,25 +1493,23 @@
       async run(){
         window.__FAST_SIM__ = true;
         const contactsList = [
-          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
-          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
+          { id:'1', name:'Danny', phone:'x', photo:null },
+          { id:'2', name:'Jan', phone:'x', photo:null }
         ];
         const alarm = createAlarm(contactsList, 'Tester', true);
-        const outcomes = ['answered'];
-        let i = 0;
-        await runAlarmSequence(alarm, { onUpdate(){}, onLog(){}, decideOutcome: () => outcomes[i++] || 'no_answer' });
+        await runAlarmSequence(alarm, { onUpdate(){}, onLog(){}, decideAnswerRing: () => 1 });
         window.__FAST_SIM__ = false;
         const summary = computeSummary(alarm);
-        assert(summary.emailText === '2/2 verstuurd', 'e-mailsamenvatting klopt niet: ' + summary.emailText);
         assert(summary.current.indexOf('gestopt') !== -1, 'huidige actie klopt niet: ' + summary.current);
+        assert(summary.next === 'Niemand meer', 'volgende-veld klopt niet na opname: ' + summary.next);
       }
     },
     {
       name: 'Alarm handmatig beëindigen annuleert openstaande contacten',
       async run(){
         const contactsList = [
-          { id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null },
-          { id:'2', name:'Jan', phone:'x', email:'b@a.nl', photo:null }
+          { id:'1', name:'Danny', phone:'x', photo:null },
+          { id:'2', name:'Jan', phone:'x', photo:null }
         ];
         const alarm = createAlarm(contactsList, 'Tester', true);
         alarm.entries[0].status = 'calling';
@@ -1317,12 +1524,11 @@
       name: 'Activiteitenlog bevat de belangrijkste stappen van een volledig alarm',
       async run(){
         window.__FAST_SIM__ = true;
-        const contactsList = [{ id:'1', name:'Danny', phone:'x', email:'a@a.nl', photo:null }];
+        const contactsList = [{ id:'1', name:'Danny', phone:'x', photo:null }];
         const alarm = createAlarm(contactsList, 'Tester', true);
         const logs = [];
-        await runAlarmSequence(alarm, { onUpdate(){}, onLog:(t) => logs.push(t), decideOutcome: () => 'answered' });
+        await runAlarmSequence(alarm, { onUpdate(){}, onLog:(t) => logs.push(t), decideAnswerRing: () => 1 });
         window.__FAST_SIM__ = false;
-        assert(logs.some(l => l.indexOf('E-mail verstuurd') === 0), 'e-mail-log ontbreekt');
         assert(logs.some(l => l.indexOf('wordt gebeld') !== -1), 'bel-log ontbreekt');
         assert(logs.some(l => l.indexOf('heeft opgenomen') !== -1), 'opname-log ontbreekt');
       }
