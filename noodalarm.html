@@ -483,6 +483,19 @@
     padding:14px 18px; font-size:16px; font-weight:600;
   }
   .siren-banner .link-button{ font-size:15px; }
+  .location-card{ flex-shrink:0; background:var(--surface); border-bottom:1px solid var(--border-soft); padding:14px 16px; }
+  .location-header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:15.5px; margin-bottom:10px; }
+  .location-header strong{ font-weight:800; }
+  .location-accuracy{ color:var(--text-faint); font-size:12.5px; font-weight:600; white-space:nowrap; flex-shrink:0; }
+  .location-map-wrap{ border-radius:14px; overflow:hidden; border:1px solid var(--border-soft); height:150px; background:var(--surface-2); }
+  .location-map-frame{ width:100%; height:100%; border:none; pointer-events:none; }
+  .location-open-button{
+    display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;
+    background:var(--accent); color:#fff; text-decoration:none; font-weight:700; font-size:15.5px;
+    padding:12px; border-radius:12px; min-height:48px;
+  }
+  .location-open-button:hover{ background:var(--accent-dark); }
+  .location-open-button svg{ width:19px; height:19px; }
   .platform-icon{ width:18px; height:18px; flex-shrink:0; vertical-align:-4px; margin:0 1px; }
 
   /* ---------- Onboarding (uitleg) ---------- */
@@ -551,7 +564,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
         <h2 class="onboarding-title">Stap 3: Druk op ALARM bij nood</h2>
-        <p class="onboarding-text">U heeft daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen uw contacten meteen een melding: in de app en per e-mail.</p>
+        <p class="onboarding-text">U heeft daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen uw contacten meteen een melding: in de app en per e-mail, mét uw locatie op dat moment.</p>
       </div>
 
       <div class="onboarding-dots">
@@ -614,6 +627,19 @@
     <div id="sirenBanner" class="siren-banner hidden">
       🔊 Het alarmgeluid speelt af.
       <button type="button" id="sirenStopButton" class="link-button" style="padding:0; margin-left:auto;">Geluid stoppen</button>
+    </div>
+    <div id="locationCard" class="location-card hidden">
+      <div class="location-header">
+        <span>📍 Locatie van <strong id="locationName">—</strong></span>
+        <span id="locationAccuracy" class="location-accuracy"></span>
+      </div>
+      <div class="location-map-wrap">
+        <iframe id="locationMapFrame" class="location-map-frame" loading="lazy" title="Locatiekaart" referrerpolicy="no-referrer"></iframe>
+      </div>
+      <a id="locationOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Open in Maps
+      </a>
     </div>
     <div id="chatMessages" class="chat-messages"></div>
     <form id="chatForm" class="chat-form">
@@ -984,6 +1010,11 @@
     chatSendButton: document.getElementById('chatSendButton'),
     sirenBanner: document.getElementById('sirenBanner'),
     sirenStopButton: document.getElementById('sirenStopButton'),
+    locationCard: document.getElementById('locationCard'),
+    locationName: document.getElementById('locationName'),
+    locationAccuracy: document.getElementById('locationAccuracy'),
+    locationMapFrame: document.getElementById('locationMapFrame'),
+    locationOpenButton: document.getElementById('locationOpenButton'),
 
     tabAlarm: document.getElementById('tabAlarm'),
     tabContacts: document.getElementById('tabContacts'),
@@ -1678,6 +1709,26 @@
   let countdownRafId = null;
   let countdownStartedAt = 0;
   let countdownActive = false;
+  let pendingLocation = null;
+
+  // Vraagt de locatie op zodra iemand de knop indrukt — niet pas na de 3
+  // seconden, zodat er meer tijd is voor een GPS-fix. Lukt dit niet (geen
+  // toestemming, geen GPS-signaal, te traag) dan wordt het alarm gewoon
+  // zonder locatie verstuurd; een ontbrekende locatie mag een noodalarm nooit
+  // tegenhouden.
+  function requestLocation(){
+    if (!('geolocation' in navigator)) return Promise.resolve(null);
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
+        () => resolve(null),
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 20000 }
+      );
+    });
+  }
+  function withTimeout(promise, ms){
+    return Promise.race([promise, new Promise(resolve => setTimeout(() => resolve(null), ms))]);
+  }
 
   function setHoldProgress(fraction){
     els.holdProgress.style.strokeDashoffset = String(HOLD_CIRCUMFERENCE * (1 - fraction));
@@ -1696,6 +1747,7 @@
     if (countdownActive || els.alarmButton.disabled) return;
     countdownActive = true;
     countdownStartedAt = performance.now();
+    pendingLocation = requestLocation();
     els.alarmButton.classList.add('counting');
     els.alarmButton.setAttribute('aria-label', 'Tik om het alarm te annuleren');
     els.alarmIcon.classList.add('hidden');
@@ -1722,6 +1774,7 @@
   function cancelCountdown(){
     if (!countdownActive) return;
     countdownActive = false;
+    pendingLocation = null;
     if (countdownRafId) cancelAnimationFrame(countdownRafId);
     resetAlarmButton();
   }
@@ -1746,6 +1799,8 @@
     const startedAt = new Date();
     const activatorName = currentProfile ? currentProfile.full_name : 'Onbekende gebruiker';
     const contacts = await refreshContacts();
+    const location = pendingLocation ? await withTimeout(pendingLocation, 2500) : null;
+    pendingLocation = null;
 
     let result = { notified: [], contactCount: contacts.length };
     let sendError = null;
@@ -1758,7 +1813,12 @@
           apikey: SUPABASE_ANON_KEY,
           Authorization: 'Bearer ' + session.access_token
         },
-        body: JSON.stringify({ testMode: false })
+        body: JSON.stringify({
+          testMode: false,
+          lat: location ? location.lat : null,
+          lng: location ? location.lng : null,
+          accuracy: location ? location.accuracy : null
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Onbekende fout');
@@ -1871,21 +1931,46 @@
     els.notifOverlay.classList.add('hidden');
     els.chatOverlay.classList.remove('hidden');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">Bericht laden…</p>';
+    els.locationCard.classList.add('hidden');
 
-    const { data: participants } = await sb.rpc('get_alarm_participants', { p_alarm_id: alarmId });
+    const [{ data: participants }, { data: alarmRow }] = await Promise.all([
+      sb.rpc('get_alarm_participants', { p_alarm_id: alarmId }),
+      sb.from('alarms').select('lat, lng, location_accuracy, triggered_by').eq('id', alarmId).single()
+    ]);
     chatParticipantById = {};
     (participants || []).forEach(p => { chatParticipantById[p.user_id] = p; });
     els.chatParticipants.textContent = (participants || []).map(p => p.full_name).join(', ');
+    renderLocationCard(alarmRow);
 
     await loadChatMessages(alarmId);
     subscribeChat(alarmId);
     els.chatInput.focus();
   }
 
+  function renderLocationCard(alarmRow){
+    if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
+      els.locationCard.classList.add('hidden');
+      els.locationMapFrame.src = '';
+      return;
+    }
+    const { lat, lng, location_accuracy, triggered_by } = alarmRow;
+    const isOwn = triggered_by === currentSession.user.id;
+    const activator = chatParticipantById[triggered_by];
+    els.locationName.textContent = isOwn ? 'jou' : (activator ? activator.full_name : 'de activator');
+    els.locationAccuracy.textContent = location_accuracy ? ('±' + Math.round(location_accuracy) + ' m') : '';
+    const dLat = 0.0035, dLng = 0.006;
+    els.locationMapFrame.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' +
+      (lng - dLng) + '%2C' + (lat - dLat) + '%2C' + (lng + dLng) + '%2C' + (lat + dLat) +
+      '&layer=mapnik&marker=' + lat + '%2C' + lng;
+    els.locationOpenButton.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+    els.locationCard.classList.remove('hidden');
+  }
+
   function closeChat(){
     els.chatOverlay.classList.add('hidden');
     if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
     currentChatAlarmId = null;
+    els.locationMapFrame.src = '';
   }
   els.chatCloseButton.addEventListener('click', closeChat);
 
