@@ -683,6 +683,11 @@
         <ul id="searchResultsList" class="people-list"></ul>
       </div>
 
+      <div id="sentRequestsSection" class="hidden">
+        <div class="section-title">Openstaande verzoeken</div>
+        <ul id="sentRequestsList" class="people-list"></ul>
+      </div>
+
       <div id="contactsSection">
         <div class="section-title">Mijn contacten</div>
         <div id="contactsEmpty" class="empty-state hidden">Nog geen contacten. Zoek hierboven naar iemand die u vertrouwt.</div>
@@ -885,6 +890,8 @@
     searchResultsSection: document.getElementById('searchResultsSection'),
     searchEmpty: document.getElementById('searchEmpty'),
     searchResultsList: document.getElementById('searchResultsList'),
+    sentRequestsSection: document.getElementById('sentRequestsSection'),
+    sentRequestsList: document.getElementById('sentRequestsList'),
     contactsSection: document.getElementById('contactsSection'),
     contactsEmpty: document.getElementById('contactsEmpty'),
     contactsList: document.getElementById('contactsList'),
@@ -1327,6 +1334,41 @@
       return;
     }
     runSearch();
+    refreshSentRequests();
+  }
+
+  async function refreshSentRequests(){
+    const { data } = await sb.rpc('my_sent_requests');
+    const requests = data || [];
+    els.sentRequestsSection.classList.toggle('hidden', requests.length === 0);
+    els.sentRequestsList.innerHTML = requests.map(r => (
+      '<li class="person-card">' +
+        '<div class="avatar">' + avatarInner(r.avatar_url) + '</div>' +
+        '<div class="person-info">' +
+          '<div class="name">' + escapeHtml(r.full_name) + '</div>' +
+          '<div class="handle">@' + escapeHtml(r.username) + '</div>' +
+        '</div>' +
+        '<button type="button" class="small-btn cancel-request" data-id="' + r.connection_id + '">Intrekken</button>' +
+      '</li>'
+    )).join('');
+    els.sentRequestsList.querySelectorAll('.cancel-request').forEach(btn =>
+      btn.addEventListener('click', () => cancelRequest(btn))
+    );
+    return requests;
+  }
+
+  async function cancelRequest(btn){
+    btn.disabled = true;
+    btn.textContent = 'Bezig…';
+    const { error } = await sb.rpc('cancel_connection_request', { p_connection_id: btn.dataset.id });
+    if (error){
+      window.alert('Intrekken mislukt: ' + error.message);
+      btn.disabled = false;
+      btn.textContent = 'Intrekken';
+      return;
+    }
+    refreshSentRequests();
+    if (!els.searchResultsSection.classList.contains('hidden')) runSearch();
   }
 
   async function refreshContacts(){
@@ -1366,6 +1408,7 @@
       els.searchResultsSection.classList.add('hidden');
       els.contactsSection.classList.remove('hidden');
       refreshContacts();
+      refreshSentRequests();
     }
   }
 
