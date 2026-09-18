@@ -909,7 +909,7 @@
 
       </main>
 
-      <footer class="note">Noodmeldingen gaan via de app en e-mail — er wordt niemand gebeld.</footer>
+      <footer class="note">&copy; <span id="copyrightYear"></span> NORI. Alle rechten voorbehouden.</footer>
     </section>
 
     <!-- =========================== CONTACTEN SCHERM =========================== -->
@@ -1186,6 +1186,9 @@
     settingsCloseButton: document.getElementById('settingsCloseButton'),
     locationToggle: document.getElementById('locationToggle')
   };
+
+  const copyrightYearEl = document.getElementById('copyrightYear');
+  if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
 
   const HOLD_CIRCUMFERENCE = 2 * Math.PI * 112;
   els.holdProgress.style.strokeDasharray = String(HOLD_CIRCUMFERENCE);
