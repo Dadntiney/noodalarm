@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>NoodAlarm — persoonlijk noodnetwerk</title>
-<meta name="description" content="Persoonlijk noodalarm-netwerk: waarschuw alleen je eigen, bevestigde noodcontacten via een pushmelding.">
+<meta name="description" content="Persoonlijk noodalarm-netwerk: waarschuw je bevestigde noodcontacten via pushmelding, melding in de app en e-mail.">
 <meta name="theme-color" content="#0b1220">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -50,6 +50,7 @@
   button, input, textarea{ font-family:inherit; color:inherit; }
   button{ -webkit-tap-highlight-color:transparent; }
   ul{ list-style:none; margin:0; padding:0; }
+  a{ color:inherit; }
 
   .app{
     max-width:480px;
@@ -74,6 +75,18 @@
   .brand{ display:flex; align-items:center; gap:10px; color:var(--text); }
   .brand svg{ width:24px; height:24px; color:var(--text-muted); flex-shrink:0; }
   .brand-name{ font-weight:800; font-size:19px; letter-spacing:0.01em; }
+  .topbar-actions{ display:flex; align-items:center; gap:10px; }
+  .bell-button{
+    position:relative; width:46px; height:46px; border-radius:50%; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .bell-button svg{ width:21px; height:21px; }
+  .bell-badge{
+    position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; border-radius:10px; background:var(--red);
+    color:#fff; font-size:11.5px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 5px;
+    border:2px solid var(--bg);
+  }
+  .bell-badge.hidden{ display:none; }
   .logout-link{
     background:none; border:none; color:var(--text-muted); font-size:14.5px; font-weight:600;
     cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:3px;
@@ -87,7 +100,7 @@
   }
   .segmented button{
     flex:1; border:none; background:transparent; color:var(--text-muted);
-    font-weight:700; font-size:16px; padding:14px 0; border-radius:999px; cursor:pointer;
+    font-weight:700; font-size:15px; padding:13px 0; border-radius:999px; cursor:pointer;
     transition:background .15s ease, color .15s ease;
   }
   .segmented button.active{ background:var(--surface-2); color:var(--text); }
@@ -105,16 +118,16 @@
   /* ---------- Auth screen ---------- */
   .auth-wrap{
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:28px; text-align:center; width:100%;
+    gap:22px; text-align:center; width:100%; padding:20px 0;
   }
   .auth-logo{
-    width:96px; height:96px; border-radius:50%;
+    width:88px; height:88px; border-radius:50%;
     background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 14px 30px rgba(227,32,61,.35);
   }
-  .auth-logo svg{ width:44px; height:44px; color:#fff; }
-  .auth-title{ font-size:26px; font-weight:800; margin:0; }
+  .auth-logo svg{ width:42px; height:42px; color:#fff; }
+  .auth-title{ font-size:25px; font-weight:800; margin:0; }
   .auth-form{ width:100%; display:flex; flex-direction:column; gap:14px; text-align:left; }
   .auth-message{
     width:100%; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
@@ -123,6 +136,11 @@
   .auth-message.success{ border-color:var(--green); color:var(--text); }
   .auth-message.error{ border-color:var(--danger); color:var(--text); }
   .auth-message.warn{ border-color:var(--amber); color:var(--amber); }
+  .auth-switch{ font-size:15.5px; color:var(--text-muted); margin:0; }
+  .auth-switch button{ background:none; border:none; color:var(--red-bright); font-weight:700; font-size:15.5px; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:3px; }
+  .field-hint{ font-size:13.5px; color:var(--text-faint); margin-top:6px; }
+  .field-hint.ok{ color:var(--green); }
+  .field-hint.bad{ color:var(--danger); }
 
   .form-card, .info-card, .actions-card, .entries-card, .tests-panel{
     width:100%; background:var(--surface); border:1px solid var(--border-soft);
@@ -143,10 +161,14 @@
 
   /* ---------- Alarm button ---------- */
   .alarm-button-wrap{
-    padding:18px; border-radius:50%;
+    padding:18px; border-radius:50%; position:relative;
     background:linear-gradient(150deg,#2c3554,#141a2c);
     box-shadow:0 22px 45px rgba(0,0,0,.55), inset 0 2px 3px rgba(255,255,255,.06), inset 0 -2px 4px rgba(0,0,0,.4);
   }
+  .hold-ring{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); pointer-events:none; }
+  .hold-ring circle{ fill:none; stroke-width:6; }
+  .hold-ring .bg{ stroke:rgba(255,255,255,.06); }
+  .hold-ring .progress{ stroke:var(--amber); stroke-linecap:round; stroke-dasharray:god; transition:none; }
   .alarm-button{
     width:clamp(200px, 58vw, 270px); height:clamp(200px, 58vw, 270px); border-radius:50%; border:none;
     cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
@@ -154,35 +176,20 @@
     box-shadow:0 14px 0 var(--red-dark), 0 22px 34px rgba(0,0,0,.5),
       inset 0 -8px 14px rgba(0,0,0,.28), inset 0 8px 12px rgba(255,255,255,.18);
     transition:transform .08s ease, box-shadow .08s ease;
+    -webkit-user-select:none; user-select:none; touch-action:none;
   }
   .alarm-button svg{ width:17%; height:17%; color:rgba(255,255,255,.95); }
   .alarm-button .label{
-    font-size:clamp(22px,6vw,30px); font-weight:800; letter-spacing:.05em; color:#fff;
-    text-shadow:0 2px 4px rgba(0,0,0,.25);
+    font-size:clamp(18px,5vw,24px); font-weight:800; letter-spacing:.04em; color:#fff;
+    text-shadow:0 2px 4px rgba(0,0,0,.25); text-align:center; line-height:1.25;
   }
-  .alarm-button.pressed{
-    transform:translateY(10px);
-    box-shadow:0 4px 0 var(--red-dark), 0 8px 16px rgba(0,0,0,.5),
+  .alarm-button.holding{
+    transform:translateY(8px);
+    box-shadow:0 6px 0 var(--red-dark), 0 10px 20px rgba(0,0,0,.5),
       inset 0 -4px 8px rgba(0,0,0,.32), inset 0 4px 8px rgba(255,255,255,.12);
   }
   .alarm-button:focus-visible{ outline:3px solid var(--red-bright); outline-offset:6px; }
   .alarm-button:disabled{ cursor:not-allowed; opacity:.6; }
-
-  /* ---------- Arming view ---------- */
-  .arming-ring-wrap{ position:relative; width:230px; height:230px; }
-  .arming-ring{ width:100%; height:100%; transform:rotate(-90deg); }
-  .arming-ring circle{ fill:none; stroke-width:11; }
-  .ring-bg{ stroke:var(--surface-2); }
-  .ring-progress{
-    stroke:var(--amber); stroke-linecap:round; stroke-dasharray:565.48; stroke-dashoffset:565.48;
-    transition:stroke-dashoffset 1s linear;
-  }
-  .arming-count{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-size:76px; font-weight:800; color:var(--amber); font-variant-numeric:tabular-nums;
-  }
-  #view-arming h2{ font-size:23px; margin:0; }
-  #view-arming p{ color:var(--text-muted); font-size:16.5px; max-width:310px; margin:0; line-height:1.5; }
 
   .cancel-button, .end-button, .reset-button, .add-button, .save-button{
     font-weight:700; font-size:17px; padding:17px 30px; min-height:56px; border-radius:999px; cursor:pointer;
@@ -225,35 +232,37 @@
   .dot.dot-green{ background:var(--green); }
   .dot.dot-amber{ background:var(--amber); }
 
-  .history-header{ display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px; }
-  .history-header h3{ font-size:14.5px; font-weight:700; color:var(--text-muted); margin:0; text-transform:uppercase; letter-spacing:.03em; }
-  .history-card{ width:100%; text-align:left; }
-  .history-card ul{ display:flex; flex-direction:column; gap:8px; }
-  .history-card li{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    background:var(--surface); border:1px solid var(--border-soft); border-radius:12px; padding:11px 14px; font-size:15px;
-  }
-  .h-name{ font-weight:600; }
-  .h-time{ color:var(--text-muted); flex:1; text-align:right; font-size:13px; }
-
   /* ---------- Avatars ---------- */
   .avatar{
     width:54px; height:54px; border-radius:50%; background:var(--surface-2); border:1px solid var(--border);
     display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; color:var(--text-muted);
   }
   .avatar svg{ width:55%; height:55%; }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
   .avatar.sm{ width:38px; height:38px; }
+  .avatar.lg{ width:96px; height:96px; }
 
-  /* ---------- Contacts / network screen ---------- */
+  /* ---------- Contacten / zoeken ---------- */
   .section-title{ font-size:14.5px; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
-  .contact-card{
+  .search-box{
+    width:100%; display:flex; align-items:center; gap:10px; background:var(--surface); border:1.5px solid var(--border);
+    border-radius:999px; padding:6px 8px 6px 18px;
+  }
+  .search-box svg{ width:20px; height:20px; color:var(--text-muted); flex-shrink:0; }
+  .search-box input{
+    flex:1; background:none; border:none; color:var(--text); font-size:17px; padding:10px 4px; min-width:0;
+  }
+  .search-box input:focus{ outline:none; }
+  .search-box input::placeholder{ color:var(--text-faint); }
+
+  .person-card{
     display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border-soft);
     border-radius:var(--radius-md); padding:14px 16px;
   }
-  .contact-info{ flex:1; text-align:left; min-width:0; }
-  .contact-info .name{ font-weight:700; font-size:17.5px; }
-  .contact-info .meta{ color:var(--text-muted); font-size:14.5px; margin-top:2px; }
-  .contact-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .person-info{ flex:1; text-align:left; min-width:0; }
+  .person-info .name{ font-weight:700; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .person-info .handle{ color:var(--text-muted); font-size:14.5px; margin-top:1px; }
+  .person-actions{ display:flex; gap:8px; flex-shrink:0; }
   .icon-btn{
     width:46px; height:46px; border-radius:11px; border:1px solid var(--border); background:var(--surface-2);
     color:var(--text-muted); display:flex; align-items:center; justify-content:center; cursor:pointer;
@@ -262,23 +271,18 @@
   .icon-btn:hover{ color:var(--text); border-color:var(--text-muted); }
   .icon-btn.danger:hover{ color:var(--danger); border-color:var(--danger); }
   .icon-btn.confirm:hover{ color:var(--green); border-color:var(--green); }
-  .contacts-list{ display:flex; flex-direction:column; gap:10px; }
+  .people-list{ display:flex; flex-direction:column; gap:10px; }
+  .status-pill{
+    font-size:13.5px; font-weight:700; padding:9px 14px; border-radius:999px; white-space:nowrap;
+    background:var(--surface-2); color:var(--text-muted); border:1px solid var(--border);
+  }
+  .status-pill.pending{ color:var(--amber); border-color:var(--amber); background:var(--amber-soft); }
+  .status-pill.accepted{ color:var(--green); border-color:var(--green); }
 
   .empty-state{
     width:100%; padding:20px 18px; text-align:center; color:var(--text-muted);
     font-size:15px; border:1.5px dashed var(--border); border-radius:var(--radius-md); line-height:1.5;
   }
-
-  .invite-code-card{
-    width:100%; background:var(--surface); border:1.5px dashed var(--amber); border-radius:var(--radius-md);
-    padding:16px 18px; text-align:center;
-  }
-  .invite-code-card .label{ font-size:13.5px; color:var(--text-muted); font-weight:600; margin-bottom:8px; }
-  .invite-code-value{
-    font-size:28px; font-weight:800; letter-spacing:.12em; color:var(--amber);
-    font-variant-numeric:tabular-nums;
-  }
-  .invite-code-hint{ font-size:13.5px; color:var(--text-muted); margin-top:8px; line-height:1.4; }
 
   .small-btn{
     background:var(--surface-2); border:1px solid var(--border); color:var(--text); font-size:15px;
@@ -292,7 +296,6 @@
   .form-actions .save-button{ flex:1; }
 
   footer.note{ text-align:center; color:var(--text-muted); font-size:13.5px; padding-top:20px; line-height:1.5; }
-  .footer-links{ display:flex; justify-content:center; gap:14px; padding-top:8px; }
 
   .link-button{
     background:none; border:none; color:var(--text-muted); font-size:14.5px; font-weight:600;
@@ -300,37 +303,61 @@
   }
   .link-button:hover{ color:var(--red-bright); }
 
-  /* ---------- Uitleg / onboarding ---------- */
-  .onboarding-overlay{
+  /* ---------- Profiel ---------- */
+  .profile-header{ display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; }
+  .profile-photo-wrap{ position:relative; }
+  .profile-photo-edit{
+    position:absolute; bottom:-2px; right:-2px; width:34px; height:34px; border-radius:50%;
+    background:var(--red); border:3px solid var(--bg); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .profile-photo-edit svg{ width:15px; height:15px; }
+  .profile-name{ font-size:23px; font-weight:800; margin:0; }
+  .profile-handle{ color:var(--text-muted); font-size:16px; margin:0; }
+
+  /* ---------- Overlays (uitleg, meldingen) ---------- */
+  .overlay{
     position:fixed; inset:0; background:rgba(6,10,20,.92); backdrop-filter:blur(2px);
     z-index:100; display:flex; align-items:center; justify-content:center; padding:22px;
   }
-  .onboarding-overlay.hidden{ display:none; }
-  .onboarding-card{
-    width:100%; max-width:400px; background:var(--surface); border:1px solid var(--border-soft);
-    border-radius:var(--radius-lg); padding:30px 26px 26px; text-align:center;
-    display:flex; flex-direction:column; align-items:center; gap:18px;
+  .overlay.hidden{ display:none; }
+  .overlay-card{
+    width:100%; max-width:400px; max-height:88vh; overflow-y:auto; background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg); padding:26px 22px; display:flex; flex-direction:column; gap:16px;
   }
+  .overlay-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .overlay-title{ font-size:20px; font-weight:800; margin:0; }
+  .overlay-close{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:38px; height:38px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .overlay-close svg{ width:17px; height:17px; }
+
+  .notif-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:14px 16px; text-align:left; }
+  .notif-card.unread{ border-color:var(--red); }
+  .notif-title{ font-weight:700; font-size:15.5px; display:flex; align-items:center; gap:8px; }
+  .notif-message{ color:var(--text-muted); font-size:15px; margin-top:4px; line-height:1.4; }
+  .notif-time{ color:var(--text-faint); font-size:12.5px; margin-top:6px; }
+  .notif-actions{ display:flex; gap:8px; margin-top:12px; }
+  .notif-actions button{ flex:1; }
+
+  /* ---------- Onboarding (uitleg) ---------- */
   .onboarding-skip{
-    align-self:flex-end; margin:-14px -10px -8px 0; background:none; border:none; color:var(--text-muted);
+    align-self:flex-end; margin:-6px -6px -4px 0; background:none; border:none; color:var(--text-muted);
     font-size:15px; font-weight:600; cursor:pointer; padding:8px 10px; text-decoration:underline; text-underline-offset:3px;
   }
   .onboarding-icon{
-    width:84px; height:84px; border-radius:50%; flex-shrink:0;
+    width:84px; height:84px; border-radius:50%; flex-shrink:0; align-self:center;
     background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 12px 26px rgba(227,32,61,.35);
   }
   .onboarding-icon svg{ width:40px; height:40px; color:#fff; }
-  .onboarding-title{ font-size:22px; font-weight:800; margin:0; line-height:1.3; }
-  .onboarding-text{ font-size:17px; line-height:1.55; color:var(--text-muted); margin:0; }
+  .onboarding-title{ font-size:22px; font-weight:800; margin:0; line-height:1.3; text-align:center; }
+  .onboarding-text{ font-size:17px; line-height:1.55; color:var(--text-muted); margin:0; text-align:center; }
   .onboarding-text strong{ color:var(--text); }
-  .onboarding-dots{ display:flex; gap:9px; }
+  .onboarding-dots{ display:flex; gap:9px; justify-content:center; }
   .onboarding-dot{ width:10px; height:10px; border-radius:50%; background:var(--border); }
   .onboarding-dot.active{ background:var(--red-bright); }
-  .onboarding-actions{ width:100%; display:flex; flex-direction:column; gap:10px; margin-top:4px; }
-  .onboarding-actions .save-button{ width:100%; }
-  .onboarding-actions .cancel-button{ width:100%; }
 
   @media (max-width:360px){
     .app{ padding-left:14px; padding-right:14px; }
@@ -342,8 +369,8 @@
 <div class="app">
 
   <!-- =========================== UITLEG (bij eerste keer inloggen) =========================== -->
-  <div id="onboardingOverlay" class="onboarding-overlay hidden">
-    <div class="onboarding-card">
+  <div id="onboardingOverlay" class="overlay hidden">
+    <div class="overlay-card">
       <button type="button" id="onboardingSkip" class="onboarding-skip">Overslaan</button>
 
       <div id="onboardingStep1" class="onboarding-step" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
@@ -356,10 +383,10 @@
 
       <div id="onboardingStep2" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
         <div class="onboarding-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3.5-6 7-6s7 2 7 6"/><path d="M19 8v6"/><path d="M16 11h6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="8" r="4"/><path d="M3 21c0-4 3.5-6 8-6s8 2 8 6"/><path d="M19 8h4"/><path d="M21 6v4"/></svg>
         </div>
-        <h2 class="onboarding-title">Stap 1: Voeg iemand toe</h2>
-        <p class="onboarding-text">Ga naar <strong>"Noodcontacten"</strong>. Vraag de code van iemand die u vertrouwt en vul die in bij "Uitnodigen".</p>
+        <h2 class="onboarding-title">Stap 1: Zoek iemand op</h2>
+        <p class="onboarding-text">Ga naar <strong>"Contacten"</strong> en typ de naam van iemand die u vertrouwt. Druk daarna op "Toevoegen".</p>
       </div>
 
       <div id="onboardingStep3" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
@@ -367,15 +394,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
         </div>
         <h2 class="onboarding-title">Stap 2: Die persoon bevestigt</h2>
-        <p class="onboarding-text">Diegene krijgt uw verzoek en drukt op het <strong>groene vinkje</strong>. Daarna staat die persoon in uw lijst.</p>
+        <p class="onboarding-text">Diegene krijgt een melding (🔔) en drukt op <strong>Accepteren</strong>. Daarna staan jullie in elkaars lijst.</p>
       </div>
 
       <div id="onboardingStep4" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
         <div class="onboarding-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
-        <h2 class="onboarding-title">Stap 3: Druk op ALARM bij nood</h2>
-        <p class="onboarding-text">Al uw bevestigde contacten krijgen dan <strong>meteen een melding</strong> op hun telefoon.</p>
+        <h2 class="onboarding-title">Stap 3: Houd ALARM ingedrukt bij nood</h2>
+        <p class="onboarding-text">Uw contacten krijgen dan <strong>meteen</strong> een melding: in de app, als pushbericht en per e-mail.</p>
       </div>
 
       <div class="onboarding-dots">
@@ -385,34 +412,75 @@
         <span class="onboarding-dot" data-dot="4"></span>
       </div>
 
-      <div class="onboarding-actions">
-        <button type="button" id="onboardingNextButton" class="save-button">Volgende</button>
-      </div>
+      <button type="button" id="onboardingNextButton" class="save-button">Volgende</button>
     </div>
   </div>
 
-  <!-- =========================== INLOGSCHERM =========================== -->
+  <!-- =========================== MELDINGEN =========================== -->
+  <div id="notifOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <div class="overlay-header">
+        <h2 class="overlay-title">Meldingen</h2>
+        <button type="button" id="notifCloseButton" class="overlay-close" aria-label="Sluiten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div id="notifEmpty" class="empty-state hidden">Nog geen meldingen.</div>
+      <div id="notifList" style="display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+  </div>
+
+  <!-- =========================== INLOG / REGISTRATIE =========================== -->
   <section id="screen-auth" class="screen">
     <div class="auth-wrap">
       <div class="auth-logo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
       </div>
-      <div>
-        <h1 class="auth-title">NoodAlarm</h1>
-        <p class="intro" style="margin-top:10px;">Log in met je e-mailadres. Je krijgt een inloglink toegestuurd — geen wachtwoord nodig.</p>
-      </div>
+      <h1 class="auth-title">NoodAlarm</h1>
 
-      <form id="authForm" class="auth-form">
+      <!-- INLOGGEN -->
+      <form id="loginForm" class="auth-form">
         <div class="field">
-          <label for="authName">Jouw naam</label>
-          <input type="text" id="authName" placeholder="Bijv. Danny Gielen" autocomplete="name" required>
+          <label for="loginIdentifier">E-mailadres of gebruikersnaam</label>
+          <input type="text" id="loginIdentifier" placeholder="naam@voorbeeld.nl of gebruikersnaam" autocomplete="username" required>
         </div>
         <div class="field">
-          <label for="authEmail">E-mailadres</label>
-          <input type="email" id="authEmail" placeholder="naam@voorbeeld.nl" autocomplete="email" required>
+          <label for="loginPassword">Wachtwoord</label>
+          <input type="password" id="loginPassword" placeholder="Wachtwoord" autocomplete="current-password" required>
         </div>
-        <button type="submit" id="authSubmitButton" class="save-button">Stuur inloglink</button>
+        <button type="submit" id="loginSubmitButton" class="save-button">Inloggen</button>
+        <button type="button" id="forgotPasswordButton" class="link-button" style="align-self:center;">Wachtwoord vergeten of instellen</button>
       </form>
+      <p class="auth-switch">Nog geen account? <button type="button" id="showRegisterButton">Account aanmaken</button></p>
+
+      <!-- REGISTREREN -->
+      <form id="registerForm" class="auth-form hidden">
+        <div class="field-row">
+          <div class="field">
+            <label for="regFirstName">Voornaam</label>
+            <input type="text" id="regFirstName" placeholder="Danny" autocomplete="given-name" required>
+          </div>
+          <div class="field">
+            <label for="regLastName">Achternaam</label>
+            <input type="text" id="regLastName" placeholder="Gielen" autocomplete="family-name" required>
+          </div>
+          <div class="field">
+            <label for="regUsername">Gebruikersnaam</label>
+            <input type="text" id="regUsername" placeholder="dannygielen" autocomplete="off" required>
+            <div id="regUsernameHint" class="field-hint">Alleen kleine letters, cijfers en _ (3-20 tekens)</div>
+          </div>
+          <div class="field">
+            <label for="regEmail">E-mailadres</label>
+            <input type="email" id="regEmail" placeholder="naam@voorbeeld.nl" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="regPassword">Wachtwoord</label>
+            <input type="password" id="regPassword" placeholder="Minimaal 8 tekens" autocomplete="new-password" required minlength="8">
+          </div>
+        </div>
+        <button type="submit" id="registerSubmitButton" class="save-button">Account aanmaken</button>
+      </form>
+      <p class="auth-switch hidden" id="showLoginRow">Al een account? <button type="button" id="showLoginButton">Inloggen</button></p>
 
       <div id="authMessage" class="auth-message hidden"></div>
     </div>
@@ -426,15 +494,19 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
         <span class="brand-name">NoodAlarm</span>
       </div>
-      <div style="display:flex; align-items:center; gap:4px;">
-        <button type="button" id="helpButton" class="logout-link">Hoe werkt dit?</button>
+      <div class="topbar-actions">
+        <button type="button" id="bellButton" class="bell-button" aria-label="Meldingen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+          <span id="bellBadge" class="bell-badge hidden">0</span>
+        </button>
         <button type="button" id="logoutButton" class="logout-link">Uitloggen</button>
       </div>
     </header>
 
     <nav class="segmented" role="tablist">
       <button type="button" id="tabAlarm" class="active" role="tab" aria-selected="true">Alarm</button>
-      <button type="button" id="tabContacts" role="tab" aria-selected="false">Noodcontacten</button>
+      <button type="button" id="tabContacts" role="tab" aria-selected="false">Contacten</button>
+      <button type="button" id="tabProfile" role="tab" aria-selected="false">Profiel</button>
     </nav>
 
     <!-- =========================== ALARM SCHERM =========================== -->
@@ -443,32 +515,23 @@
 
         <!-- IDLE -->
         <div id="view-idle" class="view">
-          <p class="intro">Eén druk op de knop start een korte bevestiging — daarna krijgen je bevestigde noodcontacten direct een pushmelding.</p>
+          <p class="intro">Houd de knop <strong>ingedrukt</strong> om je bevestigde noodcontacten te waarschuwen — via de app, pushmelding én e-mail.</p>
 
           <div class="alarm-button-wrap">
-            <button id="alarmButton" class="alarm-button" aria-label="Activeer alarm">
+            <svg class="hold-ring" viewBox="0 0 240 240">
+              <circle class="bg" cx="120" cy="120" r="112"/>
+              <circle class="progress" id="holdProgress" cx="120" cy="120" r="112"/>
+            </svg>
+            <button id="alarmButton" class="alarm-button" aria-label="Ingedrukt houden voor alarm">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-              <span class="label">ALARM</span>
+              <span class="label" id="alarmButtonLabel">INGEDRUKT<br>HOUDEN VOOR<br>ALARM</span>
             </button>
           </div>
 
-          <p class="hint">Druk in en bevestig — er volgt eerst een korte aftelling</p>
+          <p class="hint">Loslaten voordat de cirkel rond is annuleert het alarm — geen misklik mogelijk.</p>
 
           <div id="pushWarning" class="auth-message hidden"></div>
-        </div>
-
-        <!-- ARMING / CONFIRMATION -->
-        <div id="view-arming" class="view hidden">
-          <div class="arming-ring-wrap">
-            <svg class="arming-ring" viewBox="0 0 200 200">
-              <circle class="ring-bg" cx="100" cy="100" r="90"/>
-              <circle class="ring-progress" id="armingProgress" cx="100" cy="100" r="90"/>
-            </svg>
-            <div class="arming-count" id="armingCount">3</div>
-          </div>
-          <h2>Noodalarm wordt verstuurd…</h2>
-          <p>Zodra de teller afloopt ontvangen je noodcontacten direct een pushmelding. Niet gewild? Annuleer hieronder.</p>
-          <button id="cancelButton" class="cancel-button">Annuleren</button>
+          <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
         </div>
 
         <!-- VERZONDEN -->
@@ -493,56 +556,59 @@
 
       </main>
 
-      <!-- ACTIVITEITEN / LOGBOEK -->
-      <div class="history-card hidden">
-        <div class="history-header">
-          <h3>Laatste activiteiten</h3>
-          <button id="clearHistoryButton" class="link-button">Activiteiten wissen</button>
-        </div>
-        <ul id="historyList"></ul>
-        <div id="historyEmpty" class="empty-state hidden">Nog geen activiteiten.</div>
-      </div>
-
-      <footer class="note">Noodmeldingen worden verstuurd als pushmelding vanuit deze app — er wordt niemand gebeld.</footer>
+      <footer class="note">Noodmeldingen gaan via de app, pushmelding en e-mail — er wordt niemand gebeld.</footer>
     </section>
 
-    <!-- =========================== NOODCONTACTEN SCHERM =========================== -->
+    <!-- =========================== CONTACTEN SCHERM =========================== -->
     <section id="screen-contacts" class="screen hidden">
 
-      <div class="invite-code-card">
-        <div class="label">Jouw persoonlijke code</div>
-        <div class="invite-code-value" id="myInviteCode">········</div>
-        <div class="invite-code-hint">Deel deze code met iemand die jou als noodcontact wil toevoegen.</div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
       </div>
 
-      <div>
-        <div class="section-title">Noodcontact toevoegen</div>
-        <form id="addContactForm" class="form-card" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-          <div class="field" style="flex:1; min-width:160px;">
-            <label for="inviteCodeInput">Code van de ander</label>
-            <input type="text" id="inviteCodeInput" placeholder="Bijv. AB12CD34" autocomplete="off" maxlength="8" style="text-transform:uppercase;">
-          </div>
-          <button type="submit" id="inviteSubmitButton" class="save-button" style="min-width:140px;">Uitnodigen</button>
-        </form>
-        <div id="inviteMessage" class="auth-message hidden" style="margin-top:10px;"></div>
+      <div id="searchResultsSection" class="hidden">
+        <div class="section-title">Zoekresultaten</div>
+        <div id="searchEmpty" class="empty-state hidden">Niemand gevonden met deze naam.</div>
+        <ul id="searchResultsList" class="people-list"></ul>
       </div>
 
-      <div id="incomingSection">
-        <div class="section-title">Uitnodigingen ontvangen</div>
-        <ul id="incomingList" class="contacts-list"></ul>
+      <div id="contactsSection">
+        <div class="section-title">Mijn contacten</div>
+        <div id="contactsEmpty" class="empty-state hidden">Nog geen contacten. Zoek hierboven naar iemand die u vertrouwt.</div>
+        <ul id="contactsList" class="people-list"></ul>
       </div>
 
-      <div>
-        <div class="section-title">Mijn noodcontacten</div>
-        <div id="contactsEmpty" class="empty-state hidden">Nog geen noodcontacten. Voeg iemand toe met hun code hierboven.</div>
-        <ul id="contactsList" class="contacts-list"></ul>
+    </section>
+
+    <!-- =========================== PROFIEL SCHERM =========================== -->
+    <section id="screen-profile" class="screen hidden">
+      <div class="profile-header">
+        <div class="profile-photo-wrap">
+          <div class="avatar lg" id="profileAvatar"></div>
+          <button type="button" id="editAvatarButton" class="profile-photo-edit" aria-label="Foto wijzigen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+        </div>
+        <div>
+          <h2 class="profile-name" id="profileName">—</h2>
+          <p class="profile-handle" id="profileHandle">@—</p>
+        </div>
       </div>
 
-      <div id="outgoingSection" class="hidden">
-        <div class="section-title">Verstuurde uitnodigingen</div>
-        <ul id="outgoingList" class="contacts-list"></ul>
-      </div>
-
+      <form id="profileForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+        <div class="field">
+          <label for="profileFirstName">Voornaam</label>
+          <input type="text" id="profileFirstName" required>
+        </div>
+        <div class="field">
+          <label for="profileLastName">Achternaam</label>
+          <input type="text" id="profileLastName" required>
+        </div>
+        <button type="submit" id="profileSaveButton" class="save-button">Wijzigingen opslaan</button>
+      </form>
+      <div id="profileMessage" class="auth-message hidden"></div>
     </section>
 
   </section>
@@ -554,16 +620,17 @@
   'use strict';
 
   /* =========================================================================
-     CONFIG — Supabase project + Web Push (VAPID public key is not secret)
+     CONFIG
      ========================================================================= */
   const SUPABASE_URL = 'https://vdohfnmhzbttqmsinoln.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkb2hmbm1oemJ0dHFtc2lub2xuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2NDQzNjYsImV4cCI6MjEwNTIyMDM2Nn0.KXZC5lOtTt0R2JyWEvhm-4pjFK3kr4NEPZleVSyGKCY';
   const VAPID_PUBLIC_KEY = 'BKaq76q5i2lyKB7XqW9sP-J5CDDv3VxCRgyJvsmGQwYjOcgNdmd2zsbbpKUMiptIFSfDBnpeMAYcn1gTs4uDn8g';
+  const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   /* =========================================================================
-     STORAGE-LAAG (alleen voor lokaal activiteitenlogboek, geen app-data)
+     Kleine helpers
      ========================================================================= */
   function createStore(backend){
     return {
@@ -578,28 +645,28 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { activity: 'noodalarm.activity', onboarded: 'noodalarm.onboarded' };
-
-  function genId(){ return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
-
-  function createActivityLog(store){
-    return {
-      list(){ return store.get(KEYS.activity, []); },
-      add(text){
-        const items = this.list();
-        items.unshift({ id: genId(), text, time: new Date().toISOString() });
-        store.set(KEYS.activity, items.slice(0, 40));
-      },
-      clear(){ store.set(KEYS.activity, []); }
-    };
-  }
-  const Activity = createActivityLog(realStore);
+  const KEYS = { onboarded: 'noodalarm.onboarded' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
   const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
-
+  function avatarInner(url){
+    return url ? '<img src="' + url + '" alt="">' : PERSON_ICON;
+  }
+  function timeAgo(iso){
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 1) return 'zojuist';
+    if (mins < 60) return mins + ' min geleden';
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return hrs + ' uur geleden';
+    return new Date(iso).toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
+  }
+  function debounce(fn, ms){
+    let t = null;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  }
   function urlBase64ToUint8Array(base64String){
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -615,13 +682,75 @@
   const els = {
     screenAuth: document.getElementById('screen-auth'),
     screenApp: document.getElementById('screen-app'),
-    authForm: document.getElementById('authForm'),
-    authName: document.getElementById('authName'),
-    authEmail: document.getElementById('authEmail'),
-    authSubmitButton: document.getElementById('authSubmitButton'),
+
+    loginForm: document.getElementById('loginForm'),
+    loginIdentifier: document.getElementById('loginIdentifier'),
+    loginPassword: document.getElementById('loginPassword'),
+    loginSubmitButton: document.getElementById('loginSubmitButton'),
+    forgotPasswordButton: document.getElementById('forgotPasswordButton'),
+    showRegisterButton: document.getElementById('showRegisterButton'),
+
+    registerForm: document.getElementById('registerForm'),
+    regFirstName: document.getElementById('regFirstName'),
+    regLastName: document.getElementById('regLastName'),
+    regUsername: document.getElementById('regUsername'),
+    regUsernameHint: document.getElementById('regUsernameHint'),
+    regEmail: document.getElementById('regEmail'),
+    regPassword: document.getElementById('regPassword'),
+    registerSubmitButton: document.getElementById('registerSubmitButton'),
+    showLoginRow: document.getElementById('showLoginRow'),
+    showLoginButton: document.getElementById('showLoginButton'),
+
     authMessage: document.getElementById('authMessage'),
     logoutButton: document.getElementById('logoutButton'),
-    helpButton: document.getElementById('helpButton'),
+
+    bellButton: document.getElementById('bellButton'),
+    bellBadge: document.getElementById('bellBadge'),
+    notifOverlay: document.getElementById('notifOverlay'),
+    notifCloseButton: document.getElementById('notifCloseButton'),
+    notifEmpty: document.getElementById('notifEmpty'),
+    notifList: document.getElementById('notifList'),
+
+    tabAlarm: document.getElementById('tabAlarm'),
+    tabContacts: document.getElementById('tabContacts'),
+    tabProfile: document.getElementById('tabProfile'),
+    screenAlarm: document.getElementById('screen-alarm'),
+    screenContacts: document.getElementById('screen-contacts'),
+    screenProfile: document.getElementById('screen-profile'),
+
+    alarmButton: document.getElementById('alarmButton'),
+    alarmButtonLabel: document.getElementById('alarmButtonLabel'),
+    holdProgress: document.getElementById('holdProgress'),
+    pushWarning: document.getElementById('pushWarning'),
+    noGroupWarning: document.getElementById('noGroupWarning'),
+
+    viewIdle: document.getElementById('view-idle'),
+    viewSent: document.getElementById('view-sent'),
+    statusBadge: document.getElementById('statusBadge'),
+    statusBadgeText: document.getElementById('statusBadgeText'),
+    sentBy: document.getElementById('sentBy'),
+    sentAt: document.getElementById('sentAt'),
+    entriesList: document.getElementById('entriesList'),
+    endAlarmButton: document.getElementById('endAlarmButton'),
+
+    searchInput: document.getElementById('searchInput'),
+    searchResultsSection: document.getElementById('searchResultsSection'),
+    searchEmpty: document.getElementById('searchEmpty'),
+    searchResultsList: document.getElementById('searchResultsList'),
+    contactsSection: document.getElementById('contactsSection'),
+    contactsEmpty: document.getElementById('contactsEmpty'),
+    contactsList: document.getElementById('contactsList'),
+
+    profileAvatar: document.getElementById('profileAvatar'),
+    editAvatarButton: document.getElementById('editAvatarButton'),
+    avatarInput: document.getElementById('avatarInput'),
+    profileName: document.getElementById('profileName'),
+    profileHandle: document.getElementById('profileHandle'),
+    profileForm: document.getElementById('profileForm'),
+    profileFirstName: document.getElementById('profileFirstName'),
+    profileLastName: document.getElementById('profileLastName'),
+    profileSaveButton: document.getElementById('profileSaveButton'),
+    profileMessage: document.getElementById('profileMessage'),
 
     onboardingOverlay: document.getElementById('onboardingOverlay'),
     onboardingSkip: document.getElementById('onboardingSkip'),
@@ -632,103 +761,203 @@
       document.getElementById('onboardingStep3'),
       document.getElementById('onboardingStep4')
     ],
-    onboardingDots: Array.from(document.querySelectorAll('.onboarding-dot')),
-
-    tabAlarm: document.getElementById('tabAlarm'),
-    tabContacts: document.getElementById('tabContacts'),
-    screenAlarm: document.getElementById('screen-alarm'),
-    screenContacts: document.getElementById('screen-contacts'),
-
-    alarmButton: document.getElementById('alarmButton'),
-    pushWarning: document.getElementById('pushWarning'),
-
-    viewIdle: document.getElementById('view-idle'),
-    viewArming: document.getElementById('view-arming'),
-    viewSent: document.getElementById('view-sent'),
-
-    armingCount: document.getElementById('armingCount'),
-    armingProgress: document.getElementById('armingProgress'),
-    cancelButton: document.getElementById('cancelButton'),
-
-    statusBadge: document.getElementById('statusBadge'),
-    statusBadgeText: document.getElementById('statusBadgeText'),
-    sentBy: document.getElementById('sentBy'),
-    sentAt: document.getElementById('sentAt'),
-    entriesList: document.getElementById('entriesList'),
-    endAlarmButton: document.getElementById('endAlarmButton'),
-
-    historyList: document.getElementById('historyList'),
-    historyEmpty: document.getElementById('historyEmpty'),
-    clearHistoryButton: document.getElementById('clearHistoryButton'),
-
-    myInviteCode: document.getElementById('myInviteCode'),
-    addContactForm: document.getElementById('addContactForm'),
-    inviteCodeInput: document.getElementById('inviteCodeInput'),
-    inviteSubmitButton: document.getElementById('inviteSubmitButton'),
-    inviteMessage: document.getElementById('inviteMessage'),
-    incomingSection: document.getElementById('incomingSection'),
-    incomingList: document.getElementById('incomingList'),
-    contactsEmpty: document.getElementById('contactsEmpty'),
-    contactsList: document.getElementById('contactsList'),
-    outgoingSection: document.getElementById('outgoingSection'),
-    outgoingList: document.getElementById('outgoingList')
+    onboardingDots: Array.from(document.querySelectorAll('.onboarding-dot'))
   };
 
-  const ARMING_SECONDS = 3;
-  const RING_CIRCUMFERENCE = 2 * Math.PI * 90;
-  let armingTimer = null;
-  let armingRemaining = ARMING_SECONDS;
+  const HOLD_CIRCUMFERENCE = 2 * Math.PI * 112;
+  els.holdProgress.style.strokeDasharray = String(HOLD_CIRCUMFERENCE);
+  els.holdProgress.style.strokeDashoffset = String(HOLD_CIRCUMFERENCE);
+
   let currentSession = null;
   let currentProfile = null;
+  let realtimeChannel = null;
 
   /* =========================================================================
-     AUTH
+     AUTH — registreren / inloggen / uitloggen
      ========================================================================= */
-  els.authForm.addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const name = els.authName.value.trim();
-    const email = els.authEmail.value.trim();
-    if (!name || !email) return;
+  els.showRegisterButton.addEventListener('click', () => {
+    els.loginForm.classList.add('hidden');
+    els.registerForm.classList.remove('hidden');
+    els.showLoginRow.classList.remove('hidden');
+    els.showRegisterButton.parentElement.classList.add('hidden');
+    showAuthMessage('', null);
+  });
+  els.showLoginButton.addEventListener('click', () => {
+    els.registerForm.classList.add('hidden');
+    els.loginForm.classList.remove('hidden');
+    els.showLoginRow.classList.add('hidden');
+    els.showRegisterButton.parentElement.classList.remove('hidden');
+    showAuthMessage('', null);
+  });
 
-    els.authSubmitButton.disabled = true;
-    els.authSubmitButton.textContent = 'Bezig…';
+  const checkUsername = debounce(async () => {
+    const value = els.regUsername.value.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,20}$/.test(value)){
+      els.regUsernameHint.textContent = 'Alleen kleine letters, cijfers en _ (3-20 tekens)';
+      els.regUsernameHint.className = 'field-hint bad';
+      return;
+    }
+    const { data: available } = await sb.rpc('is_username_available', { p_username: value });
+    if (available){
+      els.regUsernameHint.textContent = 'Deze gebruikersnaam is beschikbaar';
+      els.regUsernameHint.className = 'field-hint ok';
+    } else {
+      els.regUsernameHint.textContent = 'Deze gebruikersnaam is al bezet';
+      els.regUsernameHint.className = 'field-hint bad';
+    }
+  }, 400);
+  els.regUsername.addEventListener('input', checkUsername);
+
+  els.registerForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const first_name = els.regFirstName.value.trim();
+    const last_name = els.regLastName.value.trim();
+    const username = els.regUsername.value.trim().toLowerCase();
+    const email = els.regEmail.value.trim();
+    const password = els.regPassword.value;
+
+    if (!/^[a-z0-9_]{3,20}$/.test(username)){
+      showAuthMessage('Kies een geldige gebruikersnaam (kleine letters, cijfers, _; 3-20 tekens).', 'error');
+      return;
+    }
+
+    els.registerSubmitButton.disabled = true;
+    els.registerSubmitButton.textContent = 'Bezig…';
     showAuthMessage('', null);
 
-    const { error } = await sb.auth.signInWithOtp({
-      email,
+    const { error } = await sb.auth.signUp({
+      email, password,
       options: {
         emailRedirectTo: window.location.origin + window.location.pathname,
-        data: { display_name: name },
-        shouldCreateUser: true
+        data: { first_name, last_name, username }
       }
     });
 
-    els.authSubmitButton.disabled = false;
-    els.authSubmitButton.textContent = 'Stuur inloglink';
+    els.registerSubmitButton.disabled = false;
+    els.registerSubmitButton.textContent = 'Account aanmaken';
 
     if (error){
-      showAuthMessage('Kon geen inloglink versturen: ' + error.message, 'error');
-    } else {
-      showAuthMessage('Check je e-mail (' + escapeHtml(email) + ') voor de inloglink. Je kunt dit venster daarna sluiten.', 'success');
+      const msg = error.message.indexOf('bezet') !== -1 ? 'Deze gebruikersnaam is net bezet geraakt — kies een andere.'
+        : (error.message.indexOf('registered') !== -1 || error.message.indexOf('already') !== -1) ? 'Dit e-mailadres heeft al een account. Log in, of gebruik "Wachtwoord vergeten".'
+        : 'Registreren mislukt: ' + error.message;
+      showAuthMessage(msg, 'error');
+      return;
     }
+
+    showAuthMessage('Bijna klaar! Check je e-mail (' + escapeHtml(email) + ') en klik op de bevestigingslink om in te loggen.', 'success');
+    els.registerForm.reset();
+    els.regUsernameHint.textContent = 'Alleen kleine letters, cijfers en _ (3-20 tekens)';
+    els.regUsernameHint.className = 'field-hint';
+  });
+
+  els.loginForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const identifier = els.loginIdentifier.value.trim();
+    const password = els.loginPassword.value;
+
+    els.loginSubmitButton.disabled = true;
+    els.loginSubmitButton.textContent = 'Bezig…';
+    showAuthMessage('', null);
+
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+        body: JSON.stringify({ identifier, password })
+      });
+      const data = await res.json();
+      if (!res.ok){
+        showAuthMessage(data.error || 'Inloggen mislukt. Controleer je gegevens.', 'error');
+        return;
+      }
+      await sb.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+    } catch (err){
+      showAuthMessage('Inloggen mislukt: ' + err.message, 'error');
+    } finally {
+      els.loginSubmitButton.disabled = false;
+      els.loginSubmitButton.textContent = 'Inloggen';
+    }
+  });
+
+  els.forgotPasswordButton.addEventListener('click', async () => {
+    const email = window.prompt('Vul je e-mailadres in om een link te ontvangen waarmee je een (nieuw) wachtwoord kunt instellen:');
+    if (!email) return;
+    const { error } = await sb.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    showAuthMessage(error ? 'Kon geen e-mail versturen: ' + error.message : 'Check je e-mail voor de link om een wachtwoord in te stellen.', error ? 'error' : 'success');
   });
 
   function showAuthMessage(text, kind){
     if (!text){ els.authMessage.classList.add('hidden'); return; }
     els.authMessage.textContent = text;
     els.authMessage.className = 'auth-message' + (kind ? ' ' + kind : '');
+    els.authMessage.classList.remove('hidden');
   }
 
   els.logoutButton.addEventListener('click', async () => {
+    if (realtimeChannel){ sb.removeChannel(realtimeChannel); realtimeChannel = null; }
     await sb.auth.signOut();
   });
 
+  sb.auth.onAuthStateChange((_event, session) => {
+    currentSession = session;
+    if (session){
+      onSignedIn();
+    } else {
+      currentProfile = null;
+      if (realtimeChannel){ sb.removeChannel(realtimeChannel); realtimeChannel = null; }
+      els.screenApp.classList.add('hidden');
+      els.screenAuth.classList.remove('hidden');
+    }
+  });
+
+  // If we arrived via a recovery link, prompt to set a new password right away.
+  sb.auth.onAuthStateChange(async (event) => {
+    if (event === 'PASSWORD_RECOVERY'){
+      const pw = window.prompt('Stel je nieuwe wachtwoord in (minimaal 8 tekens):');
+      if (pw && pw.length >= 8){
+        const { error } = await sb.auth.updateUser({ password: pw });
+        showAuthMessage(error ? error.message : 'Wachtwoord ingesteld. Je bent ingelogd.', error ? 'error' : 'success');
+      }
+    }
+  });
+
+  async function onSignedIn(){
+    els.screenAuth.classList.add('hidden');
+    els.screenApp.classList.remove('hidden');
+
+    const { data: profile } = await sb.from('profiles')
+      .select('first_name, last_name, full_name, username, avatar_url')
+      .eq('id', currentSession.user.id).single();
+    currentProfile = profile || { full_name: 'Onbekende gebruiker', username: '—' };
+    renderProfile();
+
+    await refreshContacts();
+    await refreshNotifications();
+    await setupPush();
+    subscribeRealtime();
+
+    if (!realStore.get(KEYS.onboarded, false)){
+      showOnboarding();
+    }
+  }
+
+  function subscribeRealtime(){
+    if (realtimeChannel) return;
+    realtimeChannel = sb
+      .channel('notifications-' + currentSession.user.id)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'notifications',
+        filter: 'user_id=eq.' + currentSession.user.id
+      }, () => { refreshNotifications(); })
+      .subscribe();
+  }
+
   /* =========================================================================
-     UITLEG (onboarding) — verschijnt vanzelf bij de eerste keer inloggen,
-     en is daarna altijd terug te bekijken via "Hoe werkt dit?".
+     UITLEG (onboarding)
      ========================================================================= */
   let onboardingStep = 1;
-
   function renderOnboardingStep(){
     els.onboardingSteps.forEach((el, i) => el.classList.toggle('hidden', i !== onboardingStep - 1));
     els.onboardingDots.forEach((dot, i) => dot.classList.toggle('active', i === onboardingStep - 1));
@@ -744,221 +973,287 @@
     realStore.set(KEYS.onboarded, true);
   }
   els.onboardingNextButton.addEventListener('click', () => {
-    if (onboardingStep < els.onboardingSteps.length){
-      onboardingStep += 1;
-      renderOnboardingStep();
-    } else {
-      hideOnboarding();
-    }
+    if (onboardingStep < els.onboardingSteps.length){ onboardingStep += 1; renderOnboardingStep(); }
+    else hideOnboarding();
   });
   els.onboardingSkip.addEventListener('click', hideOnboarding);
-  els.helpButton.addEventListener('click', showOnboarding);
-
-  sb.auth.onAuthStateChange((_event, session) => {
-    currentSession = session;
-    if (session){
-      onSignedIn();
-    } else {
-      currentProfile = null;
-      els.screenApp.classList.add('hidden');
-      els.screenAuth.classList.remove('hidden');
-    }
-  });
-
-  async function onSignedIn(){
-    els.screenAuth.classList.add('hidden');
-    els.screenApp.classList.remove('hidden');
-
-    const { data: profile } = await sb.from('profiles').select('display_name, invite_code').eq('id', currentSession.user.id).single();
-    currentProfile = profile || { display_name: 'Onbekende gebruiker', invite_code: '········' };
-    els.myInviteCode.textContent = currentProfile.invite_code;
-
-    renderHistory();
-    await refreshContacts();
-    await setupPush();
-
-    if (!realStore.get(KEYS.onboarded, false)){
-      showOnboarding();
-    }
-  }
 
   /* =========================================================================
-     NOODCONTACTEN (persoonlijk netwerk)
+     MELDINGEN (bell)
      ========================================================================= */
-  async function refreshContacts(){
-    const [{ data: contacts }, { data: incoming }, { data: outgoing }] = await Promise.all([
-      sb.rpc('my_contacts'),
-      sb.rpc('my_incoming_invites'),
-      sb.rpc('my_outgoing_invites')
-    ]);
-    renderContacts(contacts || [], incoming || [], outgoing || []);
-    return contacts || [];
+  async function refreshNotifications(){
+    const { data } = await sb.from('notifications').select('*').order('created_at', { ascending:false }).limit(30);
+    const items = data || [];
+    const unread = items.filter(n => !n.is_read).length;
+    els.bellBadge.textContent = String(unread);
+    els.bellBadge.classList.toggle('hidden', unread === 0);
+    renderNotifications(items);
+    return items;
   }
 
-  function renderContacts(contacts, incoming, outgoing){
+  function renderNotifications(items){
+    els.notifEmpty.classList.toggle('hidden', items.length > 0);
+    els.notifList.innerHTML = items.map(n => {
+      const icon = n.type === 'alarm' ? '🚨' : (n.type === 'connection_accepted' ? '✅' : '👋');
+      let actions = '';
+      if (n.type === 'connection_request' && n.related_connection_id){
+        actions = '<div class="notif-actions">' +
+          '<button type="button" class="save-button accept-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Accepteren</button>' +
+          '<button type="button" class="cancel-button reject-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Verwijderen</button>' +
+          '</div>';
+      }
+      return '<div class="notif-card' + (n.is_read ? '' : ' unread') + '" data-nid="' + n.id + '">' +
+        '<div class="notif-title">' + icon + ' ' + escapeHtml(n.title) + '</div>' +
+        '<div class="notif-message">' + escapeHtml(n.message) + '</div>' +
+        '<div class="notif-time">' + timeAgo(n.created_at) + '</div>' +
+        actions +
+        '</div>';
+    }).join('');
+
+    els.notifList.querySelectorAll('.accept-notif').forEach(btn =>
+      btn.addEventListener('click', () => respondToInvite(btn.dataset.cid, 'accepted'))
+    );
+    els.notifList.querySelectorAll('.reject-notif').forEach(btn =>
+      btn.addEventListener('click', () => respondToInvite(btn.dataset.cid, 'rejected'))
+    );
+  }
+
+  async function respondToInvite(connectionId, status){
+    await sb.from('connections').update({ status }).eq('id', connectionId);
+    await refreshNotifications();
+    await refreshContacts();
+  }
+
+  els.bellButton.addEventListener('click', async () => {
+    els.notifOverlay.classList.remove('hidden');
+    const items = await refreshNotifications();
+    const unreadIds = items.filter(n => !n.is_read).map(n => n.id);
+    if (unreadIds.length){
+      await sb.from('notifications').update({ is_read: true }).in('id', unreadIds);
+      await refreshNotifications();
+    }
+  });
+  els.notifCloseButton.addEventListener('click', () => els.notifOverlay.classList.add('hidden'));
+
+  /* =========================================================================
+     CONTACTEN — zoeken, uitnodigen, lijst
+     ========================================================================= */
+  function statusButtonHtml(person){
+    if (person.connection_status === 'accepted'){
+      return '<span class="status-pill accepted">Verbonden</span>';
+    }
+    if (person.connection_status === 'pending'){
+      return '<span class="status-pill pending">Uitnodiging verzonden</span>';
+    }
+    return '<button type="button" class="small-btn send-invite" data-id="' + person.id + '">+ Toevoegen</button>';
+  }
+
+  function personCardHtml(person){
+    return '<li class="person-card">' +
+      '<div class="avatar">' + avatarInner(person.avatar_url) + '</div>' +
+      '<div class="person-info">' +
+        '<div class="name">' + escapeHtml(person.full_name) + '</div>' +
+        '<div class="handle">@' + escapeHtml(person.username) + '</div>' +
+      '</div>' +
+      statusButtonHtml(person) +
+      '</li>';
+  }
+
+  const runSearch = debounce(async () => {
+    const q = els.searchInput.value.trim();
+    if (q.length < 2){
+      els.searchResultsSection.classList.add('hidden');
+      els.contactsSection.classList.remove('hidden');
+      return;
+    }
+    els.contactsSection.classList.add('hidden');
+    els.searchResultsSection.classList.remove('hidden');
+
+    const { data } = await sb.rpc('search_users', { p_query: q });
+    const results = data || [];
+    els.searchEmpty.classList.toggle('hidden', results.length > 0);
+    els.searchResultsList.innerHTML = results.map(personCardHtml).join('');
+    els.searchResultsList.querySelectorAll('.send-invite').forEach(btn =>
+      btn.addEventListener('click', () => sendInvite(btn))
+    );
+  }, 350);
+  els.searchInput.addEventListener('input', runSearch);
+
+  async function sendInvite(btn){
+    btn.disabled = true;
+    btn.textContent = 'Bezig…';
+    const { error } = await sb.rpc('send_connection_request', { p_target_id: btn.dataset.id });
+    if (error){
+      window.alert('Uitnodigen mislukt: ' + error.message);
+      btn.disabled = false;
+      btn.textContent = '+ Toevoegen';
+      return;
+    }
+    runSearch();
+  }
+
+  async function refreshContacts(){
+    const { data } = await sb.rpc('my_contacts');
+    const contacts = data || [];
     els.contactsEmpty.classList.toggle('hidden', contacts.length > 0);
     els.contactsList.innerHTML = contacts.map(c => (
-      '<li class="contact-card">' +
-        '<div class="avatar">' + PERSON_ICON + '</div>' +
-        '<div class="contact-info">' +
-          '<div class="name">' + escapeHtml(c.display_name) + '</div>' +
-          '<div class="meta">Bevestigd noodcontact</div>' +
+      '<li class="person-card">' +
+        '<div class="avatar">' + avatarInner(c.avatar_url) + '</div>' +
+        '<div class="person-info">' +
+          '<div class="name">' + escapeHtml(c.full_name) + '</div>' +
+          '<div class="handle">@' + escapeHtml(c.username) + '</div>' +
         '</div>' +
-        '<div class="contact-actions">' +
-          '<button type="button" class="icon-btn danger remove-contact" aria-label="Verwijderen" data-id="' + c.connection_id + '">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>' +
-          '</button>' +
-        '</div>' +
+        '<span class="status-pill accepted">Verbonden</span>' +
       '</li>'
     )).join('');
-
-    els.incomingSection.classList.toggle('hidden', incoming.length === 0);
-    els.incomingList.innerHTML = incoming.map(inv => (
-      '<li class="contact-card">' +
-        '<div class="avatar">' + PERSON_ICON + '</div>' +
-        '<div class="contact-info">' +
-          '<div class="name">' + escapeHtml(inv.display_name) + '</div>' +
-          '<div class="meta">wil jou toevoegen als noodcontact</div>' +
-        '</div>' +
-        '<div class="contact-actions">' +
-          '<button type="button" class="icon-btn confirm accept-invite" aria-label="Accepteren" data-id="' + inv.connection_id + '">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
-          '</button>' +
-          '<button type="button" class="icon-btn danger reject-invite" aria-label="Weigeren" data-id="' + inv.connection_id + '">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</li>'
-    )).join('');
-
-    els.outgoingSection.classList.toggle('hidden', outgoing.length === 0);
-    els.outgoingList.innerHTML = outgoing.map(o => (
-      '<li class="contact-card">' +
-        '<div class="avatar">' + PERSON_ICON + '</div>' +
-        '<div class="contact-info">' +
-          '<div class="name">' + escapeHtml(o.display_name) + '</div>' +
-          '<div class="meta">' + (o.status === 'rejected' ? 'Uitnodiging geweigerd' : 'Wacht op reactie…') + '</div>' +
-        '</div>' +
-        '<div class="contact-actions">' +
-          '<button type="button" class="icon-btn danger cancel-invite" aria-label="Intrekken" data-id="' + o.connection_id + '">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</li>'
-    )).join('');
-
-    els.contactsList.querySelectorAll('.remove-contact').forEach(btn =>
-      btn.addEventListener('click', () => updateConnection(btn.dataset.id, 'removed', 'Noodcontact verwijderd'))
-    );
-    els.incomingList.querySelectorAll('.accept-invite').forEach(btn =>
-      btn.addEventListener('click', () => updateConnection(btn.dataset.id, 'accepted', 'Uitnodiging geaccepteerd'))
-    );
-    els.incomingList.querySelectorAll('.reject-invite').forEach(btn =>
-      btn.addEventListener('click', () => updateConnection(btn.dataset.id, 'rejected', 'Uitnodiging geweigerd'))
-    );
-    els.outgoingList.querySelectorAll('.cancel-invite').forEach(btn =>
-      btn.addEventListener('click', () => updateConnection(btn.dataset.id, 'removed', 'Uitnodiging ingetrokken'))
-    );
-  }
-
-  async function updateConnection(connectionId, status, logText){
-    const { error } = await sb.from('connections').update({ status }).eq('id', connectionId);
-    if (error){
-      window.alert('Actie mislukt: ' + error.message);
-      return;
-    }
-    Activity.add(logText);
-    renderHistory();
-    await refreshContacts();
-  }
-
-  els.addContactForm.addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const code = els.inviteCodeInput.value.trim().toUpperCase();
-    if (!code) return;
-
-    els.inviteSubmitButton.disabled = true;
-    showInviteMessage('', null);
-
-    const { error } = await sb.rpc('request_connection', { p_invite_code: code });
-
-    els.inviteSubmitButton.disabled = false;
-
-    if (error){
-      showInviteMessage(error.message.indexOf('Geen gebruiker') !== -1
-        ? 'Geen gebruiker gevonden met deze code.'
-        : (error.message.indexOf('jezelf') !== -1 ? 'Je kunt jezelf niet toevoegen.' : 'Uitnodigen mislukt: ' + error.message), 'error');
-      return;
-    }
-
-    els.inviteCodeInput.value = '';
-    showInviteMessage('Uitnodiging verstuurd. Zodra deze geaccepteerd is, verschijnt het contact in je lijst.', 'success');
-    Activity.add('Noodcontact uitgenodigd met code ' + code);
-    renderHistory();
-    await refreshContacts();
-  });
-
-  function showInviteMessage(text, kind){
-    if (!text){ els.inviteMessage.classList.add('hidden'); return; }
-    els.inviteMessage.textContent = text;
-    els.inviteMessage.className = 'auth-message' + (kind ? ' ' + kind : '');
+    els.noGroupWarning.classList.toggle('hidden', contacts.length > 0);
+    return contacts;
   }
 
   /* ---------------- Navigatie tussen schermen ---------------- */
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
+  els.tabProfile.addEventListener('click', () => switchScreen('profile'));
   function switchScreen(name){
-    const isAlarm = name === 'alarm';
-    els.screenAlarm.classList.toggle('hidden', !isAlarm);
-    els.screenContacts.classList.toggle('hidden', isAlarm);
-    els.tabAlarm.classList.toggle('active', isAlarm);
-    els.tabContacts.classList.toggle('active', !isAlarm);
-    els.tabAlarm.setAttribute('aria-selected', String(isAlarm));
-    els.tabContacts.setAttribute('aria-selected', String(!isAlarm));
-    if (!isAlarm) refreshContacts();
+    els.screenAlarm.classList.toggle('hidden', name !== 'alarm');
+    els.screenContacts.classList.toggle('hidden', name !== 'contacts');
+    els.screenProfile.classList.toggle('hidden', name !== 'profile');
+    els.tabAlarm.classList.toggle('active', name === 'alarm');
+    els.tabContacts.classList.toggle('active', name === 'contacts');
+    els.tabProfile.classList.toggle('active', name === 'profile');
+    els.tabAlarm.setAttribute('aria-selected', String(name === 'alarm'));
+    els.tabContacts.setAttribute('aria-selected', String(name === 'contacts'));
+    els.tabProfile.setAttribute('aria-selected', String(name === 'profile'));
+    if (name === 'contacts'){
+      els.searchInput.value = '';
+      els.searchResultsSection.classList.add('hidden');
+      els.contactsSection.classList.remove('hidden');
+      refreshContacts();
+    }
   }
 
-  els.armingProgress.style.strokeDasharray = RING_CIRCUMFERENCE;
-  els.armingProgress.style.strokeDashoffset = RING_CIRCUMFERENCE;
-
-  renderHistory();
-
-  ['pointerdown'].forEach(evt => els.alarmButton.addEventListener(evt, () => els.alarmButton.classList.add('pressed')));
-  ['pointerup','pointerleave','pointercancel'].forEach(evt => els.alarmButton.addEventListener(evt, () => els.alarmButton.classList.remove('pressed')));
-  els.alarmButton.addEventListener('click', startArming);
-  els.cancelButton.addEventListener('click', cancelArming);
-  els.endAlarmButton.addEventListener('click', () => switchView(els.viewIdle));
-  els.clearHistoryButton.addEventListener('click', onClearHistory);
-
-  /* ---------------- Idle → Arming → Verzonden ---------------- */
-  function switchView(target){
-    [els.viewIdle, els.viewArming, els.viewSent].forEach(v => v.classList.add('hidden'));
-    target.classList.remove('hidden');
+  /* =========================================================================
+     PROFIEL
+     ========================================================================= */
+  function renderProfile(){
+    if (!currentProfile) return;
+    els.profileName.textContent = currentProfile.full_name;
+    els.profileHandle.textContent = '@' + currentProfile.username;
+    els.profileFirstName.value = currentProfile.first_name || '';
+    els.profileLastName.value = currentProfile.last_name || '';
+    els.profileAvatar.innerHTML = avatarInner(currentProfile.avatar_url);
   }
 
-  function startArming(){
-    armingRemaining = ARMING_SECONDS;
-    updateArmingUI();
-    switchView(els.viewArming);
-    if (navigator.vibrate) navigator.vibrate(30);
-    armingTimer = setInterval(() => {
-      armingRemaining -= 1;
-      if (armingRemaining <= 0){
-        clearInterval(armingTimer);
+  els.profileForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const first_name = els.profileFirstName.value.trim();
+    const last_name = els.profileLastName.value.trim();
+    if (!first_name || !last_name) return;
+
+    els.profileSaveButton.disabled = true;
+    const { error } = await sb.from('profiles').update({ first_name, last_name }).eq('id', currentSession.user.id);
+    els.profileSaveButton.disabled = false;
+
+    if (error){
+      showProfileMessage('Opslaan mislukt: ' + error.message, 'error');
+      return;
+    }
+    const { data: profile } = await sb.from('profiles')
+      .select('first_name, last_name, full_name, username, avatar_url').eq('id', currentSession.user.id).single();
+    currentProfile = profile;
+    renderProfile();
+    showProfileMessage('Wijzigingen opgeslagen.', 'success');
+  });
+
+  function showProfileMessage(text, kind){
+    if (!text){ els.profileMessage.classList.add('hidden'); return; }
+    els.profileMessage.textContent = text;
+    els.profileMessage.className = 'auth-message' + (kind ? ' ' + kind : '');
+    els.profileMessage.classList.remove('hidden');
+  }
+
+  els.editAvatarButton.addEventListener('click', () => els.avatarInput.click());
+  els.avatarInput.addEventListener('change', async () => {
+    const file = els.avatarInput.files && els.avatarInput.files[0];
+    els.avatarInput.value = '';
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024){
+      showProfileMessage('Afbeelding is te groot (max 3 MB).', 'error');
+      return;
+    }
+    showProfileMessage('Foto uploaden…', null);
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = currentSession.user.id + '/avatar.' + ext;
+
+    const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '3600' });
+    if (upErr){
+      showProfileMessage('Uploaden mislukt: ' + upErr.message, 'error');
+      return;
+    }
+    const { data: pub } = sb.storage.from('avatars').getPublicUrl(path);
+    const avatar_url = pub.publicUrl + '?t=' + Date.now();
+    const { error: updErr } = await sb.from('profiles').update({ avatar_url }).eq('id', currentSession.user.id);
+    if (updErr){
+      showProfileMessage('Opslaan mislukt: ' + updErr.message, 'error');
+      return;
+    }
+    currentProfile.avatar_url = avatar_url;
+    renderProfile();
+    showProfileMessage('Profielfoto bijgewerkt.', 'success');
+  });
+
+  /* =========================================================================
+     ALARMKNOP — ingedrukt houden i.p.v. tikken (voorkomt misklik)
+     ========================================================================= */
+  const HOLD_MS = 1600;
+  let holdRafId = null;
+  let holdStartedAt = 0;
+  let holdActive = false;
+
+  function setHoldProgress(fraction){
+    els.holdProgress.style.strokeDashoffset = String(HOLD_CIRCUMFERENCE * (1 - fraction));
+  }
+
+  function startHold(){
+    if (holdActive || els.alarmButton.disabled) return;
+    holdActive = true;
+    holdStartedAt = performance.now();
+    els.alarmButton.classList.add('holding');
+    if (navigator.vibrate) navigator.vibrate(20);
+
+    function tick(now){
+      if (!holdActive) return;
+      const elapsed = now - holdStartedAt;
+      const fraction = Math.min(1, elapsed / HOLD_MS);
+      setHoldProgress(fraction);
+      if (fraction >= 1){
+        holdActive = false;
+        els.alarmButton.classList.remove('holding');
+        setHoldProgress(0);
         activateAlarm();
-      } else {
-        updateArmingUI();
+        return;
       }
-    }, 1000);
+      holdRafId = requestAnimationFrame(tick);
+    }
+    holdRafId = requestAnimationFrame(tick);
   }
-  function updateArmingUI(){
-    els.armingCount.textContent = armingRemaining;
-    const progress = (ARMING_SECONDS - armingRemaining) / ARMING_SECONDS;
-    els.armingProgress.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - progress));
+  function cancelHold(){
+    if (!holdActive) return;
+    holdActive = false;
+    if (holdRafId) cancelAnimationFrame(holdRafId);
+    els.alarmButton.classList.remove('holding');
+    setHoldProgress(0);
   }
-  function cancelArming(){
-    clearInterval(armingTimer);
-    switchView(els.viewIdle);
+
+  els.alarmButton.addEventListener('pointerdown', startHold);
+  ['pointerup','pointerleave','pointercancel'].forEach(evt => els.alarmButton.addEventListener(evt, cancelHold));
+  els.alarmButton.addEventListener('contextmenu', ev => ev.preventDefault());
+
+  els.endAlarmButton.addEventListener('click', () => switchView(els.viewIdle));
+
+  function switchView(target){
+    [els.viewIdle, els.viewSent].forEach(v => v.classList.add('hidden'));
+    target.classList.remove('hidden');
   }
 
   async function activateAlarm(){
@@ -966,18 +1261,24 @@
     if (navigator.vibrate) navigator.vibrate([80,40,80]);
 
     const startedAt = new Date();
-    const activatorName = currentProfile ? currentProfile.display_name : 'Onbekende gebruiker';
-
-    // Fetch the current accepted contact list purely for DISPLAY — the backend
-    // independently determines who actually gets notified, it never trusts
-    // a list supplied by this client.
+    const activatorName = currentProfile ? currentProfile.full_name : 'Onbekende gebruiker';
     const contacts = await refreshContacts();
 
     let result = { notified: [], contactCount: contacts.length };
     let sendError = null;
     try {
-      const { data, error } = await sb.functions.invoke('send-alert', { body: { testMode: false } });
-      if (error) throw error;
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch(FUNCTIONS_URL + '/send-alert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + session.access_token
+        },
+        body: JSON.stringify({ testMode: false })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Onbekende fout');
       result = data;
     } catch (err){
       sendError = err;
@@ -989,66 +1290,43 @@
     if (sendError){
       els.statusBadge.className = 'status-badge warn';
       els.statusBadgeText.textContent = 'VERSTUREN MISLUKT';
-      Activity.add('Noodalarm versturen mislukt: ' + sendError.message);
     } else {
       els.statusBadge.className = 'status-badge sent';
       els.statusBadgeText.textContent = 'NOODALARM VERZONDEN';
-      Activity.add('Noodalarm geactiveerd door ' + activatorName);
     }
 
     const notifiedSet = new Set(result.notified || []);
     els.entriesList.innerHTML = contacts.length
       ? contacts.map(c => {
-          const wasNotified = notifiedSet.has(c.display_name);
+          const wasNotified = notifiedSet.has(c.full_name);
           return '<li>' +
-            '<span class="entry-name">' + escapeHtml(c.display_name) + '</span>' +
+            '<span class="entry-name">' + escapeHtml(c.full_name) + '</span>' +
             '<span class="entry-status ' + (wasNotified ? 'st-green' : 'st-amber') + '">' +
               '<span class="dot ' + (wasNotified ? 'dot-green' : 'dot-amber') + '"></span>' +
-              (wasNotified ? 'Melding verstuurd' : 'Geen apparaat geregistreerd') +
+              (wasNotified ? 'Melding verstuurd' : 'In app gemeld') +
             '</span></li>';
         }).join('')
       : '<li><span class="entry-name" style="color:var(--text-faint);">Geen noodcontacten gekoppeld</span></li>';
 
-    renderHistory();
     switchView(els.viewSent);
     els.alarmButton.disabled = false;
   }
 
-  /* ---------------- Activiteitenlog (lokaal, alleen zichtbaar op dit toestel) ---------------- */
-  function renderHistory(){
-    const items = Activity.list();
-    els.historyList.innerHTML = items.map(item => (
-      '<li><span class="h-name">' + escapeHtml(item.text) + '</span>' +
-      '<span class="h-time">' + escapeHtml(new Date(item.time).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'medium' })) + '</span></li>'
-    )).join('');
-    els.historyEmpty.classList.toggle('hidden', items.length > 0);
-    els.historyList.classList.toggle('hidden', items.length === 0);
-  }
-  function onClearHistory(){
-    if (!Activity.list().length) return;
-    const ok = window.confirm('Weet je zeker dat je alle activiteiten wilt wissen?');
-    if (!ok) return;
-    Activity.clear();
-    renderHistory();
-  }
-
   /* =========================================================================
-     WEB PUSH — registratie van deze browser/toestel voor pushmeldingen
+     WEB PUSH
      ========================================================================= */
   async function setupPush(){
     if (!('serviceWorker' in navigator) || !('PushManager' in window)){
-      showPushWarning('Pushmeldingen worden niet ondersteund in deze browser. Installeer de app of gebruik een moderne browser om meldingen te kunnen ontvangen.');
+      showPushWarning('Pushmeldingen worden niet ondersteund in deze browser. Je ontvangt meldingen nog wel in de app en per e-mail.');
       return;
     }
     try {
       const registration = await navigator.serviceWorker.register('sw.js');
 
       let permission = Notification.permission;
-      if (permission === 'default'){
-        permission = await Notification.requestPermission();
-      }
+      if (permission === 'default') permission = await Notification.requestPermission();
       if (permission !== 'granted'){
-        showPushWarning('Meldingen staan uit voor deze browser. Zet toestemming voor meldingen aan om noodmeldingen van je contacten te kunnen ontvangen.');
+        showPushWarning('Meldingen staan uit voor deze browser. Je ontvangt meldingen nog wel in de app en per e-mail.');
         return;
       }
 
@@ -1074,7 +1352,6 @@
       showPushWarning('Kon pushmeldingen niet activeren: ' + err.message);
     }
   }
-
   function showPushWarning(text){
     if (!text){ els.pushWarning.classList.add('hidden'); return; }
     els.pushWarning.textContent = text;
