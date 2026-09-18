@@ -74,6 +74,7 @@
 
   *{ box-sizing:border-box; }
   .hidden{ display:none !important; }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   html,body{ margin:0; padding:0; }
   body{
     background:var(--bg);
@@ -382,6 +383,21 @@
   }
   .link-button:hover{ color:var(--red-bright); }
 
+  /* ---------- Instellingen ---------- */
+  .settings-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:24px; }
+  .settings-row-text{ flex:1; }
+  .settings-row-title{ font-size:16px; font-weight:700; }
+  .toggle-switch{
+    position:relative; width:52px; height:30px; border-radius:999px; border:none; cursor:pointer; flex-shrink:0;
+    background:var(--border); transition:background .15s ease; padding:0;
+  }
+  .toggle-switch.on{ background:var(--green); }
+  .toggle-knob{
+    position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .15s ease;
+  }
+  .toggle-switch.on .toggle-knob{ transform:translateX(22px); }
+
   /* ---------- Profiel ---------- */
   .profile-header{ display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; }
   .profile-photo-wrap{ position:relative; }
@@ -477,18 +493,13 @@
   }
   .chat-send-button svg{ width:24px; height:24px; }
   .chat-send-button:hover{ background:var(--accent-dark); }
-  .siren-banner{
-    display:flex; align-items:center; gap:10px; flex-shrink:0;
-    background:var(--amber-soft); border-bottom:1px solid var(--red); color:var(--text);
-    padding:14px 18px; font-size:16px; font-weight:600;
-  }
-  .siren-banner .link-button{ font-size:15px; }
   .location-card{ flex-shrink:0; background:var(--surface); border-bottom:1px solid var(--border-soft); padding:14px 16px; }
-  .location-header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:15.5px; margin-bottom:10px; }
+  .location-header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:15.5px; margin-bottom:6px; }
   .location-header strong{ font-weight:800; }
   .location-accuracy{ color:var(--text-faint); font-size:12.5px; font-weight:600; white-space:nowrap; flex-shrink:0; }
+  .location-address{ color:var(--text-muted); font-size:14.5px; margin:0 0 10px; }
   .location-map-wrap{ border-radius:14px; overflow:hidden; border:1px solid var(--border-soft); height:150px; background:var(--surface-2); }
-  .location-map-frame{ width:100%; height:100%; border:none; pointer-events:none; }
+  .location-map-frame{ display:block; width:100%; height:100%; border:none; object-fit:cover; }
   .location-open-button{
     display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;
     background:var(--accent); color:#fff; text-decoration:none; font-weight:700; font-size:15.5px;
@@ -596,6 +607,38 @@
     </div>
   </div>
 
+  <!-- =========================== INSTELLINGEN =========================== -->
+  <div id="settingsOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <div class="overlay-header">
+        <h2 class="overlay-title">Instellingen</h2>
+        <button type="button" id="settingsCloseButton" class="overlay-close" aria-label="Sluiten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-text">
+          <div class="settings-row-title">Locatie delen bij alarm</div>
+          <p class="field-hint" style="margin-top:4px;">NORI vraagt dit eenmalig bij het openen van de app, zodat je locatie al klaarstaat zodra je ooit op ALARM drukt.</p>
+        </div>
+        <button type="button" id="locationToggle" class="toggle-switch" role="switch" aria-checked="true" aria-label="Locatie delen bij alarm">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div>
+        <div class="settings-row-title" style="margin-bottom:8px;">Weergave</div>
+        <p class="field-hint" style="margin-top:0; margin-bottom:12px;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
+        <nav class="segmented" role="tablist" aria-label="Weergave">
+          <button type="button" id="themeLightButton" data-theme="light" role="tab">Licht</button>
+          <button type="button" id="themeDarkButton" data-theme="dark" role="tab">Donker</button>
+          <button type="button" id="themeAutoButton" data-theme="auto" role="tab">Automatisch</button>
+        </nav>
+      </div>
+    </div>
+  </div>
+
   <!-- =========================== MELDINGEN =========================== -->
   <div id="notifOverlay" class="overlay hidden">
     <div class="overlay-card">
@@ -624,17 +667,14 @@
         <div id="chatParticipants" class="chat-header-sub"></div>
       </div>
     </div>
-    <div id="sirenBanner" class="siren-banner hidden">
-      🔊 Het alarmgeluid speelt af.
-      <button type="button" id="sirenStopButton" class="link-button" style="padding:0; margin-left:auto;">Geluid stoppen</button>
-    </div>
     <div id="locationCard" class="location-card hidden">
       <div class="location-header">
         <span>📍 Locatie van <strong id="locationName">—</strong></span>
         <span id="locationAccuracy" class="location-accuracy"></span>
       </div>
+      <div id="locationAddress" class="location-address"></div>
       <div class="location-map-wrap">
-        <iframe id="locationMapFrame" class="location-map-frame" loading="lazy" title="Locatiekaart" referrerpolicy="no-referrer"></iframe>
+        <img id="locationMapImg" class="location-map-frame" alt="Kaart met locatie" loading="lazy">
       </div>
       <a id="locationOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -662,11 +702,11 @@
       <!-- INLOGGEN -->
       <form id="loginForm" class="auth-form">
         <div class="field">
-          <label for="loginIdentifier">E-mailadres of gebruikersnaam</label>
-          <input type="text" id="loginIdentifier" placeholder="naam@voorbeeld.nl of gebruikersnaam" autocomplete="username" required>
+          <label for="loginIdentifier" class="sr-only">E-mail of gebruikersnaam</label>
+          <input type="text" id="loginIdentifier" placeholder="E-mail of gebruikersnaam" autocomplete="username" required>
         </div>
         <div class="field">
-          <label for="loginPassword">Wachtwoord</label>
+          <label for="loginPassword" class="sr-only">Wachtwoord</label>
           <div class="password-field">
             <input type="password" id="loginPassword" placeholder="Wachtwoord" autocomplete="current-password" required>
             <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Wachtwoord tonen">
@@ -683,26 +723,26 @@
       <form id="registerForm" class="auth-form hidden">
         <div class="field-row">
           <div class="field">
-            <label for="regFirstName">Voornaam</label>
+            <label for="regFirstName" class="sr-only">Voornaam</label>
             <input type="text" id="regFirstName" placeholder="Voornaam" autocomplete="given-name" required>
           </div>
           <div class="field">
-            <label for="regLastName">Achternaam</label>
+            <label for="regLastName" class="sr-only">Achternaam</label>
             <input type="text" id="regLastName" placeholder="Achternaam" autocomplete="family-name" required>
           </div>
           <div class="field">
-            <label for="regUsername">Gebruikersnaam</label>
-            <input type="text" id="regUsername" placeholder="gebruikersnaam" autocomplete="off" required>
+            <label for="regUsername" class="sr-only">Gebruikersnaam</label>
+            <input type="text" id="regUsername" placeholder="Gebruikersnaam" autocomplete="off" required>
             <div id="regUsernameHint" class="field-hint">Alleen kleine letters, cijfers en _ (3-20 tekens)</div>
           </div>
           <div class="field">
-            <label for="regEmail">E-mailadres</label>
-            <input type="email" id="regEmail" placeholder="naam@voorbeeld.nl" autocomplete="email" required>
+            <label for="regEmail" class="sr-only">E-mail</label>
+            <input type="email" id="regEmail" placeholder="E-mail" autocomplete="email" required>
           </div>
           <div class="field">
-            <label for="regPassword">Wachtwoord</label>
+            <label for="regPassword" class="sr-only">Wachtwoord</label>
             <div class="password-field">
-              <input type="password" id="regPassword" placeholder="Minimaal 8 tekens" autocomplete="new-password" required minlength="8">
+              <input type="password" id="regPassword" placeholder="Wachtwoord (minimaal 8 tekens)" autocomplete="new-password" required minlength="8">
               <button type="button" class="password-toggle" data-target="regPassword" aria-label="Wachtwoord tonen">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -745,7 +785,6 @@
     <nav class="segmented" role="tablist">
       <button type="button" id="tabAlarm" class="active" role="tab" aria-selected="true">Alarm</button>
       <button type="button" id="tabContacts" role="tab" aria-selected="false">Contacten</button>
-      <button type="button" id="tabProfile" role="tab" aria-selected="false">Profiel</button>
     </nav>
 
     <!-- =========================== ALARM SCHERM =========================== -->
@@ -871,17 +910,7 @@
       </form>
       <div id="profileMessage" class="auth-message hidden"></div>
 
-      <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
-        <div>
-          <label style="display:block; font-size:15px; font-weight:700; color:var(--text-muted); margin-bottom:8px;">Weergave</label>
-          <p class="field-hint" style="margin-top:0;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
-        </div>
-        <nav class="segmented" role="tablist" aria-label="Weergave">
-          <button type="button" id="themeLightButton" data-theme="light" role="tab">Licht</button>
-          <button type="button" id="themeDarkButton" data-theme="dark" role="tab">Donker</button>
-          <button type="button" id="themeAutoButton" data-theme="auto" role="tab">Automatisch</button>
-        </nav>
-      </div>
+      <button type="button" id="openSettingsButton" class="add-button">Instellingen</button>
 
       <div class="danger-zone">
         <button type="button" id="profileLogoutButton" class="logout-link" style="width:100%;">Uitloggen</button>
@@ -923,7 +952,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', lastChatAlarmId: 'noodalarm.lastChatAlarmId' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', lastChatAlarmId: 'noodalarm.lastChatAlarmId', locationSharing: 'noodalarm.locationSharing' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1012,17 +1041,15 @@
     chatForm: document.getElementById('chatForm'),
     chatInput: document.getElementById('chatInput'),
     chatSendButton: document.getElementById('chatSendButton'),
-    sirenBanner: document.getElementById('sirenBanner'),
-    sirenStopButton: document.getElementById('sirenStopButton'),
     locationCard: document.getElementById('locationCard'),
     locationName: document.getElementById('locationName'),
     locationAccuracy: document.getElementById('locationAccuracy'),
-    locationMapFrame: document.getElementById('locationMapFrame'),
+    locationAddress: document.getElementById('locationAddress'),
+    locationMapImg: document.getElementById('locationMapImg'),
     locationOpenButton: document.getElementById('locationOpenButton'),
 
     tabAlarm: document.getElementById('tabAlarm'),
     tabContacts: document.getElementById('tabContacts'),
-    tabProfile: document.getElementById('tabProfile'),
     screenAlarm: document.getElementById('screen-alarm'),
     screenContacts: document.getElementById('screen-contacts'),
     screenProfile: document.getElementById('screen-profile'),
@@ -1084,7 +1111,12 @@
     themeColorMeta: document.getElementById('themeColorMeta'),
     themeLightButton: document.getElementById('themeLightButton'),
     themeDarkButton: document.getElementById('themeDarkButton'),
-    themeAutoButton: document.getElementById('themeAutoButton')
+    themeAutoButton: document.getElementById('themeAutoButton'),
+
+    openSettingsButton: document.getElementById('openSettingsButton'),
+    settingsOverlay: document.getElementById('settingsOverlay'),
+    settingsCloseButton: document.getElementById('settingsCloseButton'),
+    locationToggle: document.getElementById('locationToggle')
   };
 
   const HOLD_CIRCUMFERENCE = 2 * Math.PI * 112;
@@ -1123,6 +1155,28 @@
   applyTheme();
   setInterval(() => { if (realStore.get(KEYS.theme, 'auto') === 'auto') applyTheme(); }, 5 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) applyTheme(); });
+
+  /* =========================================================================
+     INSTELLINGEN
+     ========================================================================= */
+  els.openSettingsButton.addEventListener('click', () => els.settingsOverlay.classList.remove('hidden'));
+  els.settingsCloseButton.addEventListener('click', () => els.settingsOverlay.classList.add('hidden'));
+
+  function isLocationSharingOn(){
+    return realStore.get(KEYS.locationSharing, true);
+  }
+  function renderLocationToggle(){
+    const on = isLocationSharingOn();
+    els.locationToggle.classList.toggle('on', on);
+    els.locationToggle.setAttribute('aria-checked', String(on));
+  }
+  els.locationToggle.addEventListener('click', () => {
+    const next = !isLocationSharingOn();
+    realStore.set(KEYS.locationSharing, next);
+    renderLocationToggle();
+    if (next) primeLocation();
+  });
+  renderLocationToggle();
 
   /* =========================================================================
      Wachtwoord tonen/verbergen
@@ -1360,6 +1414,7 @@
     await setupPush();
     updateReopenChatButton();
     maybeOpenChatFromUrl();
+    primeLocation();
 
     if (!realStore.get(KEYS.onboarded, false)){
       showOnboarding();
@@ -1377,7 +1432,7 @@
         refreshNotifications();
         const n = payload.new;
         if (n && n.type === 'alarm' && n.related_alarm_id){
-          playSiren();
+          if (navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
           openChat(n.related_alarm_id);
         }
       })
@@ -1606,27 +1661,44 @@
           '<div class="name">' + escapeHtml(c.full_name) + '</div>' +
           '<div class="handle">@' + escapeHtml(c.username) + '</div>' +
         '</div>' +
-        '<span class="status-pill accepted">Verbonden</span>' +
+        '<div class="person-actions">' +
+          '<span class="status-pill accepted">Verbonden</span>' +
+          '<button type="button" class="icon-btn danger remove-contact" data-id="' + c.connection_id + '" aria-label="Verbinding verbreken">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
+          '</button>' +
+        '</div>' +
       '</li>'
     )).join('');
+    els.contactsList.querySelectorAll('.remove-contact').forEach(btn =>
+      btn.addEventListener('click', () => removeContact(btn))
+    );
     els.noGroupWarning.classList.toggle('hidden', contacts.length > 0);
     return contacts;
+  }
+
+  async function removeContact(btn){
+    if (!window.confirm('Verbinding verbreken? Jullie zien elkaar dan niet meer als noodcontact.')) return;
+    btn.disabled = true;
+    const { error } = await sb.from('connections').update({ status: 'removed' }).eq('id', btn.dataset.id);
+    if (error){
+      window.alert('Verbreken mislukt: ' + error.message);
+      btn.disabled = false;
+      return;
+    }
+    refreshContacts();
   }
 
   /* ---------------- Navigatie tussen schermen ---------------- */
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
-  els.tabProfile.addEventListener('click', () => switchScreen('profile'));
   function switchScreen(name){
     els.screenAlarm.classList.toggle('hidden', name !== 'alarm');
     els.screenContacts.classList.toggle('hidden', name !== 'contacts');
     els.screenProfile.classList.toggle('hidden', name !== 'profile');
     els.tabAlarm.classList.toggle('active', name === 'alarm');
     els.tabContacts.classList.toggle('active', name === 'contacts');
-    els.tabProfile.classList.toggle('active', name === 'profile');
     els.tabAlarm.setAttribute('aria-selected', String(name === 'alarm'));
     els.tabContacts.setAttribute('aria-selected', String(name === 'contacts'));
-    els.tabProfile.setAttribute('aria-selected', String(name === 'profile'));
     if (name === 'contacts'){
       els.searchInput.value = '';
       els.searchResultsSection.classList.add('hidden');
@@ -1716,13 +1788,14 @@
   let countdownActive = false;
   let pendingLocation = null;
 
-  // Vraagt de locatie op zodra iemand de knop indrukt — niet pas na de 3
-  // seconden, zodat er meer tijd is voor een GPS-fix. Lukt dit niet (geen
-  // toestemming, geen GPS-signaal, te traag) dan wordt het alarm gewoon
-  // zonder locatie verstuurd; een ontbrekende locatie mag een noodalarm nooit
-  // tegenhouden.
+  // Vraagt de locatie (en dus ook de eenmalige toestemmingsvraag van de
+  // browser) al op zodra de app opent — niet pas als iemand op ALARM drukt.
+  // Zo is dat moment nooit meer een onverwachte extra handeling in een
+  // noodsituatie. Lukt het niet (uitgezet, geen GPS-signaal, te traag) dan
+  // wordt het alarm gewoon zonder locatie verstuurd; een ontbrekende
+  // locatie mag een noodalarm nooit tegenhouden.
   function requestLocation(){
-    if (!('geolocation' in navigator)) return Promise.resolve(null);
+    if (!isLocationSharingOn() || !('geolocation' in navigator)) return Promise.resolve(null);
     return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
         (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
@@ -1730,6 +1803,9 @@
         { enableHighAccuracy: true, timeout: 6000, maximumAge: 20000 }
       );
     });
+  }
+  function primeLocation(){
+    pendingLocation = requestLocation();
   }
   function withTimeout(promise, ms){
     return Promise.race([promise, new Promise(resolve => setTimeout(() => resolve(null), ms))]);
@@ -1865,48 +1941,6 @@
   }
 
   /* =========================================================================
-     ALARMGELUID — zo luid en dwingend mogelijk binnen wat een browser toelaat.
-     Een website kan de stille-stand/mute-knop van een telefoon niet omzeilen
-     (dat is een bewuste, harde grens van Apple/Google, geen bug) — dit speelt
-     daarom alleen af zolang de app open is, via het media-volume (niet de
-     beltoon/stille-standknop, die staat los op Android).
-     ========================================================================= */
-  let sirenCtx = null;
-  let sirenOsc = null;
-  let sirenTimer = null;
-
-  function playSiren(){
-    stopSiren();
-    try {
-      sirenCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const gain = sirenCtx.createGain();
-      gain.gain.value = 1;
-      gain.connect(sirenCtx.destination);
-      const osc = sirenCtx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = 900;
-      osc.connect(gain);
-      osc.start();
-      sirenOsc = osc;
-      let high = true;
-      sirenTimer = setInterval(() => {
-        high = !high;
-        if (sirenCtx) osc.frequency.setValueAtTime(high ? 900 : 650, sirenCtx.currentTime);
-      }, 450);
-    } catch (err){ /* Web Audio niet beschikbaar — vibratie hieronder blijft over */ }
-    if (navigator.vibrate) navigator.vibrate([500,200,500,200,500,200,500,200,500]);
-    if (els.sirenBanner) els.sirenBanner.classList.remove('hidden');
-  }
-  function stopSiren(){
-    if (sirenTimer){ clearInterval(sirenTimer); sirenTimer = null; }
-    if (sirenOsc){ try { sirenOsc.stop(); } catch (err){} sirenOsc = null; }
-    if (sirenCtx){ try { sirenCtx.close(); } catch (err){} sirenCtx = null; }
-    if (navigator.vibrate) navigator.vibrate(0);
-    if (els.sirenBanner) els.sirenBanner.classList.add('hidden');
-  }
-  if (els.sirenStopButton) els.sirenStopButton.addEventListener('click', stopSiren);
-
-  /* =========================================================================
      GROEPSCHAT — iedereen die een alarm activeert of ontvangt zit direct
      samen in één gesprek, gekoppeld aan die specifieke alarmering.
      ========================================================================= */
@@ -1968,7 +2002,8 @@
   function renderLocationCard(alarmRow){
     if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
       els.locationCard.classList.add('hidden');
-      els.locationMapFrame.src = '';
+      els.locationMapImg.src = '';
+      els.locationAddress.textContent = '';
       return;
     }
     const { lat, lng, location_accuracy, triggered_by } = alarmRow;
@@ -1976,19 +2011,38 @@
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? 'jou' : (activator ? activator.full_name : 'de activator');
     els.locationAccuracy.textContent = location_accuracy ? ('±' + Math.round(location_accuracy) + ' m') : '';
-    const dLat = 0.0035, dLng = 0.006;
-    els.locationMapFrame.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' +
-      (lng - dLng) + '%2C' + (lat - dLat) + '%2C' + (lng + dLng) + '%2C' + (lat + dLat) +
-      '&layer=mapnik&marker=' + lat + '%2C' + lng;
+    els.locationAddress.textContent = 'Adres ophalen…';
+    els.locationMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
+      '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
     els.locationOpenButton.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
+    fetchStreetAddress(lat, lng);
+  }
+
+  // Nominatim (OpenStreetMap) — gratis, geen API-sleutel nodig. Zet de
+  // coördinaten om naar een leesbaar straatadres voor boven de kaart.
+  async function fetchStreetAddress(lat, lng){
+    try {
+      const res = await fetch(
+        'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=17&addressdetails=1',
+        { headers: { 'Accept-Language': 'nl' } }
+      );
+      const data = await res.json();
+      const a = data && data.address;
+      if (!a){ els.locationAddress.textContent = ''; return; }
+      const street = [a.road, a.house_number].filter(Boolean).join(' ');
+      const city = a.city || a.town || a.village || a.municipality || '';
+      els.locationAddress.textContent = [street, city].filter(Boolean).join(', ');
+    } catch (err){
+      els.locationAddress.textContent = '';
+    }
   }
 
   function closeChat(){
     els.chatOverlay.classList.add('hidden');
     if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
     currentChatAlarmId = null;
-    els.locationMapFrame.src = '';
+    els.locationMapImg.src = '';
   }
   els.chatCloseButton.addEventListener('click', closeChat);
 
