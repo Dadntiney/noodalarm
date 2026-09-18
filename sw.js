@@ -18,8 +18,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || '🚨 NORI';
   const options = {
     body: data.body || 'Een noodcontact heeft een noodalarm geactiveerd.',
-    icon: 'icon-192.png',
-    badge: 'icon-192.png',
+    icon: 'icon-192.png?v=2',
+    badge: 'icon-192.png?v=2',
     requireInteraction: true,
     vibrate: [200, 100, 200, 100, 200],
     tag: 'noodalarm-' + Date.now()
