@@ -21,8 +21,14 @@ self.addEventListener('push', (event) => {
     icon: 'icon-192.png?v=2',
     badge: 'icon-192.png?v=2',
     requireInteraction: true,
-    vibrate: [200, 100, 200, 100, 200],
-    tag: 'noodalarm-' + Date.now()
+    // silent:false + een lang, zwaar vibratiepatroon is het luidst/dwingendst
+    // wat een webmelding kan zijn — de stille-stand/mute-knop van het
+    // toestel blijft altijd de baas over daadwerkelijk geluid, dat kan geen
+    // website omzeilen (bewuste OS-grens, niet iets wat wij kunnen fixen).
+    silent: false,
+    vibrate: [500, 200, 500, 200, 500, 200, 500, 200, 500],
+    tag: 'noodalarm-' + Date.now(),
+    data: { alarmId: data.alarmId || null }
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -30,12 +36,19 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const alarmId = event.notification.data && event.notification.data.alarmId;
+  const targetPath = alarmId ? ('./?chat=' + alarmId) : './';
+
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if ('focus' in client) return client.focus();
+        if ('focus' in client) {
+          client.focus();
+          if (alarmId) client.postMessage({ type: 'open-chat', alarmId });
+          return;
+        }
       }
-      if (self.clients.openWindow) return self.clients.openWindow('./');
+      if (self.clients.openWindow) return self.clients.openWindow(targetPath);
     })
   );
 });

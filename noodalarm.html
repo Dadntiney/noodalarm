@@ -420,6 +420,21 @@
   .notif-actions{ display:flex; gap:8px; margin-top:12px; }
   .notif-actions button{ flex:1; }
 
+  /* ---------- Groepschat ---------- */
+  .chat-participants{ color:var(--text-faint); font-size:13px; margin:2px 0 0; }
+  .chat-messages{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:6px 2px; min-height:140px; max-height:50vh; }
+  .chat-bubble{ max-width:78%; padding:9px 13px; border-radius:16px; font-size:15px; line-height:1.4; }
+  .chat-bubble.own{ align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:5px; }
+  .chat-bubble.other{ align-self:flex-start; background:var(--surface-2); border:1px solid var(--border-soft); border-bottom-left-radius:5px; }
+  .chat-bubble .who{ font-size:12px; opacity:.75; margin-bottom:2px; font-weight:700; }
+  .chat-bubble .when{ font-size:10.5px; opacity:.6; margin-top:3px; }
+  .chat-form{ display:flex; gap:8px; margin-top:12px; }
+  .chat-form input{ flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:11px; padding:12px 14px; font-size:15px; }
+  .chat-form input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
+  .chat-send-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; border-radius:11px; padding:0 18px; font-weight:700; font-size:15px; cursor:pointer; }
+  .siren-banner{ display:flex; align-items:center; gap:8px; background:var(--amber-soft); border:1px solid var(--red); color:var(--text); border-radius:12px; padding:10px 14px; font-size:14.5px; margin-bottom:8px; }
+  .platform-icon{ width:18px; height:18px; flex-shrink:0; vertical-align:-4px; margin:0 1px; }
+
   /* ---------- Onboarding (uitleg) ---------- */
   .onboarding-skip{
     align-self:flex-end; margin:-6px -6px -4px 0; background:none; border:none; color:var(--text-muted);
@@ -523,12 +538,39 @@
     <div class="overlay-card">
       <div class="overlay-header">
         <h2 class="overlay-title">Meldingen</h2>
-        <button type="button" id="notifCloseButton" class="overlay-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <button type="button" id="notifClearButton" class="link-button hidden" style="padding:0; font-size:14px;">Alles wissen</button>
+          <button type="button" id="notifCloseButton" class="overlay-close" aria-label="Sluiten">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
       </div>
       <div id="notifEmpty" class="empty-state hidden">Nog geen meldingen.</div>
       <div id="notifList" style="display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+  </div>
+
+  <!-- =========================== GROEPSCHAT =========================== -->
+  <div id="chatOverlay" class="overlay hidden">
+    <div class="overlay-card" style="display:flex; flex-direction:column; max-height:85vh;">
+      <div class="overlay-header">
+        <div>
+          <h2 class="overlay-title">Groepschat</h2>
+          <p id="chatParticipants" class="chat-participants"></p>
+        </div>
+        <button type="button" id="chatCloseButton" class="overlay-close" aria-label="Sluiten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div id="sirenBanner" class="siren-banner hidden">
+        🔊 Alarmgeluid speelt af.
+        <button type="button" id="sirenStopButton" class="link-button" style="padding:0; margin-left:auto;">Stoppen</button>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <form id="chatForm" class="chat-form">
+        <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
+        <button type="submit" id="chatSendButton" class="chat-send-button">Sturen</button>
+      </form>
     </div>
   </div>
 
@@ -652,16 +694,20 @@
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
 
           <div id="iosInstallHint" class="auth-message hidden">
-            📱 <strong>Op iPhone of iPad?</strong> Pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op het deel-icoon en kies daarna <strong>"Zet op beginscherm"</strong>.
+            📱 <strong>Op iPhone of iPad?</strong> Pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon) en kies daarna <strong>"Zet op beginscherm"</strong>.
             <div style="margin-top:10px;"><button type="button" id="iosInstallHintDismiss" class="link-button" style="padding:0;">Begrepen</button></div>
           </div>
 
           <div id="androidInstallHint" class="auth-message hidden">
             📱 <strong>Installeer NORI</strong> voor snellere toegang en pushmeldingen.
-            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button type="button" id="androidInstallButton" class="small-btn">NORI installeren</button>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <button type="button" id="androidInstallButton" class="small-btn" style="display:flex; align-items:center; gap:6px;">
+                <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 19h16"/></svg>
+                NORI installeren
+              </button>
               <button type="button" id="androidInstallHintDismiss" class="link-button" style="padding:0;">Niet nu</button>
             </div>
+            <div class="field-hint" style="margin-top:8px;">Zie je geen knop? Tik op <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg> (menu) rechtsboven in Chrome en kies <strong>"App installeren"</strong>.</div>
           </div>
         </div>
 
@@ -875,8 +921,19 @@
     bellBadge: document.getElementById('bellBadge'),
     notifOverlay: document.getElementById('notifOverlay'),
     notifCloseButton: document.getElementById('notifCloseButton'),
+    notifClearButton: document.getElementById('notifClearButton'),
     notifEmpty: document.getElementById('notifEmpty'),
     notifList: document.getElementById('notifList'),
+
+    chatOverlay: document.getElementById('chatOverlay'),
+    chatCloseButton: document.getElementById('chatCloseButton'),
+    chatParticipants: document.getElementById('chatParticipants'),
+    chatMessages: document.getElementById('chatMessages'),
+    chatForm: document.getElementById('chatForm'),
+    chatInput: document.getElementById('chatInput'),
+    chatSendButton: document.getElementById('chatSendButton'),
+    sirenBanner: document.getElementById('sirenBanner'),
+    sirenStopButton: document.getElementById('sirenStopButton'),
 
     tabAlarm: document.getElementById('tabAlarm'),
     tabContacts: document.getElementById('tabContacts'),
@@ -1216,6 +1273,7 @@
     subscribeRealtime();
     maybeShowIosInstallHint();
     await setupPush();
+    maybeOpenChatFromUrl();
 
     if (!realStore.get(KEYS.onboarded, false)){
       showOnboarding();
@@ -1229,8 +1287,33 @@
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'notifications',
         filter: 'user_id=eq.' + currentSession.user.id
-      }, () => { refreshNotifications(); })
+      }, (payload) => {
+        refreshNotifications();
+        const n = payload.new;
+        if (n && n.type === 'alarm' && n.related_alarm_id){
+          playSiren();
+          openChat(n.related_alarm_id);
+        }
+      })
       .subscribe();
+  }
+
+  function maybeOpenChatFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const chatId = params.get('chat');
+    if (!chatId) return;
+    openChat(chatId);
+    params.delete('chat');
+    const rest = params.toString();
+    history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : ''));
+  }
+
+  if ('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'open-chat' && event.data.alarmId && currentSession){
+        openChat(event.data.alarmId);
+      }
+    });
   }
 
   /* =========================================================================
@@ -1261,7 +1344,9 @@
      MELDINGEN (bell)
      ========================================================================= */
   async function refreshNotifications(){
-    const { data } = await sb.from('notifications').select('*').order('created_at', { ascending:false }).limit(30);
+    const { data } = await sb.from('notifications')
+      .select('*, connection:related_connection_id(status)')
+      .order('created_at', { ascending:false }).limit(30);
     const items = data || [];
     const unread = items.filter(n => !n.is_read).length;
     els.bellBadge.textContent = String(unread);
@@ -1272,20 +1357,30 @@
 
   function renderNotifications(items){
     els.notifEmpty.classList.toggle('hidden', items.length > 0);
+    els.notifClearButton.classList.toggle('hidden', items.length === 0);
     els.notifList.innerHTML = items.map(n => {
       const icon = n.type === 'alarm' ? '🚨' : (n.type === 'connection_accepted' ? '✅' : '👋');
       let actions = '';
       if (n.type === 'connection_request' && n.related_connection_id){
-        actions = '<div class="notif-actions">' +
-          '<button type="button" class="save-button accept-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Accepteren</button>' +
-          '<button type="button" class="cancel-button reject-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Verwijderen</button>' +
-          '</div>';
+        const status = n.connection ? n.connection.status : 'pending';
+        if (status === 'accepted'){
+          actions = '<div class="notif-actions"><span class="status-pill accepted">Geaccepteerd</span></div>';
+        } else if (status === 'pending'){
+          actions = '<div class="notif-actions">' +
+            '<button type="button" class="save-button accept-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Accepteren</button>' +
+            '<button type="button" class="cancel-button reject-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Verwijderen</button>' +
+            '</div>';
+        }
+      }
+      let chatAction = '';
+      if (n.type === 'alarm' && n.related_alarm_id){
+        chatAction = '<div class="notif-actions"><button type="button" class="small-btn open-chat-notif" data-alarm="' + n.related_alarm_id + '">Open groepschat</button></div>';
       }
       return '<div class="notif-card' + (n.is_read ? '' : ' unread') + (n.type === 'alarm' ? ' alarm' : '') + '" data-nid="' + n.id + '">' +
         '<div class="notif-title">' + icon + ' ' + escapeHtml(n.title) + '</div>' +
         '<div class="notif-message">' + escapeHtml(n.message) + '</div>' +
         '<div class="notif-time">' + timeAgo(n.created_at) + '</div>' +
-        actions +
+        actions + chatAction +
         '</div>';
     }).join('');
 
@@ -1294,6 +1389,9 @@
     );
     els.notifList.querySelectorAll('.reject-notif').forEach(btn =>
       btn.addEventListener('click', () => respondToInvite(btn.dataset.cid, 'rejected'))
+    );
+    els.notifList.querySelectorAll('.open-chat-notif').forEach(btn =>
+      btn.addEventListener('click', () => openChat(btn.dataset.alarm))
     );
   }
 
@@ -1313,6 +1411,11 @@
     }
   });
   els.notifCloseButton.addEventListener('click', () => els.notifOverlay.classList.add('hidden'));
+  els.notifClearButton.addEventListener('click', async () => {
+    if (!window.confirm('Alle meldingen definitief wissen?')) return;
+    await sb.from('notifications').delete().eq('user_id', currentSession.user.id);
+    await refreshNotifications();
+  });
 
   /* =========================================================================
      CONTACTEN — zoeken, uitnodigen, lijst
@@ -1640,7 +1743,129 @@
 
     switchView(els.viewSent);
     els.alarmButton.disabled = false;
+
+    if (result.alarmId){
+      openChat(result.alarmId);
+    }
   }
+
+  /* =========================================================================
+     ALARMGELUID — zo luid en dwingend mogelijk binnen wat een browser toelaat.
+     Een website kan de stille-stand/mute-knop van een telefoon niet omzeilen
+     (dat is een bewuste, harde grens van Apple/Google, geen bug) — dit speelt
+     daarom alleen af zolang de app open is, via het media-volume (niet de
+     beltoon/stille-standknop, die staat los op Android).
+     ========================================================================= */
+  let sirenCtx = null;
+  let sirenOsc = null;
+  let sirenTimer = null;
+
+  function playSiren(){
+    stopSiren();
+    try {
+      sirenCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const gain = sirenCtx.createGain();
+      gain.gain.value = 1;
+      gain.connect(sirenCtx.destination);
+      const osc = sirenCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 900;
+      osc.connect(gain);
+      osc.start();
+      sirenOsc = osc;
+      let high = true;
+      sirenTimer = setInterval(() => {
+        high = !high;
+        if (sirenCtx) osc.frequency.setValueAtTime(high ? 900 : 650, sirenCtx.currentTime);
+      }, 450);
+    } catch (err){ /* Web Audio niet beschikbaar — vibratie hieronder blijft over */ }
+    if (navigator.vibrate) navigator.vibrate([500,200,500,200,500,200,500,200,500]);
+    if (els.sirenBanner) els.sirenBanner.classList.remove('hidden');
+  }
+  function stopSiren(){
+    if (sirenTimer){ clearInterval(sirenTimer); sirenTimer = null; }
+    if (sirenOsc){ try { sirenOsc.stop(); } catch (err){} sirenOsc = null; }
+    if (sirenCtx){ try { sirenCtx.close(); } catch (err){} sirenCtx = null; }
+    if (navigator.vibrate) navigator.vibrate(0);
+    if (els.sirenBanner) els.sirenBanner.classList.add('hidden');
+  }
+  if (els.sirenStopButton) els.sirenStopButton.addEventListener('click', stopSiren);
+
+  /* =========================================================================
+     GROEPSCHAT — iedereen die een alarm activeert of ontvangt zit direct
+     samen in één gesprek, gekoppeld aan die specifieke alarmering.
+     ========================================================================= */
+  let chatChannel = null;
+  let currentChatAlarmId = null;
+
+  function chatBubbleHtml(msg){
+    const own = msg.sender_id === currentSession.user.id;
+    return '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
+      (own ? '' : '<div class="who">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
+      '<div>' + escapeHtml(msg.body) + '</div>' +
+      '<div class="when">' + new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' }) + '</div>' +
+      '</div>';
+  }
+
+  async function openChat(alarmId){
+    if (!alarmId) return;
+    currentChatAlarmId = alarmId;
+    els.notifOverlay.classList.add('hidden');
+    els.chatOverlay.classList.remove('hidden');
+    els.chatMessages.innerHTML = '<p class="field-hint">Bericht laden…</p>';
+
+    const { data: participants } = await sb.rpc('get_alarm_participants', { p_alarm_id: alarmId });
+    els.chatParticipants.textContent = (participants || []).map(p => p.full_name).join(', ');
+
+    await loadChatMessages(alarmId, participants || []);
+    subscribeChat(alarmId);
+  }
+
+  function closeChat(){
+    els.chatOverlay.classList.add('hidden');
+    if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
+    currentChatAlarmId = null;
+  }
+  els.chatCloseButton.addEventListener('click', closeChat);
+
+  async function loadChatMessages(alarmId, participants){
+    const { data: messages } = await sb.from('alarm_messages').select('*')
+      .eq('alarm_id', alarmId).order('created_at', { ascending:true }).limit(200);
+    const nameById = {};
+    participants.forEach(p => { nameById[p.user_id] = p.full_name; });
+    els.chatMessages.innerHTML = (messages || []).length
+      ? messages.map(m => chatBubbleHtml({ ...m, senderName: nameById[m.sender_id] })).join('')
+      : '<p class="field-hint">Nog geen berichten. Laat de rest weten wat er speelt.</p>';
+    els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+  }
+
+  function subscribeChat(alarmId){
+    if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
+    chatChannel = sb
+      .channel('alarm-chat-' + alarmId)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'alarm_messages',
+        filter: 'alarm_id=eq.' + alarmId
+      }, async (payload) => {
+        const msg = payload.new;
+        let senderName = 'Jij';
+        if (msg.sender_id !== currentSession.user.id){
+          const { data: p } = await sb.from('profiles').select('full_name').eq('id', msg.sender_id).single();
+          senderName = p ? p.full_name : 'Onbekend';
+        }
+        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, senderName }));
+        els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+      })
+      .subscribe();
+  }
+
+  els.chatForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const body = els.chatInput.value.trim();
+    if (!body || !currentChatAlarmId) return;
+    els.chatInput.value = '';
+    await sb.from('alarm_messages').insert({ alarm_id: currentChatAlarmId, sender_id: currentSession.user.id, body });
+  });
 
   /* =========================================================================
      WEB PUSH
