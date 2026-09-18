@@ -707,40 +707,6 @@
     </div>
   </div>
 
-  <!-- =========================== GROEPSCHAT =========================== -->
-  <div id="chatOverlay" class="chat-screen hidden">
-    <div class="chat-header">
-      <button type="button" id="chatCloseButton" class="chat-back-button" aria-label="Terug naar de app">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-      </button>
-      <div class="chat-header-info">
-        <div class="chat-header-title">Groepschat</div>
-        <div id="chatParticipants" class="chat-header-sub"></div>
-      </div>
-    </div>
-    <div id="locationCard" class="location-card hidden">
-      <div class="location-header">
-        <span>📍 Locatie van <strong id="locationName">—</strong></span>
-        <span id="locationAccuracy" class="location-accuracy"></span>
-      </div>
-      <div id="locationAddress" class="location-address"></div>
-      <div class="location-map-wrap">
-        <img id="locationMapImg" class="location-map-frame" alt="Kaart met locatie" loading="lazy">
-      </div>
-      <a id="locationOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-        Open in Maps
-      </a>
-    </div>
-    <div id="chatMessages" class="chat-messages"></div>
-    <form id="chatForm" class="chat-form">
-      <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
-      <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-      </button>
-    </form>
-  </div>
-
   <!-- =========================== INLOG / REGISTRATIE =========================== -->
   <section id="screen-auth" class="screen">
     <div class="auth-wrap">
@@ -819,9 +785,6 @@
         <span class="brand-name">NORI</span>
       </button>
       <div class="topbar-actions">
-        <button type="button" id="reopenChatButton" class="bell-button hidden" aria-label="Open groepschat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
-        </button>
         <button type="button" id="bellButton" class="bell-button" aria-label="Meldingen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
           <span id="bellBadge" class="bell-badge hidden">0</span>
@@ -836,6 +799,7 @@
     <nav class="segmented" id="mainNav" role="tablist">
       <button type="button" id="tabAlarm" class="active" role="tab" aria-selected="true">Alarm</button>
       <button type="button" id="tabContacts" role="tab" aria-selected="false"><span id="tabContactsCount" class="tab-count hidden"></span>Contacten</button>
+      <button type="button" id="tabMessages" role="tab" aria-selected="false">Berichten</button>
     </nav>
 
     <button type="button" id="profileBackButton" class="profile-back-button hidden" aria-label="Terug naar Alarm">
@@ -939,6 +903,34 @@
 
     </section>
 
+    <!-- =========================== BERICHTEN SCHERM =========================== -->
+    <section id="screen-messages" class="screen hidden" style="gap:0;">
+      <div id="messagesParticipants" class="hint" style="margin-bottom:14px;"></div>
+
+      <div id="locationCard" class="location-card hidden" style="border-radius:var(--radius-md); border:1px solid var(--border-soft); margin-bottom:14px;">
+        <div class="location-header">
+          <span>📍 Locatie van <strong id="locationName">—</strong></span>
+          <span id="locationAccuracy" class="location-accuracy"></span>
+        </div>
+        <div id="locationAddress" class="location-address"></div>
+        <div class="location-map-wrap">
+          <img id="locationMapImg" class="location-map-frame" alt="Kaart met locatie" loading="lazy">
+        </div>
+        <a id="locationOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Open in Maps
+        </a>
+      </div>
+
+      <div id="chatMessages" class="chat-messages" style="flex:1; padding-left:0; padding-right:0;"></div>
+      <form id="chatForm" class="chat-form" style="padding-left:0; padding-right:0;">
+        <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
+        <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </form>
+    </section>
+
     <!-- =========================== PROFIEL SCHERM =========================== -->
     <section id="screen-profile" class="screen hidden">
       <div class="profile-header">
@@ -1013,7 +1005,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', lastChatAlarmId: 'noodalarm.lastChatAlarmId', locationSharing: 'noodalarm.locationSharing' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1086,7 +1078,6 @@
     deleteAccountConfirmButton: document.getElementById('deleteAccountConfirmButton'),
     deleteAccountMessage: document.getElementById('deleteAccountMessage'),
 
-    reopenChatButton: document.getElementById('reopenChatButton'),
     bellButton: document.getElementById('bellButton'),
     bellBadge: document.getElementById('bellBadge'),
     notifOverlay: document.getElementById('notifOverlay'),
@@ -1095,9 +1086,7 @@
     notifEmpty: document.getElementById('notifEmpty'),
     notifList: document.getElementById('notifList'),
 
-    chatOverlay: document.getElementById('chatOverlay'),
-    chatCloseButton: document.getElementById('chatCloseButton'),
-    chatParticipants: document.getElementById('chatParticipants'),
+    messagesParticipants: document.getElementById('messagesParticipants'),
     chatMessages: document.getElementById('chatMessages'),
     chatForm: document.getElementById('chatForm'),
     chatInput: document.getElementById('chatInput'),
@@ -1115,8 +1104,10 @@
     tabAlarm: document.getElementById('tabAlarm'),
     tabContacts: document.getElementById('tabContacts'),
     tabContactsCount: document.getElementById('tabContactsCount'),
+    tabMessages: document.getElementById('tabMessages'),
     screenAlarm: document.getElementById('screen-alarm'),
     screenContacts: document.getElementById('screen-contacts'),
+    screenMessages: document.getElementById('screen-messages'),
     screenProfile: document.getElementById('screen-profile'),
 
     alarmButton: document.getElementById('alarmButton'),
@@ -1268,6 +1259,12 @@
   let currentSession = null;
   let currentProfile = null;
   let realtimeChannel = null;
+  let myGroupId = null;
+
+  async function loadMyGroupId(){
+    const { data } = await sb.from('alarm_groups').select('id').eq('owner_id', currentSession.user.id).single();
+    myGroupId = data ? data.id : null;
+  }
 
   /* =========================================================================
      AUTH — registreren / inloggen / uitloggen
@@ -1480,12 +1477,12 @@
     currentProfile = profile || { full_name: 'Onbekende gebruiker', username: '—' };
     renderProfile();
 
+    await loadMyGroupId();
     await refreshContacts();
     await refreshNotifications();
     subscribeRealtime();
     maybeShowIosInstallHint();
     await setupPush();
-    updateReopenChatButton();
     maybeOpenChatFromUrl();
     primeLocation();
 
@@ -1506,7 +1503,7 @@
         const n = payload.new;
         if (n && n.type === 'alarm' && n.related_alarm_id){
           if (navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
-          openChat(n.related_alarm_id);
+          openChatByAlarm(n.related_alarm_id);
         }
       })
       .subscribe();
@@ -1516,7 +1513,7 @@
     const params = new URLSearchParams(window.location.search);
     const chatId = params.get('chat');
     if (!chatId) return;
-    openChat(chatId);
+    openChatByAlarm(chatId);
     params.delete('chat');
     const rest = params.toString();
     history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : ''));
@@ -1525,7 +1522,7 @@
   if ('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'open-chat' && event.data.alarmId && currentSession){
-        openChat(event.data.alarmId);
+        openChatByAlarm(event.data.alarmId);
       }
     });
   }
@@ -1588,7 +1585,7 @@
       }
       let chatAction = '';
       if (n.type === 'alarm' && n.related_alarm_id){
-        chatAction = '<div class="notif-actions"><button type="button" class="small-btn open-chat-notif" data-alarm="' + n.related_alarm_id + '">Open groepschat</button></div>';
+        chatAction = '<div class="notif-actions"><button type="button" class="small-btn open-chat-notif" data-alarm="' + n.related_alarm_id + '">Open Berichten</button></div>';
       }
       return '<div class="notif-card' + (n.is_read ? '' : ' unread') + (n.type === 'alarm' ? ' alarm' : '') + '" data-nid="' + n.id + '">' +
         '<div class="notif-title">' + icon + ' ' + escapeHtml(n.title) + '</div>' +
@@ -1605,7 +1602,7 @@
       btn.addEventListener('click', () => respondToInvite(btn.dataset.cid, 'rejected'))
     );
     els.notifList.querySelectorAll('.open-chat-notif').forEach(btn =>
-      btn.addEventListener('click', () => openChat(btn.dataset.alarm))
+      btn.addEventListener('click', () => openChatByAlarm(btn.dataset.alarm))
     );
   }
 
@@ -1766,15 +1763,24 @@
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
+  els.tabMessages.addEventListener('click', () => openMessages(myGroupId));
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
+    if (name !== 'messages' && chatChannel){
+      sb.removeChannel(chatChannel);
+      chatChannel = null;
+      currentChatGroupId = null;
+    }
     els.screenAlarm.classList.toggle('hidden', name !== 'alarm');
     els.screenContacts.classList.toggle('hidden', name !== 'contacts');
+    els.screenMessages.classList.toggle('hidden', name !== 'messages');
     els.screenProfile.classList.toggle('hidden', name !== 'profile');
     els.tabAlarm.classList.toggle('active', name === 'alarm');
     els.tabContacts.classList.toggle('active', name === 'contacts');
+    els.tabMessages.classList.toggle('active', name === 'messages');
     els.tabAlarm.setAttribute('aria-selected', String(name === 'alarm'));
     els.tabContacts.setAttribute('aria-selected', String(name === 'contacts'));
+    els.tabMessages.setAttribute('aria-selected', String(name === 'messages'));
     els.mainNav.classList.toggle('hidden', name === 'profile');
     els.profileBackButton.classList.toggle('hidden', name !== 'profile');
     if (name === 'contacts'){
@@ -2014,16 +2020,17 @@
     els.alarmButton.disabled = false;
 
     if (result.alarmId){
-      openChat(result.alarmId);
+      openMessages(myGroupId);
     }
   }
 
   /* =========================================================================
-     GROEPSCHAT — iedereen die een alarm activeert of ontvangt zit direct
-     samen in één gesprek, gekoppeld aan die specifieke alarmering.
+     BERICHTEN — een doorlopend groepsgesprek tussen jou en je bevestigde
+     noodcontacten. Slaat iemand alarm, dan verschijnt boven dit gesprek
+     de locatie van diegene die het alarm activeerde.
      ========================================================================= */
   let chatChannel = null;
-  let currentChatAlarmId = null;
+  let currentChatGroupId = null;
 
   let chatParticipantById = {};
 
@@ -2041,40 +2048,35 @@
       '</div>';
   }
 
-  function updateReopenChatButton(){
-    if (!els.reopenChatButton) return;
-    const id = realStore.get(KEYS.lastChatAlarmId, null);
-    els.reopenChatButton.classList.toggle('hidden', !id);
-  }
-  if (els.reopenChatButton){
-    els.reopenChatButton.addEventListener('click', () => {
-      const id = realStore.get(KEYS.lastChatAlarmId, null);
-      if (id) openChat(id);
-    });
-  }
-
-  async function openChat(alarmId){
-    if (!alarmId) return;
-    currentChatAlarmId = alarmId;
-    realStore.set(KEYS.lastChatAlarmId, alarmId);
-    updateReopenChatButton();
+  async function openMessages(groupId){
+    if (!groupId) return;
+    currentChatGroupId = groupId;
     els.notifOverlay.classList.add('hidden');
-    els.chatOverlay.classList.remove('hidden');
+    switchScreen('messages');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">Bericht laden…</p>';
     els.locationCard.classList.add('hidden');
 
-    const [{ data: participants }, { data: alarmRow }] = await Promise.all([
-      sb.rpc('get_alarm_participants', { p_alarm_id: alarmId }),
-      sb.from('alarms').select('lat, lng, location_accuracy, triggered_by').eq('id', alarmId).single()
+    const [{ data: members }, { data: alarmRow }] = await Promise.all([
+      sb.rpc('get_group_participants', { p_group_id: groupId }),
+      sb.from('alarms').select('lat, lng, location_accuracy, triggered_by')
+        .eq('group_id', groupId).order('created_at', { ascending:false }).limit(1).maybeSingle()
     ]);
     chatParticipantById = {};
-    (participants || []).forEach(p => { chatParticipantById[p.user_id] = p; });
-    els.chatParticipants.textContent = (participants || []).map(p => p.full_name).join(', ');
+    (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url }; });
+    els.messagesParticipants.textContent = Object.values(chatParticipantById).map(p => p.full_name).join(', ');
     renderLocationCard(alarmRow);
 
-    await loadChatMessages(alarmId);
-    subscribeChat(alarmId);
+    await loadChatMessages(groupId);
+    subscribeChat(groupId);
     els.chatInput.focus();
+  }
+
+  // Alarmmeldingen wijzen naar een specifiek alarm; zoek daarvan de kring op
+  // en open die als doorlopend gesprek.
+  async function openChatByAlarm(alarmId){
+    if (!alarmId) return;
+    const { data: alarmRow } = await sb.from('alarms').select('group_id').eq('id', alarmId).single();
+    if (alarmRow && alarmRow.group_id) openMessages(alarmRow.group_id);
   }
 
   function renderLocationCard(alarmRow){
@@ -2116,17 +2118,9 @@
     }
   }
 
-  function closeChat(){
-    els.chatOverlay.classList.add('hidden');
-    if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
-    currentChatAlarmId = null;
-    els.locationMapImg.src = '';
-  }
-  els.chatCloseButton.addEventListener('click', closeChat);
-
-  async function loadChatMessages(alarmId){
+  async function loadChatMessages(groupId){
     const { data: messages } = await sb.from('alarm_messages').select('*')
-      .eq('alarm_id', alarmId).order('created_at', { ascending:true }).limit(200);
+      .eq('group_id', groupId).order('created_at', { ascending:true }).limit(200);
     els.chatMessages.innerHTML = (messages || []).length
       ? messages.map(m => chatBubbleHtml({
           ...m,
@@ -2137,13 +2131,13 @@
     els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
   }
 
-  function subscribeChat(alarmId){
+  function subscribeChat(groupId){
     if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
     chatChannel = sb
-      .channel('alarm-chat-' + alarmId)
+      .channel('group-chat-' + groupId)
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'alarm_messages',
-        filter: 'alarm_id=eq.' + alarmId
+        filter: 'group_id=eq.' + groupId
       }, async (payload) => {
         const msg = payload.new;
         let participant = chatParticipantById[msg.sender_id];
@@ -2163,9 +2157,9 @@
   els.chatForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const body = els.chatInput.value.trim();
-    if (!body || !currentChatAlarmId) return;
+    if (!body || !currentChatGroupId) return;
     els.chatInput.value = '';
-    await sb.from('alarm_messages').insert({ alarm_id: currentChatAlarmId, sender_id: currentSession.user.id, body });
+    await sb.from('alarm_messages').insert({ group_id: currentChatGroupId, sender_id: currentSession.user.id, body });
   });
 
   /* =========================================================================
