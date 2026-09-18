@@ -19,7 +19,7 @@
   })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>NoodAlarm — persoonlijk noodnetwerk</title>
+<title>NORI — persoonlijk noodnetwerk</title>
 <meta name="description" content="Persoonlijk noodalarm-netwerk: waarschuw je bevestigde noodcontacten via een melding in de app en e-mail.">
 <meta name="theme-color" id="themeColorMeta" content="#f0f2f5">
 <link rel="manifest" href="manifest.json">
@@ -110,7 +110,11 @@
     padding-bottom:16px;
   }
   .brand{ display:flex; align-items:center; gap:10px; color:var(--text); }
-  .brand svg{ width:24px; height:24px; color:var(--text-muted); flex-shrink:0; }
+  .brand-mark{
+    width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 32% 24%, var(--red-bright), var(--red) 60%, var(--red-dark) 100%);
+  }
+  .brand-mark svg{ width:17px; height:17px; color:#fff; }
   .brand-name{ font-weight:800; font-size:19px; letter-spacing:0.01em; }
   .topbar-actions{ display:flex; align-items:center; gap:10px; }
   .bell-button{
@@ -129,6 +133,12 @@
     cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:3px;
   }
   .logout-link:hover{ color:var(--accent); }
+  .top-profile-button{
+    display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border);
+    border-radius:999px; padding:5px 14px 5px 5px; cursor:pointer; color:var(--text);
+  }
+  .top-profile-button:hover{ border-color:var(--text-muted); }
+  .top-profile-label{ font-size:14.5px; font-weight:700; }
 
   /* ---------- Segmented nav ---------- */
   .segmented{
@@ -165,6 +175,7 @@
   }
   .auth-logo svg{ width:42px; height:42px; color:#fff; }
   .auth-title{ font-size:25px; font-weight:800; margin:0; }
+  .auth-slogan{ font-size:14.5px; font-weight:600; color:var(--text-muted); margin:-14px 0 0; letter-spacing:.01em; }
   .auth-form{ width:100%; display:flex; flex-direction:column; gap:14px; text-align:left; }
   .auth-message{
     width:100%; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
@@ -228,6 +239,9 @@
     font-size:clamp(20px,6vw,26px); font-weight:800; letter-spacing:.06em; color:#fff;
     text-shadow:0 2px 4px rgba(0,0,0,.25); text-align:center; line-height:1.2; transition:font-size .1s ease;
   }
+  .alarm-button .sublabel{
+    font-size:13px; font-weight:700; letter-spacing:.02em; color:rgba(255,255,255,.88); text-transform:uppercase;
+  }
   .alarm-button.counting{
     animation:alarm-pulse 1s ease-in-out infinite;
     box-shadow:0 6px 0 var(--red-dark), 0 10px 20px rgba(0,0,0,.5),
@@ -251,6 +265,13 @@
   .save-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; }
   .save-button:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
   .save-button:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .danger-zone{ display:flex; flex-direction:column; gap:10px; margin-top:6px; padding-top:20px; border-top:1px solid var(--border-soft); }
+  .danger-button{
+    background:transparent; border:1.5px solid var(--danger); color:var(--danger); font-weight:700; font-size:15.5px;
+    padding:14px; min-height:52px; border-radius:12px; cursor:pointer; width:100%; transition:background .15s ease;
+  }
+  .danger-button:hover{ background:rgba(239,68,68,.1); }
 
   /* ---------- Sent / status ---------- */
   .status-badge{
@@ -427,9 +448,9 @@
 
       <div id="onboardingStep1" class="onboarding-step" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
         <div class="onboarding-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="7" stroke-opacity=".55"/><circle cx="12" cy="12" r="10.6" stroke-opacity=".28"/></svg>
         </div>
-        <h2 class="onboarding-title">Welkom bij NoodAlarm</h2>
+        <h2 class="onboarding-title">Welkom bij NORI</h2>
         <p class="onboarding-text">Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt.</p>
       </div>
 
@@ -468,6 +489,24 @@
     </div>
   </div>
 
+  <!-- =========================== ACCOUNT VERWIJDEREN (bevestiging) =========================== -->
+  <div id="deleteAccountOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <div class="overlay-header">
+        <h2 class="overlay-title">Account verwijderen</h2>
+        <button type="button" id="deleteAccountCloseButton" class="overlay-close" aria-label="Sluiten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <p class="onboarding-text" style="text-align:left; font-size:16px;">Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.</p>
+      <div id="deleteAccountMessage" class="auth-message hidden"></div>
+      <div class="form-actions">
+        <button type="button" id="deleteAccountCancelButton" class="cancel-button">Annuleren</button>
+        <button type="button" id="deleteAccountConfirmButton" class="danger-button">Definitief verwijderen</button>
+      </div>
+    </div>
+  </div>
+
   <!-- =========================== MELDINGEN =========================== -->
   <div id="notifOverlay" class="overlay hidden">
     <div class="overlay-card">
@@ -486,9 +525,10 @@
   <section id="screen-auth" class="screen">
     <div class="auth-wrap">
       <div class="auth-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="7" stroke-opacity=".55"/><circle cx="12" cy="12" r="10.6" stroke-opacity=".28"/></svg>
       </div>
-      <h1 class="auth-title">NoodAlarm</h1>
+      <h1 class="auth-title">NORI</h1>
+      <p class="auth-slogan">Eén druk. Iedereen weet het.</p>
 
       <!-- INLOGGEN -->
       <form id="loginForm" class="auth-form">
@@ -543,15 +583,20 @@
 
     <header class="topbar">
       <div class="brand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
-        <span class="brand-name">NoodAlarm</span>
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="7" stroke-opacity=".55"/><circle cx="12" cy="12" r="10.6" stroke-opacity=".28"/></svg>
+        </div>
+        <span class="brand-name">NORI</span>
       </div>
       <div class="topbar-actions">
         <button type="button" id="bellButton" class="bell-button" aria-label="Meldingen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
           <span id="bellBadge" class="bell-badge hidden">0</span>
         </button>
-        <button type="button" id="logoutButton" class="logout-link">Uitloggen</button>
+        <button type="button" id="topProfileButton" class="top-profile-button" aria-label="Naar profiel">
+          <span class="avatar sm" id="topProfileAvatar"></span>
+          <span class="top-profile-label">Profiel</span>
+        </button>
       </div>
     </header>
 
@@ -577,6 +622,7 @@
             <button id="alarmButton" class="alarm-button" aria-label="Druk voor alarm">
               <svg id="alarmIcon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
               <span class="label" id="alarmButtonLabel">ALARM</span>
+              <span class="sublabel hidden" id="alarmButtonSublabel">tik om te annuleren</span>
             </button>
           </div>
 
@@ -585,7 +631,7 @@
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
 
           <div id="iosInstallHint" class="auth-message hidden">
-            📱 <strong>Op iPhone of iPad?</strong> Pushmeldingen werken hier alleen als je NoodAlarm aan je beginscherm toevoegt: tik in Safari op het deel-icoon onderin en kies <strong>"Zet op beginscherm"</strong>.
+            📱 <strong>Op iPhone of iPad?</strong> Pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt: tik in Safari op het deel-icoon onderin en kies <strong>"Zet op beginscherm"</strong>.
             <div style="margin-top:10px;"><button type="button" id="iosInstallHintDismiss" class="link-button" style="padding:0;">Begrepen</button></div>
           </div>
         </div>
@@ -676,6 +722,11 @@
           <button type="button" id="themeDarkButton" data-theme="dark" role="tab">Donker</button>
           <button type="button" id="themeAutoButton" data-theme="auto" role="tab">Automatisch</button>
         </nav>
+      </div>
+
+      <div class="danger-zone">
+        <button type="button" id="profileLogoutButton" class="logout-link" style="width:100%;">Uitloggen</button>
+        <button type="button" id="deleteAccountButton" class="danger-button">Account verwijderen</button>
       </div>
     </section>
 
@@ -776,7 +827,15 @@
     showLoginButton: document.getElementById('showLoginButton'),
 
     authMessage: document.getElementById('authMessage'),
-    logoutButton: document.getElementById('logoutButton'),
+    topProfileButton: document.getElementById('topProfileButton'),
+    topProfileAvatar: document.getElementById('topProfileAvatar'),
+    profileLogoutButton: document.getElementById('profileLogoutButton'),
+    deleteAccountButton: document.getElementById('deleteAccountButton'),
+    deleteAccountOverlay: document.getElementById('deleteAccountOverlay'),
+    deleteAccountCloseButton: document.getElementById('deleteAccountCloseButton'),
+    deleteAccountCancelButton: document.getElementById('deleteAccountCancelButton'),
+    deleteAccountConfirmButton: document.getElementById('deleteAccountConfirmButton'),
+    deleteAccountMessage: document.getElementById('deleteAccountMessage'),
 
     bellButton: document.getElementById('bellButton'),
     bellBadge: document.getElementById('bellBadge'),
@@ -794,6 +853,7 @@
 
     alarmButton: document.getElementById('alarmButton'),
     alarmButtonLabel: document.getElementById('alarmButtonLabel'),
+    alarmButtonSublabel: document.getElementById('alarmButtonSublabel'),
     alarmIcon: document.getElementById('alarmIcon'),
     holdProgress: document.getElementById('holdProgress'),
     cancelAlarmButton: document.getElementById('cancelAlarmButton'),
@@ -1010,9 +1070,53 @@
     els.authMessage.classList.remove('hidden');
   }
 
-  els.logoutButton.addEventListener('click', async () => {
+  async function signOutNow(){
     if (realtimeChannel){ sb.removeChannel(realtimeChannel); realtimeChannel = null; }
     await sb.auth.signOut();
+  }
+  els.profileLogoutButton.addEventListener('click', signOutNow);
+
+  els.topProfileButton.addEventListener('click', () => switchScreen('profile'));
+
+  els.deleteAccountButton.addEventListener('click', () => {
+    showDeleteAccountMessage('', null);
+    els.deleteAccountConfirmButton.disabled = false;
+    els.deleteAccountConfirmButton.textContent = 'Definitief verwijderen';
+    els.deleteAccountOverlay.classList.remove('hidden');
+  });
+  els.deleteAccountCloseButton.addEventListener('click', () => els.deleteAccountOverlay.classList.add('hidden'));
+  els.deleteAccountCancelButton.addEventListener('click', () => els.deleteAccountOverlay.classList.add('hidden'));
+
+  function showDeleteAccountMessage(text, kind){
+    if (!text){ els.deleteAccountMessage.classList.add('hidden'); return; }
+    els.deleteAccountMessage.textContent = text;
+    els.deleteAccountMessage.className = 'auth-message' + (kind ? ' ' + kind : '');
+    els.deleteAccountMessage.classList.remove('hidden');
+  }
+
+  els.deleteAccountConfirmButton.addEventListener('click', async () => {
+    els.deleteAccountConfirmButton.disabled = true;
+    els.deleteAccountConfirmButton.textContent = 'Bezig…';
+    showDeleteAccountMessage('', null);
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch(FUNCTIONS_URL + '/delete-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + session.access_token
+        }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Onbekende fout');
+      els.deleteAccountOverlay.classList.add('hidden');
+      await signOutNow();
+    } catch (err){
+      showDeleteAccountMessage('Verwijderen mislukt: ' + err.message, 'error');
+      els.deleteAccountConfirmButton.disabled = false;
+      els.deleteAccountConfirmButton.textContent = 'Definitief verwijderen';
+    }
   });
 
   sb.auth.onAuthStateChange((_event, session) => {
@@ -1258,6 +1362,7 @@
     els.profileFirstName.value = currentProfile.first_name || '';
     els.profileLastName.value = currentProfile.last_name || '';
     els.profileAvatar.innerHTML = avatarInner(currentProfile.avatar_url);
+    els.topProfileAvatar.innerHTML = avatarInner(currentProfile.avatar_url);
   }
 
   els.profileForm.addEventListener('submit', async (ev) => {
@@ -1331,8 +1436,10 @@
   }
   function resetAlarmButton(){
     els.alarmButtonLabel.textContent = 'ALARM';
+    els.alarmButtonSublabel.classList.add('hidden');
     els.alarmIcon.classList.remove('hidden');
     els.alarmButton.classList.remove('counting');
+    els.alarmButton.setAttribute('aria-label', 'Druk voor alarm');
     els.cancelAlarmButton.classList.add('hidden');
     setHoldProgress(0);
   }
@@ -1342,7 +1449,9 @@
     countdownActive = true;
     countdownStartedAt = performance.now();
     els.alarmButton.classList.add('counting');
+    els.alarmButton.setAttribute('aria-label', 'Tik om het alarm te annuleren');
     els.alarmIcon.classList.add('hidden');
+    els.alarmButtonSublabel.classList.remove('hidden');
     els.cancelAlarmButton.classList.remove('hidden');
     if (navigator.vibrate) navigator.vibrate(20);
 
@@ -1369,7 +1478,10 @@
     resetAlarmButton();
   }
 
-  els.alarmButton.addEventListener('click', startCountdown);
+  els.alarmButton.addEventListener('click', () => {
+    if (countdownActive) cancelCountdown();
+    else startCountdown();
+  });
   els.cancelAlarmButton.addEventListener('click', cancelCountdown);
 
   els.endAlarmButton.addEventListener('click', () => switchView(els.viewIdle));

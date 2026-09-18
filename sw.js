@@ -1,4 +1,4 @@
-// NoodAlarm service worker: shows the emergency push notification and
+// NORI service worker: shows the emergency push notification and
 // focuses/opens the app when the person taps it. No caching/offline logic —
 // this app always needs a live connection to Supabase, so there is
 // deliberately no fetch handler here.
@@ -15,7 +15,7 @@ self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { /* ignore malformed payload */ }
 
-  const title = data.title || '🚨 NOODALARM';
+  const title = data.title || '🚨 NORI';
   const options = {
     body: data.body || 'Een noodcontact heeft een noodalarm geactiveerd.',
     icon: 'icon-192.png',

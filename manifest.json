@@ -1,12 +1,12 @@
 {
-  "name": "NoodAlarm",
-  "short_name": "NoodAlarm",
+  "name": "NORI — Eén druk. Iedereen weet het.",
+  "short_name": "NORI",
   "description": "Persoonlijk noodalarm-netwerk: waarschuw alleen je eigen, bevestigde noodcontacten.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
+  "background_color": "#f0f2f5",
+  "theme_color": "#f0f2f5",
   "lang": "nl",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
