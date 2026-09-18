@@ -152,6 +152,8 @@
     transition:background .15s ease, color .15s ease;
   }
   .segmented button.active{ background:var(--accent); color:#fff; }
+  .tab-count{ margin-left:6px; opacity:.75; }
+  .tab-count.hidden{ display:none; }
 
   .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; }
   .screen.hidden{ display:none; }
@@ -833,7 +835,7 @@
 
     <nav class="segmented" id="mainNav" role="tablist">
       <button type="button" id="tabAlarm" class="active" role="tab" aria-selected="true">Alarm</button>
-      <button type="button" id="tabContacts" role="tab" aria-selected="false">Contacten</button>
+      <button type="button" id="tabContacts" role="tab" aria-selected="false">Contacten<span id="tabContactsCount" class="tab-count hidden"></span></button>
     </nav>
 
     <button type="button" id="profileBackButton" class="profile-back-button hidden" aria-label="Terug naar Alarm">
@@ -1112,6 +1114,7 @@
     profileBackButton: document.getElementById('profileBackButton'),
     tabAlarm: document.getElementById('tabAlarm'),
     tabContacts: document.getElementById('tabContacts'),
+    tabContactsCount: document.getElementById('tabContactsCount'),
     screenAlarm: document.getElementById('screen-alarm'),
     screenContacts: document.getElementById('screen-contacts'),
     screenProfile: document.getElementById('screen-profile'),
@@ -1720,6 +1723,8 @@
   async function refreshContacts(){
     const { data } = await sb.rpc('my_contacts');
     const contacts = data || [];
+    els.tabContactsCount.textContent = contacts.length > 0 ? contacts.length : '';
+    els.tabContactsCount.classList.toggle('hidden', contacts.length === 0);
     els.contactsEmpty.classList.toggle('hidden', contacts.length > 0);
     els.contactsList.innerHTML = contacts.map(c => (
       '<li class="person-card">' +
