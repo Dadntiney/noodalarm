@@ -457,8 +457,8 @@
   .chat-bubble.own{ background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
   .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); border-bottom-left-radius:4px; box-shadow:var(--shadow-card); }
   .chat-bubble .who{ font-size:13.5px; opacity:.85; margin-bottom:3px; font-weight:700; }
-  .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; }
-  .chat-bubble .when{ font-size:12.5px; opacity:.65; margin-top:5px; text-align:right; }
+  .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
+  .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:12px; opacity:.65; white-space:nowrap; }
   .chat-form{
     display:flex; align-items:center; gap:10px; flex-shrink:0;
     padding:14px 16px max(14px, env(safe-area-inset-bottom));
@@ -728,6 +728,9 @@
         <span class="brand-name">NORI</span>
       </div>
       <div class="topbar-actions">
+        <button type="button" id="reopenChatButton" class="bell-button hidden" aria-label="Open groepschat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
+        </button>
         <button type="button" id="bellButton" class="bell-button" aria-label="Meldingen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
           <span id="bellBadge" class="bell-badge hidden">0</span>
@@ -920,7 +923,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', lastChatAlarmId: 'noodalarm.lastChatAlarmId' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -993,6 +996,7 @@
     deleteAccountConfirmButton: document.getElementById('deleteAccountConfirmButton'),
     deleteAccountMessage: document.getElementById('deleteAccountMessage'),
 
+    reopenChatButton: document.getElementById('reopenChatButton'),
     bellButton: document.getElementById('bellButton'),
     bellBadge: document.getElementById('bellBadge'),
     notifOverlay: document.getElementById('notifOverlay'),
@@ -1354,6 +1358,7 @@
     subscribeRealtime();
     maybeShowIosInstallHint();
     await setupPush();
+    updateReopenChatButton();
     maybeOpenChatFromUrl();
 
     if (!realStore.get(KEYS.onboarded, false)){
@@ -1915,8 +1920,7 @@
     const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
       (own ? '' : '<div class="who">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
-      '<div class="text">' + escapeHtml(msg.body) + '</div>' +
-      '<div class="when">' + time + '</div>' +
+      '<div class="text">' + escapeHtml(msg.body) + '<span class="when">' + time + '</span></div>' +
       '</div>';
     if (own) return '<div class="chat-row own">' + bubble + '</div>';
     return '<div class="chat-row other">' +
@@ -1925,9 +1929,23 @@
       '</div>';
   }
 
+  function updateReopenChatButton(){
+    if (!els.reopenChatButton) return;
+    const id = realStore.get(KEYS.lastChatAlarmId, null);
+    els.reopenChatButton.classList.toggle('hidden', !id);
+  }
+  if (els.reopenChatButton){
+    els.reopenChatButton.addEventListener('click', () => {
+      const id = realStore.get(KEYS.lastChatAlarmId, null);
+      if (id) openChat(id);
+    });
+  }
+
   async function openChat(alarmId){
     if (!alarmId) return;
     currentChatAlarmId = alarmId;
+    realStore.set(KEYS.lastChatAlarmId, alarmId);
+    updateReopenChatButton();
     els.notifOverlay.classList.add('hidden');
     els.chatOverlay.classList.remove('hidden');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">Bericht laden…</p>';
