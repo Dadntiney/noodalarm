@@ -583,6 +583,11 @@
           <button type="button" id="cancelAlarmButton" class="cancel-button hidden">Annuleren</button>
 
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
+
+          <div id="iosInstallHint" class="auth-message hidden">
+            📱 <strong>Op iPhone of iPad?</strong> Pushmeldingen werken hier alleen als je NoodAlarm aan je beginscherm toevoegt: tik in Safari op het deel-icoon onderin en kies <strong>"Zet op beginscherm"</strong>.
+            <div style="margin-top:10px;"><button type="button" id="iosInstallHintDismiss" class="link-button" style="padding:0;">Begrepen</button></div>
+          </div>
         </div>
 
         <!-- VERZONDEN -->
@@ -708,7 +713,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -737,6 +742,12 @@
     const outputArray = new Uint8Array(rawData.length);
     for (let i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
     return outputArray;
+  }
+  function isIos(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+  function isStandalone(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
   /* =========================================================================
@@ -787,6 +798,8 @@
     holdProgress: document.getElementById('holdProgress'),
     cancelAlarmButton: document.getElementById('cancelAlarmButton'),
     noGroupWarning: document.getElementById('noGroupWarning'),
+    iosInstallHint: document.getElementById('iosInstallHint'),
+    iosInstallHintDismiss: document.getElementById('iosInstallHintDismiss'),
 
     viewIdle: document.getElementById('view-idle'),
     viewSent: document.getElementById('view-sent'),
@@ -1038,6 +1051,8 @@
     await refreshContacts();
     await refreshNotifications();
     subscribeRealtime();
+    maybeShowIosInstallHint();
+    await setupPush();
 
     if (!realStore.get(KEYS.onboarded, false)){
       showOnboarding();
@@ -1421,11 +1436,20 @@
   }
 
   /* =========================================================================
-     WEB PUSH — nog niet actief (webbrowser-fase heeft dit niet nodig); de
-     infrastructuur (VAPID, service worker, push_subscriptions) staat klaar
-     om later weer aangezet te worden door setupPush() vanuit onSignedIn()
-     aan te roepen.
+     WEB PUSH
      ========================================================================= */
+  function maybeShowIosInstallHint(){
+    if (!els.iosInstallHint) return;
+    const shouldShow = isIos() && !isStandalone() && !realStore.get(KEYS.iosHintDismissed, false);
+    els.iosInstallHint.classList.toggle('hidden', !shouldShow);
+  }
+  if (els.iosInstallHintDismiss){
+    els.iosInstallHintDismiss.addEventListener('click', () => {
+      realStore.set(KEYS.iosHintDismissed, true);
+      els.iosInstallHint.classList.add('hidden');
+    });
+  }
+
   async function setupPush(){
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     try {
@@ -1451,7 +1475,7 @@
         auth_key: raw.keys.auth,
         last_seen_at: new Date().toISOString()
       }, { onConflict: 'endpoint' });
-    } catch (err){ /* stil negeren zolang push niet actief is */ }
+    } catch (err){ /* stil negeren als push niet lukt — app blijft werken via app-melding en e-mail */ }
   }
 
 })();
