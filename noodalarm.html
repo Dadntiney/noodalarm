@@ -2,10 +2,26 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<script>
+  // Zet het thema meteen (voor het eerste tekenen van de pagina) om een flits van het verkeerde thema te voorkomen.
+  (function(){
+    try {
+      var pref = JSON.parse(localStorage.getItem('noodalarm.theme') || '"auto"');
+      var theme = pref;
+      if (pref === 'auto' || !pref){
+        var h = new Date().getHours();
+        theme = (h >= 7 && h < 20) ? 'light' : 'dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+    } catch(e){
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>NoodAlarm — persoonlijk noodnetwerk</title>
-<meta name="description" content="Persoonlijk noodalarm-netwerk: waarschuw je bevestigde noodcontacten via pushmelding, melding in de app en e-mail.">
-<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Persoonlijk noodalarm-netwerk: waarschuw je bevestigde noodcontacten via een melding in de app en e-mail.">
+<meta name="theme-color" id="themeColorMeta" content="#f0f2f5">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,6 +31,34 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   :root{
+    --red:#e3203d;
+    --red-dark:#8c0f24;
+    --red-bright:#ff5468;
+    --amber:#f2a93b;
+    --green:#2bb673;
+    --danger:#ef4444;
+    --accent:#1877f2;
+    --accent-dark:#125fcc;
+    --font:'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius-lg:24px;
+    --radius-md:16px;
+  }
+  /* ---------- Licht (standaard) ---------- */
+  :root, :root[data-theme="light"]{
+    --bg:#f0f2f5;
+    --surface:#ffffff;
+    --surface-2:#f0f2f5;
+    --border:#dadde1;
+    --border-soft:#e4e6eb;
+    --text:#050505;
+    --text-muted:#65676b;
+    --text-faint:#8a8d91;
+    --amber-soft:#fdf1de;
+    --shadow-card:0 1px 2px rgba(0,0,0,.06), 0 2px 6px rgba(0,0,0,.05);
+    --scrim:rgba(20,22,28,.6);
+  }
+  /* ---------- Donker ---------- */
+  :root[data-theme="dark"]{
     --bg:#0b1220;
     --surface:#141c30;
     --surface-2:#1b2540;
@@ -23,16 +67,9 @@
     --text:#f5f7fb;
     --text-muted:#aab4cc;
     --text-faint:#8895b3;
-    --red:#e3203d;
-    --red-dark:#8c0f24;
-    --red-bright:#ff5468;
-    --amber:#f2a93b;
     --amber-soft:#3a2c14;
-    --green:#2bb673;
-    --danger:#ef4444;
-    --font:'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
-    --radius-lg:24px;
-    --radius-md:16px;
+    --shadow-card:0 2px 10px rgba(0,0,0,.35);
+    --scrim:rgba(6,10,20,.92);
   }
 
   *{ box-sizing:border-box; }
@@ -82,7 +119,7 @@
   }
   .bell-button svg{ width:21px; height:21px; }
   .bell-badge{
-    position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; border-radius:10px; background:var(--red);
+    position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; border-radius:10px; background:var(--accent);
     color:#fff; font-size:11.5px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 5px;
     border:2px solid var(--bg);
   }
@@ -91,7 +128,7 @@
     background:none; border:none; color:var(--text-muted); font-size:14.5px; font-weight:600;
     cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:3px;
   }
-  .logout-link:hover{ color:var(--red-bright); }
+  .logout-link:hover{ color:var(--accent); }
 
   /* ---------- Segmented nav ---------- */
   .segmented{
@@ -103,7 +140,7 @@
     font-weight:700; font-size:15px; padding:13px 0; border-radius:999px; cursor:pointer;
     transition:background .15s ease, color .15s ease;
   }
-  .segmented button.active{ background:var(--surface-2); color:var(--text); }
+  .segmented button.active{ background:var(--accent); color:#fff; }
 
   .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; }
   .screen.hidden{ display:none; }
@@ -137,14 +174,14 @@
   .auth-message.error{ border-color:var(--danger); color:var(--text); }
   .auth-message.warn{ border-color:var(--amber); color:var(--amber); }
   .auth-switch{ font-size:15.5px; color:var(--text-muted); margin:0; }
-  .auth-switch button{ background:none; border:none; color:var(--red-bright); font-weight:700; font-size:15.5px; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:3px; }
+  .auth-switch button{ background:none; border:none; color:var(--accent); font-weight:700; font-size:15.5px; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:3px; }
   .field-hint{ font-size:13.5px; color:var(--text-faint); margin-top:6px; }
   .field-hint.ok{ color:var(--green); }
   .field-hint.bad{ color:var(--danger); }
 
   .form-card, .info-card, .actions-card, .entries-card, .tests-panel{
     width:100%; background:var(--surface); border:1px solid var(--border-soft);
-    border-radius:var(--radius-md); padding:18px 20px; text-align:left;
+    border-radius:var(--radius-md); padding:18px 20px; text-align:left; box-shadow:var(--shadow-card);
   }
   .field label{
     display:block; font-size:15px; font-weight:700; color:var(--text-muted); margin-bottom:8px;
@@ -153,7 +190,7 @@
     width:100%; background:var(--surface-2); border:1.5px solid var(--border); border-radius:11px;
     padding:14px 15px; font-size:17px; color:var(--text); min-height:52px;
   }
-  .field input:focus{ outline:2.5px solid var(--red); outline-offset:1px; }
+  .field input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
   .field input::placeholder{ color:var(--text-faint); }
   .field-row{ display:grid; grid-template-columns:1fr; gap:14px; }
   .field{ display:flex; flex-direction:column; gap:7px; }
@@ -201,8 +238,8 @@
   .end-button:hover{ background:rgba(227,32,61,.12); }
   .add-button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:100%; }
   .add-button:hover{ border-color:var(--text-muted); }
-  .save-button{ background:var(--green); border:1px solid var(--green); color:#0b1220; }
-  .save-button:hover{ filter:brightness(1.08); }
+  .save-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; }
+  .save-button:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
   .save-button:disabled{ opacity:.6; cursor:not-allowed; }
 
   /* ---------- Sent / status ---------- */
@@ -257,7 +294,7 @@
 
   .person-card{
     display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border-soft);
-    border-radius:var(--radius-md); padding:14px 16px;
+    border-radius:var(--radius-md); padding:14px 16px; box-shadow:var(--shadow-card);
   }
   .person-info{ flex:1; text-align:left; min-width:0; }
   .person-info .name{ font-weight:700; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -308,7 +345,7 @@
   .profile-photo-wrap{ position:relative; }
   .profile-photo-edit{
     position:absolute; bottom:-2px; right:-2px; width:34px; height:34px; border-radius:50%;
-    background:var(--red); border:3px solid var(--bg); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    background:var(--accent); border:3px solid var(--bg); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
   .profile-photo-edit svg{ width:15px; height:15px; }
   .profile-name{ font-size:23px; font-weight:800; margin:0; }
@@ -316,13 +353,13 @@
 
   /* ---------- Overlays (uitleg, meldingen) ---------- */
   .overlay{
-    position:fixed; inset:0; background:rgba(6,10,20,.92); backdrop-filter:blur(2px);
+    position:fixed; inset:0; background:var(--scrim); backdrop-filter:blur(2px);
     z-index:100; display:flex; align-items:center; justify-content:center; padding:22px;
   }
   .overlay.hidden{ display:none; }
   .overlay-card{
     width:100%; max-width:400px; max-height:88vh; overflow-y:auto; background:var(--surface); border:1px solid var(--border-soft);
-    border-radius:var(--radius-lg); padding:26px 22px; display:flex; flex-direction:column; gap:16px;
+    border-radius:var(--radius-lg); padding:26px 22px; display:flex; flex-direction:column; gap:16px; box-shadow:var(--shadow-card);
   }
   .overlay-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .overlay-title{ font-size:20px; font-weight:800; margin:0; }
@@ -333,7 +370,8 @@
   .overlay-close svg{ width:17px; height:17px; }
 
   .notif-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:14px 16px; text-align:left; }
-  .notif-card.unread{ border-color:var(--red); }
+  .notif-card.unread{ border-color:var(--accent); }
+  .notif-card.alarm{ border-color:var(--red); }
   .notif-title{ font-weight:700; font-size:15.5px; display:flex; align-items:center; gap:8px; }
   .notif-message{ color:var(--text-muted); font-size:15px; margin-top:4px; line-height:1.4; }
   .notif-time{ color:var(--text-faint); font-size:12.5px; margin-top:6px; }
@@ -347,8 +385,12 @@
   }
   .onboarding-icon{
     width:84px; height:84px; border-radius:50%; flex-shrink:0; align-self:center;
-    background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
+    background:radial-gradient(circle at 35% 28%, #63a4ff, var(--accent) 55%, var(--accent-dark) 100%);
     display:flex; align-items:center; justify-content:center;
+    box-shadow:0 12px 26px rgba(24,119,242,.35);
+  }
+  .onboarding-icon.emergency{
+    background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
     box-shadow:0 12px 26px rgba(227,32,61,.35);
   }
   .onboarding-icon svg{ width:40px; height:40px; color:#fff; }
@@ -357,7 +399,7 @@
   .onboarding-text strong{ color:var(--text); }
   .onboarding-dots{ display:flex; gap:9px; justify-content:center; }
   .onboarding-dot{ width:10px; height:10px; border-radius:50%; background:var(--border); }
-  .onboarding-dot.active{ background:var(--red-bright); }
+  .onboarding-dot.active{ background:var(--accent); }
 
   @media (max-width:360px){
     .app{ padding-left:14px; padding-right:14px; }
@@ -398,11 +440,11 @@
       </div>
 
       <div id="onboardingStep4" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
-        <div class="onboarding-icon">
+        <div class="onboarding-icon emergency">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
         <h2 class="onboarding-title">Stap 3: Houd ALARM ingedrukt bij nood</h2>
-        <p class="onboarding-text">Uw contacten krijgen dan <strong>meteen</strong> een melding: in de app, als pushbericht en per e-mail.</p>
+        <p class="onboarding-text">Uw contacten krijgen dan <strong>meteen</strong> een melding: in de app en per e-mail.</p>
       </div>
 
       <div class="onboarding-dots">
@@ -515,7 +557,7 @@
 
         <!-- IDLE -->
         <div id="view-idle" class="view">
-          <p class="intro">Houd de knop <strong>ingedrukt</strong> om je bevestigde noodcontacten te waarschuwen — via de app, pushmelding én e-mail.</p>
+          <p class="intro">Houd de knop <strong>ingedrukt</strong> om je bevestigde noodcontacten te waarschuwen — via de app en e-mail.</p>
 
           <div class="alarm-button-wrap">
             <svg class="hold-ring" viewBox="0 0 240 240">
@@ -530,7 +572,6 @@
 
           <p class="hint">Loslaten voordat de cirkel rond is annuleert het alarm — geen misklik mogelijk.</p>
 
-          <div id="pushWarning" class="auth-message hidden"></div>
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
         </div>
 
@@ -556,7 +597,7 @@
 
       </main>
 
-      <footer class="note">Noodmeldingen gaan via de app, pushmelding en e-mail — er wordt niemand gebeld.</footer>
+      <footer class="note">Noodmeldingen gaan via de app en e-mail — er wordt niemand gebeld.</footer>
     </section>
 
     <!-- =========================== CONTACTEN SCHERM =========================== -->
@@ -609,6 +650,18 @@
         <button type="submit" id="profileSaveButton" class="save-button">Wijzigingen opslaan</button>
       </form>
       <div id="profileMessage" class="auth-message hidden"></div>
+
+      <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+        <div>
+          <label style="display:block; font-size:15px; font-weight:700; color:var(--text-muted); margin-bottom:8px;">Weergave</label>
+          <p class="field-hint" style="margin-top:0;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
+        </div>
+        <nav class="segmented" role="tablist" aria-label="Weergave">
+          <button type="button" id="themeLightButton" data-theme="light" role="tab">Licht</button>
+          <button type="button" id="themeDarkButton" data-theme="dark" role="tab">Donker</button>
+          <button type="button" id="themeAutoButton" data-theme="auto" role="tab">Automatisch</button>
+        </nav>
+      </div>
     </section>
 
   </section>
@@ -645,7 +698,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -721,7 +774,6 @@
     alarmButton: document.getElementById('alarmButton'),
     alarmButtonLabel: document.getElementById('alarmButtonLabel'),
     holdProgress: document.getElementById('holdProgress'),
-    pushWarning: document.getElementById('pushWarning'),
     noGroupWarning: document.getElementById('noGroupWarning'),
 
     viewIdle: document.getElementById('view-idle'),
@@ -761,12 +813,50 @@
       document.getElementById('onboardingStep3'),
       document.getElementById('onboardingStep4')
     ],
-    onboardingDots: Array.from(document.querySelectorAll('.onboarding-dot'))
+    onboardingDots: Array.from(document.querySelectorAll('.onboarding-dot')),
+
+    themeColorMeta: document.getElementById('themeColorMeta'),
+    themeLightButton: document.getElementById('themeLightButton'),
+    themeDarkButton: document.getElementById('themeDarkButton'),
+    themeAutoButton: document.getElementById('themeAutoButton')
   };
 
   const HOLD_CIRCUMFERENCE = 2 * Math.PI * 112;
   els.holdProgress.style.strokeDasharray = String(HOLD_CIRCUMFERENCE);
   els.holdProgress.style.strokeDashoffset = String(HOLD_CIRCUMFERENCE);
+
+  /* =========================================================================
+     WEERGAVE — licht / donker / automatisch (op tijdstip van de dag)
+     ========================================================================= */
+  function computeAutoTheme(){
+    const hour = new Date().getHours();
+    return (hour >= 7 && hour < 20) ? 'light' : 'dark';
+  }
+  function resolveTheme(pref){
+    return pref === 'auto' ? computeAutoTheme() : pref;
+  }
+  function applyTheme(){
+    const pref = realStore.get(KEYS.theme, 'auto');
+    const resolved = resolveTheme(pref);
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (els.themeColorMeta) els.themeColorMeta.setAttribute('content', resolved === 'dark' ? '#0b1220' : '#f0f2f5');
+    [els.themeLightButton, els.themeDarkButton, els.themeAutoButton].forEach(btn => {
+      if (!btn) return;
+      const active = btn.dataset.theme === pref;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+  }
+  function setThemePreference(pref){
+    realStore.set(KEYS.theme, pref);
+    applyTheme();
+  }
+  [els.themeLightButton, els.themeDarkButton, els.themeAutoButton].forEach(btn => {
+    if (btn) btn.addEventListener('click', () => setThemePreference(btn.dataset.theme));
+  });
+  applyTheme();
+  setInterval(() => { if (realStore.get(KEYS.theme, 'auto') === 'auto') applyTheme(); }, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) applyTheme(); });
 
   let currentSession = null;
   let currentProfile = null;
@@ -935,7 +1025,6 @@
 
     await refreshContacts();
     await refreshNotifications();
-    await setupPush();
     subscribeRealtime();
 
     if (!realStore.get(KEYS.onboarded, false)){
@@ -1002,7 +1091,7 @@
           '<button type="button" class="cancel-button reject-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Verwijderen</button>' +
           '</div>';
       }
-      return '<div class="notif-card' + (n.is_read ? '' : ' unread') + '" data-nid="' + n.id + '">' +
+      return '<div class="notif-card' + (n.is_read ? '' : ' unread') + (n.type === 'alarm' ? ' alarm' : '') + '" data-nid="' + n.id + '">' +
         '<div class="notif-title">' + icon + ' ' + escapeHtml(n.title) + '</div>' +
         '<div class="notif-message">' + escapeHtml(n.message) + '</div>' +
         '<div class="notif-time">' + timeAgo(n.created_at) + '</div>' +
@@ -1313,22 +1402,19 @@
   }
 
   /* =========================================================================
-     WEB PUSH
+     WEB PUSH — nog niet actief (webbrowser-fase heeft dit niet nodig); de
+     infrastructuur (VAPID, service worker, push_subscriptions) staat klaar
+     om later weer aangezet te worden door setupPush() vanuit onSignedIn()
+     aan te roepen.
      ========================================================================= */
   async function setupPush(){
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)){
-      showPushWarning('Pushmeldingen worden niet ondersteund in deze browser. Je ontvangt meldingen nog wel in de app en per e-mail.');
-      return;
-    }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     try {
       const registration = await navigator.serviceWorker.register('sw.js');
 
       let permission = Notification.permission;
       if (permission === 'default') permission = await Notification.requestPermission();
-      if (permission !== 'granted'){
-        showPushWarning('Meldingen staan uit voor deze browser. Je ontvangt meldingen nog wel in de app en per e-mail.');
-        return;
-      }
+      if (permission !== 'granted') return;
 
       let subscription = await registration.pushManager.getSubscription();
       if (!subscription){
@@ -1346,17 +1432,7 @@
         auth_key: raw.keys.auth,
         last_seen_at: new Date().toISOString()
       }, { onConflict: 'endpoint' });
-
-      showPushWarning('');
-    } catch (err){
-      showPushWarning('Kon pushmeldingen niet activeren: ' + err.message);
-    }
-  }
-  function showPushWarning(text){
-    if (!text){ els.pushWarning.classList.add('hidden'); return; }
-    els.pushWarning.textContent = text;
-    els.pushWarning.className = 'auth-message warn';
-    els.pushWarning.classList.remove('hidden');
+    } catch (err){ /* stil negeren zolang push niet actief is */ }
   }
 
 })();
