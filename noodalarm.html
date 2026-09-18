@@ -285,6 +285,7 @@
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
   .settings-link-icon svg{ width:20px; height:20px; }
+  .settings-link-icon-accent{ background:var(--accent); color:#fff; }
   .settings-link-label{ flex:1; font-weight:700; font-size:16px; }
   .settings-link-chevron{ width:18px; height:18px; color:var(--text-faint); flex-shrink:0; }
   .save-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; }
@@ -468,6 +469,16 @@
   }
   .chat-back-button svg{ width:23px; height:23px; }
   .chat-back-button:hover{ background:var(--border-soft); }
+  .profile-back-button{
+    display:flex; align-items:center; gap:12px; background:none; border:none; padding:0; margin-bottom:24px;
+    cursor:pointer; color:var(--text); font-weight:700; font-size:16px;
+  }
+  .profile-back-icon{
+    width:40px; height:40px; border-radius:50%; background:var(--surface-2); color:var(--text);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .profile-back-icon svg{ width:20px; height:20px; }
+  .profile-back-button:hover .profile-back-icon{ background:var(--border-soft); }
   .chat-header-info{ min-width:0; }
   .chat-header-title{ font-size:19px; font-weight:800; line-height:1.25; }
   .chat-header-sub{
@@ -652,6 +663,31 @@
     </div>
   </div>
 
+  <!-- =========================== ACCOUNT =========================== -->
+  <div id="accountOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <div class="overlay-header">
+        <h2 class="overlay-title">Account</h2>
+        <button type="button" id="accountCloseButton" class="overlay-close" aria-label="Sluiten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="profileForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+        <div class="field">
+          <label for="profileFirstName">Voornaam</label>
+          <input type="text" id="profileFirstName" required>
+        </div>
+        <div class="field">
+          <label for="profileLastName">Achternaam</label>
+          <input type="text" id="profileLastName" required>
+        </div>
+        <button type="submit" id="profileSaveButton" class="save-button">Wijzigingen opslaan</button>
+      </form>
+      <div id="profileMessage" class="auth-message hidden"></div>
+    </div>
+  </div>
+
   <!-- =========================== MELDINGEN =========================== -->
   <div id="notifOverlay" class="overlay hidden">
     <div class="overlay-card">
@@ -800,8 +836,11 @@
       <button type="button" id="tabContacts" role="tab" aria-selected="false">Contacten</button>
     </nav>
 
-    <button type="button" id="profileBackButton" class="chat-back-button hidden" aria-label="Terug naar Alarm" style="margin-bottom:24px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    <button type="button" id="profileBackButton" class="profile-back-button hidden" aria-label="Terug naar Alarm">
+      <span class="profile-back-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </span>
+      Terug
     </button>
 
     <!-- =========================== ALARM SCHERM =========================== -->
@@ -914,26 +953,23 @@
         </div>
       </div>
 
-      <form id="profileForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
-        <div class="field">
-          <label for="profileFirstName">Voornaam</label>
-          <input type="text" id="profileFirstName" required>
-        </div>
-        <div class="field">
-          <label for="profileLastName">Achternaam</label>
-          <input type="text" id="profileLastName" required>
-        </div>
-        <button type="submit" id="profileSaveButton" class="save-button">Wijzigingen opslaan</button>
-      </form>
-      <div id="profileMessage" class="auth-message hidden"></div>
+      <div class="profile-menu" style="display:flex; flex-direction:column; gap:10px;">
+        <button type="button" id="openAccountButton" class="settings-link">
+          <span class="settings-link-icon settings-link-icon-accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <span class="settings-link-label">Account</span>
+          <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
 
-      <button type="button" id="openSettingsButton" class="settings-link">
-        <span class="settings-link-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </span>
-        <span class="settings-link-label">Instellingen</span>
-        <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
+        <button type="button" id="openSettingsButton" class="settings-link">
+          <span class="settings-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          <span class="settings-link-label">Instellingen</span>
+          <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
 
       <div class="danger-zone">
         <button type="button" id="profileLogoutButton" class="logout-link" style="width:100%;">Uitloggen</button>
@@ -1139,6 +1175,9 @@
     themeDarkButton: document.getElementById('themeDarkButton'),
     themeAutoButton: document.getElementById('themeAutoButton'),
 
+    openAccountButton: document.getElementById('openAccountButton'),
+    accountOverlay: document.getElementById('accountOverlay'),
+    accountCloseButton: document.getElementById('accountCloseButton'),
     openSettingsButton: document.getElementById('openSettingsButton'),
     settingsOverlay: document.getElementById('settingsOverlay'),
     settingsCloseButton: document.getElementById('settingsCloseButton'),
@@ -1185,6 +1224,8 @@
   /* =========================================================================
      INSTELLINGEN
      ========================================================================= */
+  els.openAccountButton.addEventListener('click', () => els.accountOverlay.classList.remove('hidden'));
+  els.accountCloseButton.addEventListener('click', () => els.accountOverlay.classList.add('hidden'));
   els.openSettingsButton.addEventListener('click', () => els.settingsOverlay.classList.remove('hidden'));
   els.settingsCloseButton.addEventListener('click', () => els.settingsOverlay.classList.add('hidden'));
 
