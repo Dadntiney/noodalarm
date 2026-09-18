@@ -110,7 +110,7 @@
     gap:12px;
     padding-bottom:16px;
   }
-  .brand{ display:flex; align-items:center; gap:10px; color:var(--text); }
+  .brand{ display:flex; align-items:center; gap:10px; color:var(--text); background:none; border:none; padding:0; cursor:pointer; font:inherit; }
   .brand-mark{
     width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
     background:radial-gradient(circle at 32% 24%, var(--red-bright), var(--red) 60%, var(--red-dark) 100%);
@@ -274,6 +274,19 @@
   .end-button:hover{ background:rgba(227,32,61,.12); }
   .add-button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:100%; }
   .add-button:hover{ border-color:var(--text-muted); }
+  .settings-link{
+    width:100%; display:flex; align-items:center; gap:14px; text-align:left;
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
+    padding:14px 16px; cursor:pointer; color:var(--text);
+  }
+  .settings-link:hover{ border-color:var(--text-muted); }
+  .settings-link-icon{
+    width:40px; height:40px; border-radius:50%; background:var(--surface-2); color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .settings-link-icon svg{ width:20px; height:20px; }
+  .settings-link-label{ flex:1; font-weight:700; font-size:16px; }
+  .settings-link-chevron{ width:18px; height:18px; color:var(--text-faint); flex-shrink:0; }
   .save-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; }
   .save-button:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
   .save-button:disabled{ opacity:.6; cursor:not-allowed; }
@@ -761,12 +774,12 @@
   <section id="screen-app" class="screen hidden">
 
     <header class="topbar">
-      <div class="brand">
+      <button type="button" id="brandHomeButton" class="brand" aria-label="Naar Alarm">
         <div class="brand-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="7" stroke-opacity=".55"/><circle cx="12" cy="12" r="10.6" stroke-opacity=".28"/></svg>
         </div>
         <span class="brand-name">NORI</span>
-      </div>
+      </button>
       <div class="topbar-actions">
         <button type="button" id="reopenChatButton" class="bell-button hidden" aria-label="Open groepschat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
@@ -782,10 +795,14 @@
       </div>
     </header>
 
-    <nav class="segmented" role="tablist">
+    <nav class="segmented" id="mainNav" role="tablist">
       <button type="button" id="tabAlarm" class="active" role="tab" aria-selected="true">Alarm</button>
       <button type="button" id="tabContacts" role="tab" aria-selected="false">Contacten</button>
     </nav>
+
+    <button type="button" id="profileBackButton" class="chat-back-button hidden" aria-label="Terug naar Alarm" style="margin-bottom:24px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
 
     <!-- =========================== ALARM SCHERM =========================== -->
     <section id="screen-alarm" class="screen">
@@ -910,7 +927,13 @@
       </form>
       <div id="profileMessage" class="auth-message hidden"></div>
 
-      <button type="button" id="openSettingsButton" class="add-button">Instellingen</button>
+      <button type="button" id="openSettingsButton" class="settings-link">
+        <span class="settings-link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </span>
+        <span class="settings-link-label">Instellingen</span>
+        <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
 
       <div class="danger-zone">
         <button type="button" id="profileLogoutButton" class="logout-link" style="width:100%;">Uitloggen</button>
@@ -1048,6 +1071,9 @@
     locationMapImg: document.getElementById('locationMapImg'),
     locationOpenButton: document.getElementById('locationOpenButton'),
 
+    brandHomeButton: document.getElementById('brandHomeButton'),
+    mainNav: document.getElementById('mainNav'),
+    profileBackButton: document.getElementById('profileBackButton'),
     tabAlarm: document.getElementById('tabAlarm'),
     tabContacts: document.getElementById('tabContacts'),
     screenAlarm: document.getElementById('screen-alarm'),
@@ -1662,7 +1688,6 @@
           '<div class="handle">@' + escapeHtml(c.username) + '</div>' +
         '</div>' +
         '<div class="person-actions">' +
-          '<span class="status-pill accepted">Verbonden</span>' +
           '<button type="button" class="icon-btn danger remove-contact" data-id="' + c.connection_id + '" aria-label="Verbinding verbreken">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
           '</button>' +
@@ -1689,8 +1714,10 @@
   }
 
   /* ---------------- Navigatie tussen schermen ---------------- */
+  els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
+  els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
     els.screenAlarm.classList.toggle('hidden', name !== 'alarm');
     els.screenContacts.classList.toggle('hidden', name !== 'contacts');
@@ -1699,6 +1726,8 @@
     els.tabContacts.classList.toggle('active', name === 'contacts');
     els.tabAlarm.setAttribute('aria-selected', String(name === 'alarm'));
     els.tabContacts.setAttribute('aria-selected', String(name === 'contacts'));
+    els.mainNav.classList.toggle('hidden', name === 'profile');
+    els.profileBackButton.classList.toggle('hidden', name !== 'profile');
     if (name === 'contacts'){
       els.searchInput.value = '';
       els.searchResultsSection.classList.add('hidden');
