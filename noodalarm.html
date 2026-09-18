@@ -197,34 +197,44 @@
   .field-error{ color:var(--danger); font-size:14px; font-weight:600; }
 
   /* ---------- Alarm button ---------- */
+  @keyframes alarm-breathe{
+    0%, 100%{ box-shadow:0 22px 45px rgba(0,0,0,.55), inset 0 2px 3px rgba(255,255,255,.06), inset 0 -2px 4px rgba(0,0,0,.4), 0 0 0 0 rgba(227,32,61,.28); }
+    50%{ box-shadow:0 22px 45px rgba(0,0,0,.55), inset 0 2px 3px rgba(255,255,255,.06), inset 0 -2px 4px rgba(0,0,0,.4), 0 0 0 16px rgba(227,32,61,0); }
+  }
+  @keyframes alarm-pulse{
+    0%, 100%{ transform:scale(1); }
+    50%{ transform:scale(1.045); }
+  }
   .alarm-button-wrap{
     padding:18px; border-radius:50%; position:relative;
     background:linear-gradient(150deg,#2c3554,#141a2c);
-    box-shadow:0 22px 45px rgba(0,0,0,.55), inset 0 2px 3px rgba(255,255,255,.06), inset 0 -2px 4px rgba(0,0,0,.4);
+    animation:alarm-breathe 3.2s ease-in-out infinite;
   }
   .hold-ring{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); pointer-events:none; }
-  .hold-ring circle{ fill:none; stroke-width:6; }
+  .hold-ring circle{ fill:none; stroke-width:7; }
   .hold-ring .bg{ stroke:rgba(255,255,255,.06); }
-  .hold-ring .progress{ stroke:var(--amber); stroke-linecap:round; stroke-dasharray:god; transition:none; }
+  .hold-ring .progress{ stroke:var(--amber); stroke-linecap:round; transition:none; }
   .alarm-button{
     width:clamp(200px, 58vw, 270px); height:clamp(200px, 58vw, 270px); border-radius:50%; border:none;
     cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
-    background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
+    background:radial-gradient(circle at 32% 24%, #ff8394, var(--red-bright) 32%, var(--red) 62%, var(--red-dark) 100%);
     box-shadow:0 14px 0 var(--red-dark), 0 22px 34px rgba(0,0,0,.5),
-      inset 0 -8px 14px rgba(0,0,0,.28), inset 0 8px 12px rgba(255,255,255,.18);
+      inset 0 -8px 14px rgba(0,0,0,.28), inset 0 10px 16px rgba(255,255,255,.25);
     transition:transform .08s ease, box-shadow .08s ease;
-    -webkit-user-select:none; user-select:none; touch-action:none;
+    -webkit-user-select:none; user-select:none;
   }
-  .alarm-button svg{ width:17%; height:17%; color:rgba(255,255,255,.95); }
+  .alarm-button svg{ width:17%; height:17%; color:rgba(255,255,255,.95); transition:opacity .1s ease; }
   .alarm-button .label{
-    font-size:clamp(18px,5vw,24px); font-weight:800; letter-spacing:.04em; color:#fff;
-    text-shadow:0 2px 4px rgba(0,0,0,.25); text-align:center; line-height:1.25;
+    font-size:clamp(20px,6vw,26px); font-weight:800; letter-spacing:.06em; color:#fff;
+    text-shadow:0 2px 4px rgba(0,0,0,.25); text-align:center; line-height:1.2; transition:font-size .1s ease;
   }
-  .alarm-button.holding{
-    transform:translateY(8px);
+  .alarm-button.counting{
+    animation:alarm-pulse 1s ease-in-out infinite;
     box-shadow:0 6px 0 var(--red-dark), 0 10px 20px rgba(0,0,0,.5),
       inset 0 -4px 8px rgba(0,0,0,.32), inset 0 4px 8px rgba(255,255,255,.12);
   }
+  .alarm-button.counting .label{ font-size:clamp(52px,18vw,78px); letter-spacing:0; }
+  .alarm-button-wrap:has(.counting){ animation:none; }
   .alarm-button:focus-visible{ outline:3px solid var(--red-bright); outline-offset:6px; }
   .alarm-button:disabled{ cursor:not-allowed; opacity:.6; }
 
@@ -443,8 +453,8 @@
         <div class="onboarding-icon emergency">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
-        <h2 class="onboarding-title">Stap 3: Houd ALARM ingedrukt bij nood</h2>
-        <p class="onboarding-text">Uw contacten krijgen dan <strong>meteen</strong> een melding: in de app en per e-mail.</p>
+        <h2 class="onboarding-title">Stap 3: Druk op ALARM bij nood</h2>
+        <p class="onboarding-text">U heeft daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen uw contacten meteen een melding: in de app en per e-mail.</p>
       </div>
 
       <div class="onboarding-dots">
@@ -557,20 +567,20 @@
 
         <!-- IDLE -->
         <div id="view-idle" class="view">
-          <p class="intro">Houd de knop <strong>ingedrukt</strong> om je bevestigde noodcontacten te waarschuwen — via de app en e-mail.</p>
+          <p class="intro">Druk op de knop om je noodcontacten te waarschuwen.</p>
 
           <div class="alarm-button-wrap">
             <svg class="hold-ring" viewBox="0 0 240 240">
               <circle class="bg" cx="120" cy="120" r="112"/>
               <circle class="progress" id="holdProgress" cx="120" cy="120" r="112"/>
             </svg>
-            <button id="alarmButton" class="alarm-button" aria-label="Ingedrukt houden voor alarm">
-              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-              <span class="label" id="alarmButtonLabel">INGEDRUKT<br>HOUDEN VOOR<br>ALARM</span>
+            <button id="alarmButton" class="alarm-button" aria-label="Druk voor alarm">
+              <svg id="alarmIcon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              <span class="label" id="alarmButtonLabel">ALARM</span>
             </button>
           </div>
 
-          <p class="hint">Loslaten voordat de cirkel rond is annuleert het alarm — geen misklik mogelijk.</p>
+          <button type="button" id="cancelAlarmButton" class="cancel-button hidden">Annuleren</button>
 
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
         </div>
@@ -773,7 +783,9 @@
 
     alarmButton: document.getElementById('alarmButton'),
     alarmButtonLabel: document.getElementById('alarmButtonLabel'),
+    alarmIcon: document.getElementById('alarmIcon'),
     holdProgress: document.getElementById('holdProgress'),
+    cancelAlarmButton: document.getElementById('cancelAlarmButton'),
     noGroupWarning: document.getElementById('noGroupWarning'),
 
     viewIdle: document.getElementById('view-idle'),
@@ -1292,51 +1304,58 @@
   });
 
   /* =========================================================================
-     ALARMKNOP — ingedrukt houden i.p.v. tikken (voorkomt misklik)
+     ALARMKNOP — één druk, dan een zichtbare aftelling (voorkomt misklik)
      ========================================================================= */
-  const HOLD_MS = 1600;
-  let holdRafId = null;
-  let holdStartedAt = 0;
-  let holdActive = false;
+  const COUNTDOWN_MS = 3000;
+  let countdownRafId = null;
+  let countdownStartedAt = 0;
+  let countdownActive = false;
 
   function setHoldProgress(fraction){
     els.holdProgress.style.strokeDashoffset = String(HOLD_CIRCUMFERENCE * (1 - fraction));
   }
-
-  function startHold(){
-    if (holdActive || els.alarmButton.disabled) return;
-    holdActive = true;
-    holdStartedAt = performance.now();
-    els.alarmButton.classList.add('holding');
-    if (navigator.vibrate) navigator.vibrate(20);
-
-    function tick(now){
-      if (!holdActive) return;
-      const elapsed = now - holdStartedAt;
-      const fraction = Math.min(1, elapsed / HOLD_MS);
-      setHoldProgress(fraction);
-      if (fraction >= 1){
-        holdActive = false;
-        els.alarmButton.classList.remove('holding');
-        setHoldProgress(0);
-        activateAlarm();
-        return;
-      }
-      holdRafId = requestAnimationFrame(tick);
-    }
-    holdRafId = requestAnimationFrame(tick);
-  }
-  function cancelHold(){
-    if (!holdActive) return;
-    holdActive = false;
-    if (holdRafId) cancelAnimationFrame(holdRafId);
-    els.alarmButton.classList.remove('holding');
+  function resetAlarmButton(){
+    els.alarmButtonLabel.textContent = 'ALARM';
+    els.alarmIcon.classList.remove('hidden');
+    els.alarmButton.classList.remove('counting');
+    els.cancelAlarmButton.classList.add('hidden');
     setHoldProgress(0);
   }
 
-  els.alarmButton.addEventListener('pointerdown', startHold);
-  ['pointerup','pointerleave','pointercancel'].forEach(evt => els.alarmButton.addEventListener(evt, cancelHold));
-  els.alarmButton.addEventListener('contextmenu', ev => ev.preventDefault());
+  function startCountdown(){
+    if (countdownActive || els.alarmButton.disabled) return;
+    countdownActive = true;
+    countdownStartedAt = performance.now();
+    els.alarmButton.classList.add('counting');
+    els.alarmIcon.classList.add('hidden');
+    els.cancelAlarmButton.classList.remove('hidden');
+    if (navigator.vibrate) navigator.vibrate(20);
+
+    function tick(now){
+      if (!countdownActive) return;
+      const elapsed = now - countdownStartedAt;
+      const fraction = Math.min(1, elapsed / COUNTDOWN_MS);
+      setHoldProgress(fraction);
+      els.alarmButtonLabel.textContent = String(Math.max(1, Math.ceil((COUNTDOWN_MS - elapsed) / 1000)));
+      if (fraction >= 1){
+        countdownActive = false;
+        resetAlarmButton();
+        activateAlarm();
+        return;
+      }
+      countdownRafId = requestAnimationFrame(tick);
+    }
+    countdownRafId = requestAnimationFrame(tick);
+  }
+  function cancelCountdown(){
+    if (!countdownActive) return;
+    countdownActive = false;
+    if (countdownRafId) cancelAnimationFrame(countdownRafId);
+    resetAlarmButton();
+  }
+
+  els.alarmButton.addEventListener('click', startCountdown);
+  els.cancelAlarmButton.addEventListener('click', cancelCountdown);
 
   els.endAlarmButton.addEventListener('click', () => switchView(els.viewIdle));
 
