@@ -631,10 +631,15 @@
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
 
           <div id="iosInstallHint" class="auth-message hidden">
-            📱 <strong>Op iPhone of iPad?</strong> Pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik hieronder op "Delen" en kies daarna <strong>"Zet op beginscherm"</strong>.
+            📱 <strong>Op iPhone of iPad?</strong> Pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op het deel-icoon <span aria-hidden="true">⬆️</span> en kies daarna <strong>"Zet op beginscherm"</strong>. (iOS staat het helaas niet toe om deze stap vanuit de app zelf te openen.)
+            <div style="margin-top:10px;"><button type="button" id="iosInstallHintDismiss" class="link-button" style="padding:0;">Begrepen</button></div>
+          </div>
+
+          <div id="androidInstallHint" class="auth-message hidden">
+            📱 <strong>Installeer NORI</strong> voor snellere toegang en pushmeldingen.
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button type="button" id="iosShareButton" class="small-btn">Delen</button>
-              <button type="button" id="iosInstallHintDismiss" class="link-button" style="padding:0;">Begrepen</button>
+              <button type="button" id="androidInstallButton" class="small-btn">NORI installeren</button>
+              <button type="button" id="androidInstallHintDismiss" class="link-button" style="padding:0;">Niet nu</button>
             </div>
           </div>
         </div>
@@ -767,7 +772,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -863,7 +868,9 @@
     noGroupWarning: document.getElementById('noGroupWarning'),
     iosInstallHint: document.getElementById('iosInstallHint'),
     iosInstallHintDismiss: document.getElementById('iosInstallHintDismiss'),
-    iosShareButton: document.getElementById('iosShareButton'),
+    androidInstallHint: document.getElementById('androidInstallHint'),
+    androidInstallButton: document.getElementById('androidInstallButton'),
+    androidInstallHintDismiss: document.getElementById('androidInstallHintDismiss'),
 
     viewIdle: document.getElementById('view-idle'),
     viewSent: document.getElementById('view-sent'),
@@ -1571,18 +1578,35 @@
       els.iosInstallHint.classList.add('hidden');
     });
   }
-  if (els.iosShareButton){
-    // iOS staat webpagina's niet toe om "Zet op beginscherm" rechtstreeks te
-    // openen — alleen de systeem-share-sheet kan dat, dus dit is de kortste
-    // route die wél mogelijk is: één tik opent die sheet meteen.
-    els.iosShareButton.addEventListener('click', async () => {
-      try {
-        if (navigator.share){
-          await navigator.share({ title: 'NORI', url: window.location.origin + window.location.pathname });
-        } else {
-          window.alert('Tik op het deel-icoon onderin Safari en kies "Zet op beginscherm".');
-        }
-      } catch (e){ /* gebruiker annuleerde de share-sheet — geen actie nodig */ }
+
+  // Android/Chrome staat wel toe om de installatie-prompt rechtstreeks vanuit
+  // de app te openen: de browser geeft ons dat "beforeinstallprompt"-event,
+  // en we bewaren het tot iemand op de knop drukt.
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (els.androidInstallHint && !isStandalone() && !realStore.get(KEYS.androidHintDismissed, false)){
+      els.androidInstallHint.classList.remove('hidden');
+    }
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    if (els.androidInstallHint) els.androidInstallHint.classList.add('hidden');
+  });
+  if (els.androidInstallButton){
+    els.androidInstallButton.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      els.androidInstallHint.classList.add('hidden');
+    });
+  }
+  if (els.androidInstallHintDismiss){
+    els.androidInstallHintDismiss.addEventListener('click', () => {
+      realStore.set(KEYS.androidHintDismissed, true);
+      els.androidInstallHint.classList.add('hidden');
     });
   }
 
