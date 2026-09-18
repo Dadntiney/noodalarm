@@ -207,6 +207,17 @@
   .field{ display:flex; flex-direction:column; gap:7px; }
   .field-error{ color:var(--danger); font-size:14px; font-weight:600; }
 
+  .password-field{ position:relative; }
+  .password-field input{ padding-right:48px; }
+  .password-toggle{
+    position:absolute; top:50%; right:4px; transform:translateY(-50%);
+    width:40px; height:40px; border:none; background:none; color:var(--text-faint);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:8px;
+  }
+  .password-toggle:hover{ color:var(--text-muted); }
+  .password-toggle svg{ width:21px; height:21px; }
+  .password-toggle.showing{ color:var(--accent); }
+
   /* ---------- Alarm button ---------- */
   @keyframes alarm-breathe{
     0%, 100%{ box-shadow:0 22px 45px rgba(0,0,0,.55), inset 0 2px 3px rgba(255,255,255,.06), inset 0 -2px 4px rgba(0,0,0,.4), 0 0 0 0 rgba(227,32,61,.28); }
@@ -538,7 +549,12 @@
         </div>
         <div class="field">
           <label for="loginPassword">Wachtwoord</label>
-          <input type="password" id="loginPassword" placeholder="Wachtwoord" autocomplete="current-password" required>
+          <div class="password-field">
+            <input type="password" id="loginPassword" placeholder="Wachtwoord" autocomplete="current-password" required>
+            <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Wachtwoord tonen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
         <button type="submit" id="loginSubmitButton" class="save-button">Inloggen</button>
         <button type="button" id="forgotPasswordButton" class="link-button" style="align-self:center;">Wachtwoord vergeten of instellen</button>
@@ -567,7 +583,12 @@
           </div>
           <div class="field">
             <label for="regPassword">Wachtwoord</label>
-            <input type="password" id="regPassword" placeholder="Minimaal 8 tekens" autocomplete="new-password" required minlength="8">
+            <div class="password-field">
+              <input type="password" id="regPassword" placeholder="Minimaal 8 tekens" autocomplete="new-password" required minlength="8">
+              <button type="button" class="password-toggle" data-target="regPassword" aria-label="Wachtwoord tonen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         <button type="submit" id="registerSubmitButton" class="save-button">Account aanmaken</button>
@@ -960,6 +981,20 @@
   applyTheme();
   setInterval(() => { if (realStore.get(KEYS.theme, 'auto') === 'auto') applyTheme(); }, 5 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) applyTheme(); });
+
+  /* =========================================================================
+     Wachtwoord tonen/verbergen
+     ========================================================================= */
+  document.querySelectorAll('.password-toggle').forEach(btn => {
+    const input = document.getElementById(btn.dataset.target);
+    if (!input) return;
+    btn.addEventListener('click', () => {
+      const showing = input.type === 'password';
+      input.type = showing ? 'text' : 'password';
+      btn.classList.toggle('showing', showing);
+      btn.setAttribute('aria-label', showing ? 'Wachtwoord verbergen' : 'Wachtwoord tonen');
+    });
+  });
 
   let currentSession = null;
   let currentProfile = null;
