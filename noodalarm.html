@@ -513,7 +513,11 @@
   }
   .chat-messages{
     flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:14px;
-    padding:18px; background:var(--bg); -webkit-overflow-scrolling:touch;
+    padding:18px; -webkit-overflow-scrolling:touch;
+    color:var(--text);
+    background-color:var(--bg);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
+    background-size:24px 24px;
   }
   .chat-empty-hint{ color:var(--text-muted); font-size:16px; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
   .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
