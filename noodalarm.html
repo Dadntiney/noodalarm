@@ -1000,29 +1000,35 @@
     els.registerSubmitButton.textContent = 'Bezig…';
     showAuthMessage('', null);
 
-    const { error } = await sb.auth.signUp({
-      email, password,
-      options: {
-        emailRedirectTo: window.location.origin + window.location.pathname,
-        data: { first_name, last_name, username }
-      }
-    });
+    let data = null;
+    try {
+      const res = await fetch(FUNCTIONS_URL + '/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+        body: JSON.stringify({ first_name, last_name, username, email, password })
+      });
+      data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Registreren mislukt.');
+    } catch (err){
+      els.registerSubmitButton.disabled = false;
+      els.registerSubmitButton.textContent = 'Account aanmaken';
+      showAuthMessage(err.message, 'error');
+      return;
+    }
 
     els.registerSubmitButton.disabled = false;
     els.registerSubmitButton.textContent = 'Account aanmaken';
 
-    if (error){
-      const msg = error.message.indexOf('bezet') !== -1 ? 'Deze gebruikersnaam is net bezet geraakt — kies een andere.'
-        : (error.message.indexOf('registered') !== -1 || error.message.indexOf('already') !== -1) ? 'Dit e-mailadres heeft al een account. Log in, of gebruik "Wachtwoord vergeten".'
-        : 'Registreren mislukt: ' + error.message;
-      showAuthMessage(msg, 'error');
+    if (data.autoLogin && data.access_token){
+      await sb.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
       return;
     }
 
-    showAuthMessage('Bijna klaar! Check je e-mail (' + escapeHtml(email) + ') en klik op de bevestigingslink om in te loggen.', 'success');
+    showAuthMessage('Account aangemaakt! Je kunt nu inloggen.', 'success');
     els.registerForm.reset();
     els.regUsernameHint.textContent = 'Alleen kleine letters, cijfers en _ (3-20 tekens)';
     els.regUsernameHint.className = 'field-hint';
+    els.showLoginButton.click();
   });
 
   els.loginForm.addEventListener('submit', async (ev) => {
