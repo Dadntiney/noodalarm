@@ -42,6 +42,7 @@
     --font:'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
     --radius-lg:24px;
     --radius-md:16px;
+    --app-pad-x:22px;
   }
   /* ---------- Licht (standaard) ---------- */
   :root, :root[data-theme="light"]{
@@ -98,7 +99,7 @@
     flex-direction:column;
     padding:
       max(20px, env(safe-area-inset-top))
-      22px
+      var(--app-pad-x)
       max(28px, env(safe-area-inset-bottom));
   }
 
@@ -508,7 +509,8 @@
   .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:12px; opacity:.65; white-space:nowrap; }
   .chat-form{
     display:flex; align-items:center; gap:10px; flex-shrink:0;
-    padding:14px 16px max(14px, env(safe-area-inset-bottom));
+    margin:0 calc(-1 * var(--app-pad-x)) calc(-1 * max(28px, env(safe-area-inset-bottom)));
+    padding:14px var(--app-pad-x) max(14px, env(safe-area-inset-bottom));
     background:var(--surface); border-top:1px solid var(--border-soft);
   }
   .chat-form input{
@@ -564,7 +566,7 @@
   .onboarding-dot.active{ background:var(--accent); }
 
   @media (max-width:360px){
-    .app{ padding-left:14px; padding-right:14px; }
+    :root{ --app-pad-x:14px; }
   }
 </style>
 </head>
@@ -928,7 +930,7 @@
       </div>
 
       <div id="chatMessages" class="chat-messages" style="flex:1; padding-left:0; padding-right:0;"></div>
-      <form id="chatForm" class="chat-form" style="padding-left:0; padding-right:0;">
+      <form id="chatForm" class="chat-form">
         <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
         <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
@@ -1906,6 +1908,7 @@
   let countdownStartedAt = 0;
   let countdownActive = false;
   let pendingLocation = null;
+  let lastTriggeredAlarmId = null;
 
   // Vraagt de locatie (en dus ook de eenmalige toestemmingsvraag van de
   // browser) al op zodra de app opent — niet pas als iemand op ALARM drukt.
@@ -1985,7 +1988,13 @@
   });
   els.cancelAlarmButton.addEventListener('click', cancelCountdown);
 
-  els.endAlarmButton.addEventListener('click', () => switchView(els.viewIdle));
+  els.endAlarmButton.addEventListener('click', async () => {
+    switchView(els.viewIdle);
+    if (lastTriggeredAlarmId){
+      await sb.from('alarms').update({ status: 'ended' }).eq('id', lastTriggeredAlarmId);
+      lastTriggeredAlarmId = null;
+    }
+  });
 
   function switchView(target){
     [els.viewIdle, els.viewSent].forEach(v => v.classList.add('hidden'));
@@ -2055,6 +2064,7 @@
     els.alarmButton.disabled = false;
 
     if (result.alarmId){
+      lastTriggeredAlarmId = result.alarmId;
       openMessages(myGroupId);
     }
   }
@@ -2094,7 +2104,7 @@
     const [{ data: members }, { data: alarmRow }] = await Promise.all([
       sb.rpc('get_group_participants', { p_group_id: groupId }),
       sb.from('alarms').select('lat, lng, location_accuracy, triggered_by')
-        .eq('group_id', groupId).order('created_at', { ascending:false }).limit(1).maybeSingle()
+        .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle()
     ]);
     chatParticipantById = {};
     (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url }; });
