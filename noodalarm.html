@@ -420,19 +420,69 @@
   .notif-actions{ display:flex; gap:8px; margin-top:12px; }
   .notif-actions button{ flex:1; }
 
-  /* ---------- Groepschat ---------- */
-  .chat-participants{ color:var(--text-faint); font-size:13px; margin:2px 0 0; }
-  .chat-messages{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:6px 2px; min-height:140px; max-height:50vh; }
-  .chat-bubble{ max-width:78%; padding:9px 13px; border-radius:16px; font-size:15px; line-height:1.4; }
-  .chat-bubble.own{ align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:5px; }
-  .chat-bubble.other{ align-self:flex-start; background:var(--surface-2); border:1px solid var(--border-soft); border-bottom-left-radius:5px; }
-  .chat-bubble .who{ font-size:12px; opacity:.75; margin-bottom:2px; font-weight:700; }
-  .chat-bubble .when{ font-size:10.5px; opacity:.6; margin-top:3px; }
-  .chat-form{ display:flex; gap:8px; margin-top:12px; }
-  .chat-form input{ flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:11px; padding:12px 14px; font-size:15px; }
+  /* ---------- Groepschat (volledig scherm, WhatsApp-achtig, grote bediening) ---------- */
+  .chat-screen{
+    position:fixed; top:0; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:480px; z-index:200; background:var(--bg);
+    display:flex; flex-direction:column;
+  }
+  .chat-screen.hidden{ display:none; }
+  .chat-header{
+    display:flex; align-items:center; gap:12px; flex-shrink:0;
+    padding:max(16px, env(safe-area-inset-top)) 18px 14px;
+    background:var(--surface); border-bottom:1px solid var(--border-soft);
+    box-shadow:var(--shadow-card);
+  }
+  .chat-back-button{
+    width:46px; height:46px; border-radius:50%; border:none; background:var(--surface-2);
+    color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .chat-back-button svg{ width:23px; height:23px; }
+  .chat-back-button:hover{ background:var(--border-soft); }
+  .chat-header-info{ min-width:0; }
+  .chat-header-title{ font-size:19px; font-weight:800; line-height:1.25; }
+  .chat-header-sub{
+    color:var(--text-muted); font-size:14.5px; margin-top:2px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .chat-messages{
+    flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:14px;
+    padding:18px; background:var(--bg); -webkit-overflow-scrolling:touch;
+  }
+  .chat-empty-hint{ color:var(--text-muted); font-size:16px; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
+  .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
+  .chat-row.own{ justify-content:flex-end; }
+  .chat-row .avatar{ margin-bottom:2px; }
+  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:18px; font-size:17px; line-height:1.45; }
+  .chat-bubble.own{ background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); border-bottom-left-radius:4px; box-shadow:var(--shadow-card); }
+  .chat-bubble .who{ font-size:13.5px; opacity:.85; margin-bottom:3px; font-weight:700; }
+  .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; }
+  .chat-bubble .when{ font-size:12.5px; opacity:.65; margin-top:5px; text-align:right; }
+  .chat-form{
+    display:flex; align-items:center; gap:10px; flex-shrink:0;
+    padding:14px 16px max(14px, env(safe-area-inset-bottom));
+    background:var(--surface); border-top:1px solid var(--border-soft);
+  }
+  .chat-form input{
+    flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:26px;
+    padding:14px 20px; font-size:17px; color:var(--text); min-height:52px;
+  }
   .chat-form input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
-  .chat-send-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; border-radius:11px; padding:0 18px; font-weight:700; font-size:15px; cursor:pointer; }
-  .siren-banner{ display:flex; align-items:center; gap:8px; background:var(--amber-soft); border:1px solid var(--red); color:var(--text); border-radius:12px; padding:10px 14px; font-size:14.5px; margin-bottom:8px; }
+  .chat-form input::placeholder{ color:var(--text-faint); }
+  .chat-send-button{
+    width:52px; height:52px; min-height:52px; border-radius:50%; flex-shrink:0;
+    background:var(--accent); border:none; color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .chat-send-button svg{ width:24px; height:24px; }
+  .chat-send-button:hover{ background:var(--accent-dark); }
+  .siren-banner{
+    display:flex; align-items:center; gap:10px; flex-shrink:0;
+    background:var(--amber-soft); border-bottom:1px solid var(--red); color:var(--text);
+    padding:14px 18px; font-size:16px; font-weight:600;
+  }
+  .siren-banner .link-button{ font-size:15px; }
   .platform-icon{ width:18px; height:18px; flex-shrink:0; vertical-align:-4px; margin:0 1px; }
 
   /* ---------- Onboarding (uitleg) ---------- */
@@ -551,27 +601,27 @@
   </div>
 
   <!-- =========================== GROEPSCHAT =========================== -->
-  <div id="chatOverlay" class="overlay hidden">
-    <div class="overlay-card" style="display:flex; flex-direction:column; max-height:85vh;">
-      <div class="overlay-header">
-        <div>
-          <h2 class="overlay-title">Groepschat</h2>
-          <p id="chatParticipants" class="chat-participants"></p>
-        </div>
-        <button type="button" id="chatCloseButton" class="overlay-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
+  <div id="chatOverlay" class="chat-screen hidden">
+    <div class="chat-header">
+      <button type="button" id="chatCloseButton" class="chat-back-button" aria-label="Terug naar de app">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div class="chat-header-info">
+        <div class="chat-header-title">Groepschat</div>
+        <div id="chatParticipants" class="chat-header-sub"></div>
       </div>
-      <div id="sirenBanner" class="siren-banner hidden">
-        🔊 Alarmgeluid speelt af.
-        <button type="button" id="sirenStopButton" class="link-button" style="padding:0; margin-left:auto;">Stoppen</button>
-      </div>
-      <div id="chatMessages" class="chat-messages"></div>
-      <form id="chatForm" class="chat-form">
-        <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
-        <button type="submit" id="chatSendButton" class="chat-send-button">Sturen</button>
-      </form>
     </div>
+    <div id="sirenBanner" class="siren-banner hidden">
+      🔊 Het alarmgeluid speelt af.
+      <button type="button" id="sirenStopButton" class="link-button" style="padding:0; margin-left:auto;">Geluid stoppen</button>
+    </div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <form id="chatForm" class="chat-form">
+      <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
+      <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </button>
+    </form>
   </div>
 
   <!-- =========================== INLOG / REGISTRATIE =========================== -->
@@ -1798,12 +1848,20 @@
   let chatChannel = null;
   let currentChatAlarmId = null;
 
+  let chatParticipantById = {};
+
   function chatBubbleHtml(msg){
     const own = msg.sender_id === currentSession.user.id;
-    return '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
+    const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+    const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
       (own ? '' : '<div class="who">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
-      '<div>' + escapeHtml(msg.body) + '</div>' +
-      '<div class="when">' + new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' }) + '</div>' +
+      '<div class="text">' + escapeHtml(msg.body) + '</div>' +
+      '<div class="when">' + time + '</div>' +
+      '</div>';
+    if (own) return '<div class="chat-row own">' + bubble + '</div>';
+    return '<div class="chat-row other">' +
+      '<div class="avatar sm">' + avatarInner(msg.senderAvatar) + '</div>' +
+      bubble +
       '</div>';
   }
 
@@ -1812,13 +1870,16 @@
     currentChatAlarmId = alarmId;
     els.notifOverlay.classList.add('hidden');
     els.chatOverlay.classList.remove('hidden');
-    els.chatMessages.innerHTML = '<p class="field-hint">Bericht laden…</p>';
+    els.chatMessages.innerHTML = '<p class="chat-empty-hint">Bericht laden…</p>';
 
     const { data: participants } = await sb.rpc('get_alarm_participants', { p_alarm_id: alarmId });
+    chatParticipantById = {};
+    (participants || []).forEach(p => { chatParticipantById[p.user_id] = p; });
     els.chatParticipants.textContent = (participants || []).map(p => p.full_name).join(', ');
 
-    await loadChatMessages(alarmId, participants || []);
+    await loadChatMessages(alarmId);
     subscribeChat(alarmId);
+    els.chatInput.focus();
   }
 
   function closeChat(){
@@ -1828,14 +1889,16 @@
   }
   els.chatCloseButton.addEventListener('click', closeChat);
 
-  async function loadChatMessages(alarmId, participants){
+  async function loadChatMessages(alarmId){
     const { data: messages } = await sb.from('alarm_messages').select('*')
       .eq('alarm_id', alarmId).order('created_at', { ascending:true }).limit(200);
-    const nameById = {};
-    participants.forEach(p => { nameById[p.user_id] = p.full_name; });
     els.chatMessages.innerHTML = (messages || []).length
-      ? messages.map(m => chatBubbleHtml({ ...m, senderName: nameById[m.sender_id] })).join('')
-      : '<p class="field-hint">Nog geen berichten. Laat de rest weten wat er speelt.</p>';
+      ? messages.map(m => chatBubbleHtml({
+          ...m,
+          senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
+          senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
+        })).join('')
+      : '<p class="chat-empty-hint">Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.</p>';
     els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
   }
 
@@ -1848,12 +1911,15 @@
         filter: 'alarm_id=eq.' + alarmId
       }, async (payload) => {
         const msg = payload.new;
-        let senderName = 'Jij';
-        if (msg.sender_id !== currentSession.user.id){
-          const { data: p } = await sb.from('profiles').select('full_name').eq('id', msg.sender_id).single();
-          senderName = p ? p.full_name : 'Onbekend';
+        let participant = chatParticipantById[msg.sender_id];
+        if (!participant){
+          const { data: p } = await sb.from('profiles').select('full_name, avatar_url').eq('id', msg.sender_id).single();
+          participant = p ? { full_name: p.full_name, avatar_url: p.avatar_url } : { full_name: 'Onbekend', avatar_url: null };
+          chatParticipantById[msg.sender_id] = participant;
         }
-        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, senderName }));
+        const emptyHint = els.chatMessages.querySelector('.chat-empty-hint');
+        if (emptyHint) emptyHint.remove();
+        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, senderName: participant.full_name, senderAvatar: participant.avatar_url }));
         els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
       })
       .subscribe();
