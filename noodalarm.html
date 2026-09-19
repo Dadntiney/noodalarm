@@ -233,6 +233,11 @@
     transition:background .15s ease, color .15s ease;
   }
   .segmented button.active{ background:var(--accent); color:#fff; }
+  .resus-segmented{ margin-bottom:0; }
+  .resus-segmented button{ font-size:0.8125rem; padding:11px 4px; }
+  .resus-segmented button[data-resus="yes"].active{ background:var(--green); }
+  .resus-segmented button[data-resus="no"].active{ background:var(--danger); }
+  @media (max-width:360px){ .resus-segmented button{ font-size:0.71875rem; padding:10px 2px; } }
 
   /* ---------- Weergave (thema)-keuze ---------- */
   .theme-picker{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
@@ -838,6 +843,11 @@
   .medical-info-chevron{ width:18px; height:18px; color:var(--text-muted); flex-shrink:0; transition:transform .15s ease; }
   .medical-info-card.open .medical-info-chevron{ transform:rotate(180deg); }
   .medical-info-body{ padding:0 16px 16px; display:flex; flex-direction:column; gap:8px; }
+  /* Reanimatievoorkeur mag nooit achter de inklapbare details schuilgaan —
+     altijd meteen zichtbaar, ook zonder de kaart open te tikken. */
+  .medical-resus-banner{ padding:12px 16px; font-weight:800; font-size:0.9375rem; text-align:center; }
+  .medical-resus-banner.danger{ background:var(--danger); color:#fff; }
+  .medical-resus-banner.ok{ background:var(--green); color:#fff; }
   .medical-info-row{ font-size:0.90625rem; line-height:1.4; }
   .medical-info-row strong{ font-weight:700; }
 
@@ -1098,6 +1108,15 @@
         <div>
           <div class="settings-row-title" style="margin-bottom:4px;">Medische info</div>
           <p class="field-hint" style="margin-top:0;">Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert.</p>
+        </div>
+        <div class="field">
+          <label>Mag je gereanimeerd worden?</label>
+          <nav class="segmented resus-segmented" id="resusSegmented" role="tablist" aria-label="Reanimatievoorkeur">
+            <button type="button" data-resus="" role="tab">Niet aangegeven</button>
+            <button type="button" data-resus="yes" role="tab">Ja, reanimeer</button>
+            <button type="button" data-resus="no" role="tab">Nee, niet reanimeren</button>
+          </nav>
+          <div class="field-hint">Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.</div>
         </div>
         <div class="field">
           <label for="medicalAllergies">Allergieën</label>
@@ -1363,11 +1382,16 @@
     <!-- =========================== CONTACTEN SCHERM =========================== -->
     <section id="screen-contacts" class="screen hidden">
 
-      <button type="button" id="qrInviteToggle" class="settings-link" style="margin-bottom:16px;">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
+      </div>
+
+      <button type="button" id="qrInviteToggle" class="settings-link" style="margin:12px 0 16px;">
         <span class="settings-link-icon settings-link-icon-accent">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
         </span>
-        <span class="settings-link-label">Voeg toe via QR-code</span>
+        <span class="settings-link-label">Of nodig iemand uit (QR-code / link)</span>
         <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
       </button>
 
@@ -1375,11 +1399,6 @@
         <img id="qrInviteImg" alt="QR-code om jou toe te voegen als noodcontact">
         <p class="field-hint" style="text-align:center; margin:12px 0 0;">Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.</p>
         <button type="button" id="copyInviteLinkButton" class="small-btn" style="margin:12px auto 0; display:block;">Of kopieer de link</button>
-      </div>
-
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
       </div>
 
       <div id="searchResultsSection" class="hidden">
@@ -1435,6 +1454,7 @@
       </div>
 
       <div id="medicalInfoCard" class="medical-info-card hidden">
+        <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
         <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
           <span>🩺 Medische info van <strong id="medicalInfoName">—</strong></span>
           <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -1685,6 +1705,7 @@
     locationMapFallback: document.getElementById('locationMapFallback'),
     locationOpenButton: document.getElementById('locationOpenButton'),
     medicalInfoCard: document.getElementById('medicalInfoCard'),
+    medicalResusBanner: document.getElementById('medicalResusBanner'),
     medicalInfoToggle: document.getElementById('medicalInfoToggle'),
     medicalInfoName: document.getElementById('medicalInfoName'),
     medicalInfoBody: document.getElementById('medicalInfoBody'),
@@ -1764,6 +1785,7 @@
     profileSaveButton: document.getElementById('profileSaveButton'),
     profileMessage: document.getElementById('profileMessage'),
     medicalForm: document.getElementById('medicalForm'),
+    resusSegmented: document.getElementById('resusSegmented'),
     medicalAllergies: document.getElementById('medicalAllergies'),
     medicalMedications: document.getElementById('medicalMedications'),
     medicalConditions: document.getElementById('medicalConditions'),
@@ -2782,8 +2804,31 @@
   });
 
   /* -------- Medische info -------- */
+  // Reanimatievoorkeur: null (niet aangegeven) / true (ja) / false (nee) —
+  // opgeslagen als een segmented-keuze i.p.v. een los invoerveld, zodat een
+  // reagerende noodcontact het in één oogopslag ziet.
+  function setResusSelection(value){
+    els.resusSegmented.querySelectorAll('button').forEach(btn => {
+      const btnValue = btn.dataset.resus === 'yes' ? true : (btn.dataset.resus === 'no' ? false : null);
+      btn.classList.toggle('active', btnValue === value);
+      btn.setAttribute('aria-selected', String(btnValue === value));
+    });
+  }
+  function getResusSelection(){
+    const active = els.resusSegmented.querySelector('button.active');
+    if (!active || !active.dataset.resus) return null;
+    return active.dataset.resus === 'yes';
+  }
+  els.resusSegmented.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const value = btn.dataset.resus === 'yes' ? true : (btn.dataset.resus === 'no' ? false : null);
+      setResusSelection(value);
+    });
+  });
+
   async function loadMedicalInfo(){
     const { data } = await sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle();
+    setResusSelection(data && typeof data.resuscitate === 'boolean' ? data.resuscitate : null);
     els.medicalAllergies.value = data?.allergies || '';
     els.medicalMedications.value = data?.medications || '';
     els.medicalConditions.value = data?.conditions || '';
@@ -2796,6 +2841,7 @@
     els.medicalSaveButton.disabled = true;
     const { error } = await sb.from('medical_info').upsert({
       user_id: currentSession.user.id,
+      resuscitate: getResusSelection(),
       allergies: els.medicalAllergies.value.trim() || null,
       medications: els.medicalMedications.value.trim() || null,
       conditions: els.medicalConditions.value.trim() || null,
@@ -3394,13 +3440,23 @@
     }
     const { data } = await sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id });
     const info = data && data[0];
-    const hasAny = info && (info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone || info.notes);
+    const hasResus = info && typeof info.resuscitate === 'boolean';
+    const hasAny = info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone || info.notes);
     if (!hasAny){
       els.medicalInfoCard.classList.add('hidden');
       return;
     }
     const activator = chatParticipantById[alarmRow.triggered_by];
-    els.medicalInfoName.textContent = activator ? activator.full_name : 'de activator';
+    const activatorName = activator ? activator.full_name : 'de activator';
+    els.medicalInfoName.textContent = activatorName;
+    if (hasResus){
+      els.medicalResusBanner.textContent = info.resuscitate
+        ? '✅ ' + activatorName + ' mag gereanimeerd worden'
+        : '⛔ ' + activatorName + ' wil NIET gereanimeerd worden';
+      els.medicalResusBanner.className = 'medical-resus-banner ' + (info.resuscitate ? 'ok' : 'danger');
+    } else {
+      els.medicalResusBanner.classList.add('hidden');
+    }
     const rows = [];
     if (info.allergies) rows.push('<div class="medical-info-row"><strong>Allergieën:</strong> ' + escapeHtml(info.allergies) + '</div>');
     if (info.medications) rows.push('<div class="medical-info-row"><strong>Medicatie:</strong> ' + escapeHtml(info.medications) + '</div>');
