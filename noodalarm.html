@@ -716,13 +716,16 @@
   .chat-messages{
     flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:contain;
     display:flex; flex-direction:column; gap:14px;
-    padding:18px; -webkit-overflow-scrolling:touch;
+    padding:18px 18px 24px; -webkit-overflow-scrolling:touch;
     color:var(--text);
     background-color:var(--bg);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
     background-size:24px 24px;
-    -webkit-mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 52px), rgba(0,0,0,.5) calc(100% - 20px), transparent);
-    mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 52px), rgba(0,0,0,.5) calc(100% - 20px), transparent);
+    /* Onderkant bewust korter dan de bottom-padding hierboven, zodat de
+       fade altijd binnen die lege ruimte blijft en het laatste bericht
+       zelf nooit raakt, ook niet als je helemaal onderaan gescrold bent. */
+    -webkit-mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 16px), transparent);
+    mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 16px), transparent);
   }
   /* Zonder dit selecteert een lang indrukken (voor het berichtmenu) ook de
      omliggende pagina-tekst, met de bekende blauwe selectie-highlight en op
@@ -1166,11 +1169,11 @@
             </span>
             <div class="settings-item-body">
               <div class="settings-item-title" id="testAlarmSectionTitle">Oefenen met een testalarm</div>
-              <p class="settings-item-hint" id="testAlarmSectionHint">Stuur een testalarm naar je noodcontacten, zodat je precies weet hoe het voelt en werkt.</p>
+              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop zonder dat je noodcontacten er iets van merken — zo weet je precies hoe het voelt en werkt.</p>
             </div>
           </div>
           <div class="settings-item-control">
-            <button type="button" id="testAlarmButton" class="small-btn">🧪 Stuur een testalarm</button>
+            <button type="button" id="testAlarmButton" class="small-btn">🧪 Test het alarm</button>
           </div>
         </div>
       </div>
@@ -1314,7 +1317,7 @@
             <label id="resusFieldLabel">Mag je gereanimeerd worden?</label>
             <nav class="segmented resus-segmented" id="resusSegmented" role="tablist" aria-label="Reanimatievoorkeur">
               <button type="button" data-resus="" role="tab">Nog niet gekozen</button>
-              <button type="button" data-resus="yes" role="tab">Ja, reanimeer</button>
+              <button type="button" data-resus="yes" role="tab">Ja, reanimeren</button>
               <button type="button" data-resus="no" role="tab">Nee, niet reanimeren</button>
             </nav>
             <div class="field-hint" id="resusFieldHint">Reanimeren betekent: iemand probeert je hart weer te laten kloppen als het gestopt is. Jij bepaalt of dat mag.</div>
@@ -1421,7 +1424,7 @@
           <p class="field-hint" id="extraInfoSectionHint" style="margin-top:0;">Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.</p>
         </div>
         <div class="field">
-          <label for="extraInfoSpareKey" id="spareKeyLabel">Sleutel buitenshuis</label>
+          <label for="extraInfoSpareKey" id="spareKeyLabel">Waar ligt een reservesleutel?</label>
           <input type="text" id="extraInfoSpareKey" placeholder="Bijv. sleutelkluisje naast de voordeur, code 1234 — of bij de buren op nr. 12">
         </div>
         <button type="submit" id="extraInfoSaveButton" class="save-button">Opslaan</button>
@@ -1963,7 +1966,7 @@
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
     { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
     { sel: '#testAlarmSectionTitle', nl: 'Oefenen met een testalarm', en: 'Practice with a test alarm' },
-    { sel: '#testAlarmSectionHint', nl: 'Stuur een testalarm naar je noodcontacten, zodat je precies weet hoe het voelt en werkt.', en: 'Send a test alarm to your emergency contacts, so you know exactly how it feels and works.' },
+    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop zonder dat je noodcontacten er iets van merken — zo weet je precies hoe het voelt en werkt.', en: 'Practice pressing the alarm button without your emergency contacts noticing anything — so you know exactly how it feels and works.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
@@ -2003,7 +2006,7 @@
     { sel: '#resusSegmented', attr: 'aria-label', nl: 'Reanimatievoorkeur', en: 'Resuscitation preference' },
     { sel: '#resusFieldLabel', nl: 'Mag je gereanimeerd worden?', en: 'May you be resuscitated?' },
     { sel: '#resusSegmented button[data-resus=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
-    { sel: '#resusSegmented button[data-resus="yes"]', nl: 'Ja, reanimeer', en: 'Yes, resuscitate' },
+    { sel: '#resusSegmented button[data-resus="yes"]', nl: 'Ja, reanimeren', en: 'Yes, resuscitate' },
     { sel: '#resusSegmented button[data-resus="no"]', nl: 'Nee, niet reanimeren', en: 'No, do not resuscitate' },
     { sel: '#resusFieldHint', nl: 'Reanimeren betekent: iemand probeert je hart weer te laten kloppen als het gestopt is. Jij bepaalt of dat mag.', en: 'Resuscitation means: someone tries to get your heart beating again if it has stopped. You decide whether that\'s allowed.' },
     { sel: '#advanceDirectiveLabel', nl: 'Speciale wensen bij ernstige zorg', en: 'Special wishes for serious care' },
@@ -2092,7 +2095,7 @@
     { sel: '#alarmButton', attr: 'aria-label', nl: 'Druk voor alarm', en: 'Press for alarm' },
     { sel: '#alarmButtonSublabel', nl: 'tik om te annuleren', en: 'tap to cancel' },
     { sel: '#cancelAlarmButton', nl: 'Annuleren', en: 'Cancel' },
-    { sel: '#testAlarmButton', nl: '🧪 Stuur een testalarm', en: '🧪 Send a test alarm' },
+    { sel: '#testAlarmButton', nl: '🧪 Test het alarm', en: '🧪 Test the alarm' },
     { sel: '#noGroupWarning', nl: 'Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.', en: 'You don\'t have any confirmed emergency contacts yet. Add someone under "Contacts" so there\'s someone to alert.' },
     { sel: '#iosInstallHintText', m: 'h', nl: '📱 <strong>Op iPhone of iPad?</strong> Zonder dit installeren mis je een noodalarm van een contact: pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon) en kies daarna <strong>"Zet op beginscherm"</strong>.', en: '📱 <strong>On iPhone or iPad?</strong> Without installing this you\'ll miss an emergency alert from a contact: push notifications only work here once you add NORI to your home screen. Tap <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (the share icon) at the bottom of Safari, then choose <strong>"Add to Home Screen"</strong>.' },
     { sel: '#iosInstallHintDismiss', nl: 'Begrepen', en: 'Got it' },
@@ -2147,7 +2150,7 @@
     { sel: '#extraInfoOverlayTitle', nl: 'Overige informatie', en: 'Other information' },
     { sel: '#extraInfoSectionTitle', nl: 'Praktische info', en: 'Practical info' },
     { sel: '#extraInfoSectionHint', nl: 'Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.', en: 'You don\'t have to fill this in. Your emergency contacts only see it once you press ALARM yourself.' },
-    { sel: '#spareKeyLabel', nl: 'Sleutel buitenshuis', en: 'Spare key location' },
+    { sel: '#spareKeyLabel', nl: 'Waar ligt een reservesleutel?', en: 'Where is a spare key?' },
     { sel: '#extraInfoSpareKey', attr: 'placeholder', nl: 'Bijv. sleutelkluisje naast de voordeur, code 1234 — of bij de buren op nr. 12', en: 'E.g. lockbox next to the front door, code 1234 — or with the neighbours at no. 12' },
     { sel: '#extraInfoSaveButton', nl: 'Opslaan', en: 'Save' },
     { sel: '#openSettingsButton .settings-link-label', nl: 'Instellingen', en: 'Settings' },
@@ -2177,11 +2180,11 @@
       'onboarding.done': 'Begrepen, aan de slag',
       'copy.copied': 'Gekopieerd!',
       'copy.failed': 'Kopiëren mislukt. Link: {link}',
-      'confirm.removeContact': 'Verbinding verbreken? Jullie zien elkaar dan niet meer als noodcontact.',
+      'confirm.removeContact': 'Dit contact verwijderen? Jullie zien elkaar dan niet meer als noodcontact.',
       'confirm.clearNotifications': 'Alle meldingen definitief wissen?',
       'confirm.deleteMessageEveryone': 'Bericht verwijderen voor iedereen?',
       'confirm.addFromInvite': '{name} (@{username}) toevoegen als noodcontact?',
-      'aria.removeContact': 'Verbinding verbreken',
+      'aria.removeContact': 'Contact verwijderen',
       'alert.addFailed': 'Toevoegen mislukt: {msg}',
       'alert.requestSent': 'Verzoek verstuurd naar {name}.',
       'invite.useHomeScreen': 'Heb je NORI al op je beginscherm staan? Gebruik voortaan dát icoon in plaats van deze pagina — alleen zo komen noodmeldingen goed binnen. Nog niet geïnstalleerd? Dat kan via Instellingen.',
@@ -2194,11 +2197,12 @@
       'alert.uploadFailed': 'Versturen mislukt: {msg}',
       'common.busy': 'Bezig…',
       'status.sendFailed': 'VERSTUREN MISLUKT',
-      'status.testSent': '🧪 TESTALARM VERZONDEN',
+      'status.testSent': '🧪 TESTALARM VOLTOOID',
       'status.alarmSent': 'NOODALARM VERZONDEN',
-      'entry.notified': 'Melding verstuurd',
-      'entry.inApp': 'In app gemeld',
+      'entry.notified': 'Pushmelding verstuurd',
+      'entry.inApp': 'Geen push, wel in app',
       'entry.noContacts': 'Geen noodcontacten gekoppeld',
+      'entry.testNote': '🧪 Dit was een oefening — je noodcontacten hebben hier niets van gemerkt (geen melding, geen e-mail).',
       'time.now': 'zojuist',
       'time.minAgo': '{n} min geleden',
       'time.hourAgo': '{n} uur geleden',
@@ -2247,7 +2251,7 @@
       'locationTest.unsupported': 'Je toestel of browser ondersteunt dit niet.',
       'notif.accepted': 'Geaccepteerd',
       'notif.accept': 'Accepteren',
-      'notif.reject': 'Verwijderen',
+      'notif.reject': 'Weigeren',
       'notif.openMessages': 'Open Berichten',
       'install.installed': 'Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
       'install.notInstalled': 'Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
@@ -2291,11 +2295,11 @@
       'onboarding.done': 'Got it, let\'s go',
       'copy.copied': 'Copied!',
       'copy.failed': 'Copying failed. Link: {link}',
-      'confirm.removeContact': 'Disconnect? You\'ll no longer see each other as emergency contacts.',
+      'confirm.removeContact': 'Remove this contact? You\'ll no longer see each other as emergency contacts.',
       'confirm.clearNotifications': 'Permanently clear all notifications?',
       'confirm.deleteMessageEveryone': 'Delete this message for everyone?',
       'confirm.addFromInvite': 'Add {name} (@{username}) as an emergency contact?',
-      'aria.removeContact': 'Disconnect',
+      'aria.removeContact': 'Remove contact',
       'alert.addFailed': 'Adding failed: {msg}',
       'alert.requestSent': 'Request sent to {name}.',
       'invite.useHomeScreen': 'Already have NORI on your home screen? Use that icon from now on instead of this page — that\'s the only way emergency alerts come through reliably. Not installed yet? You can do that via Settings.',
@@ -2308,11 +2312,12 @@
       'alert.uploadFailed': 'Sending failed: {msg}',
       'common.busy': 'Working…',
       'status.sendFailed': 'SENDING FAILED',
-      'status.testSent': '🧪 TEST ALARM SENT',
+      'status.testSent': '🧪 TEST ALARM COMPLETE',
       'status.alarmSent': 'EMERGENCY ALARM SENT',
-      'entry.notified': 'Notification sent',
-      'entry.inApp': 'Reported in app',
+      'entry.notified': 'Push notification sent',
+      'entry.inApp': 'No push, but in app',
       'entry.noContacts': 'No emergency contacts linked',
+      'entry.testNote': '🧪 This was a practice run — your emergency contacts didn\'t notice anything (no notification, no email).',
       'time.now': 'just now',
       'time.minAgo': '{n} min ago',
       'time.hourAgo': '{n} hr ago',
@@ -2361,7 +2366,7 @@
       'locationTest.unsupported': 'Your device or browser doesn\'t support this.',
       'notif.accepted': 'Accepted',
       'notif.accept': 'Accept',
-      'notif.reject': 'Remove',
+      'notif.reject': 'Decline',
       'notif.openMessages': 'Open Messages',
       'install.installed': 'Installed — you\'ll receive emergency alerts as expected.',
       'install.notInstalled': 'Not installed yet — without this you could miss an emergency alert.',
@@ -4370,18 +4375,27 @@
       els.statusBadgeText.textContent = t('status.alarmSent');
     }
 
-    const notifiedSet = new Set(result.notified || []);
-    els.entriesList.innerHTML = contacts.length
-      ? contacts.map(c => {
-          const wasNotified = notifiedSet.has(c.full_name);
-          return '<li>' +
-            '<span class="entry-name">' + escapeHtml(c.full_name) + '</span>' +
-            '<span class="entry-status ' + (wasNotified ? 'st-green' : 'st-amber') + '">' +
-              '<span class="dot ' + (wasNotified ? 'dot-green' : 'dot-amber') + '"></span>' +
-              (wasNotified ? t('entry.notified') : t('entry.inApp')) +
-            '</span></li>';
-        }).join('')
-      : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
+    // Oefenmodus stuurt bewust geen push/e-mail/in-app-melding naar wie dan
+    // ook (zie send-alert) — de "notified"-namen die de server teruggeeft
+    // gelden dus NIET als echte afleverstatus hier, alleen bij een echt
+    // alarm. Anders zou dit scherm bij een test ten onrechte "Pushmelding
+    // verstuurd" laten zien terwijl niemand iets heeft gekregen.
+    if (testMode){
+      els.entriesList.innerHTML = '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.testNote')) + '</span></li>';
+    } else {
+      const notifiedSet = new Set(result.notified || []);
+      els.entriesList.innerHTML = contacts.length
+        ? contacts.map(c => {
+            const wasNotified = notifiedSet.has(c.full_name);
+            return '<li>' +
+              '<span class="entry-name">' + escapeHtml(c.full_name) + '</span>' +
+              '<span class="entry-status ' + (wasNotified ? 'st-green' : 'st-amber') + '">' +
+                '<span class="dot ' + (wasNotified ? 'dot-green' : 'dot-amber') + '"></span>' +
+                (wasNotified ? t('entry.notified') : t('entry.inApp')) +
+              '</span></li>';
+          }).join('')
+        : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
+    }
 
     // Eerst de bevestiging laten zien dat het alarm daadwerkelijk is
     // verzonden (en aan wie) — pas als iemand zelf op "Open Berichten"
