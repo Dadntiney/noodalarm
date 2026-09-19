@@ -96,6 +96,7 @@
     font-size:17px;
     -webkit-font-smoothing:antialiased;
     min-height:100vh;
+    min-height:100dvh;
     overflow-x:hidden;
   }
   button, input, textarea{ font-family:inherit; color:inherit; }
@@ -107,6 +108,7 @@
     max-width:480px;
     margin:0 auto;
     min-height:100vh;
+    min-height:100dvh;
     display:flex;
     flex-direction:column;
     padding:
@@ -2160,6 +2162,12 @@
     return 'var(--chat-name-' + (hash % CHAT_NAME_COLOR_COUNT + 1) + ')';
   }
 
+  // .chat-messages heeft geen eigen scroll meer (de hele pagina scrolt), dus
+  // "onderaan de chat" betekent onderaan de pagina zelf.
+  function scrollChatToBottom(){
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  }
+
   function chatBubbleHtml(msg){
     const own = msg.sender_id === currentSession.user.id;
     const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
@@ -2280,7 +2288,8 @@
           senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
         })).join('')
       : '<p class="chat-empty-hint">Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.</p>';
-    els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+    scrollChatToBottom();
+    requestAnimationFrame(scrollChatToBottom);
   }
 
   function subscribeChat(groupId){
@@ -2306,7 +2315,10 @@
         const emptyHint = els.chatMessages.querySelector('.chat-empty-hint');
         if (emptyHint) emptyHint.remove();
         els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }));
-        els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+        scrollChatToBottom();
+        requestAnimationFrame(scrollChatToBottom);
+        const lastMedia = els.chatMessages.querySelector('.chat-row:last-child .chat-media');
+        if (lastMedia) lastMedia.addEventListener(lastMedia.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom, { once: true });
       })
       .subscribe();
   }
@@ -2317,6 +2329,8 @@
     if (!body || !currentChatGroupId) return;
     els.chatInput.value = '';
     await sb.from('alarm_messages').insert({ group_id: currentChatGroupId, sender_id: currentSession.user.id, body });
+    scrollChatToBottom();
+    requestAnimationFrame(scrollChatToBottom);
   });
 
   const CHAT_MEDIA_MAX_BYTES = 25 * 1024 * 1024;
@@ -2348,6 +2362,8 @@
       media_path: path, media_type: isVideo ? 'video' : 'image'
     });
     els.chatAttachButton.disabled = false;
+    scrollChatToBottom();
+    requestAnimationFrame(scrollChatToBottom);
   });
 
   /* =========================================================================
