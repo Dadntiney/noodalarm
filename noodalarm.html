@@ -89,7 +89,11 @@
   .hidden{ display:none !important; }
   .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   html,body{ margin:0; padding:0; overscroll-behavior-x:none; overscroll-behavior-y:none; }
-  body.messages-open{ overscroll-behavior-y:auto; }
+  /* Op de Berichten-pagina scrolt alleen de berichtenlijst zelf (zoals
+     WhatsApp): header en typebalk staan los vast, de pagina eromheen niet. */
+  body.messages-open{ height:100vh; height:100dvh; overflow:hidden; }
+  body.messages-open .app{ height:100vh; height:100dvh; overflow:hidden; }
+  body.messages-open #screen-app{ overflow:hidden; }
   body{
     background:var(--bg);
     color:var(--text);
@@ -179,7 +183,8 @@
     padding:max(20px, env(safe-area-inset-top)) var(--app-pad-x) 0;
   }
   #screen-auth{ padding-top:max(20px, env(safe-area-inset-top)); }
-  #screen-app{ padding-top:var(--header-height, 140px); }
+  #screen-app{ padding-top:var(--header-height, 140px); min-height:0; }
+  #screen-messages{ min-height:0; padding-bottom:var(--footer-height, 76px); }
 
   /* ---------- Views ---------- */
   .view{ width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; gap:24px; }
@@ -522,7 +527,8 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .chat-messages{
-    flex:1; display:flex; flex-direction:column; gap:14px;
+    flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:contain;
+    display:flex; flex-direction:column; gap:14px;
     padding:18px; -webkit-overflow-scrolling:touch;
     color:var(--text);
     background-color:var(--bg);
@@ -546,8 +552,8 @@
   }
   .chat-form{
     display:flex; align-items:center; gap:10px; flex-shrink:0;
-    position:sticky; bottom:0; z-index:10;
-    margin:0 calc(-1 * var(--app-pad-x)) calc(-1 * max(28px, env(safe-area-inset-bottom)));
+    position:fixed; bottom:0; left:0; right:0; z-index:10;
+    max-width:480px; margin:0 auto;
     padding:14px var(--app-pad-x) max(14px, env(safe-area-inset-bottom));
     background:var(--surface); border-top:1px solid var(--border-soft);
   }
@@ -1262,6 +1268,9 @@
     new ResizeObserver(entries => {
       document.documentElement.style.setProperty('--header-height', entries[0].target.offsetHeight + 'px');
     }).observe(els.appHeader);
+    new ResizeObserver(entries => {
+      document.documentElement.style.setProperty('--footer-height', entries[0].target.offsetHeight + 'px');
+    }).observe(els.chatForm);
   }
 
   const HOLD_CIRCUMFERENCE = 2 * Math.PI * 112;
@@ -2164,10 +2173,8 @@
     return 'var(--chat-name-' + (hash % CHAT_NAME_COLOR_COUNT + 1) + ')';
   }
 
-  // .chat-messages heeft geen eigen scroll meer (de hele pagina scrolt), dus
-  // "onderaan de chat" betekent onderaan de pagina zelf.
   function scrollChatToBottom(){
-    window.scrollTo(0, document.documentElement.scrollHeight);
+    els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
   }
 
   function chatBubbleHtml(msg){
