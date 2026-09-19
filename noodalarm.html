@@ -407,7 +407,8 @@
   .hold-ring .bg{ stroke:rgba(255,255,255,.06); }
   .hold-ring .progress{ stroke:var(--amber); stroke-linecap:round; transition:none; }
   .alarm-button{
-    width:clamp(200px, 58vw, 270px); height:clamp(200px, 58vw, 270px); border-radius:50%; border:none;
+    --urgency:0;
+    width:clamp(210px, 62vw, 280px); height:clamp(210px, 62vw, 280px); border-radius:50%; border:none;
     cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
     background:radial-gradient(circle at 32% 22%, #ffaab3, var(--red-bright) 28%, var(--red) 60%, var(--red-dark) 100%);
     box-shadow:0 14px 0 var(--red-dark), 0 24px 38px rgba(153,16,31,.45),
@@ -423,15 +424,29 @@
   .alarm-button .sublabel{
     font-size:0.8125rem; font-weight:700; letter-spacing:.02em; color:rgba(255,255,255,.88); text-transform:uppercase;
   }
+  /* --urgency loopt via JS van 0 naar 1 mee met het aftellen — de gloed om
+     de knop dijt daardoor merkbaar uit naarmate het echt menens wordt, een
+     niet-talige spanningsopbouw die je ook in je ooghoek voelt. */
   .alarm-button.counting{
     animation:alarm-pulse 1s ease-in-out infinite;
-    box-shadow:0 6px 0 var(--red-dark), 0 10px 24px rgba(153,16,31,.55),
+    box-shadow:0 6px 0 var(--red-dark),
+      0 10px 24px rgba(153,16,31,.55),
+      0 0 calc(30px + var(--urgency) * 60px) calc(4px + var(--urgency) * 22px) rgba(255,31,63, calc(.4 + var(--urgency) * .5)),
       inset 0 -4px 8px rgba(0,0,0,.34), inset 0 4px 8px rgba(255,255,255,.16);
   }
   .alarm-button.counting .label{ font-size:clamp(52px,18vw,78px); letter-spacing:0; }
   .alarm-button-wrap:has(.counting){ animation:none; }
   .alarm-button:focus-visible{ outline:3px solid var(--red-bright); outline-offset:6px; }
   .alarm-button:disabled{ cursor:not-allowed; opacity:.6; }
+  /* Zwakke, hele-scherm rode ademhaling tijdens het aftellen — puur
+     perifeer waarneembaar (je hoeft niet naar de knop te kijken om te
+     "voelen" dat er iets loopt), en bekrachtigt meteen ook: dit is nog te
+     annuleren, er gebeurt nog niets onomkeerbaars. */
+  body:has(.alarm-button.counting){ animation:countdown-screen-flash 1s ease-in-out infinite; }
+  @keyframes countdown-screen-flash{
+    0%, 100%{ background-color:var(--bg); }
+    50%{ background-color:color-mix(in srgb, var(--bg) 88%, var(--red) 12%); }
+  }
 
   .cancel-button, .end-button, .reset-button, .add-button, .save-button{
     font-weight:700; font-size:1.0625rem; padding:17px 30px; min-height:56px; border-radius:999px; cursor:pointer;
@@ -4248,7 +4263,10 @@
   /* =========================================================================
      ALARMKNOP — één druk, dan een zichtbare aftelling (voorkomt misklik)
      ========================================================================= */
-  const COUNTDOWN_MS = 3000;
+  // 4s i.p.v. 3s: geeft iets meer marge tegen een ongeluk (bv. per ongeluk
+  // geraakt vlak voordat het scherm vergrendelt) zonder dat het bij een
+  // echte noodsituatie merkbaar voelt — praten tegen 112 duurt al langer.
+  const COUNTDOWN_MS = 4000;
   let countdownRafId = null;
   let countdownStartedAt = 0;
   let countdownActive = false;
@@ -4310,6 +4328,35 @@
       else fire();
     } catch (err){ /* geluid is decoratief — het aftellen zelf mag hier nooit van afhangen */ }
   }
+  // Eén duidelijk, dalend "bevestigd"-signaal op het exacte moment dat het
+  // aftellen voorbij is — bewust anders dan de oplopende piepjes hiervoor,
+  // zodat het onmiskenbaar voelt als "het is nu echt verstuurd" in plaats
+  // van nog een tel. Speelt synchroon met het aftellen, dus zonder te
+  // wachten op het netwerkverzoek erna.
+  function playFiredTone(){
+    try {
+      if (!countdownAudioCtx) countdownAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = countdownAudioCtx;
+      const fire = () => {
+        [ [523.25, 0], [392.00, 0.09] ].forEach(([freq, delay]) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = freq;
+          const t0 = ctx.currentTime + delay;
+          gain.gain.setValueAtTime(0.0001, t0);
+          gain.gain.exponentialRampToValueAtTime(0.26, t0 + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t0);
+          osc.stop(t0 + 0.24);
+        });
+      };
+      if (ctx.state === 'suspended') ctx.resume().then(fire).catch(() => {});
+      else fire();
+    } catch (err){ /* geluid is decoratief */ }
+  }
   function resetAlarmButton(){
     els.alarmButtonLabel.textContent = 'ALARM';
     els.alarmButtonSublabel.classList.add('hidden');
@@ -4319,6 +4366,7 @@
     els.cancelAlarmButton.classList.add('hidden');
     els.testAlarmButton.classList.remove('hidden');
     setHoldProgress(0);
+    els.alarmButton.style.setProperty('--urgency', '0');
   }
 
   let pendingTestMode = false;
@@ -4342,6 +4390,10 @@
       const elapsed = now - countdownStartedAt;
       const fraction = Math.min(1, elapsed / COUNTDOWN_MS);
       setHoldProgress(fraction);
+      // De gloed om de knop dijt gaandeweg uit — een non-verbale
+      // spanningsopbouw die ook in de ooghoek (en op het hele scherm, via
+      // de gekoppelde body-animatie) voelbaar is.
+      els.alarmButton.style.setProperty('--urgency', String(fraction));
       const secondsLeft = Math.max(1, Math.ceil((COUNTDOWN_MS - elapsed) / 1000));
       els.alarmButtonLabel.textContent = String(secondsLeft);
       if (secondsLeft !== lastBeepSecond){
@@ -4351,6 +4403,8 @@
       }
       if (fraction >= 1){
         countdownActive = false;
+        playFiredTone();
+        if (navigator.vibrate) navigator.vibrate([25,40,25,40,120]);
         resetAlarmButton();
         activateAlarm(pendingTestMode);
         return;
