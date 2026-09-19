@@ -1014,7 +1014,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="8" r="4"/><path d="M3 21c0-4 3.5-6 8-6s8 2 8 6"/><path d="M19 8h4"/><path d="M21 6v4"/></svg>
         </div>
         <h2 class="onboarding-title">Stap 1: Zoek iemand op</h2>
-        <p class="onboarding-text">Ga naar <strong>"Contacten"</strong> en typ de naam van iemand die u vertrouwt. Druk daarna op "Toevoegen".</p>
+        <p class="onboarding-text">Ga naar <strong>"Contacten"</strong> en typ de naam van iemand die je vertrouwt. Druk daarna op "Toevoegen".</p>
       </div>
 
       <div id="onboardingStep3" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
@@ -1030,7 +1030,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
         <h2 class="onboarding-title">Stap 3: Druk op ALARM bij nood</h2>
-        <p class="onboarding-text">U heeft daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen uw contacten meteen een melding: in de app en per e-mail, mét uw locatie op dat moment.</p>
+        <p class="onboarding-text">Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding: in de app en per e-mail, mét jouw locatie op dat moment.</p>
       </div>
 
       <div class="onboarding-dots">
@@ -1303,79 +1303,98 @@
     <div class="slide-page-content">
       <h1 class="slide-page-title" id="medicalOverlayTitle">Medische informatie</h1>
 
-      <form id="medicalForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
-        <div>
-          <p class="field-hint" style="margin-top:0;">Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.</p>
-        </div>
-        <div class="field">
-          <label id="resusFieldLabel">Mag je gereanimeerd worden?</label>
-          <nav class="segmented resus-segmented" id="resusSegmented" role="tablist" aria-label="Reanimatievoorkeur">
-            <button type="button" data-resus="" role="tab">Nog niet gekozen</button>
-            <button type="button" data-resus="yes" role="tab">Ja, reanimeer</button>
-            <button type="button" data-resus="no" role="tab">Nee, niet reanimeren</button>
-          </nav>
-          <div class="field-hint" id="resusFieldHint">Reanimeren betekent: iemand probeert je hart weer te laten kloppen als het gestopt is. Jij bepaalt of dat mag.</div>
-        </div>
-        <div class="field">
-          <label for="medicalAdvanceDirective" id="advanceDirectiveLabel">Speciale wensen bij ernstige zorg</label>
-          <textarea id="medicalAdvanceDirective" rows="3" placeholder="Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…"></textarea>
-          <div class="field-hint" id="advanceDirectiveHint">Bijvoorbeeld: niet naar het ziekenhuis, of eerst iemand anders bellen. Helemaal jouw keuze. Alleen tekst, geen documenten — dat houdt dit simpel.</div>
-        </div>
-        <div class="field">
-          <label for="medicalAllergies">Allergieën</label>
-          <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
-          <div class="field-hint" id="medicalAllergiesHint">Iets waar je ziek van wordt, zoals een medicijn of eten.</div>
-        </div>
-        <div class="field">
-          <label for="medicalMedications">Medicijnen die je gebruikt</label>
-          <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
-        </div>
-        <div class="field">
-          <label for="medicalConditions">Ziektes die je hebt</label>
-          <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
-        </div>
-        <div class="field">
-          <label id="mobilityFieldLabel">Hoe goed kun je lopen?</label>
-          <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
-            <button type="button" data-mobility="" role="tab">Nog niet gekozen</button>
-            <button type="button" data-mobility="good" role="tab">Goed mobiel</button>
-            <button type="button" data-mobility="walker" role="tab">Rollator</button>
-            <button type="button" data-mobility="wheelchair" role="tab">Rolstoel</button>
-          </nav>
-        </div>
-        <div class="field">
-          <label id="contact1Label">Contactpersoon 1 (bel deze eerst)</label>
-          <input type="text" id="medicalContact1Name" placeholder="Naam">
-          <div class="field-row" style="grid-template-columns:1fr 1fr;">
-            <input type="text" id="medicalContact1Relation" placeholder="Relatie, bijv. partner">
-            <input type="tel" id="medicalContact1Phone" placeholder="Telefoonnummer">
+      <form id="medicalForm">
+        <p class="field-hint" style="margin:0 6px 22px;">Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.</p>
+
+        <div class="settings-group-label" id="medicalResusGroupLabel">Reanimatie &amp; wensen</div>
+        <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="field">
+            <label id="resusFieldLabel">Mag je gereanimeerd worden?</label>
+            <nav class="segmented resus-segmented" id="resusSegmented" role="tablist" aria-label="Reanimatievoorkeur">
+              <button type="button" data-resus="" role="tab">Nog niet gekozen</button>
+              <button type="button" data-resus="yes" role="tab">Ja, reanimeer</button>
+              <button type="button" data-resus="no" role="tab">Nee, niet reanimeren</button>
+            </nav>
+            <div class="field-hint" id="resusFieldHint">Reanimeren betekent: iemand probeert je hart weer te laten kloppen als het gestopt is. Jij bepaalt of dat mag.</div>
+          </div>
+          <div class="field">
+            <label for="medicalAdvanceDirective" id="advanceDirectiveLabel">Speciale wensen bij ernstige zorg</label>
+            <textarea id="medicalAdvanceDirective" rows="3" placeholder="Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…"></textarea>
+            <div class="field-hint" id="advanceDirectiveHint">Bijvoorbeeld: niet naar het ziekenhuis, of eerst iemand anders bellen. Helemaal jouw keuze. Alleen tekst, geen documenten — dat houdt dit simpel.</div>
           </div>
         </div>
-        <div class="field">
-          <label id="contact2Label">Contactpersoon 2 (bel deze als 1 niet opneemt)</label>
-          <input type="text" id="medicalContact2Name" placeholder="Naam">
-          <div class="field-row" style="grid-template-columns:1fr 1fr;">
-            <input type="text" id="medicalContact2Relation" placeholder="Relatie, bijv. buur">
-            <input type="tel" id="medicalContact2Phone" placeholder="Telefoonnummer">
+
+        <div class="settings-group-label" id="medicalHealthGroupLabel" style="margin-top:30px;">Gezondheid</div>
+        <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="field">
+            <label for="medicalAllergies">Allergieën</label>
+            <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
+            <div class="field-hint" id="medicalAllergiesHint">Iets waar je ziek van wordt, zoals een medicijn of eten.</div>
+          </div>
+          <div class="field">
+            <label for="medicalMedications">Medicijnen die je gebruikt</label>
+            <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
+          </div>
+          <div class="field">
+            <label for="medicalConditions">Ziektes die je hebt</label>
+            <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
+          </div>
+          <div class="field">
+            <label id="mobilityFieldLabel">Hoe goed kun je lopen?</label>
+            <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
+              <button type="button" data-mobility="" role="tab">Nog niet gekozen</button>
+              <button type="button" data-mobility="good" role="tab">Goed mobiel</button>
+              <button type="button" data-mobility="walker" role="tab">Rollator</button>
+              <button type="button" data-mobility="wheelchair" role="tab">Rolstoel</button>
+            </nav>
           </div>
         </div>
-        <div class="field">
-          <label for="medicalDoctorName">Huisarts</label>
-          <input type="text" id="medicalDoctorName" placeholder="Naam huisarts of praktijk">
+
+        <div class="settings-group-label" id="medicalContactsGroupLabel" style="margin-top:30px;">Contactpersonen</div>
+        <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="field">
+            <label id="contact1Label">Contactpersoon 1 (bel deze eerst)</label>
+            <input type="text" id="medicalContact1Name" placeholder="Naam">
+            <div class="field-row" style="grid-template-columns:1fr 1fr;">
+              <input type="text" id="medicalContact1Relation" placeholder="Relatie, bijv. partner">
+              <input type="tel" id="medicalContact1Phone" placeholder="Telefoonnummer">
+            </div>
+          </div>
+          <div class="field">
+            <label id="contact2Label">Contactpersoon 2 (bel deze als 1 niet opneemt)</label>
+            <input type="text" id="medicalContact2Name" placeholder="Naam">
+            <div class="field-row" style="grid-template-columns:1fr 1fr;">
+              <input type="text" id="medicalContact2Relation" placeholder="Relatie, bijv. buur">
+              <input type="tel" id="medicalContact2Phone" placeholder="Telefoonnummer">
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label for="medicalDoctorPhone">Telefoonnummer huisarts</label>
-          <input type="tel" id="medicalDoctorPhone" placeholder="Praktijknummer">
+
+        <div class="settings-group-label" id="medicalCareGroupLabel" style="margin-top:30px;">Zorgverleners</div>
+        <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="field">
+            <label for="medicalDoctorName">Huisarts</label>
+            <input type="text" id="medicalDoctorName" placeholder="Naam huisarts of praktijk">
+          </div>
+          <div class="field">
+            <label for="medicalDoctorPhone">Telefoonnummer huisarts</label>
+            <input type="tel" id="medicalDoctorPhone" placeholder="Praktijknummer">
+          </div>
+          <div class="field">
+            <label for="medicalHospital">In welk ziekenhuis ben je bekend?</label>
+            <input type="text" id="medicalHospital" placeholder="Bijv. Radboudumc, locatie X">
+          </div>
         </div>
-        <div class="field">
-          <label for="medicalHospital">In welk ziekenhuis ben je bekend?</label>
-          <input type="text" id="medicalHospital" placeholder="Bijv. Radboudumc, locatie X">
+
+        <div class="settings-group-label" id="medicalOtherGroupLabel" style="margin-top:30px;">Overig</div>
+        <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="field">
+            <label for="medicalNotes">Nog iets anders belangrijks?</label>
+            <input type="text" id="medicalNotes" placeholder="Bijv. bijzonderheden">
+          </div>
         </div>
-        <div class="field">
-          <label for="medicalNotes">Nog iets anders belangrijks?</label>
-          <input type="text" id="medicalNotes" placeholder="Bijv. bijzonderheden">
-        </div>
-        <button type="submit" id="medicalSaveButton" class="save-button">Medische info opslaan</button>
+
+        <button type="submit" id="medicalSaveButton" class="save-button" style="margin-top:30px;">Medische info opslaan</button>
       </form>
       <div id="medicalMessage" class="auth-message hidden"></div>
     </div>
@@ -1682,7 +1701,7 @@
 
       <div id="contactsSection">
         <div class="section-title">Mijn contacten</div>
-        <div id="contactsEmpty" class="empty-state hidden">Nog geen contacten. Zoek hierboven naar iemand die u vertrouwt.</div>
+        <div id="contactsEmpty" class="empty-state hidden">Nog geen contacten. Zoek hierboven naar iemand die je vertrouwt.</div>
         <ul id="contactsList" class="people-list"></ul>
       </div>
 
@@ -1909,11 +1928,11 @@
     { sel: '#onboardingInstallDone', nl: '✅ Helemaal goed, NORI staat al op je scherm!', en: '✅ All good, NORI is already on your home screen!' },
     { sel: '#onboardingInstallDesktop', nl: 'Dit is alleen nodig op je telefoon — op een computer hoef je niets te doen.', en: 'This is only needed on your phone — on a computer there\'s nothing you need to do.' },
     { sel: '#onboardingStep2 .onboarding-title', nl: 'Stap 1: Zoek iemand op', en: 'Step 1: Find someone' },
-    { sel: '#onboardingStep2 .onboarding-text', m: 'h', nl: 'Ga naar <strong>"Contacten"</strong> en typ de naam van iemand die u vertrouwt. Druk daarna op "Toevoegen".', en: 'Go to <strong>"Contacts"</strong> and type the name of someone you trust. Then press "Add".' },
+    { sel: '#onboardingStep2 .onboarding-text', m: 'h', nl: 'Ga naar <strong>"Contacten"</strong> en typ de naam van iemand die je vertrouwt. Druk daarna op "Toevoegen".', en: 'Go to <strong>"Contacts"</strong> and type the name of someone you trust. Then press "Add".' },
     { sel: '#onboardingStep3 .onboarding-title', nl: 'Stap 2: Die persoon bevestigt', en: 'Step 2: That person confirms' },
     { sel: '#onboardingStep3 .onboarding-text', m: 'h', nl: 'Diegene krijgt een melding (🔔) en drukt op <strong>Accepteren</strong>. Daarna staan jullie in elkaars lijst.', en: 'They get a notification (🔔) and press <strong>Accept</strong>. After that you\'re both in each other\'s list.' },
     { sel: '#onboardingStep4 .onboarding-title', nl: 'Stap 3: Druk op ALARM bij nood', en: 'Step 3: Press ALARM in an emergency' },
-    { sel: '#onboardingStep4 .onboarding-text', m: 'h', nl: 'U heeft daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen uw contacten meteen een melding: in de app en per e-mail, mét uw locatie op dat moment.', en: 'You then have <strong>3 seconds</strong> to cancel. After that your contacts get an instant alert: in the app and by email, with your location at that moment.' },
+    { sel: '#onboardingStep4 .onboarding-text', m: 'h', nl: 'Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding: in de app en per e-mail, mét jouw locatie op dat moment.', en: 'You then have <strong>3 seconds</strong> to cancel. After that your contacts get an instant alert: in the app and by email, with your location at that moment.' },
     { sel: '#deleteAccountOverlay .overlay-title', nl: 'Account verwijderen', en: 'Delete account' },
     { sel: '#deleteAccountOverlay .onboarding-text', m: 'h', nl: 'Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.', en: 'This <strong>permanently</strong> deletes your account, profile, contacts and all notifications. This cannot be undone.' },
     { sel: '#deleteAccountCancelButton', nl: 'Annuleren', en: 'Cancel' },
@@ -1961,7 +1980,12 @@
     { sel: '#profileForm .field-hint', nl: 'Zodat noodcontacten je direct kunnen bellen als je niet op een alarm reageert.', en: 'So emergency contacts can call you directly if you don\'t respond to an alarm.' },
     { sel: '#profileSaveButton', nl: 'Wijzigingen opslaan', en: 'Save changes' },
     { sel: '#medicalOverlayTitle', nl: 'Medische informatie', en: 'Medical information' },
-    { sel: '#medicalForm > div:first-child .field-hint', nl: 'Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.', en: 'You don\'t have to fill this in. Your emergency contacts only see it once you press ALARM yourself.' },
+    { sel: '#medicalForm > p.field-hint', nl: 'Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.', en: 'You don\'t have to fill this in. Your emergency contacts only see it once you press ALARM yourself.' },
+    { sel: '#medicalResusGroupLabel', nl: 'Reanimatie & wensen', en: 'Resuscitation & wishes' },
+    { sel: '#medicalHealthGroupLabel', nl: 'Gezondheid', en: 'Health' },
+    { sel: '#medicalContactsGroupLabel', nl: 'Contactpersonen', en: 'Contact persons' },
+    { sel: '#medicalCareGroupLabel', nl: 'Zorgverleners', en: 'Care providers' },
+    { sel: '#medicalOtherGroupLabel', nl: 'Overig', en: 'Other' },
     { sel: '#resusSegmented', attr: 'aria-label', nl: 'Reanimatievoorkeur', en: 'Resuscitation preference' },
     { sel: '#resusFieldLabel', nl: 'Mag je gereanimeerd worden?', en: 'May you be resuscitated?' },
     { sel: '#resusSegmented button[data-resus=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
@@ -2083,7 +2107,7 @@
     { sel: '#searchEmpty', nl: 'Niemand gevonden met deze naam.', en: 'No one found with that name.' },
     { sel: '#sentRequestsSection .section-title', nl: 'Openstaande verzoeken', en: 'Pending requests' },
     { sel: '#contactsSection .section-title', nl: 'Mijn contacten', en: 'My contacts' },
-    { sel: '#contactsEmpty', nl: 'Nog geen contacten. Zoek hierboven naar iemand die u vertrouwt.', en: 'No contacts yet. Search above for someone you trust.' },
+    { sel: '#contactsEmpty', nl: 'Nog geen contacten. Zoek hierboven naar iemand die je vertrouwt.', en: 'No contacts yet. Search above for someone you trust.' },
     { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
     { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
     { sel: '#medicalInfoToggle > span', m: 'f', nl: '🩺 Medische info van ', en: '🩺 Medical info from ' },
