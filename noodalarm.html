@@ -794,7 +794,11 @@
     position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--border-soft);
     height:170px; background:var(--surface-2);
   }
-  .location-map-frame{ display:block; width:100%; height:100%; border:none; object-fit:cover; }
+  .location-map-frame{
+    display:block; width:100%; height:100%; border:none; object-fit:cover;
+    opacity:0; transition:opacity .35s ease;
+  }
+  .location-map-frame.loaded{ opacity:1; }
   .location-map-fallback{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center;
     padding:16px; color:var(--text-faint); font-size:0.84375rem; line-height:1.4;
@@ -3785,10 +3789,12 @@
   els.locationMapImg.addEventListener('error', () => {
     if (!els.locationMapImg.src) return;
     els.locationMapImg.classList.add('hidden');
+    els.locationMapImg.classList.remove('loaded');
     els.locationMapFallback.classList.remove('hidden');
   });
   els.locationMapImg.addEventListener('load', () => {
     els.locationMapImg.classList.remove('hidden');
+    els.locationMapImg.classList.add('loaded');
     els.locationMapFallback.classList.add('hidden');
   });
 
@@ -3807,9 +3813,12 @@
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
     lastAccuracyText = location_accuracy ? t('location.accuracy', { n: Math.round(location_accuracy) }) : '';
-    els.locationMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
-      '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
-    els.locationOpenButton.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+    // "Open in Maps" mag altijd meteen naar de nieuwste positie wijzen (kost
+    // niets, er wordt pas iets opgehaald als iemand er ook echt op tikt) —
+    // de officiële, platformonafhankelijke Google Maps-linkvorm, die altijd
+    // exact op de coördinaat een pin zet in plaats van er soms een
+    // zoekopdracht van te maken.
+    els.locationOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
     // Bij een oefenalarm (test_mode) verschijnt het "wie heeft gereageerd"-
     // kaartje nooit, dus is dit de enige plek in Berichten om zo'n oefening
@@ -3819,12 +3828,16 @@
     els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
     renderLocationMeta(location_updated_at);
 
-    // Nominatim (gratis, geen API-sleutel) mag niet elke paar seconden
-    // bevraagd worden — alleen opnieuw ophalen als de positie écht
-    // noemenswaardig is verschoven (>30m) sinds de vorige keer.
+    // Live locatie stuurt elke 25 seconden een nieuwe GPS-meting door, ook
+    // als iemand gewoon stilstaat (GPS-metingen wijken altijd een klein
+    // beetje af) — zonder deze drempel ververst de kaartafbeelding dan om
+    // de 25 seconden zichtbaar, wat erg onrustig oogt. Kaart én adres
+    // daarom alleen verversen bij een écht noemenswaardige verplaatsing.
     const moved = !lastAddressCoords || haversineMeters(lastAddressCoords.lat, lastAddressCoords.lng, lat, lng) > 30;
     if (moved){
       lastAddressCoords = { lat, lng };
+      els.locationMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
+        '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
       els.locationAddress.textContent = t('location.fetchingAddress');
       fetchStreetAddress(lat, lng);
     }
