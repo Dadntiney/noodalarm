@@ -4466,7 +4466,21 @@
   // = door iedereen gelezen. Berekend uit chatReceiptsByMessageId t.o.v. alle
   // groepsleden behalve mezelf.
   function messageTickState(messageId){
-    const others = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
+    const msg = chatMessageById[messageId];
+    // Alleen leden die al in de groep zaten tóén dit bericht verstuurd werd
+    // kunnen het ooit gelezen hebben (nieuwere leden zien oudere berichten
+    // sowieso niet) — anders bleven vinkjes voor oude berichten voor altijd
+    // op "verzonden" staan zodra er later iemand bij kwam.
+    const others = Object.keys(chatParticipantById).filter(id => {
+      if (id === currentSession.user.id) return false;
+      if (!msg) return true;
+      const addedAt = chatParticipantById[id].added_at;
+      // Onbekende added_at (zeldzame race bij een net-live binnengekomen
+      // bericht van een nog niet eerder geziene afzender): liever niet
+      // meetellen dan het vinkje voor altijd op "verzonden" laten hangen.
+      if (!addedAt) return false;
+      return new Date(addedAt) <= new Date(msg.created_at);
+    });
     if (!others.length) return 'sent';
     const receipts = chatReceiptsByMessageId[messageId] || {};
     const allRead = others.every(id => receipts[id] && receipts[id].read_at);
@@ -4542,13 +4556,12 @@
         .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle()
     ]);
     chatParticipantById = {};
-    (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number }; });
+    (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at }; });
     renderMessagesFacepile();
     handleActiveAlarmChanged(alarmRow);
 
     await loadChatMessages(groupId);
     subscribeChat(groupId);
-    els.chatInput.focus();
   }
 
   // Alarmmeldingen wijzen naar een specifiek alarm; zoek daarvan de kring op
