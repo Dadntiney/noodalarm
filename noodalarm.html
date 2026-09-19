@@ -597,10 +597,15 @@
   }
   /* Zonder dit selecteert een lang indrukken (voor het berichtmenu) ook de
      omliggende pagina-tekst, met de bekende blauwe selectie-highlight en op
-     iOS het systeem-uitknipbordmenu erbovenop ons eigen menu. */
+     iOS het systeem-uitknipbordmenu erbovenop ons eigen menu. !important
+     omdat een harde druk op iPhone anders zelfs hierdoorheen kan breken;
+     touch-action laat verticaal scrollen toe maar geeft verder geen enkel
+     ander systeemgebaar (zoals tekstselectie) een kans om te starten. */
   .chat-messages, .chat-messages *{
-    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+    -webkit-user-select:none !important; user-select:none !important;
+    -webkit-touch-callout:none !important; -webkit-user-drag:none;
   }
+  .chat-bubble{ touch-action:pan-y; }
   .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
   .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
@@ -3269,6 +3274,13 @@
     if (!bubble) return;
     ev.preventDefault();
     openChatBubbleMenu(bubble);
+  });
+  // Extra vangnet naast de CSS user-select:none — bij een stevige druk op
+  // iPhone kan iOS soms alsnog een selectie proberen te starten; dit
+  // blokkeert die zelfs dan nog expliciet, zonder de tik/lang-indrukken
+  // afhandeling te raken (heeft niets met touchstart/click te maken).
+  els.chatMessages.addEventListener('selectstart', (ev) => {
+    if (ev.target.closest('.chat-bubble')) ev.preventDefault();
   });
   els.chatBubbleMenuBackdrop.addEventListener('click', closeChatBubbleMenu);
 
