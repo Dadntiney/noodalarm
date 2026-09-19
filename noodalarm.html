@@ -438,14 +438,19 @@
   .alarm-button-wrap:has(.counting){ animation:none; }
   .alarm-button:focus-visible{ outline:3px solid var(--red-bright); outline-offset:6px; }
   .alarm-button:disabled{ cursor:not-allowed; opacity:.6; }
-  /* Zwakke, hele-scherm rode ademhaling tijdens het aftellen — puur
-     perifeer waarneembaar (je hoeft niet naar de knop te kijken om te
-     "voelen" dat er iets loopt), en bekrachtigt meteen ook: dit is nog te
-     annuleren, er gebeurt nog niets onomkeerbaars. */
-  body:has(.alarm-button.counting){ animation:countdown-screen-flash 1s ease-in-out infinite; }
+  /* Hele-scherm rode ademhaling tijdens het aftellen — perifeer
+     waarneembaar (je hoeft niet naar de knop te kijken om te "voelen" dat
+     er iets loopt) en bekrachtigt meteen ook: dit is nog te annuleren, er
+     gebeurt nog niets onomkeerbaars. Op zowel body als de vaste header,
+     zodat het écht het hele scherm vult i.p.v. een balk bovenaan zwart te
+     laten — puur de achtergrondkleur, dus nooit over de tekst/knop heen. */
+  body:has(.alarm-button.counting),
+  body:has(.alarm-button.counting) .app-header{
+    animation:countdown-screen-flash 1s ease-in-out infinite;
+  }
   @keyframes countdown-screen-flash{
     0%, 100%{ background-color:var(--bg); }
-    50%{ background-color:color-mix(in srgb, var(--bg) 88%, var(--red) 12%); }
+    50%{ background-color:color-mix(in srgb, var(--bg) 55%, var(--red) 45%); }
   }
 
   .cancel-button, .end-button, .reset-button, .add-button, .save-button{
