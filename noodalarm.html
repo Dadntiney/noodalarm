@@ -1070,6 +1070,24 @@
         </button>
       </div>
 
+      <div style="margin-bottom:24px;">
+        <div class="settings-row-title" id="locationTestSectionTitle" style="margin-bottom:8px;">Werkt je locatie?</div>
+        <p class="field-hint" id="locationTestSectionHint" style="margin-top:0; margin-bottom:12px;">Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.</p>
+        <button type="button" id="locationTestButton" class="small-btn">Test mijn locatie</button>
+        <div id="locationTestStatus" class="field-hint" style="margin-top:10px;"></div>
+        <div id="locationTestResult" class="hidden" style="margin-top:12px;">
+          <div id="locationTestAddress" class="location-address"></div>
+          <div class="location-map-wrap">
+            <img id="locationTestMapImg" class="location-map-frame" alt="Kaart met jouw locatie" loading="lazy">
+            <div id="locationTestMapFallback" class="location-map-fallback hidden">Kaart kon niet worden geladen — gebruik "Open in Maps" hieronder.</div>
+          </div>
+          <a id="locationTestOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Open in Maps
+          </a>
+        </div>
+      </div>
+
       <!-- Daarna: hoe de app eruitziet en klinkt voor jou persoonlijk. -->
       <div style="margin-bottom:24px;">
         <div class="settings-row-title" id="languageSectionTitle" style="margin-bottom:8px;">Taal</div>
@@ -1765,6 +1783,9 @@
     { sel: '#locationToggle', attr: 'aria-label', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
     { sel: '#locationSectionTitle', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
     { sel: '#locationSectionHint', nl: 'Dan weten je noodcontacten meteen waar je bent zodra jij op ALARM drukt.', en: 'That way your emergency contacts instantly know where you are the moment you press ALARM.' },
+    { sel: '#locationTestSectionTitle', nl: 'Werkt je locatie?', en: 'Does your location work?' },
+    { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
+    { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
@@ -2023,6 +2044,12 @@
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
       'location.fetchingAddress': 'Adres ophalen…',
+      'locationTest.busy': 'Bezig met opzoeken…',
+      'locationTest.success': 'Gelukt! Nauwkeurig tot op ±{n} meter.',
+      'locationTest.denied': 'Locatie staat uit voor NORI. Zet \'m aan bij de instellingen van je toestel of browser en probeer het opnieuw.',
+      'locationTest.timeout': 'Het duurde te lang. Probeer het nog eens, het liefst buiten of bij een raam.',
+      'locationTest.unavailable': 'Kon je locatie niet vinden. Probeer het nog eens, het liefst buiten of bij een raam.',
+      'locationTest.unsupported': 'Je toestel of browser ondersteunt dit niet.',
       'notif.accepted': 'Geaccepteerd',
       'notif.accept': 'Accepteren',
       'notif.reject': 'Verwijderen',
@@ -2131,6 +2158,12 @@
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
       'location.fetchingAddress': 'Fetching address…',
+      'locationTest.busy': 'Looking it up…',
+      'locationTest.success': 'It works! Accurate to within ±{n} metres.',
+      'locationTest.denied': 'Location is turned off for NORI. Turn it on in your device or browser settings and try again.',
+      'locationTest.timeout': 'That took too long. Try again, ideally outside or near a window.',
+      'locationTest.unavailable': 'Couldn\'t find your location. Try again, ideally outside or near a window.',
+      'locationTest.unsupported': 'Your device or browser doesn\'t support this.',
       'notif.accepted': 'Accepted',
       'notif.accept': 'Accept',
       'notif.reject': 'Remove',
@@ -2482,7 +2515,14 @@
     installStatusIcon: document.getElementById('installStatusIcon'),
     installStatusText: document.getElementById('installStatusText'),
     installStatusButton: document.getElementById('installStatusButton'),
-    locationToggle: document.getElementById('locationToggle')
+    locationToggle: document.getElementById('locationToggle'),
+    locationTestButton: document.getElementById('locationTestButton'),
+    locationTestStatus: document.getElementById('locationTestStatus'),
+    locationTestResult: document.getElementById('locationTestResult'),
+    locationTestAddress: document.getElementById('locationTestAddress'),
+    locationTestMapImg: document.getElementById('locationTestMapImg'),
+    locationTestMapFallback: document.getElementById('locationTestMapFallback'),
+    locationTestOpenButton: document.getElementById('locationTestOpenButton')
   };
 
   const copyrightYearEl = document.getElementById('copyrightYear');
@@ -4517,9 +4557,9 @@
     ackWatcherTimer = setInterval(() => pollAckStatus(alarmId, createdAt), 10000);
   }
 
-  // Nominatim (OpenStreetMap) — gratis, geen API-sleutel nodig. Zet de
-  // coördinaten om naar een leesbaar straatadres voor boven de kaart.
-  async function fetchStreetAddress(lat, lng){
+  // Nominatim (OpenStreetMap) — gratis, geen API-sleutel nodig. Zet
+  // coördinaten om naar een leesbaar straatadres.
+  async function reverseGeocodeAddress(lat, lng){
     try {
       const res = await fetch(
         'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=17&addressdetails=1',
@@ -4527,14 +4567,72 @@
       );
       const data = await res.json();
       const a = data && data.address;
-      if (!a){ els.locationAddress.textContent = ''; return; }
+      if (!a) return '';
       const street = [a.road, a.house_number].filter(Boolean).join(' ');
       const city = a.city || a.town || a.village || a.municipality || '';
-      els.locationAddress.textContent = [street, city].filter(Boolean).join(', ');
+      return [street, city].filter(Boolean).join(', ');
     } catch (err){
-      els.locationAddress.textContent = '';
+      return '';
     }
   }
+  async function fetchStreetAddress(lat, lng){
+    els.locationAddress.textContent = await reverseGeocodeAddress(lat, lng);
+  }
+
+  // Instellingen > "Werkt je locatie?" — laat iemand zelf checken of GPS/
+  // toestemming werkt, in plaats van dat pas te ontdekken tijdens een
+  // écht alarm. Volledig los van de "Locatie delen bij alarm"-schakelaar
+  // hierboven: dit test alleen of het toestel zelf een locatie kan geven.
+  let locationTestMapListenersReady = false;
+  function testMyLocation(){
+    if (!els.locationTestButton) return;
+    if (!('geolocation' in navigator)){
+      els.locationTestStatus.textContent = t('locationTest.unsupported');
+      els.locationTestStatus.className = 'field-hint bad';
+      return;
+    }
+    if (!locationTestMapListenersReady){
+      locationTestMapListenersReady = true;
+      els.locationTestMapImg.addEventListener('error', () => {
+        if (!els.locationTestMapImg.src) return;
+        els.locationTestMapImg.classList.add('hidden');
+        els.locationTestMapImg.classList.remove('loaded');
+        els.locationTestMapFallback.classList.remove('hidden');
+      });
+      els.locationTestMapImg.addEventListener('load', () => {
+        els.locationTestMapImg.classList.remove('hidden');
+        els.locationTestMapImg.classList.add('loaded');
+        els.locationTestMapFallback.classList.add('hidden');
+      });
+    }
+    els.locationTestButton.disabled = true;
+    els.locationTestResult.classList.add('hidden');
+    els.locationTestStatus.textContent = t('locationTest.busy');
+    els.locationTestStatus.className = 'field-hint';
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        els.locationTestButton.disabled = false;
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        els.locationTestStatus.textContent = t('locationTest.success', { n: Math.round(pos.coords.accuracy) });
+        els.locationTestStatus.className = 'field-hint ok';
+        els.locationTestMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
+          '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
+        els.locationTestOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
+        els.locationTestAddress.textContent = t('location.fetchingAddress');
+        els.locationTestResult.classList.remove('hidden');
+        els.locationTestAddress.textContent = await reverseGeocodeAddress(lat, lng);
+      },
+      (err) => {
+        els.locationTestButton.disabled = false;
+        els.locationTestResult.classList.add('hidden');
+        const key = err.code === 1 ? 'locationTest.denied' : err.code === 3 ? 'locationTest.timeout' : 'locationTest.unavailable';
+        els.locationTestStatus.textContent = t(key);
+        els.locationTestStatus.className = 'field-hint bad';
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
+  if (els.locationTestButton) els.locationTestButton.addEventListener('click', testMyLocation);
 
   const CHAT_MEDIA_URL_TTL = 60 * 60 * 24 * 7;
   async function resolveMediaUrls(paths){
