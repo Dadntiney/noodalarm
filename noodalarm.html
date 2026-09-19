@@ -175,8 +175,24 @@
   .tab-count{ margin-left:6px; opacity:.75; }
   .tab-count.hidden{ display:none; }
 
-  .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; }
+  .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; animation:screen-in .22s cubic-bezier(.25,.8,.4,1); }
   .screen.hidden{ display:none; }
+  @keyframes screen-in{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion:reduce){ .screen{ animation:none; } }
+
+  /* ---------- Tastbare tik-feedback (natuurlijker appgevoel) ---------- */
+  .small-btn, .icon-btn, .save-button, .cancel-button, .end-button, .add-button,
+  .segmented button, .person-card, .settings-link, .chat-send-button, .chat-attach-button,
+  .top-profile-button, .bell-button, .notif-card, .entries-card li, .danger-button, .link-button{
+    transition:transform .12s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+  }
+  .small-btn:active, .icon-btn:active, .save-button:active, .cancel-button:active,
+  .end-button:active, .add-button:active, .segmented button:active, .person-card:active,
+  .settings-link:active, .chat-send-button:active, .chat-attach-button:active,
+  .top-profile-button:active, .bell-button:active, .danger-button:active{
+    transform:scale(.95); opacity:.85;
+  }
+  .person-card{ animation:screen-in .22s cubic-bezier(.25,.8,.4,1); }
   .app-header{
     position:fixed; top:0; left:0; right:0; z-index:10;
     max-width:480px; margin:0 auto; background:var(--bg);
@@ -1113,6 +1129,15 @@
     let t = null;
     return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
   }
+  // Als een lijst inkrimpt (bv. een verzoek wordt ingetrokken) schuiven
+  // items eronder omhoog. Zonder deze guard telt de browser dat als "hover"
+  // op het element dat nu toevallig onder de muis staat — vandaar dat een
+  // knop daar plots rood kleurde zonder dat de muis bewoog. Even kort
+  // pointer-events uitzetten voorkomt die "geest-hover".
+  function preventHoverGlitch(){
+    document.body.style.pointerEvents = 'none';
+    requestAnimationFrame(() => { document.body.style.pointerEvents = ''; });
+  }
   function urlBase64ToUint8Array(base64String){
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -1572,10 +1597,10 @@
     }
   });
 
-  sb.auth.onAuthStateChange((_event, session) => {
+  sb.auth.onAuthStateChange((event, session) => {
     currentSession = session;
     if (session){
-      onSignedIn();
+      onSignedIn(event);
     } else {
       currentProfile = null;
       if (realtimeChannel){ sb.removeChannel(realtimeChannel); realtimeChannel = null; }
@@ -1595,9 +1620,12 @@
     }
   });
 
-  async function onSignedIn(){
+  async function onSignedIn(event){
     els.screenAuth.classList.add('hidden');
     els.screenApp.classList.remove('hidden');
+    // Alleen bij een echte (nieuwe) login terug naar Alarm — niet bij een
+    // stille token-refresh terwijl iemand al in de app aan het werk is.
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') switchScreen('alarm');
 
     const { data: profile } = await sb.from('profiles')
       .select('first_name, last_name, full_name, username, avatar_url')
@@ -1812,7 +1840,6 @@
       return;
     }
     runSearch();
-    refreshSentRequests();
   }
 
   async function refreshSentRequests(){
@@ -1845,8 +1872,9 @@
       btn.textContent = 'Intrekken';
       return;
     }
-    refreshSentRequests();
+    await refreshSentRequests();
     if (!els.searchResultsSection.classList.contains('hidden')) runSearch();
+    preventHoverGlitch();
   }
 
   async function refreshContacts(){
@@ -1886,7 +1914,8 @@
       btn.disabled = false;
       return;
     }
-    refreshContacts();
+    await refreshContacts();
+    preventHoverGlitch();
   }
 
   /* ---------------- Navigatie tussen schermen ---------------- */
