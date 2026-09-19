@@ -721,6 +721,8 @@
     background-color:var(--bg);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
     background-size:24px 24px;
+    -webkit-mask-image:linear-gradient(to bottom, transparent, black 28px, black calc(100% - 28px), transparent);
+    mask-image:linear-gradient(to bottom, transparent, black 28px, black calc(100% - 28px), transparent);
   }
   /* Zonder dit selecteert een lang indrukken (voor het berichtmenu) ook de
      omliggende pagina-tekst, met de bekende blauwe selectie-highlight en op
