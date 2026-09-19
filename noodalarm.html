@@ -1378,6 +1378,10 @@
             <ul id="entriesList"></ul>
           </div>
 
+          <button type="button" id="openMessagesFromSentButton" class="save-button" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Open Berichten
+          </button>
           <button id="endAlarmButton" class="end-button">Terug naar start</button>
         </div>
 
@@ -1718,6 +1722,7 @@
     { sel: '#sentByLabel', nl: 'Geactiveerd door', en: 'Activated by' },
     { sel: '#sentAtLabel', nl: 'Tijdstip', en: 'Time' },
     { sel: '#entriesCard h3', nl: 'Noodcontacten', en: 'Emergency contacts' },
+    { sel: '#openMessagesFromSentButton', m: 'l', nl: 'Open Berichten', en: 'Open Messages' },
     { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
     { sel: '.ack-status-card-title', nl: 'Jouw actieve alarm', en: 'Your active alarm' },
     { sel: '#endAlarmFromChatButton', nl: 'Alarm beëindigen', en: 'End alarm' },
@@ -2148,6 +2153,7 @@
     sentBy: document.getElementById('sentBy'),
     sentAt: document.getElementById('sentAt'),
     entriesList: document.getElementById('entriesList'),
+    openMessagesFromSentButton: document.getElementById('openMessagesFromSentButton'),
     endAlarmButton: document.getElementById('endAlarmButton'),
 
     searchInput: document.getElementById('searchInput'),
@@ -3457,6 +3463,9 @@
     switchView(els.viewIdle);
     await endMyActiveAlarm();
   });
+  if (els.openMessagesFromSentButton){
+    els.openMessagesFromSentButton.addEventListener('click', () => openMessages(myGroupId));
+  }
   // Zelfde actie, maar dan direct vanuit het berichtenscherm — zonder dit
   // blijft een alarm dat je hier ooit activeerde voor altijd "actief" staan
   // (met de locatiekaart en escalatiemelding erbovenop) als je nooit meer
@@ -3590,12 +3599,16 @@
         }).join('')
       : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
 
+    // Eerst de bevestiging laten zien dat het alarm daadwerkelijk is
+    // verzonden (en aan wie) — pas als iemand zelf op "Open Berichten"
+    // drukt, gaan we naar de chat/locatie/wie-heeft-gereageerd. Niet
+    // automatisch wegnavigeren: net na het drukken op ALARM wil je eerst
+    // die geruststelling zien, niet meteen in een ander scherm belanden.
     switchView(els.viewSent);
 
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;
       startLiveLocationSharing(result.alarmId);
-      openMessages(myGroupId);
     }
   }
 
