@@ -545,9 +545,9 @@
   .discreet-toast.warn{ background:rgba(153,16,31,.92); }
   .qr-invite-card{
     width:100%; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
-    padding:20px; text-align:center; box-shadow:var(--shadow-card); margin-bottom:16px;
+    padding:16px; text-align:center; box-shadow:var(--shadow-card); margin-bottom:16px;
   }
-  .qr-invite-card img{ width:200px; height:200px; max-width:100%; border-radius:12px; background:#fff; padding:10px; }
+  .qr-invite-card img{ width:132px; height:132px; max-width:100%; border-radius:10px; background:#fff; padding:8px; }
   .search-box{
     width:100%; display:flex; align-items:center; gap:10px; background:var(--surface); border:1.5px solid var(--border);
     border-radius:999px; padding:6px 8px 6px 18px;
@@ -721,8 +721,8 @@
     background-color:var(--bg);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
     background-size:24px 24px;
-    -webkit-mask-image:linear-gradient(to bottom, transparent, black 28px, black calc(100% - 28px), transparent);
-    mask-image:linear-gradient(to bottom, transparent, black 28px, black calc(100% - 28px), transparent);
+    -webkit-mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 52px), rgba(0,0,0,.5) calc(100% - 20px), transparent);
+    mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 52px), rgba(0,0,0,.5) calc(100% - 20px), transparent);
   }
   /* Zonder dit selecteert een lang indrukken (voor het berichtmenu) ook de
      omliggende pagina-tekst, met de bekende blauwe selectie-highlight en op
@@ -1708,8 +1708,8 @@
 
         <div id="qrInviteCard" class="qr-invite-card hidden">
           <img id="qrInviteImg" alt="QR-code om jou toe te voegen als noodcontact">
-          <p class="field-hint" style="text-align:center; margin:12px 0 0;">Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.</p>
-          <button type="button" id="copyInviteLinkButton" class="small-btn" style="margin:12px auto 0; display:block;">Of kopieer de link</button>
+          <p class="field-hint" style="text-align:center; margin:10px 0 0;">Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.</p>
+          <button type="button" id="copyInviteLinkButton" class="small-btn" style="margin:10px auto 0; display:block;">Of kopieer de link</button>
         </div>
 
         <div id="searchResultsSection" class="hidden">
