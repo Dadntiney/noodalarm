@@ -792,6 +792,19 @@
   .onboarding-dot{ width:10px; height:10px; border-radius:50%; background:var(--border); }
   .onboarding-dot.active{ background:var(--accent); }
 
+  /* ---------- Installatie-stappen (onboarding, groot en simpel) ---------- */
+  .install-steps{ display:flex; flex-direction:column; gap:12px; width:100%; }
+  .install-step{
+    display:flex; align-items:center; gap:14px; background:var(--surface-2); border:1.5px solid var(--border);
+    border-radius:14px; padding:14px 16px; text-align:left;
+  }
+  .install-step-num{
+    width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff; font-weight:800;
+    font-size:1.0625rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .install-step-text{ font-size:1.0625rem; font-weight:600; color:var(--text); line-height:1.4; }
+  .install-step-text .platform-icon{ vertical-align:-5px; }
+
   @media (max-width:360px){
     :root{ --app-pad-x:14px; }
   }
@@ -812,6 +825,33 @@
         </div>
         <h2 class="onboarding-title">Welkom bij NORI</h2>
         <p class="onboarding-text">Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt.</p>
+      </div>
+
+      <div id="onboardingStepInstall" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="onboarding-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg>
+        </div>
+        <h2 class="onboarding-title">Zet NORI op je scherm</h2>
+        <p class="onboarding-text">Dit is heel belangrijk: <strong>zonder dit mis je een noodmelding</strong> van een contact. Het kost maar 10 seconden.</p>
+        <div id="onboardingInstallIos" class="install-steps hidden">
+          <div class="install-step">
+            <span class="install-step-num">1</span>
+            <span class="install-step-text">Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon)</span>
+          </div>
+          <div class="install-step">
+            <span class="install-step-num">2</span>
+            <span class="install-step-text">Kies <strong>"Zet op beginscherm"</strong></span>
+          </div>
+        </div>
+        <div id="onboardingInstallAndroid" class="hidden" style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+          <button type="button" id="onboardingAndroidInstallButton" class="save-button" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 19h16"/></svg>
+            NORI installeren
+          </button>
+          <p class="field-hint">Zie je geen knop? Tik op <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg> (menu) rechtsboven en kies <strong>"App installeren"</strong>.</p>
+        </div>
+        <p id="onboardingInstallDone" class="onboarding-text hidden">✅ Helemaal goed, NORI staat al op je scherm!</p>
+        <p id="onboardingInstallDesktop" class="onboarding-text hidden">Dit is alleen nodig op je telefoon — op een computer hoef je niets te doen.</p>
       </div>
 
       <div id="onboardingStep2" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
@@ -843,6 +883,7 @@
         <span class="onboarding-dot" data-dot="2"></span>
         <span class="onboarding-dot" data-dot="3"></span>
         <span class="onboarding-dot" data-dot="4"></span>
+        <span class="onboarding-dot" data-dot="5"></span>
       </div>
 
       <button type="button" id="onboardingNextButton" class="save-button">Volgende</button>
@@ -875,6 +916,14 @@
         <button type="button" id="settingsCloseButton" class="overlay-close" aria-label="Sluiten">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
+      </div>
+
+      <div class="settings-row" id="installStatusRow" style="margin-bottom:24px;">
+        <div class="settings-row-text">
+          <div class="settings-row-title">App-installatie</div>
+          <p id="installStatusText" class="field-hint" style="margin-top:4px;">—</p>
+        </div>
+        <button type="button" id="installStatusButton" class="small-btn hidden">Bekijk hoe</button>
       </div>
 
       <div class="settings-row">
@@ -1435,6 +1484,9 @@
   function isIos(){
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   }
+  function isAndroid(){
+    return /Android/.test(navigator.userAgent);
+  }
   function isStandalone(){
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
@@ -1594,11 +1646,17 @@
     onboardingNextButton: document.getElementById('onboardingNextButton'),
     onboardingSteps: [
       document.getElementById('onboardingStep1'),
+      document.getElementById('onboardingStepInstall'),
       document.getElementById('onboardingStep2'),
       document.getElementById('onboardingStep3'),
       document.getElementById('onboardingStep4')
     ],
     onboardingDots: Array.from(document.querySelectorAll('.onboarding-dot')),
+    onboardingInstallIos: document.getElementById('onboardingInstallIos'),
+    onboardingInstallAndroid: document.getElementById('onboardingInstallAndroid'),
+    onboardingAndroidInstallButton: document.getElementById('onboardingAndroidInstallButton'),
+    onboardingInstallDone: document.getElementById('onboardingInstallDone'),
+    onboardingInstallDesktop: document.getElementById('onboardingInstallDesktop'),
 
     themeColorMeta: document.getElementById('themeColorMeta'),
     themeLightButton: document.getElementById('themeLightButton'),
@@ -1615,6 +1673,9 @@
     openSettingsButton: document.getElementById('openSettingsButton'),
     settingsOverlay: document.getElementById('settingsOverlay'),
     settingsCloseButton: document.getElementById('settingsCloseButton'),
+    installStatusRow: document.getElementById('installStatusRow'),
+    installStatusText: document.getElementById('installStatusText'),
+    installStatusButton: document.getElementById('installStatusButton'),
     locationToggle: document.getElementById('locationToggle')
   };
 
@@ -1801,7 +1862,10 @@
      ========================================================================= */
   els.openAccountButton.addEventListener('click', () => els.accountOverlay.classList.remove('hidden'));
   els.accountCloseButton.addEventListener('click', () => els.accountOverlay.classList.add('hidden'));
-  els.openSettingsButton.addEventListener('click', () => els.settingsOverlay.classList.remove('hidden'));
+  els.openSettingsButton.addEventListener('click', () => {
+    els.settingsOverlay.classList.remove('hidden');
+    renderInstallStatusRow();
+  });
   els.settingsCloseButton.addEventListener('click', () => els.settingsOverlay.classList.add('hidden'));
 
   function isLocationSharingOn(){
@@ -2147,8 +2211,26 @@
     els.onboardingDots.forEach((dot, i) => dot.classList.toggle('active', i === onboardingStep - 1));
     els.onboardingNextButton.textContent = onboardingStep === els.onboardingSteps.length ? 'Begrepen, aan de slag' : 'Volgende';
   }
+  // Laat op de installatie-stap alleen de variant zien die past bij dit
+  // toestel — iPhone/iPad krijgt de 2-staps deel-icoon-uitleg, Android de
+  // installeerknop, en wie 'm al geïnstalleerd heeft (of op een computer
+  // zit) krijgt meteen een kort, geruststellend berichtje.
+  function renderOnboardingInstallStep(){
+    [els.onboardingInstallIos, els.onboardingInstallAndroid, els.onboardingInstallDone, els.onboardingInstallDesktop]
+      .forEach(el => { if (el) el.classList.add('hidden'); });
+    if (isStandalone()){
+      els.onboardingInstallDone.classList.remove('hidden');
+    } else if (isIos()){
+      els.onboardingInstallIos.classList.remove('hidden');
+    } else if (isAndroid()){
+      els.onboardingInstallAndroid.classList.remove('hidden');
+    } else {
+      els.onboardingInstallDesktop.classList.remove('hidden');
+    }
+  }
   function showOnboarding(){
     onboardingStep = 1;
+    renderOnboardingInstallStep();
     renderOnboardingStep();
     els.onboardingOverlay.classList.remove('hidden');
   }
@@ -3487,15 +3569,49 @@
   /* =========================================================================
      WEB PUSH
      ========================================================================= */
+  // "Niet nu" op de installatie-hints is bewust een snooze, geen permanente
+  // afmelding: zonder installatie mis je écht een noodmelding, dus één
+  // ongelukkige wegtik mag dit niet voorgoed laten verdwijnen.
+  const INSTALL_HINT_SNOOZE_MS = 14 * 24 * 60 * 60 * 1000;
+  function isHintSnoozed(key){
+    const snoozedAt = realStore.get(key, 0);
+    return !!snoozedAt && Date.now() - snoozedAt < INSTALL_HINT_SNOOZE_MS;
+  }
   function maybeShowIosInstallHint(){
     if (!els.iosInstallHint) return;
-    const shouldShow = isIos() && !isStandalone() && !realStore.get(KEYS.iosHintDismissed, false);
+    const shouldShow = isIos() && !isStandalone() && !isHintSnoozed(KEYS.iosHintDismissed);
     els.iosInstallHint.classList.toggle('hidden', !shouldShow);
   }
   if (els.iosInstallHintDismiss){
     els.iosInstallHintDismiss.addEventListener('click', () => {
-      realStore.set(KEYS.iosHintDismissed, true);
+      realStore.set(KEYS.iosHintDismissed, Date.now());
       els.iosInstallHint.classList.add('hidden');
+    });
+  }
+
+  // Altijd-vindbare status in Instellingen, voor wie de onboarding oversloeg
+  // of het later nog eens wil bekijken.
+  function renderInstallStatusRow(){
+    if (!els.installStatusRow) return;
+    if (isStandalone()){
+      els.installStatusText.textContent = '✅ Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.';
+      els.installStatusButton.classList.add('hidden');
+    } else {
+      els.installStatusText.textContent = '⚠️ Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.';
+      els.installStatusButton.textContent = isAndroid() && deferredInstallPrompt ? 'Nu installeren' : 'Bekijk hoe';
+      els.installStatusButton.classList.remove('hidden');
+    }
+  }
+  if (els.installStatusButton){
+    els.installStatusButton.addEventListener('click', () => {
+      if (isAndroid() && deferredInstallPrompt){
+        triggerAndroidInstall();
+        return;
+      }
+      els.settingsOverlay.classList.add('hidden');
+      switchScreen('alarm');
+      if (isIos() && els.iosInstallHint) els.iosInstallHint.classList.remove('hidden');
+      else if (els.androidInstallHint) els.androidInstallHint.classList.remove('hidden');
     });
   }
 
@@ -3538,31 +3654,34 @@
 
   // Android/Chrome staat wel toe om de installatie-prompt rechtstreeks vanuit
   // de app te openen: de browser geeft ons dat "beforeinstallprompt"-event,
-  // en we bewaren het tot iemand op de knop drukt.
+  // en we bewaren het tot iemand op een van de installeerknoppen drukt
+  // (zowel in de onboarding als op het Alarm-scherm gebruiken dezelfde prompt).
   let deferredInstallPrompt = null;
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
-    if (els.androidInstallHint && !isStandalone() && !realStore.get(KEYS.androidHintDismissed, false)){
+    if (els.androidInstallHint && !isStandalone() && !isHintSnoozed(KEYS.androidHintDismissed)){
       els.androidInstallHint.classList.remove('hidden');
     }
   });
   window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
     if (els.androidInstallHint) els.androidInstallHint.classList.add('hidden');
+    if (els.onboardingInstallAndroid && !els.onboardingInstallAndroid.classList.contains('hidden')) renderOnboardingInstallStep();
+    if (els.installStatusRow) renderInstallStatusRow();
   });
-  if (els.androidInstallButton){
-    els.androidInstallButton.addEventListener('click', async () => {
-      if (!deferredInstallPrompt) return;
-      deferredInstallPrompt.prompt();
-      await deferredInstallPrompt.userChoice;
-      deferredInstallPrompt = null;
-      els.androidInstallHint.classList.add('hidden');
-    });
+  async function triggerAndroidInstall(){
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    if (els.androidInstallHint) els.androidInstallHint.classList.add('hidden');
   }
+  if (els.androidInstallButton) els.androidInstallButton.addEventListener('click', triggerAndroidInstall);
+  if (els.onboardingAndroidInstallButton) els.onboardingAndroidInstallButton.addEventListener('click', triggerAndroidInstall);
   if (els.androidInstallHintDismiss){
     els.androidInstallHintDismiss.addEventListener('click', () => {
-      realStore.set(KEYS.androidHintDismissed, true);
+      realStore.set(KEYS.androidHintDismissed, Date.now());
       els.androidInstallHint.classList.add('hidden');
     });
   }
