@@ -1667,7 +1667,7 @@
 
       <div id="contactsSection">
         <div class="section-title">Mijn contacten</div>
-        <div class="search-box" style="margin-bottom:16px;">
+        <div id="contactsFilterBox" class="search-box hidden" style="margin-bottom:16px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
           <input type="text" id="contactsFilterInput" placeholder="Contacten zoeken" autocomplete="off">
         </div>
@@ -2616,6 +2616,7 @@
     openMessagesFromSentButton: document.getElementById('openMessagesFromSentButton'),
     endAlarmButton: document.getElementById('endAlarmButton'),
 
+    contactsFilterBox: document.getElementById('contactsFilterBox'),
     contactsFilterInput: document.getElementById('contactsFilterInput'),
     addContactToggle: document.getElementById('addContactToggle'),
     addContactPanel: document.getElementById('addContactPanel'),
@@ -3790,11 +3791,17 @@
   }
   if (els.contactsFilterInput) els.contactsFilterInput.addEventListener('input', renderContactsList);
 
+  const CONTACTS_FILTER_MIN = 10;
   async function refreshContacts(){
     const { data } = await sb.rpc('my_contacts');
     myContactsData = data || [];
     els.tabContactsCount.textContent = myContactsData.length > 0 ? '(' + myContactsData.length + ')' : '';
     els.tabContactsCount.classList.toggle('hidden', myContactsData.length === 0);
+    const showFilter = myContactsData.length > CONTACTS_FILTER_MIN;
+    if (els.contactsFilterBox){
+      els.contactsFilterBox.classList.toggle('hidden', !showFilter);
+      if (!showFilter && els.contactsFilterInput) els.contactsFilterInput.value = '';
+    }
     renderContactsList();
     els.noGroupWarning.classList.toggle('hidden', myContactsData.length > 0);
     return myContactsData;
