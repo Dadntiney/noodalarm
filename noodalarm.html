@@ -165,14 +165,12 @@
      header stond op de gewone (zwarte) paginakleur, wat nu tegen de
      grijze achtergrond als een harde balk oogde. */
   body.messages-open .app-header{ background:var(--surface); }
-  body.messages-open .facepile-avatar{ border-color:var(--surface); }
-  /* Op het berichtenscherm mag de header (merk/bel/profiel + tabs +
-     avatarrij) compacter, zodat er meer ruimte overblijft voor het
-     gesprek zelf — net als bij WhatsApp. Andere schermen behouden hun
-     normale, ruimere header. */
-  body.messages-open .topbar{ padding-bottom:8px; }
-  body.messages-open .segmented{ margin-bottom:12px; }
-  body.messages-open .segmented button{ padding:9px 0; }
+  /* Op het berichtenscherm vervangen we de gewone header (merk/bel/profiel
+     + tabs) door een compacte WhatsApp-achtige gespreksheader (terug +
+     avatar + naam + leden) — zie #chatHeader hieronder. Andere schermen
+     behouden hun normale, ruimere header. */
+  body.messages-open .topbar,
+  body.messages-open .segmented{ display:none; }
   /* De vaste header/typebalk lopen al helemaal tot de randen (position:fixed
      met eigen padding). De berichtenlijst zelf zat daartussen nog steeds
      ingesprongen, omdat die normaal binnen de padding van .app valt — hier
@@ -550,19 +548,6 @@
     position:absolute; right:-1px; bottom:-1px; width:14px; height:14px; border-radius:50%;
     background:var(--green); border:2.5px solid var(--surface);
   }
-  /* min-height gereserveerd op de avatarmaat, zodat deze rij al meteen
-     zijn uiteindelijke hoogte heeft — anders schuift de header (en dus
-     de berichtenlijst eronder) zichtbaar op zodra de avatars een fractie
-     later worden ingeladen. */
-  .facepile{ display:flex; align-items:center; margin-top:-4px; padding-bottom:8px; min-height:30px; }
-  .facepile-avatar{
-    border:2px solid var(--bg); margin-left:-10px; box-shadow:var(--shadow-card);
-  }
-  /* Hogere specificiteit nodig om de 38px van .avatar.sm te overschrijven —
-     compacter dan de standaard avatarmaat, voor een slankere headerrij. */
-  .avatar.sm.facepile-avatar{ width:30px; height:30px; }
-  .facepile-avatar:first-child{ margin-left:0; }
-  .facepile-more{ background:var(--surface-2); color:var(--text-muted); font-size:0.75rem; font-weight:800; }
 
   /* ---------- Contacten / zoeken ---------- */
   .section-title{ font-size:0.90625rem; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
@@ -712,24 +697,14 @@
   .notif-actions{ display:flex; gap:8px; margin-top:12px; }
   .notif-actions button{ flex:1; }
 
-  /* ---------- Groepschat (volledig scherm, WhatsApp-achtig, grote bediening) ---------- */
-  .chat-screen{
-    position:fixed; top:0; bottom:0; left:50%; transform:translateX(-50%);
-    width:100%; max-width:480px; z-index:200; background:var(--bg);
-    display:flex; flex-direction:column;
-  }
-  .chat-screen.hidden{ display:none; }
-  .chat-header{
-    display:flex; align-items:center; gap:12px; flex-shrink:0;
-    padding:max(16px, env(safe-area-inset-top)) 18px 14px;
-    background:var(--surface); border-bottom:1px solid var(--border-soft);
-    box-shadow:var(--shadow-card);
-  }
+  /* ---------- Berichtenscherm-header (WhatsApp-achtig: terug + avatar + naam + leden) ---------- */
+  #chatHeader{ display:none; align-items:center; gap:10px; padding-bottom:10px; }
+  body.messages-open #chatHeader{ display:flex; }
   .chat-back-button{
-    width:46px; height:46px; border-radius:50%; border:none; background:var(--surface-2);
+    width:40px; height:40px; border-radius:50%; border:none; background:var(--surface-2);
     color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
   }
-  .chat-back-button svg{ width:23px; height:23px; }
+  .chat-back-button svg{ width:20px; height:20px; }
   .chat-back-button:hover{ background:var(--border-soft); }
   .profile-back-button{
     display:flex; align-items:center; gap:12px; background:none; border:none; padding:0; margin-bottom:24px;
@@ -769,9 +744,14 @@
   .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
   .chat-row .avatar{ margin-bottom:2px; }
-  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:18px; font-size:1.0625rem; line-height:1.45; }
-  .chat-bubble.own{ background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
-  .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); border-bottom-left-radius:4px; box-shadow:var(--shadow-card); }
+  /* Vervolgberichten van dezelfde afzender op rij tonen geen avatar/naam
+     meer (alleen het laatste bericht van zo'n reeks doet dat) — de ruimte
+     blijft wel gereserveerd zodat de tekstballonnen niet opschuiven. */
+  .chat-row.other.grouped .avatar{ visibility:hidden; }
+  .chat-row.other.grouped .who{ display:none; }
+  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:20px; font-size:1.0625rem; line-height:1.45; }
+  .chat-bubble.own{ background:var(--accent); color:#fff; }
+  .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); box-shadow:var(--shadow-card); }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
   .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:0.75rem; white-space:nowrap; display:flex; align-items:center; gap:3px; }
@@ -1642,6 +1622,17 @@
   <section id="screen-app" class="screen hidden">
 
     <div class="app-header" id="appHeader">
+      <div id="chatHeader" class="chat-header">
+        <button type="button" id="chatBackButton" class="chat-back-button" aria-label="Terug naar Alarm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="avatar sm" id="chatHeaderAvatar"></span>
+        <div class="chat-header-info">
+          <div class="chat-header-title" id="chatHeaderTitle"></div>
+          <div class="chat-header-sub" id="chatHeaderSub"></div>
+        </div>
+      </div>
+
       <header class="topbar">
         <button type="button" id="brandHomeButton" class="brand" aria-label="Naar Alarm">
           <div class="brand-mark">
@@ -1673,8 +1664,6 @@
         </span>
         Terug
       </button>
-
-      <div id="messagesParticipants" class="facepile hidden"></div>
     </div>
 
     <!-- =========================== ALARM SCHERM =========================== -->
@@ -2353,6 +2342,7 @@
       'conversation.unknown': 'Onbekend',
       'conversation.someone': 'Iemand',
       'chat.onMyWay': '✅ {name} komt eraan!',
+      'chat.headerTitle': 'Noodcontacten',
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
       'location.fetchingAddress': 'Adres ophalen…',
@@ -2468,6 +2458,7 @@
       'conversation.unknown': 'Unknown',
       'conversation.someone': 'Someone',
       'chat.onMyWay': '✅ {name} is on their way!',
+      'chat.headerTitle': 'Emergency contacts',
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
       'location.fetchingAddress': 'Fetching address…',
@@ -2644,7 +2635,11 @@
     notifEmpty: document.getElementById('notifEmpty'),
     notifList: document.getElementById('notifList'),
 
-    messagesParticipants: document.getElementById('messagesParticipants'),
+    chatHeader: document.getElementById('chatHeader'),
+    chatBackButton: document.getElementById('chatBackButton'),
+    chatHeaderAvatar: document.getElementById('chatHeaderAvatar'),
+    chatHeaderTitle: document.getElementById('chatHeaderTitle'),
+    chatHeaderSub: document.getElementById('chatHeaderSub'),
     chatMessages: document.getElementById('chatMessages'),
     chatForm: document.getElementById('chatForm'),
     chatMediaInput: document.getElementById('chatMediaInput'),
@@ -4014,6 +4009,7 @@
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
   els.tabMessages.addEventListener('click', () => openMessages(myGroupId));
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
+  els.chatBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
     if (name !== 'messages' && chatChannel){
       sb.removeChannel(chatChannel);
@@ -4034,7 +4030,6 @@
     els.tabMessages.setAttribute('aria-selected', String(name === 'messages'));
     els.mainNav.classList.toggle('hidden', name === 'profile');
     els.profileBackButton.classList.toggle('hidden', name !== 'profile');
-    els.messagesParticipants.classList.toggle('hidden', name !== 'messages');
     document.body.classList.toggle('messages-open', name === 'messages');
     if (name === 'contacts'){
       if (els.contactsFilterInput) els.contactsFilterInput.value = '';
@@ -4666,7 +4661,12 @@
     if (span) span.innerHTML = ticksInnerHtml(messageId);
   }
 
-  function chatBubbleHtml(msg){
+  // showMeta bepaalt of avatar+naam zichtbaar zijn — alleen bij het laatste
+  // bericht van een opeenvolgende reeks van dezelfde afzender (net als
+  // WhatsApp). Beide worden altijd wél gerenderd (niet weggelaten), zodat
+  // een reeks later puur met de .grouped-klasse (CSS) kan worden bijgesteld
+  // zonder de HTML opnieuw te hoeven opbouwen.
+  function chatBubbleHtml(msg, showMeta){
     const own = msg.sender_id === currentSession.user.id;
     const time = new Date(msg.created_at).toLocaleTimeString(localeTag(), { hour:'2-digit', minute:'2-digit' });
     const media = !msg.media_url ? '' : (msg.media_type === 'video'
@@ -4680,21 +4680,21 @@
       media +
       '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
-    if (own) return '<div class="chat-row own" data-message-id="' + msg.id + '">' + bubble + '</div>';
-    return '<div class="chat-row other" data-message-id="' + msg.id + '">' +
+    if (own) return '<div class="chat-row own" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' + bubble + '</div>';
+    return '<div class="chat-row other' + (showMeta ? '' : ' grouped') + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
       '<div class="avatar sm">' + avatarInner(msg.senderAvatar) + '</div>' +
       bubble +
       '</div>';
   }
 
-  const FACEPILE_MAX = 5;
-  function renderMessagesFacepile(){
-    const people = Object.values(chatParticipantById);
-    const shown = people.slice(0, FACEPILE_MAX);
-    const extra = people.length - shown.length;
-    els.messagesParticipants.innerHTML = shown.map(p =>
-      '<span class="avatar sm facepile-avatar">' + avatarInner(p.avatar_url) + '</span>'
-    ).join('') + (extra > 0 ? '<span class="avatar sm facepile-avatar facepile-more">+' + extra + '</span>' : '');
+  const GROUP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V21"/><circle cx="10" cy="8" r="4"/><path d="M17.5 11a3.5 3.5 0 0 0 0-7"/><path d="M21 21v-1.5a3.9 3.9 0 0 0-2.5-3.7"/></svg>';
+  function renderChatHeader(){
+    const otherIds = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
+    els.chatHeaderAvatar.innerHTML = GROUP_ICON;
+    els.chatHeaderTitle.textContent = t('chat.headerTitle');
+    els.chatHeaderSub.textContent = otherIds.length
+      ? otherIds.map(id => chatParticipantById[id].full_name).join(', ')
+      : t('entry.noContacts');
   }
 
   async function openMessages(groupId){
@@ -4717,7 +4717,7 @@
     ]);
     chatParticipantById = {};
     (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at }; });
-    renderMessagesFacepile();
+    renderChatHeader();
     handleActiveAlarmChanged(alarmRow);
 
     await loadChatMessages(groupId);
@@ -5114,12 +5114,16 @@
 
     const mediaUrlByPath = await resolveMediaUrls(list.filter(m => m.media_path).map(m => m.media_path));
     els.chatMessages.innerHTML = list.length
-      ? list.map(m => chatBubbleHtml({
-          ...m,
-          media_url: m.media_path ? mediaUrlByPath[m.media_path] : null,
-          senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
-          senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
-        })).join('')
+      ? list.map((m, i) => {
+          const next = list[i + 1];
+          const showMeta = !next || next.sender_id !== m.sender_id;
+          return chatBubbleHtml({
+            ...m,
+            media_url: m.media_path ? mediaUrlByPath[m.media_path] : null,
+            senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
+            senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
+          }, showMeta);
+        }).join('')
       : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
@@ -5154,7 +5158,14 @@
         }
         const emptyHint = els.chatMessages.querySelector('.chat-empty-hint');
         if (emptyHint) emptyHint.remove();
-        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }));
+        // Als de vorige laatste rij van dezelfde afzender is, hoort die nu
+        // niet meer bij het einde van de reeks — avatar/naam daar alsnog
+        // verbergen (puur een klasse-toggle, geen herbouw nodig).
+        const prevLastRow = els.chatMessages.querySelector('.chat-row:last-child');
+        if (prevLastRow && !prevLastRow.classList.contains('own') && prevLastRow.getAttribute('data-sender-id') === msg.sender_id){
+          prevLastRow.classList.add('grouped');
+        }
+        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }, true));
         scrollChatToBottom();
         requestAnimationFrame(scrollChatToBottom);
         const lastMedia = els.chatMessages.querySelector('.chat-row:last-child .chat-media');
@@ -5186,7 +5197,19 @@
         delete chatMessageById[id];
         delete chatReceiptsByMessageId[id];
         const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + id + '"]');
-        if (row) row.remove();
+        if (row){
+          // Als het verwijderde bericht het laatste van een reeks was, moet
+          // het bericht ervoor (indien van dezelfde afzender) nu weer
+          // avatar/naam tonen — het is immers zelf het nieuwe laatste.
+          const prevSib = row.previousElementSibling;
+          row.remove();
+          if (prevSib && prevSib.classList.contains('chat-row') && !prevSib.classList.contains('own')){
+            const nextOfPrev = prevSib.nextElementSibling;
+            const stillGrouped = nextOfPrev && nextOfPrev.classList.contains('chat-row') &&
+              nextOfPrev.getAttribute('data-sender-id') === prevSib.getAttribute('data-sender-id');
+            prevSib.classList.toggle('grouped', !!stillGrouped);
+          }
+        }
         if (!els.chatMessages.querySelector('.chat-row')){
           els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
         }
