@@ -1181,6 +1181,14 @@
             </div>
             <div class="field-hint" style="margin-top:8px;">Zie je geen knop? Tik op <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg> (menu) rechtsboven in Chrome en kies <strong>"App installeren"</strong>.</div>
           </div>
+
+          <div id="medicalInfoHint" class="auth-message hidden">
+            🩺 <strong>Vul je medische info in</strong>: allergieën, medicatie of aandoeningen die je noodcontacten direct moeten kunnen zien als jij ooit op ALARM drukt.
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <button type="button" id="medicalInfoHintButton" class="small-btn">Nu invullen</button>
+              <button type="button" id="medicalInfoHintDismiss" class="link-button" style="padding:0;">Niet nu</button>
+            </div>
+          </div>
         </div>
 
         <!-- VERZONDEN -->
@@ -1371,7 +1379,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing', textSize: 'noodalarm.textSize', highContrast: 'noodalarm.highContrast' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing', textSize: 'noodalarm.textSize', highContrast: 'noodalarm.highContrast', medicalHintDismissed: 'noodalarm.medicalHintDismissed' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1535,6 +1543,9 @@
     androidInstallHint: document.getElementById('androidInstallHint'),
     androidInstallButton: document.getElementById('androidInstallButton'),
     androidInstallHintDismiss: document.getElementById('androidInstallHintDismiss'),
+    medicalInfoHint: document.getElementById('medicalInfoHint'),
+    medicalInfoHintButton: document.getElementById('medicalInfoHintButton'),
+    medicalInfoHintDismiss: document.getElementById('medicalInfoHintDismiss'),
 
     viewIdle: document.getElementById('view-idle'),
     viewSent: document.getElementById('view-sent'),
@@ -2079,6 +2090,7 @@
     subscribeRealtime();
     subscribePresence();
     maybeShowIosInstallHint();
+    maybeShowMedicalInfoHint();
     await setupPush();
     maybeOpenChatFromUrl();
     primeLocation();
@@ -3451,6 +3463,37 @@
     els.iosInstallHintDismiss.addEventListener('click', () => {
       realStore.set(KEYS.iosHintDismissed, true);
       els.iosInstallHint.classList.add('hidden');
+    });
+  }
+
+  // Herinnert (nieuwe) gebruikers aan de medische info, zolang ze die nog
+  // niet hebben ingevuld — verdwijnt vanzelf zodra er iets staat.
+  async function maybeShowMedicalInfoHint(){
+    if (!els.medicalInfoHint || realStore.get(KEYS.medicalHintDismissed, false)){
+      if (els.medicalInfoHint) els.medicalInfoHint.classList.add('hidden');
+      return;
+    }
+    const { data } = await sb.from('medical_info')
+      .select('allergies, medications, conditions, doctor_name, doctor_phone, notes')
+      .eq('user_id', currentSession.user.id).maybeSingle();
+    const hasAny = data && (data.allergies || data.medications || data.conditions || data.doctor_name || data.doctor_phone || data.notes);
+    els.medicalInfoHint.classList.toggle('hidden', !!hasAny);
+  }
+  if (els.medicalInfoHintButton){
+    els.medicalInfoHintButton.addEventListener('click', () => {
+      els.medicalInfoHint.classList.add('hidden');
+      loadMedicalInfo();
+      els.accountOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        els.medicalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        els.medicalAllergies.focus();
+      });
+    });
+  }
+  if (els.medicalInfoHintDismiss){
+    els.medicalInfoHintDismiss.addEventListener('click', () => {
+      realStore.set(KEYS.medicalHintDismissed, true);
+      els.medicalInfoHint.classList.add('hidden');
     });
   }
 
