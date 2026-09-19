@@ -560,7 +560,11 @@
   .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); border-bottom-left-radius:4px; box-shadow:var(--shadow-card); }
   .chat-bubble .who{ font-size:13.5px; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
-  .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:12px; opacity:.65; white-space:nowrap; }
+  .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:12px; white-space:nowrap; display:flex; align-items:center; gap:3px; }
+  .when-time{ opacity:.65; }
+  .msg-ticks{ display:inline-flex; align-items:center; }
+  .tick-icon{ color:rgba(255,255,255,.75); }
+  .tick-icon.read{ color:#6fd8ff; }
   .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
   .chat-media{
     display:block; max-height:280px; border-radius:12px;
@@ -574,13 +578,47 @@
     display:flex; align-items:center; justify-content:center; color:#fff; pointer-events:none;
   }
   .chat-video-play svg{ width:24px; height:24px; margin-left:3px; }
+  .chat-video-duration{
+    position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.6); color:#fff;
+    font-size:12px; font-weight:700; padding:2px 7px; border-radius:6px; pointer-events:none; letter-spacing:.02em;
+  }
   .chat-form{
-    display:flex; align-items:center; gap:10px; flex-shrink:0;
+    display:flex; flex-direction:column; flex-shrink:0;
     position:fixed; bottom:0; left:0; right:0; z-index:10;
     max-width:480px; margin:0 auto;
-    padding:14px var(--app-pad-x) max(14px, env(safe-area-inset-bottom));
+    padding:0 var(--app-pad-x) max(14px, env(safe-area-inset-bottom));
     background:var(--surface); border-top:1px solid var(--border-soft);
   }
+  .chat-form-row{ display:flex; align-items:center; gap:10px; padding-top:14px; }
+  .chat-edit-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:10px 2px 0;
+  }
+  .chat-edit-banner-text{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .chat-edit-banner-text strong{ font-size:13px; color:var(--accent); }
+  .chat-edit-banner-text span{ font-size:13.5px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chat-edit-cancel{
+    width:32px; height:32px; border-radius:50%; border:none; background:var(--surface-2); color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .chat-edit-cancel svg{ width:16px; height:16px; }
+
+  /* ---------- Bericht-menu (lang indrukken) ---------- */
+  .chat-bubble.menu-active{ filter:brightness(.92); }
+  .chat-bubble-menu-backdrop{ position:fixed; inset:0; z-index:290; background:transparent; }
+  .chat-bubble-menu{
+    position:fixed; z-index:300; background:var(--surface); border:1px solid var(--border-soft);
+    border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,.28); padding:6px; min-width:190px;
+    display:flex; flex-direction:column; animation:screen-in .16s ease;
+  }
+  .chat-bubble-menu-item{
+    display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:none; border:none;
+    padding:12px 14px; border-radius:9px; font-size:15.5px; font-weight:600; color:var(--text); cursor:pointer;
+  }
+  .chat-bubble-menu-item:active{ background:var(--surface-2); }
+  .chat-bubble-menu-item svg{ width:19px; height:19px; color:var(--text-muted); flex-shrink:0; }
+  .chat-bubble-menu-item.danger{ color:var(--danger); }
+  .chat-bubble-menu-item.danger svg{ color:var(--danger); }
   .chat-form input{
     flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:26px;
     padding:14px 20px; font-size:17px; color:var(--text); min-height:52px;
@@ -788,6 +826,37 @@
       <div id="notifEmpty" class="empty-state hidden">Nog geen meldingen.</div>
       <div id="notifList" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
+  </div>
+
+  <!-- =========================== GELEZEN DOOR =========================== -->
+  <div id="readByOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <div class="overlay-header">
+        <h2 class="overlay-title">Gelezen door</h2>
+        <button type="button" id="readByCloseButton" class="overlay-close" aria-label="Sluiten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div id="readByEmpty" class="empty-state hidden">Nog door niemand gelezen.</div>
+      <div id="readByList" style="display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+  </div>
+
+  <!-- =========================== BERICHT-MENU (lang indrukken) =========================== -->
+  <div id="chatBubbleMenuBackdrop" class="chat-bubble-menu-backdrop hidden"></div>
+  <div id="chatBubbleMenu" class="chat-bubble-menu hidden">
+    <button type="button" id="chatMenuInfo" class="chat-bubble-menu-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>
+      Info
+    </button>
+    <button type="button" id="chatMenuEdit" class="chat-bubble-menu-item hidden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      Bewerken
+    </button>
+    <button type="button" id="chatMenuDelete" class="chat-bubble-menu-item danger hidden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      Verwijderen
+    </button>
   </div>
 
   <!-- =========================== INLOG / REGISTRATIE =========================== -->
@@ -1010,14 +1079,25 @@
 
       <div id="chatMessages" class="chat-messages" style="flex:1; padding-left:0; padding-right:10px;"></div>
       <form id="chatForm" class="chat-form">
-        <input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;">
-        <button type="button" id="chatAttachButton" class="chat-attach-button" aria-label="Foto of video versturen">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-        </button>
-        <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
-        <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-        </button>
+        <div id="chatEditBanner" class="chat-edit-banner hidden">
+          <div class="chat-edit-banner-text">
+            <strong>Bericht bewerken</strong>
+            <span id="chatEditBannerText"></span>
+          </div>
+          <button type="button" id="chatEditCancelButton" class="chat-edit-cancel" aria-label="Bewerken annuleren">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+        <div class="chat-form-row">
+          <input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;">
+          <button type="button" id="chatAttachButton" class="chat-attach-button" aria-label="Foto of video versturen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </button>
+          <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
+          <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          </button>
+        </div>
       </form>
     </section>
 
@@ -1204,6 +1284,18 @@
     chatAttachButton: document.getElementById('chatAttachButton'),
     chatInput: document.getElementById('chatInput'),
     chatSendButton: document.getElementById('chatSendButton'),
+    chatEditBanner: document.getElementById('chatEditBanner'),
+    chatEditBannerText: document.getElementById('chatEditBannerText'),
+    chatEditCancelButton: document.getElementById('chatEditCancelButton'),
+    chatBubbleMenu: document.getElementById('chatBubbleMenu'),
+    chatBubbleMenuBackdrop: document.getElementById('chatBubbleMenuBackdrop'),
+    chatMenuInfo: document.getElementById('chatMenuInfo'),
+    chatMenuEdit: document.getElementById('chatMenuEdit'),
+    chatMenuDelete: document.getElementById('chatMenuDelete'),
+    readByOverlay: document.getElementById('readByOverlay'),
+    readByCloseButton: document.getElementById('readByCloseButton'),
+    readByEmpty: document.getElementById('readByEmpty'),
+    readByList: document.getElementById('readByList'),
     locationCard: document.getElementById('locationCard'),
     locationName: document.getElementById('locationName'),
     locationAccuracy: document.getElementById('locationAccuracy'),
@@ -2263,8 +2355,12 @@
      ========================================================================= */
   let chatChannel = null;
   let currentChatGroupId = null;
+  let editingMessageId = null;
+  let activeMenuBubble = null;
 
   let chatParticipantById = {};
+  let chatMessageById = {};
+  let chatReceiptsByMessageId = {};
 
   const CHAT_NAME_COLOR_COUNT = 6;
   function chatNameColor(userId){
@@ -2277,18 +2373,59 @@
     els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
   }
 
+  function formatDuration(seconds){
+    if (!isFinite(seconds) || seconds < 0) return '';
+    const total = Math.round(seconds);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
   // Met preload="metadata" laat de browser standaard een leeg (wit/zwart)
   // vlak zien totdat je op play drukt. Even naar een piepklein moment in de
   // video seeken dwingt 'm om dat frame alvast te decoderen en te tonen als
-  // miniatuur — zonder de hele video te downloaden.
+  // miniatuur — zonder de hele video te downloaden. Meteen ook de duur
+  // uitlezen voor het badge rechtsonder.
   function primeVideoPosters(root){
     root.querySelectorAll('.chat-video').forEach(video => {
       if (video.dataset.posterPrimed) return;
       video.dataset.posterPrimed = '1';
-      const seekToFirstFrame = () => { try { video.currentTime = 0.01; } catch(e){} };
-      if (video.readyState >= 1) seekToFirstFrame();
-      else video.addEventListener('loadedmetadata', seekToFirstFrame, { once: true });
+      const onMetadata = () => {
+        try { video.currentTime = 0.01; } catch(e){}
+        const badge = video.parentElement.querySelector('.chat-video-duration');
+        if (badge) badge.textContent = formatDuration(video.duration);
+      };
+      if (video.readyState >= 1) onMetadata();
+      else video.addEventListener('loadedmetadata', onMetadata, { once: true });
     });
+  }
+
+  // Vinkjes: 1 grijs = verstuurd, 2 grijs = bij iedereen afgeleverd, 2 blauw
+  // = door iedereen gelezen. Berekend uit chatReceiptsByMessageId t.o.v. alle
+  // groepsleden behalve mezelf.
+  function messageTickState(messageId){
+    const others = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
+    if (!others.length) return 'sent';
+    const receipts = chatReceiptsByMessageId[messageId] || {};
+    const allRead = others.every(id => receipts[id] && receipts[id].read_at);
+    if (allRead) return 'read';
+    const allDelivered = others.every(id => receipts[id] && receipts[id].delivered_at);
+    return allDelivered ? 'delivered' : 'sent';
+  }
+  function ticksInnerHtml(messageId){
+    const state = messageTickState(messageId);
+    const readClass = state === 'read' ? ' read' : '';
+    const paths = state === 'sent'
+      ? '<path d="M2 6.5 6 10.5 16 1"/>'
+      : '<path d="M1 6.5 4.5 10 11 2.5"/><path d="M6.5 6.5 10 10 17 1.5"/>';
+    return '<svg class="tick-icon' + readClass + '" viewBox="0 0 18 12" width="17" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>';
+  }
+  function chatTicksHtml(messageId){
+    return '<span class="msg-ticks" data-message-id="' + messageId + '">' + ticksInnerHtml(messageId) + '</span>';
+  }
+  function refreshTicks(messageId){
+    const span = els.chatMessages.querySelector('.msg-ticks[data-message-id="' + messageId + '"]');
+    if (span) span.innerHTML = ticksInnerHtml(messageId);
   }
 
   function chatBubbleHtml(msg){
@@ -2296,15 +2433,17 @@
     const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
     const media = !msg.media_url ? '' : (msg.media_type === 'video'
       ? '<div class="chat-video-wrap"><video src="' + escapeHtml(msg.media_url) + '" class="chat-media chat-video" playsinline preload="metadata"></video>' +
-        '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span></div>'
+        '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span>' +
+        '<span class="chat-video-duration"></span></div>'
       : '<img src="' + escapeHtml(msg.media_url) + '" class="chat-media" loading="lazy" alt="">');
+    const ticks = own ? chatTicksHtml(msg.id) : '';
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
       (own ? '' : '<div class="who" style="color:' + chatNameColor(msg.sender_id) + ';">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
       media +
-      '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when">' + time + '</span></div>' +
+      '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
-    if (own) return '<div class="chat-row own">' + bubble + '</div>';
-    return '<div class="chat-row other">' +
+    if (own) return '<div class="chat-row own" data-message-id="' + msg.id + '">' + bubble + '</div>';
+    return '<div class="chat-row other" data-message-id="' + msg.id + '">' +
       '<div class="avatar sm">' + avatarInner(msg.senderAvatar) + '</div>' +
       bubble +
       '</div>';
@@ -2323,10 +2462,13 @@
   async function openMessages(groupId){
     if (!groupId) return;
     currentChatGroupId = groupId;
+    cancelEditingMessage();
     els.notifOverlay.classList.add('hidden');
     switchScreen('messages');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">Bericht laden…</p>';
     els.locationCard.classList.add('hidden');
+    chatMessageById = {};
+    chatReceiptsByMessageId = {};
 
     const [{ data: members }, { data: alarmRow }] = await Promise.all([
       sb.rpc('get_group_participants', { p_group_id: groupId }),
@@ -2399,10 +2541,38 @@
     return urlByPath;
   }
 
+  // Meldt berichten die niet van mezelf zijn als afgeleverd, en als gelezen
+  // zodra Berichten daadwerkelijk op het scherm staat (niet als de app op de
+  // achtergrond staat).
+  function markIncomingMessagesSeen(ids){
+    if (!ids || !ids.length) return;
+    sb.rpc('mark_messages_delivered', { p_message_ids: ids });
+    if (document.visibilityState === 'visible'){
+      sb.rpc('mark_messages_read', { p_message_ids: ids });
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && currentChatGroupId && !els.screenMessages.classList.contains('hidden')){
+      const ids = Object.keys(chatMessageById).filter(id => chatMessageById[id].sender_id !== currentSession.user.id);
+      markIncomingMessagesSeen(ids);
+    }
+  });
+
   async function loadChatMessages(groupId){
     const { data: messages } = await sb.from('alarm_messages').select('*')
       .eq('group_id', groupId).order('created_at', { ascending:true }).limit(200);
     const list = messages || [];
+    chatMessageById = {};
+    list.forEach(m => { chatMessageById[m.id] = m; });
+
+    const { data: receiptRows } = await sb.from('message_receipts')
+      .select('message_id, user_id, delivered_at, read_at').eq('group_id', groupId);
+    chatReceiptsByMessageId = {};
+    (receiptRows || []).forEach(r => {
+      if (!chatReceiptsByMessageId[r.message_id]) chatReceiptsByMessageId[r.message_id] = {};
+      chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
+    });
+
     const mediaUrlByPath = await resolveMediaUrls(list.filter(m => m.media_path).map(m => m.media_path));
     els.chatMessages.innerHTML = list.length
       ? list.map(m => chatBubbleHtml({
@@ -2418,6 +2588,8 @@
       el.addEventListener(el.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom);
     });
     primeVideoPosters(els.chatMessages);
+
+    markIncomingMessagesSeen(list.filter(m => m.sender_id !== currentSession.user.id).map(m => m.id));
   }
 
   function subscribeChat(groupId){
@@ -2429,6 +2601,7 @@
         filter: 'group_id=eq.' + groupId
       }, async (payload) => {
         const msg = payload.new;
+        chatMessageById[msg.id] = msg;
         let participant = chatParticipantById[msg.sender_id];
         if (!participant){
           const { data: p } = await sb.from('profiles').select('full_name, avatar_url').eq('id', msg.sender_id).single();
@@ -2448,15 +2621,59 @@
         const lastMedia = els.chatMessages.querySelector('.chat-row:last-child .chat-media');
         if (lastMedia) lastMedia.addEventListener(lastMedia.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom, { once: true });
         primeVideoPosters(els.chatMessages);
+        if (msg.sender_id !== currentSession.user.id) markIncomingMessagesSeen([msg.id]);
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'alarm_messages',
+        filter: 'group_id=eq.' + groupId
+      }, (payload) => {
+        const msg = payload.new;
+        chatMessageById[msg.id] = msg;
+        const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + msg.id + '"]');
+        if (row){
+          const textEl = row.querySelector('.chat-bubble .text');
+          if (textEl){
+            const whenEl = textEl.querySelector('.when');
+            textEl.innerHTML = (msg.body ? linkifyHtml(msg.body) : '') + (whenEl ? whenEl.outerHTML : '');
+          }
+        }
+      })
+      .on('postgres_changes', {
+        event: 'DELETE', schema: 'public', table: 'alarm_messages',
+        filter: 'group_id=eq.' + groupId
+      }, (payload) => {
+        const id = payload.old && payload.old.id;
+        if (!id) return;
+        delete chatMessageById[id];
+        delete chatReceiptsByMessageId[id];
+        const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + id + '"]');
+        if (row) row.remove();
+        if (!els.chatMessages.querySelector('.chat-row')){
+          els.chatMessages.innerHTML = '<p class="chat-empty-hint">Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.</p>';
+        }
+      })
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'message_receipts',
+        filter: 'group_id=eq.' + groupId
+      }, (payload) => {
+        const r = payload.new;
+        if (!r) return;
+        if (!chatReceiptsByMessageId[r.message_id]) chatReceiptsByMessageId[r.message_id] = {};
+        chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
+        refreshTicks(r.message_id);
       })
       .subscribe();
   }
 
   // Tikken op een video speelt hem direct fullscreen af, net als WhatsApp —
-  // geen inline afspelen met kleine bediening eerst.
+  // geen inline afspelen met kleine bediening eerst. Als een tik uiteindelijk
+  // een lang-indrukken bleek te zijn (menu geopend), moet die niet ook nog
+  // de video starten.
+  let suppressNextVideoClick = false;
   els.chatMessages.addEventListener('click', (ev) => {
     const video = ev.target.closest('.chat-video');
     if (!video) return;
+    if (suppressNextVideoClick){ suppressNextVideoClick = false; return; }
     video.controls = true;
     if (video.webkitEnterFullscreen){
       video.webkitEnterFullscreen();
@@ -2474,10 +2691,163 @@
     }
   });
 
+  /* -------- Lang indrukken op een bericht: info / bewerken / verwijderen -------- */
+  const LONG_PRESS_MS = 480;
+  const LONG_PRESS_MOVE_TOLERANCE = 10;
+  let longPressTimer = null;
+  let longPressStartXY = null;
+
+  function cancelLongPress(){
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+    longPressStartXY = null;
+  }
+
+  function positionChatBubbleMenu(bubbleEl){
+    const rect = bubbleEl.getBoundingClientRect();
+    const menu = els.chatBubbleMenu;
+    const menuRect = menu.getBoundingClientRect();
+    let top = rect.top - menuRect.height - 10;
+    if (top < 10) top = Math.min(rect.bottom + 10, window.innerHeight - menuRect.height - 10);
+    let left = rect.left + rect.width / 2 - menuRect.width / 2;
+    left = Math.max(10, Math.min(left, window.innerWidth - menuRect.width - 10));
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+  }
+
+  function openChatBubbleMenu(bubbleEl){
+    const row = bubbleEl.closest('.chat-row');
+    const messageId = row && row.dataset.messageId;
+    const msg = messageId && chatMessageById[messageId];
+    if (!msg) return;
+    const isOwn = msg.sender_id === currentSession.user.id;
+    // Info (gelezen door), bewerken en verwijderen zijn allemaal
+    // afzender-acties — bij een bericht van iemand anders is er niets te
+    // doen, dus dan verschijnt er geen menu.
+    if (!isOwn) return;
+    const isTextOnly = !!msg.body && !msg.media_path;
+
+    els.chatMenuEdit.classList.toggle('hidden', !isTextOnly);
+    els.chatMenuDelete.classList.remove('hidden');
+    els.chatBubbleMenu.dataset.messageId = messageId;
+
+    bubbleEl.classList.add('menu-active');
+    activeMenuBubble = bubbleEl;
+
+    els.chatBubbleMenuBackdrop.classList.remove('hidden');
+    els.chatBubbleMenu.classList.remove('hidden');
+    positionChatBubbleMenu(bubbleEl);
+  }
+
+  function closeChatBubbleMenu(){
+    els.chatBubbleMenu.classList.add('hidden');
+    els.chatBubbleMenuBackdrop.classList.add('hidden');
+    if (activeMenuBubble) activeMenuBubble.classList.remove('menu-active');
+    activeMenuBubble = null;
+  }
+
+  els.chatMessages.addEventListener('touchstart', (ev) => {
+    const bubble = ev.target.closest('.chat-bubble');
+    if (!bubble || ev.touches.length !== 1) return;
+    suppressNextVideoClick = false;
+    longPressStartXY = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
+    longPressTimer = setTimeout(() => {
+      longPressTimer = null;
+      if (bubble.querySelector('.chat-video')) suppressNextVideoClick = true;
+      if (navigator.vibrate) navigator.vibrate(15);
+      openChatBubbleMenu(bubble);
+    }, LONG_PRESS_MS);
+  }, { passive: true });
+  els.chatMessages.addEventListener('touchmove', (ev) => {
+    if (!longPressTimer || !longPressStartXY) return;
+    const dx = ev.touches[0].clientX - longPressStartXY.x;
+    const dy = ev.touches[0].clientY - longPressStartXY.y;
+    if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_TOLERANCE) cancelLongPress();
+  }, { passive: true });
+  els.chatMessages.addEventListener('touchend', cancelLongPress);
+  els.chatMessages.addEventListener('touchcancel', cancelLongPress);
+  els.chatMessages.addEventListener('contextmenu', (ev) => {
+    const bubble = ev.target.closest('.chat-bubble');
+    if (!bubble) return;
+    ev.preventDefault();
+    openChatBubbleMenu(bubble);
+  });
+  els.chatBubbleMenuBackdrop.addEventListener('click', closeChatBubbleMenu);
+
+  function formatReadTimestamp(iso){
+    return new Date(iso).toLocaleString('nl-NL', { dateStyle:'medium', timeStyle:'short' });
+  }
+  function openReadByOverlay(messageId){
+    const others = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
+    const receipts = chatReceiptsByMessageId[messageId] || {};
+    const readers = others
+      .filter(id => receipts[id] && receipts[id].read_at)
+      .map(id => ({ ...chatParticipantById[id], read_at: receipts[id].read_at }))
+      .sort((a, b) => new Date(a.read_at) - new Date(b.read_at));
+    els.readByList.innerHTML = readers.map(p =>
+      '<div style="display:flex; align-items:center; gap:12px;">' +
+        '<div class="avatar sm">' + avatarInner(p.avatar_url) + '</div>' +
+        '<div style="flex:1; min-width:0;">' +
+          '<div style="font-weight:700; font-size:15.5px;">' + escapeHtml(p.full_name) + '</div>' +
+          '<div style="color:var(--text-muted); font-size:13.5px; margin-top:2px;">' + formatReadTimestamp(p.read_at) + '</div>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+    els.readByEmpty.classList.toggle('hidden', readers.length > 0);
+    els.readByOverlay.classList.remove('hidden');
+  }
+  els.readByCloseButton.addEventListener('click', () => els.readByOverlay.classList.add('hidden'));
+
+  function showEditBanner(text){
+    els.chatEditBannerText.textContent = text.length > 60 ? text.slice(0, 60) + '…' : text;
+    els.chatEditBanner.classList.remove('hidden');
+  }
+  function startEditingMessage(msg){
+    editingMessageId = msg.id;
+    els.chatInput.value = msg.body || '';
+    els.chatInput.focus();
+    showEditBanner(msg.body || '');
+  }
+  function cancelEditingMessage(){
+    editingMessageId = null;
+    els.chatInput.value = '';
+    els.chatEditBanner.classList.add('hidden');
+  }
+  els.chatEditCancelButton.addEventListener('click', cancelEditingMessage);
+
+  els.chatMenuInfo.addEventListener('click', () => {
+    const messageId = els.chatBubbleMenu.dataset.messageId;
+    closeChatBubbleMenu();
+    openReadByOverlay(messageId);
+  });
+  els.chatMenuEdit.addEventListener('click', () => {
+    const messageId = els.chatBubbleMenu.dataset.messageId;
+    const msg = chatMessageById[messageId];
+    closeChatBubbleMenu();
+    if (msg) startEditingMessage(msg);
+  });
+  els.chatMenuDelete.addEventListener('click', async () => {
+    const messageId = els.chatBubbleMenu.dataset.messageId;
+    const msg = chatMessageById[messageId];
+    closeChatBubbleMenu();
+    if (!msg) return;
+    if (!window.confirm('Bericht verwijderen voor iedereen?')) return;
+    if (editingMessageId === messageId) cancelEditingMessage();
+    await sb.from('alarm_messages').delete().eq('id', messageId);
+    if (msg.media_path) sb.storage.from('chat-media').remove([msg.media_path]);
+  });
+
   els.chatForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const body = els.chatInput.value.trim();
     if (!body || !currentChatGroupId) return;
+    if (editingMessageId){
+      const id = editingMessageId;
+      cancelEditingMessage();
+      const { error } = await sb.from('alarm_messages').update({ body }).eq('id', id);
+      if (error) window.alert('Bewerken mislukt: ' + error.message);
+      return;
+    }
     els.chatInput.value = '';
     await sb.from('alarm_messages').insert({ group_id: currentChatGroupId, sender_id: currentSession.user.id, body });
     scrollChatToBottom();
