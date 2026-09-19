@@ -228,9 +228,10 @@
     border-radius:999px; padding:5px; gap:5px; margin-bottom:24px;
   }
   .segmented button{
-    flex:1; border:none; background:transparent; color:var(--text-muted);
+    flex:1; min-width:0; border:none; background:transparent; color:var(--text-muted);
     font-weight:700; font-size:0.9375rem; padding:13px 0; border-radius:999px; cursor:pointer;
     transition:background .15s ease, color .15s ease;
+    white-space:normal; line-height:1.2; overflow-wrap:break-word; text-align:center;
   }
   .segmented button.active{ background:var(--accent); color:#fff; }
   .resus-segmented{ margin-bottom:0; }
@@ -240,6 +241,10 @@
   @media (max-width:360px){ .resus-segmented button{ font-size:0.71875rem; padding:10px 2px; } }
   .siren-segmented button{ font-size:0.8125rem; padding:11px 4px; }
   @media (max-width:380px){ .siren-segmented button{ font-size:0.71875rem; padding:10px 2px; } }
+  /* Mobiliteit heeft 4 knoppen i.p.v. 3 — elk krijgt dus minder breedte,
+     dus net iets kleiner dan de andere segmented-rijen. */
+  .mobility-segmented button{ font-size:0.71875rem; padding:10px 3px; }
+  @media (max-width:360px){ .mobility-segmented button{ font-size:0.65625rem; padding:9px 2px; } }
 
   /* ---------- Weergave (thema)-keuze ---------- */
   .theme-picker{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
@@ -1173,7 +1178,7 @@
         </div>
         <div class="field">
           <label id="mobilityFieldLabel">Mobiliteit</label>
-          <nav class="segmented resus-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
+          <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
             <button type="button" data-mobility="" role="tab">Niet aangegeven</button>
             <button type="button" data-mobility="good" role="tab">Goed mobiel</button>
             <button type="button" data-mobility="walker" role="tab">Rollator</button>
