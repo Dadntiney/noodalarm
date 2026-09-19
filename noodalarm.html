@@ -478,6 +478,22 @@
 
   /* ---------- Contacten / zoeken ---------- */
   .section-title{ font-size:0.90625rem; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
+  /* Piepklein, tekstloos bevestigingsbolletje voor het stille alarm — geen
+     woord over wat er net gebeurd is, voor als iemand meekijkt. */
+  .discreet-toast{
+    position:fixed; bottom:max(28px, env(safe-area-inset-bottom)); left:50%; z-index:500;
+    transform:translateX(-50%) translateY(16px); width:38px; height:38px; border-radius:50%;
+    background:rgba(20,20,22,.88); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:1.0625rem; font-weight:800; opacity:0; pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .discreet-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .discreet-toast.warn{ background:rgba(153,16,31,.92); }
+  .qr-invite-card{
+    width:100%; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
+    padding:20px; text-align:center; box-shadow:var(--shadow-card); margin-bottom:16px;
+  }
+  .qr-invite-card img{ width:200px; height:200px; max-width:100%; border-radius:12px; background:#fff; padding:10px; }
   .search-box{
     width:100%; display:flex; align-items:center; gap:10px; background:var(--surface); border:1.5px solid var(--border);
     border-radius:999px; padding:6px 8px 6px 18px;
@@ -1095,6 +1111,8 @@
   </div>
 
   <!-- =========================== BERICHT-MENU (lang indrukken) =========================== -->
+  <div id="discreetToast" class="discreet-toast">✓</div>
+
   <div id="chatBubbleMenuBackdrop" class="chat-bubble-menu-backdrop hidden"></div>
   <div id="chatBubbleMenu" class="chat-bubble-menu hidden">
     <div id="chatBubbleMenuActions">
@@ -1308,6 +1326,20 @@
 
     <!-- =========================== CONTACTEN SCHERM =========================== -->
     <section id="screen-contacts" class="screen hidden">
+
+      <button type="button" id="qrInviteToggle" class="settings-link" style="margin-bottom:16px;">
+        <span class="settings-link-icon settings-link-icon-accent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
+        </span>
+        <span class="settings-link-label">Voeg toe via QR-code</span>
+        <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <div id="qrInviteCard" class="qr-invite-card hidden">
+        <img id="qrInviteImg" alt="QR-code om jou toe te voegen als noodcontact">
+        <p class="field-hint" style="text-align:center; margin:12px 0 0;">Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.</p>
+        <button type="button" id="copyInviteLinkButton" class="small-btn" style="margin:12px auto 0; display:block;">Of kopieer de link</button>
+      </div>
 
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -1614,6 +1646,7 @@
     escalationContactButtons: document.getElementById('escalationContactButtons'),
 
     brandHomeButton: document.getElementById('brandHomeButton'),
+    discreetToast: document.getElementById('discreetToast'),
     appHeader: document.getElementById('appHeader'),
     mainNav: document.getElementById('mainNav'),
     profileBackButton: document.getElementById('profileBackButton'),
@@ -1654,6 +1687,10 @@
     endAlarmButton: document.getElementById('endAlarmButton'),
 
     searchInput: document.getElementById('searchInput'),
+    qrInviteToggle: document.getElementById('qrInviteToggle'),
+    qrInviteCard: document.getElementById('qrInviteCard'),
+    qrInviteImg: document.getElementById('qrInviteImg'),
+    copyInviteLinkButton: document.getElementById('copyInviteLinkButton'),
     searchResultsSection: document.getElementById('searchResultsSection'),
     searchEmpty: document.getElementById('searchEmpty'),
     searchResultsList: document.getElementById('searchResultsList'),
@@ -2202,6 +2239,8 @@
     maybeShowMedicalInfoHint();
     await setupPush();
     maybeOpenChatFromUrl();
+    maybeHandleOmwFromUrl();
+    maybeHandleInviteFromUrl();
     primeLocation();
 
     if (!realStore.get(KEYS.onboarded, false)){
@@ -2237,11 +2276,36 @@
     history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : ''));
   }
 
+  // "Ik kom eraan" op de pushmelding zelf — meldt zich meteen als
+  // gereageerd (zelfde signaal als de escalatie-tracker gebruikt) en zet
+  // automatisch een duidelijke bevestiging in de groepschat, zodat de
+  // activator het meteen ziet zonder dat de contactpersoon iets hoeft te
+  // typen.
+  async function handleOmw(alarmId){
+    if (!alarmId || !currentSession) return;
+    const { data: alarmRow } = await sb.from('alarms').select('group_id').eq('id', alarmId).single();
+    if (!alarmRow || !alarmRow.group_id) return;
+    await sb.from('notifications').update({ is_read: true })
+      .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmId);
+    const name = currentProfile ? currentProfile.full_name : 'Iemand';
+    await sb.from('alarm_messages').insert({ group_id: alarmRow.group_id, sender_id: currentSession.user.id, body: '✅ ' + name + ' komt eraan!' });
+    openMessages(alarmRow.group_id);
+  }
+  function maybeHandleOmwFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const alarmId = params.get('omw');
+    if (!alarmId) return;
+    handleOmw(alarmId);
+    params.delete('omw');
+    const rest = params.toString();
+    history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : ''));
+  }
+
   if ('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'open-chat' && event.data.alarmId && currentSession){
-        openChatByAlarm(event.data.alarmId);
-      }
+      if (!event.data || !currentSession) return;
+      if (event.data.type === 'open-chat' && event.data.alarmId) openChatByAlarm(event.data.alarmId);
+      else if (event.data.type === 'omw' && event.data.alarmId) handleOmw(event.data.alarmId);
     });
   }
 
@@ -2367,6 +2431,59 @@
   /* =========================================================================
      CONTACTEN — zoeken, uitnodigen, lijst
      ========================================================================= */
+  // QR-code/deel-link: sneller en foutlozer dan een gebruikersnaam typen,
+  // vooral fijn voor wie moeite heeft met zoeken. De code bevat gewoon je
+  // eigen gebruikers-id; scannen/openen stuurt van de KANT VAN DE SCANNER
+  // een verzoek naar jou.
+  function inviteLink(){
+    return window.location.origin + window.location.pathname + '?invite=' + currentSession.user.id;
+  }
+  function renderInviteQr(){
+    if (!els.qrInviteImg || !currentSession) return;
+    els.qrInviteImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(inviteLink());
+  }
+  if (els.qrInviteToggle){
+    els.qrInviteToggle.addEventListener('click', () => {
+      const opening = els.qrInviteCard.classList.contains('hidden');
+      els.qrInviteCard.classList.toggle('hidden');
+      if (opening) renderInviteQr();
+    });
+  }
+  if (els.copyInviteLinkButton){
+    els.copyInviteLinkButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(inviteLink());
+        const original = els.copyInviteLinkButton.textContent;
+        els.copyInviteLinkButton.textContent = 'Gekopieerd!';
+        setTimeout(() => { els.copyInviteLinkButton.textContent = original; }, 1800);
+      } catch (err){
+        window.alert('Kopiëren mislukt. Link: ' + inviteLink());
+      }
+    });
+  }
+
+  async function handleInvite(inviterId){
+    if (inviterId === currentSession.user.id) return;
+    const { data } = await sb.rpc('get_invite_profile', { p_user_id: inviterId });
+    const profile = data && data[0];
+    if (!profile) return;
+    switchScreen('contacts');
+    if (!window.confirm(profile.full_name + ' (@' + profile.username + ') toevoegen als noodcontact?')) return;
+    const { error } = await sb.rpc('send_connection_request', { p_target_id: inviterId });
+    if (error){ window.alert('Toevoegen mislukt: ' + error.message); return; }
+    window.alert('Verzoek verstuurd naar ' + profile.full_name + '.');
+    refreshSentRequests();
+  }
+  function maybeHandleInviteFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const inviterId = params.get('invite');
+    if (!inviterId) return;
+    params.delete('invite');
+    const rest = params.toString();
+    history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : ''));
+    handleInvite(inviterId);
+  }
+
   function statusButtonHtml(person){
     if (person.connection_status === 'accepted'){
       return '<span class="status-pill accepted">Verbonden</span>';
@@ -2497,6 +2614,44 @@
     await refreshContacts();
     preventHoverGlitch();
   }
+
+  /* ---------------- Stil alarm: lang (3s) indrukken van het logo ----------------
+     Geen zichtbare aftelling, geen geluid — bedoeld voor het moment dat je
+     juist niet mag laten zien dat je om hulp vraagt. Een tweede keer
+     3s indrukken beëindigt een lopend (stil of gewoon) alarm weer, ook
+     zonder dat daar een zichtbare knop voor hoeft te bestaan. */
+  const SILENT_HOLD_MS = 3000;
+  let silentHoldTimer = null;
+  let discreetToastTimer = null;
+  function showDiscreetToast(ok){
+    if (!els.discreetToast) return;
+    els.discreetToast.textContent = ok === false ? '!' : '✓';
+    els.discreetToast.classList.toggle('warn', ok === false);
+    els.discreetToast.classList.add('show');
+    clearTimeout(discreetToastTimer);
+    discreetToastTimer = setTimeout(() => els.discreetToast.classList.remove('show'), 1600);
+  }
+  async function endSilentAlarm(){
+    const id = lastTriggeredAlarmId;
+    stopLiveLocationSharing();
+    lastTriggeredAlarmId = null;
+    if (id) await sb.from('alarms').update({ status: 'ended' }).eq('id', id);
+    showDiscreetToast(true);
+  }
+  function startSilentHold(){
+    if (silentHoldTimer || !currentSession) return;
+    if (navigator.vibrate) navigator.vibrate(10);
+    silentHoldTimer = setTimeout(() => {
+      silentHoldTimer = null;
+      if (lastTriggeredAlarmId) endSilentAlarm();
+      else activateAlarm(false, true);
+    }, SILENT_HOLD_MS);
+  }
+  function cancelSilentHold(){
+    if (silentHoldTimer){ clearTimeout(silentHoldTimer); silentHoldTimer = null; }
+  }
+  ['touchstart', 'mousedown'].forEach(evt => els.brandHomeButton.addEventListener(evt, startSilentHold, { passive: true }));
+  ['touchend', 'touchcancel', 'mouseup', 'mouseleave'].forEach(evt => els.brandHomeButton.addEventListener(evt, cancelSilentHold));
 
   /* ---------------- Navigatie tussen schermen ---------------- */
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
@@ -2813,9 +2968,9 @@
     target.classList.remove('hidden');
   }
 
-  async function activateAlarm(testMode){
+  async function activateAlarm(testMode, silent){
     els.alarmButton.disabled = true;
-    if (navigator.vibrate) navigator.vibrate([80,40,80]);
+    if (!silent && navigator.vibrate) navigator.vibrate([80,40,80]);
 
     const startedAt = new Date();
     const activatorName = currentProfile ? currentProfile.full_name : 'Onbekende gebruiker';
@@ -2848,6 +3003,20 @@
       sendError = err;
     }
 
+    els.alarmButton.disabled = false;
+
+    // Stil alarm: geen dramatisch scherm, geen geluid — alleen een
+    // piepklein, tekstloos bolletje zodat degene die het indrukte zelf wel
+    // weet dat het gelukt is, zonder dat iemand die meekijkt iets ziet.
+    if (silent){
+      if (!sendError && result.alarmId){
+        lastTriggeredAlarmId = result.alarmId;
+        startLiveLocationSharing(result.alarmId);
+      }
+      showDiscreetToast(!sendError);
+      return;
+    }
+
     els.sentBy.textContent = activatorName;
     els.sentAt.textContent = startedAt.toLocaleString('nl-NL', { dateStyle:'long', timeStyle:'medium' });
 
@@ -2876,7 +3045,6 @@
       : '<li><span class="entry-name" style="color:var(--text-faint);">Geen noodcontacten gekoppeld</span></li>';
 
     switchView(els.viewSent);
-    els.alarmButton.disabled = false;
 
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;

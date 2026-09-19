@@ -28,7 +28,13 @@ self.addEventListener('push', (event) => {
     silent: false,
     vibrate: [500, 200, 500, 200, 500, 200, 500, 200, 500],
     tag: 'noodalarm-' + Date.now(),
-    data: { alarmId: data.alarmId || null }
+    data: { alarmId: data.alarmId || null },
+    // Rechtstreeks vanaf de melding reageren, zonder de app te hoeven
+    // openen — alleen zinvol bij een écht alarm, niet bij een oefening.
+    actions: data.alarmId && !data.testMode ? [
+      { action: 'omw', title: '✅ Ik kom eraan' },
+      { action: 'call112', title: '📞 Bel 112' }
+    ] : []
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -37,14 +43,25 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const alarmId = event.notification.data && event.notification.data.alarmId;
-  const targetPath = alarmId ? ('./?chat=' + alarmId) : './';
+  const action = event.action;
+
+  // "Bel 112" heeft niets met de app zelf te maken — direct het belscherm
+  // openen, geen reden om onze eigen app ook nog te focussen/openen.
+  if (action === 'call112') {
+    event.waitUntil(self.clients.openWindow('tel:112'));
+    return;
+  }
+
+  const messageType = action === 'omw' ? 'omw' : 'open-chat';
+  const urlParam = action === 'omw' ? 'omw' : 'chat';
+  const targetPath = alarmId ? ('./?' + urlParam + '=' + alarmId) : './';
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if ('focus' in client) {
           client.focus();
-          if (alarmId) client.postMessage({ type: 'open-chat', alarmId });
+          if (alarmId) client.postMessage({ type: messageType, alarmId });
           return;
         }
       }
