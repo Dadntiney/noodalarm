@@ -722,16 +722,11 @@
   .chat-messages{
     flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:contain;
     display:flex; flex-direction:column; gap:14px;
-    padding:18px 18px 24px; -webkit-overflow-scrolling:touch;
+    padding:18px; -webkit-overflow-scrolling:touch;
     color:var(--text);
     background-color:var(--bg);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
     background-size:24px 24px;
-    /* Onderkant bewust korter dan de bottom-padding hierboven, zodat de
-       fade altijd binnen die lege ruimte blijft en het laatste bericht
-       zelf nooit raakt, ook niet als je helemaal onderaan gescrold bent. */
-    -webkit-mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 16px), transparent);
-    mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,.5) 20px, black 52px, black calc(100% - 16px), transparent);
   }
   /* Zonder dit selecteert een lang indrukken (voor het berichtmenu) ook de
      omliggende pagina-tekst, met de bekende blauwe selectie-highlight en op
