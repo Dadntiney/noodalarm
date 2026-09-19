@@ -166,6 +166,11 @@
      grijze achtergrond als een harde balk oogde. */
   body.messages-open .app-header{ background:var(--surface); }
   body.messages-open .facepile-avatar{ border-color:var(--surface); }
+  /* De vaste header/typebalk lopen al helemaal tot de randen (position:fixed
+     met eigen padding). De berichtenlijst zelf zat daartussen nog steeds
+     ingesprongen, omdat die normaal binnen de padding van .app valt — hier
+     halen we die inspringing weg zodat de lijst écht even breed is. */
+  body.messages-open .app{ padding:0; }
   body{
     background:var(--bg);
     color:var(--text);
