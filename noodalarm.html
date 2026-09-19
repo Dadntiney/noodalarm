@@ -35,6 +35,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   /* ---------- Tekstgrootte (Instellingen) — schaalt alles wat in rem staat ---------- */
@@ -811,14 +813,10 @@
     height:170px; background:var(--surface-2);
   }
   .location-map-frame{
-    display:block; width:100%; height:100%; border:none; object-fit:cover;
+    display:block; width:100%; height:100%; border:none;
     opacity:0; transition:opacity .35s ease;
   }
   .location-map-frame.loaded{ opacity:1; }
-  .location-map-fallback{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center;
-    padding:16px; color:var(--text-faint); font-size:0.84375rem; line-height:1.4;
-  }
   .location-open-button{
     display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px;
     background:var(--accent); color:#fff; text-decoration:none; font-weight:700; font-size:0.96875rem;
@@ -1078,8 +1076,7 @@
         <div id="locationTestResult" class="hidden" style="margin-top:12px;">
           <div id="locationTestAddress" class="location-address"></div>
           <div class="location-map-wrap">
-            <img id="locationTestMapImg" class="location-map-frame" alt="Kaart met jouw locatie" loading="lazy">
-            <div id="locationTestMapFallback" class="location-map-fallback hidden">Kaart kon niet worden geladen — gebruik "Open in Maps" hieronder.</div>
+            <div id="locationTestMapImg" class="location-map-frame"></div>
           </div>
           <a id="locationTestOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -1571,8 +1568,7 @@
         <div id="locationMeta" class="location-meta"></div>
         <div id="locationAddress" class="location-address"></div>
         <div class="location-map-wrap">
-          <img id="locationMapImg" class="location-map-frame" alt="Kaart met locatie" loading="lazy">
-          <div id="locationMapFallback" class="location-map-fallback hidden">Kaart kon niet worden geladen — gebruik "Open in Maps" hieronder.</div>
+          <div id="locationMapImg" class="location-map-frame"></div>
         </div>
         <a id="locationOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -1930,8 +1926,6 @@
     { sel: '#contactsEmpty', nl: 'Nog geen contacten. Zoek hierboven naar iemand die u vertrouwt.', en: 'No contacts yet. Search above for someone you trust.' },
     { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
     { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
-    { sel: '#locationMapImg', attr: 'alt', nl: 'Kaart met locatie', en: 'Map with location' },
-    { sel: '#locationMapFallback', nl: 'Kaart kon niet worden geladen — gebruik "Open in Maps" hieronder.', en: 'Map couldn\'t be loaded — use "Open in Maps" below.' },
     { sel: '#medicalInfoToggle > span', m: 'f', nl: '🩺 Medische info van ', en: '🩺 Medical info from ' },
     { sel: '#ehboInstructionsButton', nl: '🩹 EHBO-instructies', en: '🩹 First aid instructions' },
     { sel: '#call112Button', nl: '📞 Bel 112', en: '📞 Call 112' },
@@ -2357,7 +2351,6 @@
     locationMeta: document.getElementById('locationMeta'),
     locationAddress: document.getElementById('locationAddress'),
     locationMapImg: document.getElementById('locationMapImg'),
-    locationMapFallback: document.getElementById('locationMapFallback'),
     locationOpenButton: document.getElementById('locationOpenButton'),
     endAlarmFromLocationButton: document.getElementById('endAlarmFromLocationButton'),
     medicalInfoCard: document.getElementById('medicalInfoCard'),
@@ -2521,7 +2514,6 @@
     locationTestResult: document.getElementById('locationTestResult'),
     locationTestAddress: document.getElementById('locationTestAddress'),
     locationTestMapImg: document.getElementById('locationTestMapImg'),
-    locationTestMapFallback: document.getElementById('locationTestMapFallback'),
     locationTestOpenButton: document.getElementById('locationTestOpenButton')
   };
 
@@ -4312,28 +4304,44 @@
     }
   }
 
-  // Een kapotte kaartafbeelding (geen netwerk, staticmap.openstreetmap.de
-  // tijdelijk onbereikbaar) mag nooit als kapot broken-image-icoontje
-  // blijven staan — dan tonen we in plaats daarvan gewoon een nette
-  // tekstregel en blijft "Open in Maps" de betrouwbare uitwijk.
-  els.locationMapImg.addEventListener('error', () => {
-    if (!els.locationMapImg.src) return;
-    els.locationMapImg.classList.add('hidden');
-    els.locationMapImg.classList.remove('loaded');
-    els.locationMapFallback.classList.remove('hidden');
-  });
-  els.locationMapImg.addEventListener('load', () => {
-    els.locationMapImg.classList.remove('hidden');
-    els.locationMapImg.classList.add('loaded');
-    els.locationMapFallback.classList.add('hidden');
-  });
+  // Een losse "staticmap"-plaatjesdienst van een derde partij bleek
+  // geregeld onbereikbaar (kapotte-afbeelding-icoontje i.p.v. een kaart) —
+  // nu een echte Leaflet-kaart die tegels rechtstreeks bij de officiële
+  // OpenStreetMap-tegelserver ophaalt, dezelfde stabiele infrastructuur die
+  // ook al achter Nominatim (het adres hierboven) zit. "Open in Maps"
+  // blijft daarnaast altijd de betrouwbare uitwijk.
+  if (window.L){
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon.png',
+      shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png'
+    });
+  }
+  function renderLeafletMap(state, containerEl, lat, lng){
+    if (!window.L || !containerEl) return;
+    if (!state.map){
+      state.map = L.map(containerEl).setView([lat, lng], 16);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+      }).addTo(state.map);
+      state.marker = L.marker([lat, lng]).addTo(state.map);
+      containerEl.classList.add('loaded');
+      requestAnimationFrame(() => state.map.invalidateSize());
+    } else {
+      state.map.setView([lat, lng], 16);
+      state.marker.setLatLng([lat, lng]);
+      state.map.invalidateSize();
+    }
+  }
 
   let lastAddressCoords = null;
   let lastAccuracyText = '';
+  const locationMapState = { map: null, marker: null };
   function renderLocationCard(alarmRow){
     if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
       els.locationCard.classList.add('hidden');
-      els.locationMapImg.src = '';
       els.locationAddress.textContent = '';
       lastAddressCoords = null;
       return;
@@ -4366,8 +4374,7 @@
     const moved = !lastAddressCoords || haversineMeters(lastAddressCoords.lat, lastAddressCoords.lng, lat, lng) > 30;
     if (moved){
       lastAddressCoords = { lat, lng };
-      els.locationMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
-        '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
+      renderLeafletMap(locationMapState, els.locationMapImg, lat, lng);
       els.locationAddress.textContent = t('location.fetchingAddress');
       fetchStreetAddress(lat, lng);
     }
@@ -4583,27 +4590,13 @@
   // toestemming werkt, in plaats van dat pas te ontdekken tijdens een
   // écht alarm. Volledig los van de "Locatie delen bij alarm"-schakelaar
   // hierboven: dit test alleen of het toestel zelf een locatie kan geven.
-  let locationTestMapListenersReady = false;
+  const locationTestMapState = { map: null, marker: null };
   function testMyLocation(){
     if (!els.locationTestButton) return;
     if (!('geolocation' in navigator)){
       els.locationTestStatus.textContent = t('locationTest.unsupported');
       els.locationTestStatus.className = 'field-hint bad';
       return;
-    }
-    if (!locationTestMapListenersReady){
-      locationTestMapListenersReady = true;
-      els.locationTestMapImg.addEventListener('error', () => {
-        if (!els.locationTestMapImg.src) return;
-        els.locationTestMapImg.classList.add('hidden');
-        els.locationTestMapImg.classList.remove('loaded');
-        els.locationTestMapFallback.classList.remove('hidden');
-      });
-      els.locationTestMapImg.addEventListener('load', () => {
-        els.locationTestMapImg.classList.remove('hidden');
-        els.locationTestMapImg.classList.add('loaded');
-        els.locationTestMapFallback.classList.add('hidden');
-      });
     }
     els.locationTestButton.disabled = true;
     els.locationTestResult.classList.add('hidden');
@@ -4615,11 +4608,10 @@
         const lat = pos.coords.latitude, lng = pos.coords.longitude;
         els.locationTestStatus.textContent = t('locationTest.success', { n: Math.round(pos.coords.accuracy) });
         els.locationTestStatus.className = 'field-hint ok';
-        els.locationTestMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
-          '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
         els.locationTestOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
         els.locationTestAddress.textContent = t('location.fetchingAddress');
         els.locationTestResult.classList.remove('hidden');
+        renderLeafletMap(locationTestMapState, els.locationTestMapImg, lat, lng);
         els.locationTestAddress.textContent = await reverseGeocodeAddress(lat, lng);
       },
       (err) => {
