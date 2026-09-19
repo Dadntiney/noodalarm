@@ -726,6 +726,16 @@
   }
   .chat-back-button svg{ width:20px; height:20px; }
   .chat-back-button:hover{ background:var(--border-soft); }
+  /* Echte gezichten i.p.v. een generiek poppetjes-icoon: een minifacepile
+     van je noodcontacten zelf, net als de "wie zit erin"-preview bij
+     bijv. Slack-kanalen — elke foto blijft heel (geen versneden collage),
+     dus ook op deze kleine schaal nog herkenbaar. */
+  .chat-header-facepile{ display:flex; align-items:center; flex-shrink:0; }
+  .chat-header-facepile .avatar{
+    width:30px; height:30px; border:2px solid var(--surface); margin-left:-11px; box-shadow:var(--shadow-card);
+  }
+  .chat-header-facepile .avatar:first-child{ margin-left:0; }
+  .chat-header-facepile .avatar.more{ background:var(--surface-2); color:var(--text-muted); font-size:0.625rem; font-weight:800; }
   .profile-back-button{
     display:flex; align-items:center; gap:12px; background:none; border:none; padding:0; margin-bottom:24px;
     cursor:pointer; color:var(--text); font-weight:700; font-size:1rem;
@@ -1646,7 +1656,7 @@
         <button type="button" id="chatBackButton" class="chat-back-button" aria-label="Terug naar Alarm">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
-        <span class="avatar sm" id="chatHeaderAvatar"></span>
+        <span class="chat-header-facepile" id="chatHeaderAvatar"></span>
         <div class="chat-header-info">
           <div class="chat-header-title" id="chatHeaderTitle"></div>
           <div class="chat-header-sub" id="chatHeaderSub"></div>
@@ -2362,7 +2372,7 @@
       'conversation.unknown': 'Onbekend',
       'conversation.someone': 'Iemand',
       'chat.onMyWay': '✅ {name} komt eraan!',
-      'chat.headerTitle': 'Noodcontacten',
+      'chat.headerTitle': 'Noodkring',
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
       'location.fetchingAddress': 'Adres ophalen…',
@@ -2478,7 +2488,7 @@
       'conversation.unknown': 'Unknown',
       'conversation.someone': 'Someone',
       'chat.onMyWay': '✅ {name} is on their way!',
-      'chat.headerTitle': 'Emergency contacts',
+      'chat.headerTitle': 'Emergency circle',
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
       'location.fetchingAddress': 'Fetching address…',
@@ -4747,12 +4757,22 @@
   }
 
   const GROUP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V21"/><circle cx="10" cy="8" r="4"/><path d="M17.5 11a3.5 3.5 0 0 0 0-7"/><path d="M21 21v-1.5a3.9 3.9 0 0 0-2.5-3.7"/></svg>';
+  const CHAT_HEADER_FACEPILE_MAX = 3;
+  function chatHeaderFacepileHtml(others){
+    if (!others.length) return '<span class="avatar">' + GROUP_ICON + '</span>';
+    const shown = others.slice(0, CHAT_HEADER_FACEPILE_MAX);
+    const extra = others.length - shown.length;
+    return shown.map(p => '<span class="avatar">' + avatarInner(p.avatar_url) + '</span>').join('') +
+      (extra > 0 ? '<span class="avatar more">+' + extra + '</span>' : '');
+  }
   function renderChatHeader(){
-    const otherIds = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
-    els.chatHeaderAvatar.innerHTML = GROUP_ICON;
+    const others = Object.keys(chatParticipantById)
+      .filter(id => id !== currentSession.user.id)
+      .map(id => chatParticipantById[id]);
+    els.chatHeaderAvatar.innerHTML = chatHeaderFacepileHtml(others);
     els.chatHeaderTitle.textContent = t('chat.headerTitle');
-    els.chatHeaderSub.textContent = otherIds.length
-      ? otherIds.map(id => chatParticipantById[id].full_name).join(', ')
+    els.chatHeaderSub.textContent = others.length
+      ? others.map(p => p.full_name).join(', ')
       : t('entry.noContacts');
   }
 
