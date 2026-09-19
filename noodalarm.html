@@ -4392,6 +4392,29 @@
     });
   }
 
+  // Scherm actief houden zolang jouw eigen alarm loopt, zodat live locatie
+  // langer blijft doorlopen zonder dat iemand het scherm hoeft aan te raken
+  // (bv. telefoon die op tafel ligt). Geen enkele webpagina kan dit afdwingen
+  // zodra iemand het scherm zelf uitzet of wegloopt zonder de telefoon vast
+  // te houden — dat blijft een harde OS-grens, hier is niets aan te doen.
+  let wakeLockSentinel = null;
+  async function requestWakeLock(){
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
+    } catch (err) { /* niet kritiek — live locatie blijft gewoon lopen zolang de pagina actief is */ }
+  }
+  function releaseWakeLock(){
+    if (wakeLockSentinel){ wakeLockSentinel.release().catch(() => {}); wakeLockSentinel = null; }
+  }
+  // De browser laat een wake lock automatisch los zodra het tabblad naar de
+  // achtergrond gaat — komt de pagina weer in beeld terwijl het eigen alarm
+  // nog loopt, dan vragen we 'm gewoon opnieuw aan.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && liveLocationTimer) requestWakeLock();
+  });
+
   // Zolang je eigen alarm actief is, stuur je periodiek een nieuwe locatie
   // door — zodat je contacten je zien bewegen i.p.v. één momentopname van
   // het moment dat je drukte (bv. bij verplaatsing in een ambulance, of
@@ -4401,6 +4424,7 @@
   function startLiveLocationSharing(alarmId){
     stopLiveLocationSharing();
     if (!isLocationSharingOn() || !('geolocation' in navigator)) return;
+    requestWakeLock();
     liveLocationTimer = setInterval(() => {
       if (!isLocationSharingOn()) return;
       navigator.geolocation.getCurrentPosition(
@@ -4419,6 +4443,7 @@
   }
   function stopLiveLocationSharing(){
     if (liveLocationTimer){ clearInterval(liveLocationTimer); liveLocationTimer = null; }
+    releaseWakeLock();
   }
 
   function switchView(target){
