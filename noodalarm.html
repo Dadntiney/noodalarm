@@ -270,7 +270,7 @@
   .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; animation:screen-in .22s cubic-bezier(.25,.8,.4,1); }
   .screen.hidden{ display:none; }
   @keyframes screen-in{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
-  @media (prefers-reduced-motion:reduce){ .screen{ animation:none; } }
+  @media (prefers-reduced-motion:reduce){ .screen{ animation:none; } .slide-page{ transition:none; } }
 
   /* ---------- Tastbare tik-feedback (natuurlijker appgevoel) ---------- */
   .small-btn, .icon-btn, .save-button, .cancel-button, .end-button, .add-button,
@@ -653,6 +653,21 @@
     border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
   }
   .overlay-close svg{ width:17px; height:17px; }
+
+  /* ---------- Slide-pagina's (Account, Medisch, Instellingen, Meldingen enz.) ----------
+     iOS schuift bij zo'n scherm de hele pagina van rechts in i.p.v. een los
+     kaartje boven een verduisterde achtergrond te tonen — rustiger en
+     voorspelbaarder, vooral voor wie minder gewend is aan apps. */
+  .slide-page{
+    position:fixed; inset:0; z-index:100; background:var(--bg);
+    display:flex; flex-direction:column;
+    transform:translateX(100%); transition:transform .32s cubic-bezier(.32,.72,0,1);
+  }
+  .slide-page.hidden{ display:none; }
+  .slide-page.open{ transform:translateX(0); }
+  .slide-page-header{ display:flex; align-items:center; padding:14px 12px 0 8px; flex-shrink:0; }
+  .slide-page-content{ flex:1; overflow-y:auto; overscroll-behavior:contain; padding:4px 20px 40px; }
+  .slide-page-title{ font-size:1.75rem; font-weight:800; margin:10px 0 22px; }
 
   .notif-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:14px 16px; text-align:left; }
   .notif-card.unread{ border-color:var(--accent); }
@@ -1049,14 +1064,17 @@
   </div>
 
   <!-- =========================== INSTELLINGEN =========================== -->
-  <div id="settingsOverlay" class="overlay hidden">
-    <div class="overlay-card">
-      <div class="overlay-header">
-        <h2 class="overlay-title">Instellingen</h2>
-        <button type="button" id="settingsCloseButton" class="overlay-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
+  <div id="settingsOverlay" class="slide-page hidden">
+    <div class="slide-page-header">
+      <button type="button" id="settingsCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
+        <span class="profile-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        Terug
+      </button>
+    </div>
+    <div class="slide-page-content">
+      <h1 class="slide-page-title">Instellingen</h1>
 
       <!-- Eerst de dingen die zorgen dat een alarm ook echt aankomt, daarna
            pas hoe de app eruitziet — dat is voor iedereen het belangrijkst. -->
@@ -1225,14 +1243,17 @@
   </div>
 
   <!-- =========================== ACCOUNT =========================== -->
-  <div id="accountOverlay" class="overlay hidden">
-    <div class="overlay-card">
-      <div class="overlay-header">
-        <h2 class="overlay-title">Account</h2>
-        <button type="button" id="accountCloseButton" class="overlay-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
+  <div id="accountOverlay" class="slide-page hidden">
+    <div class="slide-page-header">
+      <button type="button" id="accountCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
+        <span class="profile-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        Terug
+      </button>
+    </div>
+    <div class="slide-page-content">
+      <h1 class="slide-page-title">Account</h1>
 
       <form id="profileForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
         <div class="field">
@@ -1255,14 +1276,17 @@
   </div>
 
   <!-- =========================== MEDISCHE INFO =========================== -->
-  <div id="medicalOverlay" class="overlay hidden">
-    <div class="overlay-card">
-      <div class="overlay-header">
-        <h2 class="overlay-title" id="medicalOverlayTitle">Medische informatie</h2>
-        <button type="button" id="medicalOverlayCloseButton" class="overlay-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
+  <div id="medicalOverlay" class="slide-page hidden">
+    <div class="slide-page-header">
+      <button type="button" id="medicalOverlayCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
+        <span class="profile-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        Terug
+      </button>
+    </div>
+    <div class="slide-page-content">
+      <h1 class="slide-page-title" id="medicalOverlayTitle">Medische informatie</h1>
 
       <form id="medicalForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
         <div>
@@ -1343,14 +1367,17 @@
   </div>
 
   <!-- =========================== OVERIGE INFORMATIE =========================== -->
-  <div id="extraInfoOverlay" class="overlay hidden">
-    <div class="overlay-card">
-      <div class="overlay-header">
-        <h2 class="overlay-title" id="extraInfoOverlayTitle">Overige informatie</h2>
-        <button type="button" id="extraInfoOverlayCloseButton" class="overlay-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
+  <div id="extraInfoOverlay" class="slide-page hidden">
+    <div class="slide-page-header">
+      <button type="button" id="extraInfoOverlayCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
+        <span class="profile-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        Terug
+      </button>
+    </div>
+    <div class="slide-page-content">
+      <h1 class="slide-page-title" id="extraInfoOverlayTitle">Overige informatie</h1>
 
       <form id="extraInfoForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
         <div>
@@ -1368,17 +1395,18 @@
   </div>
 
   <!-- =========================== MELDINGEN =========================== -->
-  <div id="notifOverlay" class="overlay hidden">
-    <div class="overlay-card">
-      <div class="overlay-header">
-        <h2 class="overlay-title">Meldingen</h2>
-        <div style="display:flex; align-items:center; gap:16px;">
-          <button type="button" id="notifClearButton" class="link-button hidden" style="padding:0; font-size:0.875rem;">Alles wissen</button>
-          <button type="button" id="notifCloseButton" class="overlay-close" aria-label="Sluiten">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          </button>
-        </div>
-      </div>
+  <div id="notifOverlay" class="slide-page hidden">
+    <div class="slide-page-header">
+      <button type="button" id="notifCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
+        <span class="profile-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        Terug
+      </button>
+      <button type="button" id="notifClearButton" class="link-button hidden" style="margin-left:auto;">Alles wissen</button>
+    </div>
+    <div class="slide-page-content">
+      <h1 class="slide-page-title">Meldingen</h1>
       <div id="notifEmpty" class="empty-state hidden">Nog geen meldingen.</div>
       <div id="notifList" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
@@ -1877,7 +1905,7 @@
     { sel: '#deleteAccountOverlay .onboarding-text', m: 'h', nl: 'Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.', en: 'This <strong>permanently</strong> deletes your account, profile, contacts and all notifications. This cannot be undone.' },
     { sel: '#deleteAccountCancelButton', nl: 'Annuleren', en: 'Cancel' },
     { sel: '#deleteAccountConfirmButton', nl: 'Definitief verwijderen', en: 'Delete permanently' },
-    { sel: '#settingsOverlay .overlay-title', nl: 'Instellingen', en: 'Settings' },
+    { sel: '#settingsOverlay .slide-page-title', nl: 'Instellingen', en: 'Settings' },
     { sel: '#installStatusButton', nl: 'Bekijk hoe', en: 'Show me how' },
     { sel: '#locationToggle', attr: 'aria-label', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
     { sel: '#locationSectionTitle', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
@@ -1910,7 +1938,7 @@
     { sel: '#contrastSectionTitle', nl: 'Hoog contrast', en: 'High contrast' },
     { sel: '#contrastSectionHint', nl: 'Dikkere randen en meer contrast, zodat knoppen en kaarten beter te zien zijn.', en: 'Thicker borders and more contrast, so buttons and cards are easier to see.' },
     { sel: '#contrastToggle', attr: 'aria-label', nl: 'Hoog contrast', en: 'High contrast' },
-    { sel: '#accountOverlay .overlay-title', nl: 'Account', en: 'Account' },
+    { sel: '#accountOverlay .slide-page-title', nl: 'Account', en: 'Account' },
     { sel: 'label[for="profileFirstName"]', nl: 'Voornaam', en: 'First name' },
     { sel: 'label[for="profileLastName"]', nl: 'Achternaam', en: 'Last name' },
     { sel: 'label[for="profilePhone"]', m: 'f', nl: 'Telefoonnummer ', en: 'Phone number ' },
@@ -1958,7 +1986,7 @@
     { sel: 'label[for="medicalNotes"]', nl: 'Nog iets anders belangrijks?', en: 'Anything else important?' },
     { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. bijzonderheden', en: 'E.g. other notes' },
     { sel: '#medicalSaveButton', nl: 'Medische info opslaan', en: 'Save medical info' },
-    { sel: '#notifOverlay .overlay-title', nl: 'Meldingen', en: 'Notifications' },
+    { sel: '#notifOverlay .slide-page-title', nl: 'Meldingen', en: 'Notifications' },
     { sel: '#notifClearButton', nl: 'Alles wissen', en: 'Clear all' },
     { sel: '#notifEmpty', nl: 'Nog geen meldingen.', en: 'No notifications yet.' },
     { sel: '#chatMenuInfo', m: 'l', nl: 'Info', en: 'Info' },
@@ -1996,6 +2024,16 @@
     { sel: '#tabContacts', m: 'f', nl: 'Contacten', en: 'Contacts' },
     { sel: '#tabMessages', nl: 'Berichten', en: 'Messages' },
     { sel: '#profileBackButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#settingsCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#settingsCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
+    { sel: '#accountCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#accountCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
+    { sel: '#medicalOverlayCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#medicalOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
+    { sel: '#extraInfoOverlayCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#extraInfoOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
+    { sel: '#notifCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#notifCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#brandHomeButton', attr: 'aria-label', nl: 'Naar Alarm', en: 'Go to Alarm' },
     { sel: '.intro', nl: 'Druk op de knop om je contacten te waarschuwen.', en: 'Press the button to alert your contacts.' },
     { sel: '#alarmButton', attr: 'aria-label', nl: 'Druk voor alarm', en: 'Press for alarm' },
@@ -2977,17 +3015,17 @@
   /* =========================================================================
      INSTELLINGEN
      ========================================================================= */
-  els.openAccountButton.addEventListener('click', () => els.accountOverlay.classList.remove('hidden'));
-  els.accountCloseButton.addEventListener('click', () => els.accountOverlay.classList.add('hidden'));
-  els.openMedicalButton.addEventListener('click', () => els.medicalOverlay.classList.remove('hidden'));
-  els.medicalOverlayCloseButton.addEventListener('click', () => els.medicalOverlay.classList.add('hidden'));
-  els.openExtraInfoButton.addEventListener('click', () => els.extraInfoOverlay.classList.remove('hidden'));
-  els.extraInfoOverlayCloseButton.addEventListener('click', () => els.extraInfoOverlay.classList.add('hidden'));
+  els.openAccountButton.addEventListener('click', () => openSlidePage(els.accountOverlay));
+  els.accountCloseButton.addEventListener('click', () => closeSlidePage(els.accountOverlay));
+  els.openMedicalButton.addEventListener('click', () => openSlidePage(els.medicalOverlay));
+  els.medicalOverlayCloseButton.addEventListener('click', () => closeSlidePage(els.medicalOverlay));
+  els.openExtraInfoButton.addEventListener('click', () => openSlidePage(els.extraInfoOverlay));
+  els.extraInfoOverlayCloseButton.addEventListener('click', () => closeSlidePage(els.extraInfoOverlay));
   els.openSettingsButton.addEventListener('click', () => {
-    els.settingsOverlay.classList.remove('hidden');
+    openSlidePage(els.settingsOverlay);
     renderInstallStatusRow();
   });
-  els.settingsCloseButton.addEventListener('click', () => els.settingsOverlay.classList.add('hidden'));
+  els.settingsCloseButton.addEventListener('click', () => closeSlidePage(els.settingsOverlay));
 
   function isLocationSharingOn(){
     return realStore.get(KEYS.locationSharing, true);
@@ -3478,7 +3516,7 @@
   }
 
   els.bellButton.addEventListener('click', async () => {
-    els.notifOverlay.classList.remove('hidden');
+    openSlidePage(els.notifOverlay);
     const items = await refreshNotifications();
     const unreadIds = items.filter(n => !n.is_read).map(n => n.id);
     if (unreadIds.length){
@@ -3486,7 +3524,7 @@
       await refreshNotifications();
     }
   });
-  els.notifCloseButton.addEventListener('click', () => els.notifOverlay.classList.add('hidden'));
+  els.notifCloseButton.addEventListener('click', () => closeSlidePage(els.notifOverlay));
   els.notifClearButton.addEventListener('click', async () => {
     if (!window.confirm(t('confirm.clearNotifications'))) return;
     await sb.from('notifications').delete().eq('user_id', currentSession.user.id);
@@ -3734,6 +3772,21 @@
   }
   ['touchstart', 'mousedown'].forEach(evt => els.brandHomeButton.addEventListener(evt, startSilentHold, { passive: true }));
   ['touchend', 'touchcancel', 'mouseup', 'mouseleave'].forEach(evt => els.brandHomeButton.addEventListener(evt, cancelSilentHold));
+
+  /* ---------------- Slide-pagina's (Account, Medisch, Instellingen, enz.) ----------------
+     Schuift van rechts in i.p.v. een los kaartje te tonen — zelfde gevoel als
+     terugbladeren in de Instellingen-app van iOS. */
+  function openSlidePage(el){
+    if (!el) return;
+    el.classList.remove('hidden');
+    void el.offsetHeight; // reflow forceren zodat de transitie ook echt start
+    requestAnimationFrame(() => el.classList.add('open'));
+  }
+  function closeSlidePage(el){
+    if (!el) return;
+    el.classList.remove('open');
+    setTimeout(() => el.classList.add('hidden'), 320);
+  }
 
   /* ---------------- Navigatie tussen schermen ---------------- */
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
@@ -4362,7 +4415,7 @@
     if (!groupId) return;
     currentChatGroupId = groupId;
     cancelEditingMessage();
-    els.notifOverlay.classList.add('hidden');
+    closeSlidePage(els.notifOverlay);
     switchScreen('messages');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.loading')) + '</p>';
     els.locationCard.classList.add('hidden');
@@ -5184,7 +5237,7 @@
         triggerAndroidInstall();
         return;
       }
-      els.settingsOverlay.classList.add('hidden');
+      closeSlidePage(els.settingsOverlay);
       switchScreen('alarm');
       if (isIos() && els.iosInstallHint) els.iosInstallHint.classList.remove('hidden');
       else if (els.androidInstallHint) els.androidInstallHint.classList.remove('hidden');
@@ -5215,7 +5268,7 @@
     els.medicalInfoHintButton.addEventListener('click', () => {
       els.medicalInfoHint.classList.add('hidden');
       loadMedicalInfo();
-      els.medicalOverlay.classList.remove('hidden');
+      openSlidePage(els.medicalOverlay);
       requestAnimationFrame(() => {
         els.medicalAllergies.focus();
       });
