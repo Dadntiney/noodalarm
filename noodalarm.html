@@ -3187,15 +3187,8 @@
       .subscribe();
   }
 
-  // Tikken op een video speelt hem direct fullscreen af, net als WhatsApp —
-  // geen inline afspelen met kleine bediening eerst. Als een tik uiteindelijk
-  // een lang-indrukken bleek te zijn (menu geopend), moet die niet ook nog
-  // de video starten.
-  let suppressNextVideoClick = false;
-  els.chatMessages.addEventListener('click', (ev) => {
-    const video = ev.target.closest('.chat-video');
-    if (!video) return;
-    if (suppressNextVideoClick){ suppressNextVideoClick = false; return; }
+  // Tikken op een video speelt hem direct fullscreen af, net als WhatsApp.
+  function playVideoFullscreen(video){
     video.controls = true;
     if (video.webkitEnterFullscreen){
       video.webkitEnterFullscreen();
@@ -3206,6 +3199,13 @@
     } else {
       video.play();
     }
+  }
+  // Muis-fallback voor desktop (geen touch-apparaat). Op touch-apparaten
+  // vuurt 'click' hier nooit, want touchstart hieronder roept al
+  // preventDefault aan zodra een druk op een bubbel begint.
+  els.chatMessages.addEventListener('click', (ev) => {
+    const video = ev.target.closest('.chat-video');
+    if (video) playVideoFullscreen(video);
   });
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement){
@@ -3218,6 +3218,7 @@
   const LONG_PRESS_MOVE_TOLERANCE = 10;
   let longPressTimer = null;
   let longPressStartXY = null;
+  let bubbleTouch = null;
 
   function cancelLongPress(){
     clearTimeout(longPressTimer);
@@ -3270,38 +3271,51 @@
     activeMenuBubble = null;
   }
 
+  // preventDefault op touchstart is de enige manier die iOS' eigen
+  // selectie-/callout-gebaar echt en altijd blokkeert, hoe hard je ook
+  // drukt — CSS user-select:none alleen bleek daar niet tegen bestand.
+  // Dat onderdrukt op zijn beurt de synthetische 'click' voor deze tik,
+  // dus tikken op een video wordt hieronder zelf afgehandeld i.p.v. via
+  // de click-listener hierboven (die blijft puur voor desktop/muis).
   els.chatMessages.addEventListener('touchstart', (ev) => {
     const bubble = ev.target.closest('.chat-bubble');
-    if (!bubble || ev.touches.length !== 1) return;
-    suppressNextVideoClick = false;
+    if (!bubble || ev.touches.length !== 1){ bubbleTouch = null; return; }
+    ev.preventDefault();
+    const video = ev.target.closest('.chat-video');
+    bubbleTouch = { bubble, video, startTime: Date.now(), moved: false };
     longPressStartXY = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
     longPressTimer = setTimeout(() => {
       longPressTimer = null;
-      if (bubble.querySelector('.chat-video')) suppressNextVideoClick = true;
+      if (bubbleTouch) bubbleTouch.moved = true;
       if (navigator.vibrate) navigator.vibrate(15);
       openChatBubbleMenu(bubble);
     }, LONG_PRESS_MS);
-  }, { passive: true });
+  }, { passive: false });
   els.chatMessages.addEventListener('touchmove', (ev) => {
-    if (!longPressTimer || !longPressStartXY) return;
+    if (!longPressStartXY) return;
     const dx = ev.touches[0].clientX - longPressStartXY.x;
     const dy = ev.touches[0].clientY - longPressStartXY.y;
-    if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_TOLERANCE) cancelLongPress();
+    if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_TOLERANCE){
+      cancelLongPress();
+      if (bubbleTouch) bubbleTouch.moved = true;
+    }
   }, { passive: true });
-  els.chatMessages.addEventListener('touchend', cancelLongPress);
-  els.chatMessages.addEventListener('touchcancel', cancelLongPress);
+  els.chatMessages.addEventListener('touchend', () => {
+    cancelLongPress();
+    const touch = bubbleTouch;
+    bubbleTouch = null;
+    // Alleen een echte, korte tik (niet verschoven, geen lang-indrukken,
+    // geen menu geopend) op een video telt als "afspelen".
+    if (touch && touch.video && !touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
+      playVideoFullscreen(touch.video);
+    }
+  });
+  els.chatMessages.addEventListener('touchcancel', () => { cancelLongPress(); bubbleTouch = null; });
   els.chatMessages.addEventListener('contextmenu', (ev) => {
     const bubble = ev.target.closest('.chat-bubble');
     if (!bubble) return;
     ev.preventDefault();
     openChatBubbleMenu(bubble);
-  });
-  // Extra vangnet naast de CSS user-select:none — bij een stevige druk op
-  // iPhone kan iOS soms alsnog een selectie proberen te starten; dit
-  // blokkeert die zelfs dan nog expliciet, zonder de tik/lang-indrukken
-  // afhandeling te raken (heeft niets met touchstart/click te maken).
-  els.chatMessages.addEventListener('selectstart', (ev) => {
-    if (ev.target.closest('.chat-bubble')) ev.preventDefault();
   });
   els.chatBubbleMenuBackdrop.addEventListener('click', closeChatBubbleMenu);
 
