@@ -1676,6 +1676,11 @@
         <ul id="contactsList" class="people-list"></ul>
       </div>
 
+      <div id="sentRequestsSection" class="hidden" style="margin-top:20px;">
+        <div class="section-title">Openstaande verzoeken</div>
+        <ul id="sentRequestsList" class="people-list"></ul>
+      </div>
+
       <div class="settings-group" style="margin:20px 0 0;">
         <div class="settings-item">
           <button type="button" id="addContactToggle" class="settings-item-nav">
@@ -1694,17 +1699,10 @@
           <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
         </div>
 
-        <div class="settings-group" style="margin:12px 0 16px;">
-          <div class="settings-item">
-            <button type="button" id="qrInviteToggle" class="settings-item-nav">
-              <span class="settings-item-icon icon-accent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
-              </span>
-              <span class="settings-item-body"><span class="settings-link-label">Of nodig iemand uit (QR-code / link)</span></span>
-              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-          </div>
-        </div>
+        <button type="button" id="qrInviteToggle" class="small-btn" style="margin-top:12px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
+          Of nodig iemand uit (QR-code / link)
+        </button>
 
         <div id="qrInviteCard" class="qr-invite-card hidden">
           <img id="qrInviteImg" alt="QR-code om jou toe te voegen als noodcontact">
@@ -1716,11 +1714,6 @@
           <div class="section-title">Zoekresultaten</div>
           <div id="searchEmpty" class="empty-state hidden">Niemand gevonden met deze naam.</div>
           <ul id="searchResultsList" class="people-list"></ul>
-        </div>
-
-        <div id="sentRequestsSection" class="hidden">
-          <div class="section-title">Openstaande verzoeken</div>
-          <ul id="sentRequestsList" class="people-list"></ul>
         </div>
       </div>
 
@@ -2120,7 +2113,7 @@
     { sel: '#contactsFilterInput', attr: 'placeholder', nl: 'Contacten zoeken', en: 'Search contacts' },
     { sel: '#addContactToggle .settings-link-label', nl: 'Contact toevoegen', en: 'Add contact' },
     { sel: '#searchInput', attr: 'placeholder', nl: 'Zoek op naam of gebruikersnaam…', en: 'Search by name or username…' },
-    { sel: '#qrInviteToggle .settings-link-label', nl: 'Of nodig iemand uit (QR-code / link)', en: 'Or invite someone (QR code / link)' },
+    { sel: '#qrInviteToggle', m: 'l', nl: 'Of nodig iemand uit (QR-code / link)', en: 'Or invite someone (QR code / link)' },
     { sel: '#qrInviteImg', attr: 'alt', nl: 'QR-code om jou toe te voegen als noodcontact', en: 'QR code to add you as an emergency contact' },
     { sel: '#qrInviteCard .field-hint', nl: 'Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.', en: 'Have someone scan this code with their camera to add you as an emergency contact right away — no need to type a username.' },
     { sel: '#copyInviteLinkButton', nl: 'Of kopieer de link', en: 'Or copy the link' },
