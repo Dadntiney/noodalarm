@@ -2214,6 +2214,20 @@
     els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
   }
 
+  // Met preload="metadata" laat de browser standaard een leeg (wit/zwart)
+  // vlak zien totdat je op play drukt. Even naar een piepklein moment in de
+  // video seeken dwingt 'm om dat frame alvast te decoderen en te tonen als
+  // miniatuur — zonder de hele video te downloaden.
+  function primeVideoPosters(root){
+    root.querySelectorAll('.chat-video').forEach(video => {
+      if (video.dataset.posterPrimed) return;
+      video.dataset.posterPrimed = '1';
+      const seekToFirstFrame = () => { try { video.currentTime = 0.01; } catch(e){} };
+      if (video.readyState >= 1) seekToFirstFrame();
+      else video.addEventListener('loadedmetadata', seekToFirstFrame, { once: true });
+    });
+  }
+
   function chatBubbleHtml(msg){
     const own = msg.sender_id === currentSession.user.id;
     const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
@@ -2340,6 +2354,7 @@
     els.chatMessages.querySelectorAll('.chat-media').forEach(el => {
       el.addEventListener(el.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom);
     });
+    primeVideoPosters(els.chatMessages);
   }
 
   function subscribeChat(groupId){
@@ -2369,6 +2384,7 @@
         requestAnimationFrame(scrollChatToBottom);
         const lastMedia = els.chatMessages.querySelector('.chat-row:last-child .chat-media');
         if (lastMedia) lastMedia.addEventListener(lastMedia.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom, { once: true });
+        primeVideoPosters(els.chatMessages);
       })
       .subscribe();
   }
