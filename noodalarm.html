@@ -415,6 +415,13 @@
   }
   .settings-link-icon svg{ width:20px; height:20px; }
   .settings-link-icon-accent{ background:var(--accent); color:#fff; }
+  .install-status-icon{
+    width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:background .15s ease, color .15s ease;
+  }
+  .install-status-icon svg{ width:22px; height:22px; }
+  .install-status-icon.ok{ background:rgba(43,182,115,.15); color:var(--green); }
+  .install-status-icon.warn{ background:var(--amber-soft); color:var(--amber); }
   .settings-link-label{ flex:1; font-weight:700; font-size:1rem; }
   .settings-link-chevron{ width:18px; height:18px; color:var(--text-faint); flex-shrink:0; }
   .save-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; }
@@ -1000,10 +1007,15 @@
         </nav>
       </div>
 
-      <div class="settings-row" id="installStatusRow" style="margin-bottom:24px;">
-        <div class="settings-row-text">
-          <div class="settings-row-title">App-installatie</div>
-          <p id="installStatusText" class="field-hint" style="margin-top:4px;">—</p>
+      <div class="settings-row" id="installStatusRow" style="margin-bottom:24px; align-items:center;">
+        <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
+          <div id="installStatusIcon" class="install-status-icon warn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          </div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">App-installatie</div>
+            <p id="installStatusText" class="field-hint" style="margin-top:4px;">—</p>
+          </div>
         </div>
         <button type="button" id="installStatusButton" class="small-btn hidden">Bekijk hoe</button>
       </div>
@@ -1790,8 +1802,8 @@
       'notif.accept': 'Accepteren',
       'notif.reject': 'Verwijderen',
       'notif.openMessages': 'Open Berichten',
-      'install.installed': '✅ Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
-      'install.notInstalled': '⚠️ Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
+      'install.installed': 'Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
+      'install.notInstalled': 'Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
       'install.installNow': 'Nu installeren',
       'install.showHow': 'Bekijk hoe',
       'requests.withdraw': 'Intrekken',
@@ -1877,8 +1889,8 @@
       'notif.accept': 'Accept',
       'notif.reject': 'Remove',
       'notif.openMessages': 'Open Messages',
-      'install.installed': '✅ Installed — you\'ll receive emergency alerts as expected.',
-      'install.notInstalled': '⚠️ Not installed yet — without this you could miss an emergency alert.',
+      'install.installed': 'Installed — you\'ll receive emergency alerts as expected.',
+      'install.notInstalled': 'Not installed yet — without this you could miss an emergency alert.',
       'install.installNow': 'Install now',
       'install.showHow': 'Show me how',
       'requests.withdraw': 'Withdraw',
@@ -2187,6 +2199,7 @@
     settingsOverlay: document.getElementById('settingsOverlay'),
     settingsCloseButton: document.getElementById('settingsCloseButton'),
     installStatusRow: document.getElementById('installStatusRow'),
+    installStatusIcon: document.getElementById('installStatusIcon'),
     installStatusText: document.getElementById('installStatusText'),
     installStatusButton: document.getElementById('installStatusButton'),
     locationToggle: document.getElementById('locationToggle')
@@ -4326,9 +4339,16 @@
 
   // Altijd-vindbare status in Instellingen, voor wie de onboarding oversloeg
   // of het later nog eens wil bekijken.
+  const INSTALL_ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  const INSTALL_ICON_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>';
   function renderInstallStatusRow(){
     if (!els.installStatusRow) return;
-    if (isStandalone()){
+    const installed = isStandalone();
+    if (els.installStatusIcon){
+      els.installStatusIcon.className = 'install-status-icon ' + (installed ? 'ok' : 'warn');
+      els.installStatusIcon.innerHTML = installed ? INSTALL_ICON_OK : INSTALL_ICON_WARN;
+    }
+    if (installed){
       els.installStatusText.textContent = t('install.installed');
       els.installStatusButton.classList.add('hidden');
     } else {
