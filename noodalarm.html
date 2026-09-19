@@ -1156,6 +1156,21 @@
             </div>
           </div>
         </div>
+
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="testAlarmSectionTitle">Oefenen met een testalarm</div>
+              <p class="settings-item-hint" id="testAlarmSectionHint">Stuur een testalarm naar je noodcontacten, zodat je precies weet hoe het voelt en werkt.</p>
+            </div>
+          </div>
+          <div class="settings-item-control">
+            <button type="button" id="testAlarmButton" class="small-btn">🧪 Stuur een testalarm</button>
+          </div>
+        </div>
       </div>
 
       <!-- Daarna: hoe de app eruitziet en klinkt voor jou persoonlijk. -->
@@ -1571,8 +1586,6 @@
 
           <button type="button" id="cancelAlarmButton" class="cancel-button hidden">Annuleren</button>
 
-          <button type="button" id="testAlarmButton" class="link-button">🧪 Oefenen? Stuur een testalarm</button>
-
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
 
           <div id="iosInstallHint" class="auth-message hidden">
@@ -1916,6 +1929,8 @@
     { sel: '#locationTestSectionTitle', nl: 'Werkt je locatie?', en: 'Does your location work?' },
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
     { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
+    { sel: '#testAlarmSectionTitle', nl: 'Oefenen met een testalarm', en: 'Practice with a test alarm' },
+    { sel: '#testAlarmSectionHint', nl: 'Stuur een testalarm naar je noodcontacten, zodat je precies weet hoe het voelt en werkt.', en: 'Send a test alarm to your emergency contacts, so you know exactly how it feels and works.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
@@ -2039,7 +2054,7 @@
     { sel: '#alarmButton', attr: 'aria-label', nl: 'Druk voor alarm', en: 'Press for alarm' },
     { sel: '#alarmButtonSublabel', nl: 'tik om te annuleren', en: 'tap to cancel' },
     { sel: '#cancelAlarmButton', nl: 'Annuleren', en: 'Cancel' },
-    { sel: '#testAlarmButton', nl: '🧪 Oefenen? Stuur een testalarm', en: '🧪 Want to practice? Send a test alarm' },
+    { sel: '#testAlarmButton', nl: '🧪 Stuur een testalarm', en: '🧪 Send a test alarm' },
     { sel: '#noGroupWarning', nl: 'Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.', en: 'You don\'t have any confirmed emergency contacts yet. Add someone under "Contacts" so there\'s someone to alert.' },
     { sel: '#iosInstallHintText', m: 'h', nl: '📱 <strong>Op iPhone of iPad?</strong> Zonder dit installeren mis je een noodalarm van een contact: pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon) en kies daarna <strong>"Zet op beginscherm"</strong>.', en: '📱 <strong>On iPhone or iPad?</strong> Without installing this you\'ll miss an emergency alert from a contact: push notifications only work here once you add NORI to your home screen. Tap <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (the share icon) at the bottom of Safari, then choose <strong>"Add to Home Screen"</strong>.' },
     { sel: '#iosInstallHintDismiss', nl: 'Begrepen', en: 'Got it' },
@@ -4143,7 +4158,11 @@
     else startCountdown(false);
   });
   els.cancelAlarmButton.addEventListener('click', cancelCountdown);
-  els.testAlarmButton.addEventListener('click', () => startCountdown(true));
+  els.testAlarmButton.addEventListener('click', () => {
+    closeSlidePage(els.settingsOverlay);
+    switchScreen('alarm');
+    startCountdown(true);
+  });
 
   els.endAlarmButton.addEventListener('click', async () => {
     switchView(els.viewIdle);
