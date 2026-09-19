@@ -984,7 +984,7 @@
         </a>
       </div>
 
-      <div id="chatMessages" class="chat-messages" style="flex:1; padding-left:0; padding-right:0;"></div>
+      <div id="chatMessages" class="chat-messages" style="flex:1; padding-left:0; padding-right:10px;"></div>
       <form id="chatForm" class="chat-form">
         <input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;">
         <button type="button" id="chatAttachButton" class="chat-attach-button" aria-label="Foto of video versturen">
@@ -2299,6 +2299,9 @@
       : '<p class="chat-empty-hint">Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.</p>';
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
+    els.chatMessages.querySelectorAll('.chat-media').forEach(el => {
+      el.addEventListener(el.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom);
+    });
   }
 
   function subscribeChat(groupId){
