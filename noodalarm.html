@@ -88,7 +88,7 @@
   *{ box-sizing:border-box; }
   .hidden{ display:none !important; }
   .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-  html,body{ margin:0; padding:0; }
+  html,body{ margin:0; padding:0; overscroll-behavior:none; }
   body{
     background:var(--bg);
     color:var(--text);
@@ -457,7 +457,7 @@
   }
   .overlay.hidden{ display:none; }
   .overlay-card{
-    width:100%; max-width:400px; max-height:88vh; overflow-y:auto; background:var(--surface); border:1px solid var(--border-soft);
+    width:100%; max-width:400px; max-height:88vh; overflow-y:auto; overscroll-behavior:contain; background:var(--surface); border:1px solid var(--border-soft);
     border-radius:var(--radius-lg); padding:26px 22px; display:flex; flex-direction:column; gap:16px; box-shadow:var(--shadow-card);
   }
   .overlay-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
@@ -530,6 +530,11 @@
   .chat-bubble .who{ font-size:13.5px; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
   .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:12px; opacity:.65; white-space:nowrap; }
+  .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
+  .chat-media{
+    display:block; max-height:280px; border-radius:12px;
+    margin:-2px -6px 6px; width:calc(100% + 12px); object-fit:cover; background:var(--surface-2);
+  }
   .chat-form{
     display:flex; align-items:center; gap:10px; flex-shrink:0;
     position:sticky; bottom:0; z-index:10;
@@ -550,6 +555,14 @@
   }
   .chat-send-button svg{ width:24px; height:24px; }
   .chat-send-button:hover{ background:var(--accent-dark); }
+  .chat-attach-button{
+    width:44px; height:44px; min-height:44px; border-radius:50%; flex-shrink:0;
+    background:none; border:none; color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .chat-attach-button svg{ width:22px; height:22px; }
+  .chat-attach-button:hover{ color:var(--text); background:var(--surface-2); }
+  .chat-attach-button:disabled{ opacity:.5; cursor:not-allowed; }
   .location-card{ flex-shrink:0; background:var(--surface); border-bottom:1px solid var(--border-soft); padding:14px 16px; }
   .location-header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:15.5px; margin-bottom:6px; }
   .location-header strong{ font-weight:800; }
@@ -958,6 +971,10 @@
 
       <div id="chatMessages" class="chat-messages" style="flex:1; padding-left:0; padding-right:0;"></div>
       <form id="chatForm" class="chat-form">
+        <input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;">
+        <button type="button" id="chatAttachButton" class="chat-attach-button" aria-label="Foto of video versturen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
         <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
         <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
@@ -1044,6 +1061,18 @@
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  const URL_PATTERN = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+  const URL_TRAILING_PUNCT = /[.,!?;:)\]}'"]+$/;
+  function linkifyHtml(str){
+    return String(str).split(URL_PATTERN).map((part, i) => {
+      if (i % 2 === 0) return escapeHtml(part);
+      const trailingMatch = part.match(URL_TRAILING_PUNCT);
+      const trailing = trailingMatch ? trailingMatch[0] : '';
+      const urlPart = trailing ? part.slice(0, -trailing.length) : part;
+      const href = /^https?:\/\//i.test(urlPart) ? urlPart : 'https://' + urlPart;
+      return '<a href="' + escapeHtml(href) + '" target="_blank" rel="noopener noreferrer" class="chat-link">' + escapeHtml(urlPart) + '</a>' + escapeHtml(trailing);
+    }).join('');
+  }
   const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
   function avatarInner(url){
     return url ? '<img src="' + url + '" alt="">' : PERSON_ICON;
@@ -1123,6 +1152,8 @@
     messagesParticipants: document.getElementById('messagesParticipants'),
     chatMessages: document.getElementById('chatMessages'),
     chatForm: document.getElementById('chatForm'),
+    chatMediaInput: document.getElementById('chatMediaInput'),
+    chatAttachButton: document.getElementById('chatAttachButton'),
     chatInput: document.getElementById('chatInput'),
     chatSendButton: document.getElementById('chatSendButton'),
     locationCard: document.getElementById('locationCard'),
@@ -2117,9 +2148,13 @@
   function chatBubbleHtml(msg){
     const own = msg.sender_id === currentSession.user.id;
     const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+    const media = !msg.media_url ? '' : (msg.media_type === 'video'
+      ? '<video src="' + escapeHtml(msg.media_url) + '" class="chat-media" controls playsinline preload="metadata"></video>'
+      : '<img src="' + escapeHtml(msg.media_url) + '" class="chat-media" loading="lazy" alt="">');
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
       (own ? '' : '<div class="who" style="color:' + chatNameColor(msg.sender_id) + ';">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
-      '<div class="text">' + escapeHtml(msg.body) + '<span class="when">' + time + '</span></div>' +
+      media +
+      '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when">' + time + '</span></div>' +
       '</div>';
     if (own) return '<div class="chat-row own">' + bubble + '</div>';
     return '<div class="chat-row other">' +
@@ -2208,12 +2243,24 @@
     }
   }
 
+  const CHAT_MEDIA_URL_TTL = 60 * 60 * 24 * 7;
+  async function resolveMediaUrls(paths){
+    const urlByPath = {};
+    if (!paths.length) return urlByPath;
+    const { data } = await sb.storage.from('chat-media').createSignedUrls(paths, CHAT_MEDIA_URL_TTL);
+    (data || []).forEach(entry => { if (entry.signedUrl) urlByPath[entry.path] = entry.signedUrl; });
+    return urlByPath;
+  }
+
   async function loadChatMessages(groupId){
     const { data: messages } = await sb.from('alarm_messages').select('*')
       .eq('group_id', groupId).order('created_at', { ascending:true }).limit(200);
-    els.chatMessages.innerHTML = (messages || []).length
-      ? messages.map(m => chatBubbleHtml({
+    const list = messages || [];
+    const mediaUrlByPath = await resolveMediaUrls(list.filter(m => m.media_path).map(m => m.media_path));
+    els.chatMessages.innerHTML = list.length
+      ? list.map(m => chatBubbleHtml({
           ...m,
+          media_url: m.media_path ? mediaUrlByPath[m.media_path] : null,
           senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
           senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
         })).join('')
@@ -2236,9 +2283,14 @@
           participant = p ? { full_name: p.full_name, avatar_url: p.avatar_url } : { full_name: 'Onbekend', avatar_url: null };
           chatParticipantById[msg.sender_id] = participant;
         }
+        let mediaUrl = null;
+        if (msg.media_path){
+          const urlByPath = await resolveMediaUrls([msg.media_path]);
+          mediaUrl = urlByPath[msg.media_path] || null;
+        }
         const emptyHint = els.chatMessages.querySelector('.chat-empty-hint');
         if (emptyHint) emptyHint.remove();
-        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, senderName: participant.full_name, senderAvatar: participant.avatar_url }));
+        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }));
         els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
       })
       .subscribe();
@@ -2250,6 +2302,37 @@
     if (!body || !currentChatGroupId) return;
     els.chatInput.value = '';
     await sb.from('alarm_messages').insert({ group_id: currentChatGroupId, sender_id: currentSession.user.id, body });
+  });
+
+  const CHAT_MEDIA_MAX_BYTES = 25 * 1024 * 1024;
+  els.chatAttachButton.addEventListener('click', () => els.chatMediaInput.click());
+  els.chatMediaInput.addEventListener('change', async () => {
+    const file = els.chatMediaInput.files && els.chatMediaInput.files[0];
+    els.chatMediaInput.value = '';
+    if (!file || !currentChatGroupId) return;
+    const isVideo = file.type.startsWith('video/');
+    if (!isVideo && !file.type.startsWith('image/')){
+      window.alert('Alleen foto\'s en video\'s kunnen worden verstuurd.');
+      return;
+    }
+    if (file.size > CHAT_MEDIA_MAX_BYTES){
+      window.alert('Dit bestand is te groot (max 25 MB).');
+      return;
+    }
+    els.chatAttachButton.disabled = true;
+    const ext = (file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg')).toLowerCase().replace(/[^a-z0-9]/g, '') || (isVideo ? 'mp4' : 'jpg');
+    const path = currentChatGroupId + '/' + crypto.randomUUID() + '.' + ext;
+    const { error: upErr } = await sb.storage.from('chat-media').upload(path, file, { contentType: file.type });
+    if (upErr){
+      els.chatAttachButton.disabled = false;
+      window.alert('Versturen mislukt: ' + upErr.message);
+      return;
+    }
+    await sb.from('alarm_messages').insert({
+      group_id: currentChatGroupId, sender_id: currentSession.user.id, body: null,
+      media_path: path, media_type: isVideo ? 'video' : 'image'
+    });
+    els.chatAttachButton.disabled = false;
   });
 
   /* =========================================================================
