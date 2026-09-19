@@ -64,19 +64,19 @@
     --chat-name-5:#b45309;
     --chat-name-6:#57606f;
   }
-  /* ---------- Donker ---------- */
+  /* ---------- Donker (neutrale grijstinten, zoals iOS Dark Mode — geen blauwzweem) ---------- */
   :root[data-theme="dark"]{
-    --bg:#0b1220;
-    --surface:#141c30;
-    --surface-2:#1b2540;
-    --border:#2c3859;
-    --border-soft:#1c2439;
-    --text:#f5f7fb;
-    --text-muted:#aab4cc;
-    --text-faint:#8895b3;
-    --amber-soft:#3a2c14;
-    --shadow-card:0 2px 10px rgba(0,0,0,.35);
-    --scrim:rgba(6,10,20,.92);
+    --bg:#000000;
+    --surface:#1c1c1e;
+    --surface-2:#2c2c2e;
+    --border:#3a3a3c;
+    --border-soft:#2c2c2e;
+    --text:#f5f5f7;
+    --text-muted:#98989d;
+    --text-faint:#6e6e73;
+    --amber-soft:#332a1a;
+    --shadow-card:0 2px 10px rgba(0,0,0,.5);
+    --scrim:rgba(0,0,0,.92);
     --chat-name-1:#a78bfa;
     --chat-name-2:#f472b6;
     --chat-name-3:#2dd4bf;
@@ -172,6 +172,8 @@
     transition:background .15s ease, color .15s ease;
   }
   .segmented button.active{ background:var(--accent); color:#fff; }
+  .theme-tab{ display:flex; flex-direction:column; align-items:center; gap:5px; font-size:13px; padding:11px 0 10px; }
+  .theme-tab svg{ width:19px; height:19px; flex-shrink:0; }
   .tab-count{ margin-left:6px; opacity:.75; }
   .tab-count.hidden{ display:none; }
 
@@ -778,9 +780,18 @@
         <div class="settings-row-title" style="margin-bottom:8px;">Weergave</div>
         <p class="field-hint" style="margin-top:0; margin-bottom:12px;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
         <nav class="segmented" role="tablist" aria-label="Weergave">
-          <button type="button" id="themeLightButton" data-theme="light" role="tab">Licht</button>
-          <button type="button" id="themeDarkButton" data-theme="dark" role="tab">Donker</button>
-          <button type="button" id="themeAutoButton" data-theme="auto" role="tab">Automatisch</button>
+          <button type="button" id="themeLightButton" class="theme-tab" data-theme="light" role="tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            Licht
+          </button>
+          <button type="button" id="themeDarkButton" class="theme-tab" data-theme="dark" role="tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6.36 6.36 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            Donker
+          </button>
+          <button type="button" id="themeAutoButton" class="theme-tab" data-theme="auto" role="tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg>
+            Automatisch
+          </button>
         </nav>
       </div>
     </div>
@@ -1405,8 +1416,7 @@
   // ingebouwde overscroll-bounce die daar niet consistent is.
   function attachElasticBounce(el, opts){
     const windowScroll = !!(opts && opts.windowScroll);
-    const maxPull = 46;
-    const resistance = 0.42;
+    const maxPull = 64;
     let startY = null;
     let pulling = false;
     let atTop = true;
@@ -1438,7 +1448,11 @@
       const delta = ev.touches[0].clientY - startY;
       if ((delta > 0 && atTop) || (delta < 0 && atBottom)){
         pulling = true;
-        const pull = Math.sign(delta) * Math.min(maxPull, Math.abs(delta) * resistance);
+        // Echte "rubber band"-curve (zoals UIScrollView op iOS): hoe verder
+        // je trekt, hoe meer tegendruk je voelt, in plaats van een harde
+        // afkap. Nadert maxPull asymptotisch.
+        const magnitude = Math.abs(delta);
+        const pull = Math.sign(delta) * (maxPull * magnitude) / (maxPull + magnitude);
         el.style.transform = 'translateY(' + pull + 'px)';
         if (ev.cancelable) ev.preventDefault();
       } else if (pulling){
@@ -1449,7 +1463,9 @@
 
     function release(){
       if (pulling){
-        el.style.transition = 'transform .32s cubic-bezier(.25,.8,.4,1)';
+        // Lichte overshoot-easing (zoals een iOS-spring) zodat hij niet
+        // hard stopt op 0, maar er nog heel even voorbij "veert".
+        el.style.transition = 'transform .42s cubic-bezier(.34,1.56,.64,1)';
         el.style.transform = '';
       }
       startY = null;
@@ -1479,7 +1495,7 @@
     const pref = realStore.get(KEYS.theme, 'auto');
     const resolved = resolveTheme(pref);
     document.documentElement.setAttribute('data-theme', resolved);
-    if (els.themeColorMeta) els.themeColorMeta.setAttribute('content', resolved === 'dark' ? '#0b1220' : '#f0f2f5');
+    if (els.themeColorMeta) els.themeColorMeta.setAttribute('content', resolved === 'dark' ? '#000000' : '#f0f2f5');
     [els.themeLightButton, els.themeDarkButton, els.themeAutoButton].forEach(btn => {
       if (!btn) return;
       const active = btn.dataset.theme === pref;
@@ -1973,6 +1989,7 @@
     }
     els.contactsSection.classList.add('hidden');
     els.searchResultsSection.classList.remove('hidden');
+    refreshSentRequests();
 
     const { data } = await sb.rpc('search_users', { p_query: q });
     const results = data || [];
