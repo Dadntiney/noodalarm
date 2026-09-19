@@ -5,6 +5,7 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "capture_links": "existing-client-navigate",
   "background_color": "#f0f2f5",
   "theme_color": "#f0f2f5",
   "lang": "nl",

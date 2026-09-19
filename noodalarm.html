@@ -1896,6 +1896,7 @@
       'aria.removeContact': 'Verbinding verbreken',
       'alert.addFailed': 'Toevoegen mislukt: {msg}',
       'alert.requestSent': 'Verzoek verstuurd naar {name}.',
+      'invite.useHomeScreen': 'Heb je NORI al op je beginscherm staan? Gebruik voortaan dát icoon in plaats van deze pagina — alleen zo komen noodmeldingen goed binnen. Nog niet geïnstalleerd? Dat kan via Instellingen.',
       'alert.inviteFailed': 'Uitnodigen mislukt: {msg}',
       'alert.withdrawFailed': 'Intrekken mislukt: {msg}',
       'alert.disconnectFailed': 'Verbreken mislukt: {msg}',
@@ -2002,6 +2003,7 @@
       'aria.removeContact': 'Disconnect',
       'alert.addFailed': 'Adding failed: {msg}',
       'alert.requestSent': 'Request sent to {name}.',
+      'invite.useHomeScreen': 'Already have NORI on your home screen? Use that icon from now on instead of this page — that\'s the only way emergency alerts come through reliably. Not installed yet? You can do that via Settings.',
       'alert.inviteFailed': 'Inviting failed: {msg}',
       'alert.withdrawFailed': 'Withdrawing failed: {msg}',
       'alert.disconnectFailed': 'Disconnecting failed: {msg}',
@@ -3251,6 +3253,15 @@
     if (error){ window.alert(t('alert.addFailed', { msg: error.message })); return; }
     window.alert(t('alert.requestSent', { name: profile.full_name }));
     refreshSentRequests();
+    // Een uitnodigingslink/QR-code opent altijd in de browser, nooit
+    // automatisch in een al-geïnstalleerd NORI-icoon op het beginscherm —
+    // dat kan geen enkele website afdwingen (iOS biedt hier, anders dan bij
+    // een "echte" app, geen koppeling voor). Het verzoek hierboven is al
+    // gewoon verstuurd, ongeacht in welke tab dit gebeurde — deze duw is
+    // puur om te voorkomen dat iemand per ongeluk in deze bladwijzer-achtige
+    // tab blijft hangen i.p.v. het eigen beginscherm-icoon te gebruiken,
+    // want alléén daar werken noodmeldingen betrouwbaar.
+    if (!isStandalone()) window.alert(t('invite.useHomeScreen'));
   }
   function maybeHandleInviteFromUrl(){
     const params = new URLSearchParams(window.location.search);
