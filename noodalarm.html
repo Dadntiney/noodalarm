@@ -806,6 +806,11 @@
   }
   .location-open-button:hover{ background:var(--accent-dark); }
   .location-open-button svg{ width:19px; height:19px; }
+  .location-end-button{
+    display:block; width:100%; margin-top:10px; background:none; border:1.5px solid var(--danger); color:var(--danger);
+    font-weight:700; font-size:0.90625rem; padding:11px; border-radius:12px; cursor:pointer;
+  }
+  .location-end-button:hover{ background:rgba(239,68,68,.1); }
   .location-live-badge{
     display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,.12); color:var(--danger);
     font-size:0.6875rem; font-weight:800; letter-spacing:.04em; padding:2px 7px 2px 6px; border-radius:999px;
@@ -834,6 +839,13 @@
 
   /* ---------- "Wie heeft gereageerd" + escalatie ---------- */
   .ack-status-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--surface); padding:14px 16px; margin-bottom:14px; }
+  .ack-status-card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .ack-status-card-title{ font-weight:700; font-size:0.90625rem; color:var(--text-muted); }
+  .ack-end-button{
+    background:none; border:1.5px solid var(--danger); color:var(--danger); font-weight:700;
+    font-size:0.8125rem; padding:8px 12px; border-radius:999px; cursor:pointer; flex-shrink:0;
+  }
+  .ack-end-button:hover{ background:rgba(239,68,68,.1); }
   .ack-status-list{ display:flex; flex-wrap:wrap; gap:8px; }
   .ack-pill{ display:inline-flex; align-items:center; gap:6px; font-size:0.8125rem; font-weight:600; padding:6px 10px; border-radius:999px; background:var(--surface-2); color:var(--text-muted); }
   .ack-pill.acked{ color:var(--green); }
@@ -1435,6 +1447,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
           Open in Maps
         </a>
+        <button type="button" id="endAlarmFromLocationButton" class="location-end-button hidden">Alarm beëindigen</button>
       </div>
 
       <div id="medicalInfoCard" class="medical-info-card hidden">
@@ -1447,6 +1460,10 @@
       </div>
 
       <div id="ackStatusCard" class="ack-status-card hidden">
+        <div class="ack-status-card-head">
+          <span class="ack-status-card-title">Jouw actieve alarm</span>
+          <button type="button" id="endAlarmFromChatButton" class="ack-end-button">Alarm beëindigen</button>
+        </div>
         <div id="ackStatusList" class="ack-status-list"></div>
         <div id="escalationBanner" class="escalation-banner hidden">
           <p class="escalation-text">⚠️ Nog niemand heeft gereageerd.</p>
@@ -1702,6 +1719,9 @@
     { sel: '#sentAtLabel', nl: 'Tijdstip', en: 'Time' },
     { sel: '#entriesCard h3', nl: 'Noodcontacten', en: 'Emergency contacts' },
     { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
+    { sel: '.ack-status-card-title', nl: 'Jouw actieve alarm', en: 'Your active alarm' },
+    { sel: '#endAlarmFromChatButton', nl: 'Alarm beëindigen', en: 'End alarm' },
+    { sel: '#endAlarmFromLocationButton', nl: 'Alarm beëindigen', en: 'End alarm' },
     { sel: '.note', m: 'l', nl: ' NORI. Alle rechten voorbehouden.', en: ' NORI. All rights reserved.' },
     { sel: '#searchInput', attr: 'placeholder', nl: 'Zoek op naam of gebruikersnaam…', en: 'Search by name or username…' },
     { sel: '#qrInviteToggle .settings-link-label', nl: 'Of nodig iemand uit (QR-code / link)', en: 'Or invite someone (QR code / link)' },
@@ -2077,6 +2097,7 @@
     locationMapImg: document.getElementById('locationMapImg'),
     locationMapFallback: document.getElementById('locationMapFallback'),
     locationOpenButton: document.getElementById('locationOpenButton'),
+    endAlarmFromLocationButton: document.getElementById('endAlarmFromLocationButton'),
     medicalInfoCard: document.getElementById('medicalInfoCard'),
     medicalResusBanner: document.getElementById('medicalResusBanner'),
     medicalInfoToggle: document.getElementById('medicalInfoToggle'),
@@ -2084,6 +2105,7 @@
     medicalInfoBody: document.getElementById('medicalInfoBody'),
     ackStatusCard: document.getElementById('ackStatusCard'),
     ackStatusList: document.getElementById('ackStatusList'),
+    endAlarmFromChatButton: document.getElementById('endAlarmFromChatButton'),
     escalationBanner: document.getElementById('escalationBanner'),
     escalationContactButtons: document.getElementById('escalationContactButtons'),
 
@@ -3105,11 +3127,19 @@
     clearTimeout(discreetToastTimer);
     discreetToastTimer = setTimeout(() => els.discreetToast.classList.remove('show'), 1600);
   }
-  async function endSilentAlarm(){
-    const id = lastTriggeredAlarmId;
+  // Robuuste manier om je eigen alarm te beëindigen: zoekt zelf het actieve
+  // alarm op in de database in plaats van te vertrouwen op een lokale
+  // variabele — die kan leeg zijn na een herlaad/nieuwe sessie, waardoor
+  // een alarm anders voor altijd "actief" kan blijven staan.
+  async function endMyActiveAlarm(){
     stopLiveLocationSharing();
     lastTriggeredAlarmId = null;
-    if (id) await sb.from('alarms').update({ status: 'ended' }).eq('id', id);
+    if (!currentSession) return;
+    await sb.from('alarms').update({ status: 'ended' })
+      .eq('triggered_by', currentSession.user.id).eq('status', 'active');
+  }
+  async function endSilentAlarm(){
+    await endMyActiveAlarm();
     showDiscreetToast(true);
   }
   function startSilentHold(){
@@ -3425,12 +3455,30 @@
 
   els.endAlarmButton.addEventListener('click', async () => {
     switchView(els.viewIdle);
-    stopLiveLocationSharing();
-    if (lastTriggeredAlarmId){
-      await sb.from('alarms').update({ status: 'ended' }).eq('id', lastTriggeredAlarmId);
-      lastTriggeredAlarmId = null;
-    }
+    await endMyActiveAlarm();
   });
+  // Zelfde actie, maar dan direct vanuit het berichtenscherm — zonder dit
+  // blijft een alarm dat je hier ooit activeerde voor altijd "actief" staan
+  // (met de locatiekaart en escalatiemelding erbovenop) als je nooit meer
+  // terugging naar het alarmscherm om op "Terug naar start" te drukken.
+  if (els.endAlarmFromChatButton){
+    els.endAlarmFromChatButton.addEventListener('click', async () => {
+      els.endAlarmFromChatButton.disabled = true;
+      await endMyActiveAlarm();
+      els.ackStatusCard.classList.add('hidden');
+      els.locationCard.classList.add('hidden');
+      els.endAlarmFromChatButton.disabled = false;
+    });
+  }
+  if (els.endAlarmFromLocationButton){
+    els.endAlarmFromLocationButton.addEventListener('click', async () => {
+      els.endAlarmFromLocationButton.disabled = true;
+      await endMyActiveAlarm();
+      els.locationCard.classList.add('hidden');
+      els.testModeBanner.classList.add('hidden');
+      els.endAlarmFromLocationButton.disabled = false;
+    });
+  }
 
   // Zolang je eigen alarm actief is, stuur je periodiek een nieuwe locatie
   // door — zodat je contacten je zien bewegen i.p.v. één momentopname van
@@ -3741,7 +3789,7 @@
       lastAddressCoords = null;
       return;
     }
-    const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
+    const { lat, lng, location_accuracy, location_updated_at, triggered_by, test_mode } = alarmRow;
     const isOwn = triggered_by === currentSession.user.id;
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
@@ -3750,6 +3798,11 @@
       '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
     els.locationOpenButton.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
+    // Bij een oefenalarm (test_mode) verschijnt het "wie heeft gereageerd"-
+    // kaartje nooit, dus is dit de enige plek in Berichten om zo'n oefening
+    // zelf af te sluiten — bij een écht alarm staat die knop al op de
+    // ack-status-kaart, dus dan niet nog een keer hier tonen.
+    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.toggle('hidden', !(isOwn && test_mode));
     els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
     renderLocationMeta(location_updated_at);
 
