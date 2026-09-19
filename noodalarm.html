@@ -1665,44 +1665,63 @@
     <!-- =========================== CONTACTEN SCHERM =========================== -->
     <section id="screen-contacts" class="screen hidden">
 
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
+      <div id="contactsSection">
+        <div class="section-title">Mijn contacten</div>
+        <div class="search-box" style="margin-bottom:16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="contactsFilterInput" placeholder="Contacten zoeken" autocomplete="off">
+        </div>
+        <div id="contactsEmpty" class="empty-state hidden">Nog geen contacten. Klik hieronder op "Contact toevoegen" om te beginnen.</div>
+        <div id="contactsFilterEmpty" class="empty-state hidden">Niemand gevonden in je contacten.</div>
+        <ul id="contactsList" class="people-list"></ul>
       </div>
 
-      <div class="settings-group" style="margin:12px 0 16px;">
+      <div class="settings-group" style="margin:20px 0 0;">
         <div class="settings-item">
-          <button type="button" id="qrInviteToggle" class="settings-item-nav">
+          <button type="button" id="addContactToggle" class="settings-item-nav">
             <span class="settings-item-icon icon-accent">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
             </span>
-            <span class="settings-item-body"><span class="settings-link-label">Of nodig iemand uit (QR-code / link)</span></span>
+            <span class="settings-item-body"><span class="settings-link-label">Contact toevoegen</span></span>
             <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </div>
       </div>
 
-      <div id="qrInviteCard" class="qr-invite-card hidden">
-        <img id="qrInviteImg" alt="QR-code om jou toe te voegen als noodcontact">
-        <p class="field-hint" style="text-align:center; margin:12px 0 0;">Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.</p>
-        <button type="button" id="copyInviteLinkButton" class="small-btn" style="margin:12px auto 0; display:block;">Of kopieer de link</button>
-      </div>
+      <div id="addContactPanel" class="hidden" style="margin-top:16px;">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
+        </div>
 
-      <div id="searchResultsSection" class="hidden">
-        <div class="section-title">Zoekresultaten</div>
-        <div id="searchEmpty" class="empty-state hidden">Niemand gevonden met deze naam.</div>
-        <ul id="searchResultsList" class="people-list"></ul>
-      </div>
+        <div class="settings-group" style="margin:12px 0 16px;">
+          <div class="settings-item">
+            <button type="button" id="qrInviteToggle" class="settings-item-nav">
+              <span class="settings-item-icon icon-accent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
+              </span>
+              <span class="settings-item-body"><span class="settings-link-label">Of nodig iemand uit (QR-code / link)</span></span>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
 
-      <div id="sentRequestsSection" class="hidden">
-        <div class="section-title">Openstaande verzoeken</div>
-        <ul id="sentRequestsList" class="people-list"></ul>
-      </div>
+        <div id="qrInviteCard" class="qr-invite-card hidden">
+          <img id="qrInviteImg" alt="QR-code om jou toe te voegen als noodcontact">
+          <p class="field-hint" style="text-align:center; margin:12px 0 0;">Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.</p>
+          <button type="button" id="copyInviteLinkButton" class="small-btn" style="margin:12px auto 0; display:block;">Of kopieer de link</button>
+        </div>
 
-      <div id="contactsSection">
-        <div class="section-title">Mijn contacten</div>
-        <div id="contactsEmpty" class="empty-state hidden">Nog geen contacten. Zoek hierboven naar iemand die je vertrouwt.</div>
-        <ul id="contactsList" class="people-list"></ul>
+        <div id="searchResultsSection" class="hidden">
+          <div class="section-title">Zoekresultaten</div>
+          <div id="searchEmpty" class="empty-state hidden">Niemand gevonden met deze naam.</div>
+          <ul id="searchResultsList" class="people-list"></ul>
+        </div>
+
+        <div id="sentRequestsSection" class="hidden">
+          <div class="section-title">Openstaande verzoeken</div>
+          <ul id="sentRequestsList" class="people-list"></ul>
+        </div>
       </div>
 
     </section>
@@ -2098,6 +2117,8 @@
     { sel: '#endAlarmFromChatButton', nl: 'Alarm beëindigen', en: 'End alarm' },
     { sel: '#endAlarmFromLocationButton', nl: 'Alarm beëindigen', en: 'End alarm' },
     { sel: '.note', m: 'l', nl: ' NORI. Alle rechten voorbehouden.', en: ' NORI. All rights reserved.' },
+    { sel: '#contactsFilterInput', attr: 'placeholder', nl: 'Contacten zoeken', en: 'Search contacts' },
+    { sel: '#addContactToggle .settings-link-label', nl: 'Contact toevoegen', en: 'Add contact' },
     { sel: '#searchInput', attr: 'placeholder', nl: 'Zoek op naam of gebruikersnaam…', en: 'Search by name or username…' },
     { sel: '#qrInviteToggle .settings-link-label', nl: 'Of nodig iemand uit (QR-code / link)', en: 'Or invite someone (QR code / link)' },
     { sel: '#qrInviteImg', attr: 'alt', nl: 'QR-code om jou toe te voegen als noodcontact', en: 'QR code to add you as an emergency contact' },
@@ -2107,7 +2128,8 @@
     { sel: '#searchEmpty', nl: 'Niemand gevonden met deze naam.', en: 'No one found with that name.' },
     { sel: '#sentRequestsSection .section-title', nl: 'Openstaande verzoeken', en: 'Pending requests' },
     { sel: '#contactsSection .section-title', nl: 'Mijn contacten', en: 'My contacts' },
-    { sel: '#contactsEmpty', nl: 'Nog geen contacten. Zoek hierboven naar iemand die je vertrouwt.', en: 'No contacts yet. Search above for someone you trust.' },
+    { sel: '#contactsEmpty', nl: 'Nog geen contacten. Klik hieronder op "Contact toevoegen" om te beginnen.', en: 'No contacts yet. Click "Add contact" below to get started.' },
+    { sel: '#contactsFilterEmpty', nl: 'Niemand gevonden in je contacten.', en: 'No one found in your contacts.' },
     { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
     { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
     { sel: '#medicalInfoToggle > span', m: 'f', nl: '🩺 Medische info van ', en: '🩺 Medical info from ' },
@@ -2594,6 +2616,9 @@
     openMessagesFromSentButton: document.getElementById('openMessagesFromSentButton'),
     endAlarmButton: document.getElementById('endAlarmButton'),
 
+    contactsFilterInput: document.getElementById('contactsFilterInput'),
+    addContactToggle: document.getElementById('addContactToggle'),
+    addContactPanel: document.getElementById('addContactPanel'),
     searchInput: document.getElementById('searchInput'),
     qrInviteToggle: document.getElementById('qrInviteToggle'),
     qrInviteCard: document.getElementById('qrInviteCard'),
@@ -2606,6 +2631,7 @@
     sentRequestsList: document.getElementById('sentRequestsList'),
     contactsSection: document.getElementById('contactsSection'),
     contactsEmpty: document.getElementById('contactsEmpty'),
+    contactsFilterEmpty: document.getElementById('contactsFilterEmpty'),
     contactsList: document.getElementById('contactsList'),
 
     profileAvatar: document.getElementById('profileAvatar'),
@@ -3498,7 +3524,7 @@
      ========================================================================= */
   async function refreshNotifications(){
     const { data } = await sb.from('notifications')
-      .select('*, connection:related_connection_id(status)')
+      .select('*, connection:related_connection_id(status, requester:requester_id(avatar_url))')
       .order('created_at', { ascending:false }).limit(30);
     const items = data || [];
     const unread = items.filter(n => !n.is_read).length;
@@ -3512,7 +3538,9 @@
     els.notifEmpty.classList.toggle('hidden', items.length > 0);
     els.notifClearButton.classList.toggle('hidden', items.length === 0);
     els.notifList.innerHTML = items.map(n => {
-      const icon = n.type === 'alarm' ? '🚨' : (n.type === 'connection_accepted' ? '✅' : '👋');
+      const icon = n.type === 'connection_request' && n.connection && n.connection.requester
+        ? '<span class="avatar sm">' + avatarInner(n.connection.requester.avatar_url) + '</span>'
+        : (n.type === 'alarm' ? '🚨' : (n.type === 'connection_accepted' ? '✅' : '👋'));
       let actions = '';
       if (n.type === 'connection_request' && n.related_connection_id){
         const status = n.connection ? n.connection.status : 'pending';
@@ -3656,14 +3684,20 @@
       '</li>';
   }
 
+  if (els.addContactToggle){
+    els.addContactToggle.addEventListener('click', () => {
+      const opening = els.addContactPanel.classList.contains('hidden');
+      els.addContactPanel.classList.toggle('hidden');
+      if (opening) els.searchInput.focus();
+    });
+  }
+
   const runSearch = debounce(async () => {
     const q = els.searchInput.value.trim();
     if (q.length < 2){
       els.searchResultsSection.classList.add('hidden');
-      els.contactsSection.classList.remove('hidden');
       return;
     }
-    els.contactsSection.classList.add('hidden');
     els.searchResultsSection.classList.remove('hidden');
     refreshSentRequests();
 
@@ -3725,13 +3759,17 @@
     preventHoverGlitch();
   }
 
-  async function refreshContacts(){
-    const { data } = await sb.rpc('my_contacts');
-    const contacts = data || [];
-    els.tabContactsCount.textContent = contacts.length > 0 ? '(' + contacts.length + ')' : '';
-    els.tabContactsCount.classList.toggle('hidden', contacts.length === 0);
-    els.contactsEmpty.classList.toggle('hidden', contacts.length > 0);
-    els.contactsList.innerHTML = contacts.map(c => (
+  let myContactsData = [];
+  function renderContactsList(){
+    const q = els.contactsFilterInput ? els.contactsFilterInput.value.trim().toLowerCase() : '';
+    const filtered = q
+      ? myContactsData.filter(c => c.full_name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q))
+      : myContactsData;
+    els.contactsEmpty.classList.toggle('hidden', myContactsData.length > 0);
+    if (els.contactsFilterEmpty){
+      els.contactsFilterEmpty.classList.toggle('hidden', !(q && myContactsData.length > 0 && filtered.length === 0));
+    }
+    els.contactsList.innerHTML = filtered.map(c => (
       '<li class="person-card" data-user-id="' + c.contact_id + '">' +
         '<div class="avatar-wrap"><div class="avatar">' + avatarInner(c.avatar_url) + '</div><span class="online-dot hidden"></span></div>' +
         '<div class="person-info">' +
@@ -3748,9 +3786,18 @@
     els.contactsList.querySelectorAll('.remove-contact').forEach(btn =>
       btn.addEventListener('click', () => removeContact(btn))
     );
-    els.noGroupWarning.classList.toggle('hidden', contacts.length > 0);
     updateOnlineDots();
-    return contacts;
+  }
+  if (els.contactsFilterInput) els.contactsFilterInput.addEventListener('input', renderContactsList);
+
+  async function refreshContacts(){
+    const { data } = await sb.rpc('my_contacts');
+    myContactsData = data || [];
+    els.tabContactsCount.textContent = myContactsData.length > 0 ? '(' + myContactsData.length + ')' : '';
+    els.tabContactsCount.classList.toggle('hidden', myContactsData.length === 0);
+    renderContactsList();
+    els.noGroupWarning.classList.toggle('hidden', myContactsData.length > 0);
+    return myContactsData;
   }
 
   async function removeContact(btn){
@@ -3856,9 +3903,10 @@
     els.messagesParticipants.classList.toggle('hidden', name !== 'messages');
     document.body.classList.toggle('messages-open', name === 'messages');
     if (name === 'contacts'){
+      if (els.contactsFilterInput) els.contactsFilterInput.value = '';
       els.searchInput.value = '';
       els.searchResultsSection.classList.add('hidden');
-      els.contactsSection.classList.remove('hidden');
+      if (els.addContactPanel) els.addContactPanel.classList.add('hidden');
       refreshContacts();
       refreshSentRequests();
     }
@@ -4106,18 +4154,23 @@
     try {
       if (!countdownAudioCtx) countdownAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const ctx = countdownAudioCtx;
-      if (ctx.state === 'suspended') ctx.resume();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = urgent ? 1046.5 : 830.6;
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.14);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.16);
+      const fire = () => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = urgent ? 1046.5 : 830.6;
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.16);
+      };
+      // resume() is async — zonder hierop te wachten werd de piep soms al
+      // ingepland terwijl de context nog niet echt draaide, en bleef hij stil.
+      if (ctx.state === 'suspended') ctx.resume().then(fire).catch(() => {});
+      else fire();
     } catch (err){ /* geluid is decoratief — het aftellen zelf mag hier nooit van afhangen */ }
   }
   function resetAlarmButton(){
