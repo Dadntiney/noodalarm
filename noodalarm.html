@@ -333,8 +333,12 @@
     width:100%; background:var(--surface-2); border:1.5px solid var(--border); border-radius:11px;
     padding:14px 15px; font-size:1.0625rem; color:var(--text); min-height:52px;
   }
-  .field input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
-  .field input::placeholder{ color:var(--text-faint); }
+  .field input:focus, .field textarea:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
+  .field input::placeholder, .field textarea::placeholder{ color:var(--text-faint); }
+  .field textarea{
+    width:100%; background:var(--surface-2); border:1.5px solid var(--border); border-radius:11px;
+    padding:14px 15px; font-size:1.0625rem; color:var(--text); resize:vertical; min-height:78px;
+  }
   .field-row{ display:grid; grid-template-columns:1fr; gap:14px; }
   .field{ display:flex; flex-direction:column; gap:7px; }
   .field-error{ color:var(--danger); font-size:0.875rem; font-weight:600; }
@@ -554,6 +558,9 @@
   }
   .small-btn:hover{ border-color:var(--text-muted); }
   .small-btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .small-btn.danger{ background:var(--danger); border-color:var(--danger); color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+  .ehbo-steps{ display:flex; flex-direction:column; gap:10px; margin:0; padding-left:22px; font-size:0.9375rem; line-height:1.5; }
+  .ehbo-steps li{ padding-left:4px; }
 
   .form-actions{ display:flex; gap:12px; margin-top:6px; }
   .form-actions .cancel-button{ flex:1; }
@@ -842,6 +849,9 @@
   .medical-resus-banner.ok{ background:var(--green); color:#fff; }
   .medical-info-row{ font-size:0.90625rem; line-height:1.4; }
   .medical-info-row strong{ font-weight:700; }
+  .medical-info-row-warn{ background:var(--danger); color:#fff; padding:10px 12px; border-radius:9px; }
+  .medical-info-row-warn strong{ display:block; margin-bottom:2px; }
+  .medical-info-actions{ display:flex; gap:10px; flex-wrap:wrap; padding:12px 16px; }
 
   /* ---------- "Wie heeft gereageerd" + escalatie ---------- */
   .ack-status-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--surface); padding:14px 16px; margin-bottom:14px; }
@@ -1144,7 +1154,21 @@
           <div class="field-hint" id="resusFieldHint">Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.</div>
         </div>
         <div class="field">
-          <label for="medicalAllergies">Allergieën</label>
+          <label for="medicalAdvanceDirective" id="advanceDirectiveLabel">Behandelverbod / wilsverklaring / wensen</label>
+          <textarea id="medicalAdvanceDirective" rows="3" placeholder="Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…"></textarea>
+          <div class="field-hint" id="advanceDirectiveHint">Optioneel, puur tekst. Geen documenten te uploaden — zo blijft dit veld overzichtelijk en blijft er geen bestand van jou ergens los rondslingeren.</div>
+        </div>
+        <div class="field">
+          <label id="mobilityFieldLabel">Mobiliteit</label>
+          <nav class="segmented resus-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
+            <button type="button" data-mobility="" role="tab">Niet aangegeven</button>
+            <button type="button" data-mobility="good" role="tab">Goed mobiel</button>
+            <button type="button" data-mobility="walker" role="tab">Rollator</button>
+            <button type="button" data-mobility="wheelchair" role="tab">Rolstoel</button>
+          </nav>
+        </div>
+        <div class="field">
+          <label for="medicalAllergies">Allergieën / contra-indicaties</label>
           <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
         </div>
         <div class="field">
@@ -1152,8 +1176,24 @@
           <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
         </div>
         <div class="field">
-          <label for="medicalConditions">Aandoeningen</label>
+          <label for="medicalConditions">Belangrijke ziekten / aandoeningen</label>
           <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
+        </div>
+        <div class="field">
+          <label id="contact1Label">1e contactpersoon</label>
+          <input type="text" id="medicalContact1Name" placeholder="Naam">
+          <div class="field-row" style="grid-template-columns:1fr 1fr;">
+            <input type="text" id="medicalContact1Relation" placeholder="Relatie, bijv. partner">
+            <input type="tel" id="medicalContact1Phone" placeholder="Telefoonnummer">
+          </div>
+        </div>
+        <div class="field">
+          <label id="contact2Label">2e contactpersoon</label>
+          <input type="text" id="medicalContact2Name" placeholder="Naam">
+          <div class="field-row" style="grid-template-columns:1fr 1fr;">
+            <input type="text" id="medicalContact2Relation" placeholder="Relatie, bijv. buur">
+            <input type="tel" id="medicalContact2Phone" placeholder="Telefoonnummer">
+          </div>
         </div>
         <div class="field">
           <label for="medicalDoctorName">Huisarts</label>
@@ -1164,8 +1204,12 @@
           <input type="tel" id="medicalDoctorPhone" placeholder="Praktijknummer">
         </div>
         <div class="field">
+          <label for="medicalHospital">Bekend in ziekenhuis</label>
+          <input type="text" id="medicalHospital" placeholder="Bijv. Radboudumc, locatie X">
+        </div>
+        <div class="field">
           <label for="medicalNotes">Overige informatie</label>
-          <input type="text" id="medicalNotes" placeholder="Bijv. vaste contactpersoon, bijzonderheden">
+          <input type="text" id="medicalNotes" placeholder="Bijv. bijzonderheden">
         </div>
         <button type="submit" id="medicalSaveButton" class="save-button">Medische info opslaan</button>
       </form>
@@ -1474,11 +1518,29 @@
 
       <div id="medicalInfoCard" class="medical-info-card hidden">
         <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
+        <div class="medical-info-actions">
+          <button type="button" id="ehboInstructionsButton" class="small-btn">🩹 EHBO-instructies</button>
+          <a href="tel:112" id="call112Button" class="small-btn danger">📞 Bel 112</a>
+        </div>
         <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
           <span>🩺 Medische info van <strong id="medicalInfoName">—</strong></span>
           <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div id="medicalInfoBody" class="medical-info-body hidden"></div>
+      </div>
+
+      <div id="ehboOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <div class="overlay-header">
+            <h2 class="overlay-title" id="ehboOverlayTitle">EHBO-instructies</h2>
+            <button type="button" id="ehboCloseButton" class="overlay-close" aria-label="Sluiten">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+          <div id="ehboOverlayDisclaimer" class="auth-message warn">⚠️ Dit zijn algemene, standaard EHBO-stappen — geen persoonlijk medisch advies. Bel bij twijfel altijd 112.</div>
+          <ol id="ehboStepsList" class="ehbo-steps"></ol>
+          <a href="tel:112" class="save-button" style="text-align:center; text-decoration:none;">📞 Bel 112</a>
+        </div>
       </div>
 
       <div id="ackStatusCard" class="ack-status-card hidden">
@@ -1676,18 +1738,37 @@
     { sel: '#resusSegmented button[data-resus="yes"]', nl: 'Ja, reanimeer', en: 'Yes, resuscitate' },
     { sel: '#resusSegmented button[data-resus="no"]', nl: 'Nee, niet reanimeren', en: 'No, do not resuscitate' },
     { sel: '#resusFieldHint', nl: 'Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.', en: 'Optional — shown at the top to whoever responds to your alarm.' },
-    { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën', en: 'Allergies' },
+    { sel: '#advanceDirectiveLabel', nl: 'Behandelverbod / wilsverklaring / wensen', en: 'Treatment refusal / advance directive / wishes' },
+    { sel: '#medicalAdvanceDirective', attr: 'placeholder', nl: 'Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…', en: 'E.g. no hospital, no ventilation, call contact person first…' },
+    { sel: '#advanceDirectiveHint', nl: 'Optioneel, puur tekst. Geen documenten te uploaden — zo blijft dit veld overzichtelijk en blijft er geen bestand van jou ergens los rondslingeren.', en: 'Optional, plain text only. No document uploads — this keeps the field simple and means no file of yours sits stored somewhere.' },
+    { sel: '#mobilityFieldLabel', nl: 'Mobiliteit', en: 'Mobility' },
+    { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Mobiliteit', en: 'Mobility' },
+    { sel: '#mobilitySegmented button[data-mobility=""]', nl: 'Niet aangegeven', en: 'Not specified' },
+    { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Goed mobiel', en: 'Fully mobile' },
+    { sel: '#mobilitySegmented button[data-mobility="walker"]', nl: 'Rollator', en: 'Walker' },
+    { sel: '#mobilitySegmented button[data-mobility="wheelchair"]', nl: 'Rolstoel', en: 'Wheelchair' },
+    { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën / contra-indicaties', en: 'Allergies / contra-indications' },
     { sel: '#medicalAllergies', attr: 'placeholder', nl: 'Bijv. penicilline', en: 'E.g. penicillin' },
     { sel: 'label[for="medicalMedications"]', nl: 'Medicatie', en: 'Medication' },
     { sel: '#medicalMedications', attr: 'placeholder', nl: 'Bijv. bloedverdunners', en: 'E.g. blood thinners' },
-    { sel: 'label[for="medicalConditions"]', nl: 'Aandoeningen', en: 'Conditions' },
+    { sel: 'label[for="medicalConditions"]', nl: 'Belangrijke ziekten / aandoeningen', en: 'Important illnesses / conditions' },
     { sel: '#medicalConditions', attr: 'placeholder', nl: 'Bijv. diabetes, hartklachten', en: 'E.g. diabetes, heart condition' },
+    { sel: '#contact1Label', nl: '1e contactpersoon', en: '1st contact person' },
+    { sel: '#medicalContact1Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
+    { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Relatie, bijv. partner', en: 'Relation, e.g. partner' },
+    { sel: '#medicalContact1Phone', attr: 'placeholder', nl: 'Telefoonnummer', en: 'Phone number' },
+    { sel: '#contact2Label', nl: '2e contactpersoon', en: '2nd contact person' },
+    { sel: '#medicalContact2Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
+    { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Relatie, bijv. buur', en: 'Relation, e.g. neighbour' },
+    { sel: '#medicalContact2Phone', attr: 'placeholder', nl: 'Telefoonnummer', en: 'Phone number' },
     { sel: 'label[for="medicalDoctorName"]', nl: 'Huisarts', en: 'Doctor' },
     { sel: '#medicalDoctorName', attr: 'placeholder', nl: 'Naam huisarts of praktijk', en: 'Doctor or practice name' },
     { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Doctor\'s phone number' },
     { sel: '#medicalDoctorPhone', attr: 'placeholder', nl: 'Praktijknummer', en: 'Practice number' },
+    { sel: 'label[for="medicalHospital"]', nl: 'Bekend in ziekenhuis', en: 'Known at hospital' },
+    { sel: '#medicalHospital', attr: 'placeholder', nl: 'Bijv. Radboudumc, locatie X', en: 'E.g. Radboudumc, location X' },
     { sel: 'label[for="medicalNotes"]', nl: 'Overige informatie', en: 'Other information' },
-    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. vaste contactpersoon, bijzonderheden', en: 'E.g. regular contact person, other notes' },
+    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. bijzonderheden', en: 'E.g. other notes' },
     { sel: '#medicalSaveButton', nl: 'Medische info opslaan', en: 'Save medical info' },
     { sel: '#notifOverlay .overlay-title', nl: 'Meldingen', en: 'Notifications' },
     { sel: '#notifClearButton', nl: 'Alles wissen', en: 'Clear all' },
@@ -1767,6 +1848,11 @@
     { sel: '#locationMapImg', attr: 'alt', nl: 'Kaart met locatie', en: 'Map with location' },
     { sel: '#locationMapFallback', nl: 'Kaart kon niet worden geladen — gebruik "Open in Maps" hieronder.', en: 'Map couldn\'t be loaded — use "Open in Maps" below.' },
     { sel: '#medicalInfoToggle > span', m: 'f', nl: '🩺 Medische info van ', en: '🩺 Medical info from ' },
+    { sel: '#ehboInstructionsButton', nl: '🩹 EHBO-instructies', en: '🩹 First aid instructions' },
+    { sel: '#call112Button', nl: '📞 Bel 112', en: '📞 Call 112' },
+    { sel: '#ehboOverlayTitle', nl: 'EHBO-instructies', en: 'First aid instructions' },
+    { sel: '#ehboOverlayDisclaimer', nl: '⚠️ Dit zijn algemene, standaard EHBO-stappen — geen persoonlijk medisch advies. Bel bij twijfel altijd 112.', en: '⚠️ These are general, standard first-aid steps — not personal medical advice. When in doubt, always call 112.' },
+    { sel: '#ehboOverlay .save-button', nl: '📞 Bel 112', en: '📞 Call 112' },
     { sel: '.escalation-text', nl: '⚠️ Nog niemand heeft gereageerd.', en: '⚠️ No one has responded yet.' },
     { sel: '.escalation-call-button.emergency', nl: 'Bel 112', en: 'Call 112' },
     { sel: '.chat-edit-banner-text strong', nl: 'Bericht bewerken', en: 'Editing message' },
@@ -1836,11 +1922,27 @@
       'ack.call': 'Bel {name}',
       'medical.resusYes': '✅ {name} mag gereanimeerd worden',
       'medical.resusNo': '⛔ {name} wil NIET gereanimeerd worden',
+      'medical.advanceDirective': 'Wilsverklaring / behandelwensen:',
       'medical.allergies': 'Allergieën:',
       'medical.medications': 'Medicatie:',
       'medical.conditions': 'Aandoeningen:',
+      'medical.mobility': 'Mobiliteit:',
+      'medical.mobilityGood': 'Goed mobiel',
+      'medical.mobilityWalker': 'Rollator',
+      'medical.mobilityWheelchair': 'Rolstoel',
+      'medical.contact1': '1e contactpersoon:',
+      'medical.contact2': '2e contactpersoon:',
       'medical.doctor': 'Huisarts:',
+      'medical.hospital': 'Ziekenhuis:',
       'medical.other': 'Overig:',
+      'ehbo.step1': 'Zorg eerst voor je eigen veiligheid voordat je dichterbij komt.',
+      'ehbo.step2': 'Spreek het slachtoffer aan en schud voorzichtig aan de schouders. Geen reactie? Ga door naar de volgende stap.',
+      'ehbo.step3': 'Bel (of laat iemand) 112 bellen, als dat nog niet gebeurd is.',
+      'ehbo.step4': 'Controleer de ademhaling: kijk, luister en voel maximaal 10 seconden.',
+      'ehbo.step5': 'Geen normale ademhaling? Start reanimatie: 30 borstcompressies, dan 2 beademingen — tenzij hierboven staat dat diegene niet gereanimeerd wil worden.',
+      'ehbo.step6': 'Wel ademhaling, maar niet bij bewustzijn? Leg het slachtoffer in stabiele zijligging.',
+      'ehbo.step7': 'Bij hevig bloedverlies: druk direct en stevig op de wond, het liefst met een schone doek.',
+      'ehbo.step8': 'Blijf bij het slachtoffer, houd diegene gerust en wacht tot professionele hulp arriveert.',
       'conversation.unknown': 'Onbekend',
       'conversation.someone': 'Iemand',
       'chat.onMyWay': '✅ {name} komt eraan!',
@@ -1926,11 +2028,27 @@
       'ack.call': 'Call {name}',
       'medical.resusYes': '✅ {name} may be resuscitated',
       'medical.resusNo': '⛔ {name} does NOT want to be resuscitated',
+      'medical.advanceDirective': 'Advance directive / treatment wishes:',
       'medical.allergies': 'Allergies:',
       'medical.medications': 'Medication:',
       'medical.conditions': 'Conditions:',
+      'medical.mobility': 'Mobility:',
+      'medical.mobilityGood': 'Fully mobile',
+      'medical.mobilityWalker': 'Walker',
+      'medical.mobilityWheelchair': 'Wheelchair',
+      'medical.contact1': '1st contact person:',
+      'medical.contact2': '2nd contact person:',
       'medical.doctor': 'Doctor:',
+      'medical.hospital': 'Hospital:',
       'medical.other': 'Other:',
+      'ehbo.step1': 'First make sure the scene is safe before you approach.',
+      'ehbo.step2': 'Speak to the person and gently shake their shoulders. No response? Move to the next step.',
+      'ehbo.step3': 'Call (or have someone call) 112, if that hasn\'t happened yet.',
+      'ehbo.step4': 'Check breathing: look, listen and feel for at most 10 seconds.',
+      'ehbo.step5': 'No normal breathing? Start CPR: 30 chest compressions, then 2 rescue breaths — unless it says above that this person does not want to be resuscitated.',
+      'ehbo.step6': 'Breathing but unconscious? Put the person in the recovery position.',
+      'ehbo.step7': 'Severe bleeding: press directly and firmly on the wound, ideally with a clean cloth.',
+      'ehbo.step8': 'Stay with the person, keep them calm and wait for professional help to arrive.',
       'conversation.unknown': 'Unknown',
       'conversation.someone': 'Someone',
       'chat.onMyWay': '✅ {name} is on their way!',
@@ -2138,6 +2256,10 @@
     medicalInfoToggle: document.getElementById('medicalInfoToggle'),
     medicalInfoName: document.getElementById('medicalInfoName'),
     medicalInfoBody: document.getElementById('medicalInfoBody'),
+    ehboInstructionsButton: document.getElementById('ehboInstructionsButton'),
+    ehboOverlay: document.getElementById('ehboOverlay'),
+    ehboCloseButton: document.getElementById('ehboCloseButton'),
+    ehboStepsList: document.getElementById('ehboStepsList'),
     ackStatusCard: document.getElementById('ackStatusCard'),
     ackStatusList: document.getElementById('ackStatusList'),
     endAlarmFromChatButton: document.getElementById('endAlarmFromChatButton'),
@@ -2213,11 +2335,20 @@
     profileMessage: document.getElementById('profileMessage'),
     medicalForm: document.getElementById('medicalForm'),
     resusSegmented: document.getElementById('resusSegmented'),
+    medicalAdvanceDirective: document.getElementById('medicalAdvanceDirective'),
+    mobilitySegmented: document.getElementById('mobilitySegmented'),
     medicalAllergies: document.getElementById('medicalAllergies'),
     medicalMedications: document.getElementById('medicalMedications'),
     medicalConditions: document.getElementById('medicalConditions'),
+    medicalContact1Name: document.getElementById('medicalContact1Name'),
+    medicalContact1Relation: document.getElementById('medicalContact1Relation'),
+    medicalContact1Phone: document.getElementById('medicalContact1Phone'),
+    medicalContact2Name: document.getElementById('medicalContact2Name'),
+    medicalContact2Relation: document.getElementById('medicalContact2Relation'),
+    medicalContact2Phone: document.getElementById('medicalContact2Phone'),
     medicalDoctorName: document.getElementById('medicalDoctorName'),
     medicalDoctorPhone: document.getElementById('medicalDoctorPhone'),
+    medicalHospital: document.getElementById('medicalHospital'),
     medicalNotes: document.getElementById('medicalNotes'),
     medicalSaveButton: document.getElementById('medicalSaveButton'),
     medicalMessage: document.getElementById('medicalMessage'),
@@ -3404,14 +3535,38 @@
     });
   });
 
+  function setMobilitySelection(value){
+    els.mobilitySegmented.querySelectorAll('button').forEach(btn => {
+      const isActive = (btn.dataset.mobility || null) === (value || null);
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
+    });
+  }
+  function getMobilitySelection(){
+    const active = els.mobilitySegmented.querySelector('button.active');
+    return active && active.dataset.mobility ? active.dataset.mobility : null;
+  }
+  els.mobilitySegmented.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => setMobilitySelection(btn.dataset.mobility || null));
+  });
+
   async function loadMedicalInfo(){
     const { data } = await sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle();
     setResusSelection(data && typeof data.resuscitate === 'boolean' ? data.resuscitate : null);
+    setMobilitySelection(data?.mobility || null);
+    els.medicalAdvanceDirective.value = data?.advance_directive || '';
     els.medicalAllergies.value = data?.allergies || '';
     els.medicalMedications.value = data?.medications || '';
     els.medicalConditions.value = data?.conditions || '';
+    els.medicalContact1Name.value = data?.contact1_name || '';
+    els.medicalContact1Relation.value = data?.contact1_relation || '';
+    els.medicalContact1Phone.value = data?.contact1_phone || '';
+    els.medicalContact2Name.value = data?.contact2_name || '';
+    els.medicalContact2Relation.value = data?.contact2_relation || '';
+    els.medicalContact2Phone.value = data?.contact2_phone || '';
     els.medicalDoctorName.value = data?.doctor_name || '';
     els.medicalDoctorPhone.value = data?.doctor_phone || '';
+    els.medicalHospital.value = data?.hospital || '';
     els.medicalNotes.value = data?.notes || '';
   }
   els.medicalForm.addEventListener('submit', async (ev) => {
@@ -3420,11 +3575,20 @@
     const { error } = await sb.from('medical_info').upsert({
       user_id: currentSession.user.id,
       resuscitate: getResusSelection(),
+      mobility: getMobilitySelection(),
+      advance_directive: els.medicalAdvanceDirective.value.trim() || null,
       allergies: els.medicalAllergies.value.trim() || null,
       medications: els.medicalMedications.value.trim() || null,
       conditions: els.medicalConditions.value.trim() || null,
+      contact1_name: els.medicalContact1Name.value.trim() || null,
+      contact1_relation: els.medicalContact1Relation.value.trim() || null,
+      contact1_phone: els.medicalContact1Phone.value.trim() || null,
+      contact2_name: els.medicalContact2Name.value.trim() || null,
+      contact2_relation: els.medicalContact2Relation.value.trim() || null,
+      contact2_phone: els.medicalContact2Phone.value.trim() || null,
       doctor_name: els.medicalDoctorName.value.trim() || null,
       doctor_phone: els.medicalDoctorPhone.value.trim() || null,
+      hospital: els.medicalHospital.value.trim() || null,
       notes: els.medicalNotes.value.trim() || null,
       updated_at: new Date().toISOString()
     });
@@ -4011,19 +4175,28 @@
     locationUpdatedTimer = setInterval(paint, 15000);
   }
 
-  // Medische info: alleen relevant (en zichtbaar) als iemand ANDERS dan
-  // jijzelf net een alarm heeft geactiveerd.
+  // Medische info-kaart: de knoppen EHBO-instructies + Bel 112 zijn altijd
+  // zichtbaar zodra iemand ANDERS dan jijzelf een alarm heeft geactiveerd —
+  // ook als diegene geen medische info heeft ingevuld, want dan zijn dit
+  // juist de twee dingen die een reagerend contact nog wél direct kan doen.
+  // De uitklapbare medische details tonen we alleen als er iets is ingevuld.
   async function renderMedicalInfoCard(alarmRow){
     if (!alarmRow || alarmRow.triggered_by === currentSession.user.id){
       els.medicalInfoCard.classList.add('hidden');
       return;
     }
+    els.medicalInfoCard.classList.remove('hidden');
     const { data } = await sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id });
     const info = data && data[0];
     const hasResus = info && typeof info.resuscitate === 'boolean';
-    const hasAny = info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone || info.notes);
+    const hasAny = info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
+      || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital);
+    els.medicalInfoToggle.classList.toggle('hidden', !hasAny);
     if (!hasAny){
-      els.medicalInfoCard.classList.add('hidden');
+      els.medicalInfoBody.classList.add('hidden');
+      els.medicalInfoCard.classList.remove('open');
+      els.medicalInfoBody.innerHTML = '';
+      els.medicalResusBanner.classList.add('hidden');
       return;
     }
     const activator = chatParticipantById[alarmRow.triggered_by];
@@ -4037,11 +4210,19 @@
     } else {
       els.medicalResusBanner.classList.add('hidden');
     }
+    const mobilityLabel = { good: t('medical.mobilityGood'), walker: t('medical.mobilityWalker'), wheelchair: t('medical.mobilityWheelchair') }[info.mobility];
+    const contact1 = [info.contact1_name, info.contact1_relation].filter(Boolean).join(' — ') + (info.contact1_phone ? ' · ' + info.contact1_phone : '');
+    const contact2 = [info.contact2_name, info.contact2_relation].filter(Boolean).join(' — ') + (info.contact2_phone ? ' · ' + info.contact2_phone : '');
     const rows = [];
+    if (info.advance_directive) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.advanceDirective')) + '</strong> ' + escapeHtml(info.advance_directive) + '</div>');
     if (info.allergies) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.allergies')) + '</strong> ' + escapeHtml(info.allergies) + '</div>');
     if (info.medications) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.medications')) + '</strong> ' + escapeHtml(info.medications) + '</div>');
     if (info.conditions) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.conditions')) + '</strong> ' + escapeHtml(info.conditions) + '</div>');
+    if (mobilityLabel) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.mobility')) + '</strong> ' + escapeHtml(mobilityLabel) + '</div>');
+    if (info.contact1_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact1')) + '</strong> ' + escapeHtml(contact1) + '</div>');
+    if (info.contact2_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact2')) + '</strong> ' + escapeHtml(contact2) + '</div>');
     if (info.doctor_name || info.doctor_phone) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.doctor')) + '</strong> ' + escapeHtml([info.doctor_name, info.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
+    if (info.hospital) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.hospital')) + '</strong> ' + escapeHtml(info.hospital) + '</div>');
     if (info.notes) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.other')) + '</strong> ' + escapeHtml(info.notes) + '</div>');
     els.medicalInfoBody.innerHTML = rows.join('');
     els.medicalInfoCard.classList.remove('hidden');
@@ -4050,6 +4231,25 @@
     const open = els.medicalInfoCard.classList.toggle('open');
     els.medicalInfoBody.classList.toggle('hidden', !open);
   });
+
+  // EHBO-instructies: algemene, standaard eerstehulpstappen — bewust geen
+  // gepersonaliseerd medisch advies (dat zou buiten onze verantwoordelijkheid
+  // vallen), puur de bekende basisvolgorde die iedereen die een EHBO-cursus
+  // heeft gevolgd zal herkennen.
+  const EHBO_STEP_KEYS = ['ehbo.step1','ehbo.step2','ehbo.step3','ehbo.step4','ehbo.step5','ehbo.step6','ehbo.step7','ehbo.step8'];
+  function renderEhboSteps(){
+    if (!els.ehboStepsList) return;
+    els.ehboStepsList.innerHTML = EHBO_STEP_KEYS.map(key => '<li>' + escapeHtml(t(key)) + '</li>').join('');
+  }
+  if (els.ehboInstructionsButton){
+    els.ehboInstructionsButton.addEventListener('click', () => {
+      renderEhboSteps();
+      els.ehboOverlay.classList.remove('hidden');
+    });
+  }
+  if (els.ehboCloseButton){
+    els.ehboCloseButton.addEventListener('click', () => els.ehboOverlay.classList.add('hidden'));
+  }
 
   /* -------- "Wie heeft gereageerd" + escalatie bij geen reactie -------- */
   const ESCALATION_TIMEOUT_MS = 2 * 60 * 1000;
@@ -4613,9 +4813,10 @@
       return;
     }
     const { data } = await sb.from('medical_info')
-      .select('allergies, medications, conditions, doctor_name, doctor_phone, notes')
+      .select('allergies, medications, conditions, doctor_name, doctor_phone, notes, mobility, advance_directive, contact1_name, contact2_name, hospital')
       .eq('user_id', currentSession.user.id).maybeSingle();
-    const hasAny = data && (data.allergies || data.medications || data.conditions || data.doctor_name || data.doctor_phone || data.notes);
+    const hasAny = data && (data.allergies || data.medications || data.conditions || data.doctor_name || data.doctor_phone || data.notes
+      || data.mobility || data.advance_directive || data.contact1_name || data.contact2_name || data.hospital);
     els.medicalInfoHint.classList.toggle('hidden', !!hasAny);
   }
   if (els.medicalInfoHintButton){
