@@ -529,6 +529,32 @@
   .status-pill.pending{ color:var(--amber); border-color:var(--amber); background:var(--amber-soft); }
   .status-pill.accepted{ color:var(--green); border-color:var(--green); }
 
+  /* ---------- Gesprekkenlijst ---------- */
+  .conversation-card{ cursor:pointer; text-align:left; width:100%; }
+  .conversation-card:active{ transform:scale(.98); }
+  .conversation-info .name{ display:flex; align-items:center; gap:7px; font-weight:700; font-size:1.0625rem; }
+  .conversation-own-tag{
+    font-size:0.65625rem; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--accent);
+    background:rgba(24,119,242,.12); border-radius:999px; padding:2px 8px; flex-shrink:0;
+  }
+  .conversation-preview{
+    color:var(--text-muted); font-size:0.90625rem; margin-top:2px; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; max-width:100%;
+  }
+  .conversation-card.unread .conversation-preview{ color:var(--text); font-weight:600; }
+  .conversation-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:7px; flex-shrink:0; }
+  .conversation-time{ color:var(--text-faint); font-size:0.78125rem; white-space:nowrap; }
+  .conversation-unread-badge{
+    min-width:21px; height:21px; padding:0 6px; border-radius:999px; background:var(--danger); color:#fff;
+    font-size:0.75rem; font-weight:800; display:flex; align-items:center; justify-content:center;
+  }
+  .chat-back-button{
+    display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--text-muted);
+    font-size:0.9375rem; font-weight:700; padding:14px 16px 4px; cursor:pointer; align-self:flex-start;
+  }
+  .chat-back-button svg{ width:19px; height:19px; }
+  .chat-back-button:hover{ color:var(--text); }
+
   .empty-state{
     width:100%; padding:20px 18px; text-align:center; color:var(--text-muted);
     font-size:0.9375rem; border:1.5px dashed var(--border); border-radius:var(--radius-md); line-height:1.5;
@@ -770,15 +796,25 @@
   .chat-attach-button svg{ width:22px; height:22px; }
   .chat-attach-button:hover{ color:var(--text); background:var(--surface-2); }
   .chat-attach-button:disabled{ opacity:.5; cursor:not-allowed; }
-  .location-card{ flex-shrink:0; background:var(--surface); border-bottom:1px solid var(--border-soft); padding:14px 16px; }
-  .location-header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:0.96875rem; margin-bottom:6px; }
-  .location-header strong{ font-weight:800; }
-  .location-accuracy{ color:var(--text-faint); font-size:0.78125rem; font-weight:600; white-space:nowrap; flex-shrink:0; }
+  .location-card{
+    flex-shrink:0; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
+    box-shadow:var(--shadow-card); padding:16px; margin:14px 0 0;
+  }
+  .location-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:0.96875rem; }
+  .location-title strong{ font-weight:800; }
+  .location-meta{ color:var(--text-faint); font-size:0.78125rem; font-weight:600; margin:4px 0 10px; min-height:1.1em; }
   .location-address{ color:var(--text-muted); font-size:0.90625rem; margin:0 0 10px; }
-  .location-map-wrap{ border-radius:14px; overflow:hidden; border:1px solid var(--border-soft); height:150px; background:var(--surface-2); }
+  .location-map-wrap{
+    position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--border-soft);
+    height:170px; background:var(--surface-2);
+  }
   .location-map-frame{ display:block; width:100%; height:100%; border:none; object-fit:cover; }
+  .location-map-fallback{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:16px; color:var(--text-faint); font-size:0.84375rem; line-height:1.4;
+  }
   .location-open-button{
-    display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;
+    display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px;
     background:var(--accent); color:#fff; text-decoration:none; font-weight:700; font-size:0.96875rem;
     padding:12px; border-radius:12px; min-height:48px;
   }
@@ -786,11 +822,11 @@
   .location-open-button svg{ width:19px; height:19px; }
   .location-live-badge{
     display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,.12); color:var(--danger);
-    font-size:0.6875rem; font-weight:800; letter-spacing:.04em; padding:2px 7px 2px 6px; border-radius:999px; vertical-align:1px;
+    font-size:0.6875rem; font-weight:800; letter-spacing:.04em; padding:2px 7px 2px 6px; border-radius:999px;
+    flex-shrink:0;
   }
   .location-live-badge::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--danger); animation:live-pulse 1.4s ease-in-out infinite; }
   @keyframes live-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
-  .location-updated{ color:var(--text-faint); font-size:0.75rem; margin:-2px 0 8px; }
   .platform-icon{ width:18px; height:18px; flex-shrink:0; vertical-align:-4px; margin:0 1px; }
 
   /* ---------- Medische info-kaart ---------- */
@@ -1365,20 +1401,32 @@
 
     </section>
 
+    <!-- =================== GESPREKKEN (overzicht) SCHERM =================== -->
+    <section id="screen-conversations" class="screen hidden">
+      <div id="conversationsEmpty" class="empty-state hidden">Nog geen gesprekken. Voeg eerst een noodcontact toe bij Contacten — dan verschijnt hier meteen een gesprek.</div>
+      <ul id="conversationsList" class="people-list"></ul>
+    </section>
+
     <!-- =========================== BERICHTEN SCHERM =========================== -->
     <section id="screen-messages" class="screen hidden" style="gap:0;">
 
+      <button type="button" id="chatBackButton" class="chat-back-button" aria-label="Terug naar gesprekken">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Gesprekken
+      </button>
+
       <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.</div>
 
-      <div id="locationCard" class="location-card hidden" style="border-radius:var(--radius-md); border:1px solid var(--border-soft); margin-bottom:14px;">
-        <div class="location-header">
-          <span>📍 Locatie van <strong id="locationName">—</strong> <span id="locationLiveBadge" class="location-live-badge hidden">LIVE</span></span>
-          <span id="locationAccuracy" class="location-accuracy"></span>
+      <div id="locationCard" class="location-card hidden">
+        <div class="location-head">
+          <span class="location-title">📍 Locatie van <strong id="locationName">—</strong></span>
+          <span id="locationLiveBadge" class="location-live-badge hidden">LIVE</span>
         </div>
-        <div id="locationUpdatedAt" class="location-updated"></div>
+        <div id="locationMeta" class="location-meta"></div>
         <div id="locationAddress" class="location-address"></div>
         <div class="location-map-wrap">
           <img id="locationMapImg" class="location-map-frame" alt="Kaart met locatie" loading="lazy">
+          <div id="locationMapFallback" class="location-map-fallback hidden">Kaart kon niet worden geladen — gebruik "Open in Maps" hieronder.</div>
         </div>
         <a id="locationOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -1631,10 +1679,10 @@
     locationCard: document.getElementById('locationCard'),
     locationName: document.getElementById('locationName'),
     locationLiveBadge: document.getElementById('locationLiveBadge'),
-    locationUpdatedAt: document.getElementById('locationUpdatedAt'),
-    locationAccuracy: document.getElementById('locationAccuracy'),
+    locationMeta: document.getElementById('locationMeta'),
     locationAddress: document.getElementById('locationAddress'),
     locationMapImg: document.getElementById('locationMapImg'),
+    locationMapFallback: document.getElementById('locationMapFallback'),
     locationOpenButton: document.getElementById('locationOpenButton'),
     medicalInfoCard: document.getElementById('medicalInfoCard'),
     medicalInfoToggle: document.getElementById('medicalInfoToggle'),
@@ -1656,6 +1704,10 @@
     tabMessages: document.getElementById('tabMessages'),
     screenAlarm: document.getElementById('screen-alarm'),
     screenContacts: document.getElementById('screen-contacts'),
+    screenConversations: document.getElementById('screen-conversations'),
+    conversationsList: document.getElementById('conversationsList'),
+    conversationsEmpty: document.getElementById('conversationsEmpty'),
+    chatBackButton: document.getElementById('chatBackButton'),
     screenMessages: document.getElementById('screen-messages'),
     screenProfile: document.getElementById('screen-profile'),
 
@@ -2657,7 +2709,8 @@
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
-  els.tabMessages.addEventListener('click', () => openMessages(myGroupId));
+  els.tabMessages.addEventListener('click', () => switchScreen('conversations'));
+  els.chatBackButton.addEventListener('click', () => switchScreen('conversations'));
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
     if (name !== 'messages' && chatChannel){
@@ -2669,14 +2722,15 @@
     }
     els.screenAlarm.classList.toggle('hidden', name !== 'alarm');
     els.screenContacts.classList.toggle('hidden', name !== 'contacts');
+    els.screenConversations.classList.toggle('hidden', name !== 'conversations');
     els.screenMessages.classList.toggle('hidden', name !== 'messages');
     els.screenProfile.classList.toggle('hidden', name !== 'profile');
     els.tabAlarm.classList.toggle('active', name === 'alarm');
     els.tabContacts.classList.toggle('active', name === 'contacts');
-    els.tabMessages.classList.toggle('active', name === 'messages');
+    els.tabMessages.classList.toggle('active', name === 'conversations' || name === 'messages');
     els.tabAlarm.setAttribute('aria-selected', String(name === 'alarm'));
     els.tabContacts.setAttribute('aria-selected', String(name === 'contacts'));
-    els.tabMessages.setAttribute('aria-selected', String(name === 'messages'));
+    els.tabMessages.setAttribute('aria-selected', String(name === 'conversations' || name === 'messages'));
     els.mainNav.classList.toggle('hidden', name === 'profile');
     els.profileBackButton.classList.toggle('hidden', name !== 'profile');
     els.messagesParticipants.classList.toggle('hidden', name !== 'messages');
@@ -2688,6 +2742,7 @@
       refreshContacts();
       refreshSentRequests();
     }
+    if (name === 'conversations') loadConversations();
   }
 
   /* =========================================================================
@@ -3166,6 +3221,43 @@
     ).join('') + (extra > 0 ? '<span class="avatar sm facepile-avatar facepile-more">+' + extra + '</span>' : '');
   }
 
+  // Gesprekkenlijst: elke kring waar je lid van bent (je eigen kring +
+  // die van elk van je contacten) is een apart, doorlopend gesprek — dus
+  // chatten werkt hier altijd, niet pas zodra iemand het alarm indrukt.
+  const MEDIA_PREVIEW_LABEL = { image: '📷 Foto', video: '🎥 Video' };
+  function conversationPreviewText(row){
+    if (!row.last_message_at) return 'Nog geen berichten — stuur de eerste.';
+    const mine = row.last_message_sender_id === currentSession.user.id;
+    const who = mine ? 'Jij: ' : (row.member_count > 2 && row.last_message_sender_name ? escapeHtml(row.last_message_sender_name) + ': ' : '');
+    const body = row.last_message_body ? escapeHtml(row.last_message_body) : (MEDIA_PREVIEW_LABEL[row.last_message_media_type] || 'Bericht');
+    return who + body;
+  }
+  function conversationCardHtml(row){
+    const unread = Number(row.unread_count) || 0;
+    const title = row.is_own ? 'Jouw kring' : (row.owner_name || 'Onbekend');
+    return '<li class="person-card conversation-card' + (unread ? ' unread' : '') + '" data-group-id="' + row.group_id + '" tabindex="0" role="button">' +
+      '<div class="avatar">' + avatarInner(row.owner_avatar_url) + '</div>' +
+      '<div class="person-info conversation-info">' +
+        '<div class="name">' + escapeHtml(title) + (row.is_own ? '<span class="conversation-own-tag">' + row.member_count + ' contact' + (row.member_count === 1 ? '' : 'en') + '</span>' : '') + '</div>' +
+        '<div class="conversation-preview">' + conversationPreviewText(row) + '</div>' +
+      '</div>' +
+      '<div class="conversation-meta">' +
+        (row.last_message_at ? '<span class="conversation-time">' + timeAgo(row.last_message_at) + '</span>' : '') +
+        (unread ? '<span class="conversation-unread-badge">' + (unread > 99 ? '99+' : unread) + '</span>' : '') +
+      '</div></li>';
+  }
+  async function loadConversations(){
+    els.conversationsList.innerHTML = '<li class="empty-state">Gesprekken laden…</li>';
+    els.conversationsEmpty.classList.add('hidden');
+    const { data, error } = await sb.rpc('get_my_conversations');
+    const rows = error ? [] : (data || []);
+    els.conversationsEmpty.classList.toggle('hidden', rows.length > 0);
+    els.conversationsList.innerHTML = rows.map(conversationCardHtml).join('');
+    els.conversationsList.querySelectorAll('.conversation-card').forEach(card =>
+      card.addEventListener('click', () => openMessages(card.dataset.groupId))
+    );
+  }
+
   async function openMessages(groupId){
     if (!groupId) return;
     currentChatGroupId = groupId;
@@ -3219,7 +3311,22 @@
     }
   }
 
+  // Een kapotte kaartafbeelding (geen netwerk, staticmap.openstreetmap.de
+  // tijdelijk onbereikbaar) mag nooit als kapot broken-image-icoontje
+  // blijven staan — dan tonen we in plaats daarvan gewoon een nette
+  // tekstregel en blijft "Open in Maps" de betrouwbare uitwijk.
+  els.locationMapImg.addEventListener('error', () => {
+    if (!els.locationMapImg.src) return;
+    els.locationMapImg.classList.add('hidden');
+    els.locationMapFallback.classList.remove('hidden');
+  });
+  els.locationMapImg.addEventListener('load', () => {
+    els.locationMapImg.classList.remove('hidden');
+    els.locationMapFallback.classList.add('hidden');
+  });
+
   let lastAddressCoords = null;
+  let lastAccuracyText = '';
   function renderLocationCard(alarmRow){
     if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
       els.locationCard.classList.add('hidden');
@@ -3232,13 +3339,13 @@
     const isOwn = triggered_by === currentSession.user.id;
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? 'jou' : (activator ? activator.full_name : 'de activator');
-    els.locationAccuracy.textContent = location_accuracy ? ('±' + Math.round(location_accuracy) + ' m') : '';
+    lastAccuracyText = location_accuracy ? ('±' + Math.round(location_accuracy) + ' m nauwkeurig') : '';
     els.locationMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
       '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
     els.locationOpenButton.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
     els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
-    renderLocationUpdatedAt(location_updated_at);
+    renderLocationMeta(location_updated_at);
 
     // Nominatim (gratis, geen API-sleutel) mag niet elke paar seconden
     // bevraagd worden — alleen opnieuw ophalen als de positie écht
@@ -3260,16 +3367,19 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
+  // Combineert nauwkeurigheid + "bijgewerkt X geleden" tot één rustige,
+  // muted regel onder de titel — in plaats van twee losse regels die om
+  // aandacht concurreerden.
   let locationUpdatedTimer = null;
-  function renderLocationUpdatedAt(iso){
+  function renderLocationMeta(iso){
     clearInterval(locationUpdatedTimer);
-    if (!iso){ els.locationUpdatedAt.textContent = ''; return; }
+    if (!iso){ els.locationMeta.textContent = lastAccuracyText; return; }
     const paint = () => {
       const seconds = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
-      const text = seconds < 60 ? 'zojuist bijgewerkt' :
+      const updatedText = seconds < 60 ? 'zojuist bijgewerkt' :
         seconds < 3600 ? 'bijgewerkt ' + Math.floor(seconds / 60) + ' min geleden' :
         'bijgewerkt ' + Math.floor(seconds / 3600) + ' u geleden';
-      els.locationUpdatedAt.textContent = text;
+      els.locationMeta.textContent = [lastAccuracyText, updatedText].filter(Boolean).join(' · ');
     };
     paint();
     locationUpdatedTimer = setInterval(paint, 15000);
