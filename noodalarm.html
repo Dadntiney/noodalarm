@@ -110,7 +110,7 @@
     display:flex;
     flex-direction:column;
     padding:
-      max(20px, env(safe-area-inset-top))
+      0
       var(--app-pad-x)
       max(28px, env(safe-area-inset-bottom));
   }
@@ -170,7 +170,13 @@
 
   .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; }
   .screen.hidden{ display:none; }
-  .app-header{ position:sticky; top:0; z-index:10; background:var(--bg); }
+  .app-header{
+    position:fixed; top:0; left:0; right:0; z-index:10;
+    max-width:480px; margin:0 auto; background:var(--bg);
+    padding:max(20px, env(safe-area-inset-top)) var(--app-pad-x) 0;
+  }
+  #screen-auth{ padding-top:max(20px, env(safe-area-inset-top)); }
+  #screen-app{ padding-top:var(--header-height, 140px); }
 
   /* ---------- Views ---------- */
   .view{ width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; gap:24px; }
@@ -821,7 +827,7 @@
   <!-- =========================== APP (ingelogd) =========================== -->
   <section id="screen-app" class="screen hidden">
 
-    <div class="app-header">
+    <div class="app-header" id="appHeader">
       <header class="topbar">
         <button type="button" id="brandHomeButton" class="brand" aria-label="Naar Alarm">
           <div class="brand-mark">
@@ -1164,6 +1170,7 @@
     locationOpenButton: document.getElementById('locationOpenButton'),
 
     brandHomeButton: document.getElementById('brandHomeButton'),
+    appHeader: document.getElementById('appHeader'),
     mainNav: document.getElementById('mainNav'),
     profileBackButton: document.getElementById('profileBackButton'),
     tabAlarm: document.getElementById('tabAlarm'),
@@ -1245,6 +1252,14 @@
 
   const copyrightYearEl = document.getElementById('copyrightYear');
   if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
+
+  // Houdt de inhoud precies onder de vaste header (topbalk + tabs), ongeacht
+  // hoe hoog die is (verschilt per scherm door bv. de avatarrij bij Berichten).
+  if ('ResizeObserver' in window){
+    new ResizeObserver(entries => {
+      document.documentElement.style.setProperty('--header-height', entries[0].target.offsetHeight + 'px');
+    }).observe(els.appHeader);
+  }
 
   const HOLD_CIRCUMFERENCE = 2 * Math.PI * 112;
   els.holdProgress.style.strokeDasharray = String(HOLD_CIRCUMFERENCE);
