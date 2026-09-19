@@ -1306,6 +1306,69 @@
     }).observe(els.chatForm);
   }
 
+  // Geeft het middengedeelte (contacten, chatberichten) een klein beetje
+  // "rubberen" speling bij het trekken aan boven- of onderrand, net als
+  // WhatsApp — ook wanneer de inhoud nog niet lang genoeg is om echt te
+  // scrollen. Werkt hetzelfde op iOS en Android, in tegenstelling tot de
+  // ingebouwde overscroll-bounce die daar niet consistent is.
+  function attachElasticBounce(el, opts){
+    const windowScroll = !!(opts && opts.windowScroll);
+    const maxPull = 46;
+    const resistance = 0.42;
+    let startY = null;
+    let pulling = false;
+    let atTop = true;
+    let atBottom = true;
+
+    function readBoundaries(){
+      if (windowScroll){
+        const scrollY = window.scrollY || document.documentElement.scrollTop;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        atTop = scrollY <= 0;
+        atBottom = scrollY >= maxScroll - 1;
+      } else {
+        atTop = el.scrollTop <= 0;
+        atBottom = el.scrollTop >= el.scrollHeight - el.clientHeight - 1;
+      }
+    }
+
+    el.addEventListener('touchstart', (ev) => {
+      if (ev.touches.length !== 1) return;
+      readBoundaries();
+      startY = ev.touches[0].clientY;
+      pulling = false;
+      el.style.transition = 'none';
+    }, { passive: true });
+
+    el.addEventListener('touchmove', (ev) => {
+      if (startY === null) return;
+      if (!pulling) readBoundaries();
+      const delta = ev.touches[0].clientY - startY;
+      if ((delta > 0 && atTop) || (delta < 0 && atBottom)){
+        pulling = true;
+        const pull = Math.sign(delta) * Math.min(maxPull, Math.abs(delta) * resistance);
+        el.style.transform = 'translateY(' + pull + 'px)';
+        if (ev.cancelable) ev.preventDefault();
+      } else if (pulling){
+        el.style.transform = '';
+        pulling = false;
+      }
+    }, { passive: false });
+
+    function release(){
+      if (pulling){
+        el.style.transition = 'transform .32s cubic-bezier(.25,.8,.4,1)';
+        el.style.transform = '';
+      }
+      startY = null;
+      pulling = false;
+    }
+    el.addEventListener('touchend', release);
+    el.addEventListener('touchcancel', release);
+  }
+  attachElasticBounce(els.chatMessages);
+  attachElasticBounce(els.screenContacts, { windowScroll: true });
+
   const HOLD_CIRCUMFERENCE = 2 * Math.PI * 112;
   els.holdProgress.style.strokeDasharray = String(HOLD_CIRCUMFERENCE);
   els.holdProgress.style.strokeDashoffset = String(HOLD_CIRCUMFERENCE);
