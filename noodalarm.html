@@ -328,6 +328,8 @@
   .field-hint{ font-size:0.84375rem; color:var(--text-faint); margin-top:6px; }
   .field-hint.ok{ color:var(--green); }
   .field-hint.bad{ color:var(--danger); }
+  .settings-item-hint.ok{ color:var(--green); font-weight:600; }
+  .settings-item-hint.bad{ color:var(--danger); font-weight:600; }
 
   .form-card, .info-card, .actions-card, .entries-card, .tests-panel{
     width:100%; background:var(--surface); border:1px solid var(--border-soft);
@@ -437,8 +439,47 @@
   .install-status-icon svg{ width:22px; height:22px; }
   .install-status-icon.ok{ background:rgba(43,182,115,.15); color:var(--green); }
   .install-status-icon.warn{ background:var(--amber-soft); color:var(--amber); }
-  .settings-link-label{ flex:1; font-weight:700; font-size:1rem; }
+  .settings-link-label{ flex:1; font-weight:700; font-size:1.0625rem; }
   .settings-link-chevron{ width:18px; height:18px; color:var(--text-faint); flex-shrink:0; }
+
+  /* ---------- iOS-stijl gegroepeerde lijst (Profiel-menu, Instellingen) ----------
+     Eén nette kaart per groep, dunne scheidingslijnen tussen items i.p.v. losse
+     kaartjes door elkaar — rustiger en makkelijker te scannen, vooral voor wie
+     minder vertrouwd is met apps. */
+  .settings-group-label{
+    font-size:0.875rem; font-weight:800; letter-spacing:.02em; text-transform:uppercase;
+    color:var(--text-faint); margin:0 6px 10px;
+  }
+  .settings-group{
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:16px; overflow:hidden;
+  }
+  .settings-group + .settings-group-label{ margin-top:30px; }
+  .settings-item{ padding:16px; border-top:1px solid var(--border-soft); }
+  .settings-item:first-child{ border-top:none; }
+  .settings-item-row{ display:flex; align-items:center; gap:14px; }
+  .settings-item-icon{
+    width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    color:#fff; flex-shrink:0;
+  }
+  .settings-item-icon svg{ width:19px; height:19px; }
+  .settings-item-icon.icon-accent{ background:var(--accent); }
+  .settings-item-icon.icon-danger{ background:var(--danger); }
+  .settings-item-icon.icon-green{ background:var(--green); }
+  .settings-item-icon.icon-amber{ background:var(--amber); }
+  .settings-item-body{ flex:1; min-width:0; }
+  .settings-item-title{ font-weight:700; font-size:1.0625rem; }
+  .settings-item-hint{ color:var(--text-faint); font-size:0.875rem; margin-top:3px; line-height:1.4; }
+  .settings-item-control{ margin-top:14px; }
+  .settings-item-nav{
+    width:100%; display:flex; align-items:center; gap:14px; text-align:left; background:none; border:none;
+    cursor:pointer; color:var(--text); padding:0; font:inherit;
+  }
+  .settings-item-chevron{ width:20px; height:20px; color:var(--text-faint); flex-shrink:0; }
+  .settings-item-signout{
+    width:100%; background:none; border:none; text-align:center; color:var(--danger); font-weight:700;
+    font-size:1.0625rem; cursor:pointer; padding:2px 0; font-family:inherit;
+  }
+
   .save-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; }
   .save-button:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
   .save-button:disabled{ opacity:.6; cursor:not-allowed; }
@@ -1033,105 +1074,166 @@
 
       <!-- Eerst de dingen die zorgen dat een alarm ook echt aankomt, daarna
            pas hoe de app eruitziet — dat is voor iedereen het belangrijkst. -->
-      <div class="settings-row" id="installStatusRow" style="margin-bottom:24px; align-items:center;">
-        <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
-          <div id="installStatusIcon" class="install-status-icon warn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+      <div class="settings-group-label" id="settingsSafetyGroupLabel">Veiligheid</div>
+      <div class="settings-group">
+        <div class="settings-item" id="installStatusRow">
+          <div class="settings-item-row">
+            <div id="installStatusIcon" class="install-status-icon warn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            </div>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="installStatusTitle">App-installatie</div>
+              <p id="installStatusText" class="settings-item-hint">—</p>
+            </div>
           </div>
-          <div class="settings-row-text">
-            <div class="settings-row-title">App-installatie</div>
-            <p id="installStatusText" class="field-hint" style="margin-top:4px;">—</p>
+          <div class="settings-item-control">
+            <button type="button" id="installStatusButton" class="small-btn hidden">Bekijk hoe</button>
           </div>
         </div>
-        <button type="button" id="installStatusButton" class="small-btn hidden">Bekijk hoe</button>
-      </div>
 
-      <div style="margin-bottom:24px;">
-        <div class="settings-row-title" id="sirenSectionTitle" style="margin-bottom:8px;">Alarmgeluid</div>
-        <p class="field-hint" id="sirenSectionHint" style="margin-top:0; margin-bottom:12px;">Dit geluid hoor je als een noodcontact op ALARM drukt, terwijl de app open staat. Tik op een geluid om het te beluisteren.</p>
-        <nav class="segmented siren-segmented" role="tablist" aria-label="Alarmgeluid">
-          <button type="button" id="sirenOffButton" data-siren="off" role="tab">Uit</button>
-          <button type="button" id="sirenClassicButton" data-siren="classic" role="tab">Klassiek</button>
-          <button type="button" id="sirenPulseButton" data-siren="pulse" role="tab">Puls</button>
-          <button type="button" id="sirenDigitalButton" data-siren="digital" role="tab">Digitaal</button>
-        </nav>
-        <div id="sirenPlatformNote" class="field-hint" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="settings-row" style="margin-bottom:24px;">
-        <div class="settings-row-text">
-          <div class="settings-row-title" id="locationSectionTitle">Locatie delen bij alarm</div>
-          <p class="field-hint" id="locationSectionHint" style="margin-top:4px;">Dan weten je noodcontacten meteen waar je bent zodra jij op ALARM drukt.</p>
-        </div>
-        <button type="button" id="locationToggle" class="toggle-switch" role="switch" aria-checked="true" aria-label="Locatie delen bij alarm">
-          <span class="toggle-knob"></span>
-        </button>
-      </div>
-
-      <div style="margin-bottom:24px;">
-        <div class="settings-row-title" id="locationTestSectionTitle" style="margin-bottom:8px;">Werkt je locatie?</div>
-        <p class="field-hint" id="locationTestSectionHint" style="margin-top:0; margin-bottom:12px;">Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.</p>
-        <button type="button" id="locationTestButton" class="small-btn">Test mijn locatie</button>
-        <div id="locationTestStatus" class="field-hint" style="margin-top:10px;"></div>
-        <div id="locationTestResult" class="hidden" style="margin-top:12px;">
-          <div id="locationTestAddress" class="location-address"></div>
-          <div class="location-map-wrap">
-            <div id="locationTestMapImg" class="location-map-frame"></div>
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6c0 4-2 5-2 6h16c0-1-2-2-2-6a6 6 0 0 0-6-6Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+            </span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="sirenSectionTitle">Alarmgeluid</div>
+              <p class="settings-item-hint" id="sirenSectionHint">Dit geluid hoor je als een noodcontact op ALARM drukt, terwijl de app open staat. Tik op een geluid om het te beluisteren.</p>
+            </div>
           </div>
-          <a id="locationTestOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            Open in Maps
-          </a>
+          <div class="settings-item-control">
+            <nav class="segmented siren-segmented" role="tablist" aria-label="Alarmgeluid">
+              <button type="button" id="sirenOffButton" data-siren="off" role="tab">Uit</button>
+              <button type="button" id="sirenClassicButton" data-siren="classic" role="tab">Klassiek</button>
+              <button type="button" id="sirenPulseButton" data-siren="pulse" role="tab">Puls</button>
+              <button type="button" id="sirenDigitalButton" data-siren="digital" role="tab">Digitaal</button>
+            </nav>
+            <div id="sirenPlatformNote" class="settings-item-hint" style="margin-top:10px;"></div>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-accent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            </span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="locationSectionTitle">Locatie delen bij alarm</div>
+              <p class="settings-item-hint" id="locationSectionHint">Dan weten je noodcontacten meteen waar je bent zodra jij op ALARM drukt.</p>
+            </div>
+            <button type="button" id="locationToggle" class="toggle-switch" role="switch" aria-checked="true" aria-label="Locatie delen bij alarm">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
+            </span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="locationTestSectionTitle">Werkt je locatie?</div>
+              <p class="settings-item-hint" id="locationTestSectionHint">Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.</p>
+            </div>
+          </div>
+          <div class="settings-item-control">
+            <button type="button" id="locationTestButton" class="small-btn">Test mijn locatie</button>
+            <div id="locationTestStatus" class="settings-item-hint" style="margin-top:10px;"></div>
+            <div id="locationTestResult" class="hidden" style="margin-top:12px;">
+              <div id="locationTestAddress" class="location-address"></div>
+              <div class="location-map-wrap">
+                <div id="locationTestMapImg" class="location-map-frame"></div>
+              </div>
+              <a id="locationTestOpenButton" href="#" target="_blank" rel="noopener" class="location-open-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                Open in Maps
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Daarna: hoe de app eruitziet en klinkt voor jou persoonlijk. -->
-      <div style="margin-bottom:24px;">
-        <div class="settings-row-title" id="languageSectionTitle" style="margin-bottom:8px;">Taal</div>
-        <p class="field-hint" id="languageSectionHint" style="margin-top:0; margin-bottom:12px;">Kies de taal van de app.</p>
-        <nav class="segmented" role="tablist" aria-label="Taal">
-          <button type="button" id="languageNlButton" role="tab">🇳🇱 Nederlands</button>
-          <button type="button" id="languageEnButton" role="tab">🇬🇧 English</button>
-        </nav>
-      </div>
-
-      <div style="margin-bottom:24px;">
-        <div class="settings-row-title" id="themeSectionTitle" style="margin-bottom:8px;">Weergave</div>
-        <p class="field-hint" id="themeSectionHint" style="margin-top:0; margin-bottom:12px;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
-        <nav class="theme-picker" role="tablist" aria-label="Weergave">
-          <button type="button" id="themeLightButton" class="theme-tab" data-theme="light" role="tab">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-            <span>Licht</span>
-          </button>
-          <button type="button" id="themeDarkButton" class="theme-tab" data-theme="dark" role="tab">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6.36 6.36 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-            <span>Donker</span>
-          </button>
-          <button type="button" id="themeAutoButton" class="theme-tab" data-theme="auto" role="tab">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg>
-            <span>Automatisch</span>
-          </button>
-        </nav>
-      </div>
-
-      <div style="margin-bottom:24px;">
-        <div class="settings-row-title" id="textSizeSectionTitle" style="margin-bottom:8px;">Tekstgrootte</div>
-        <p class="field-hint" id="textSizeSectionHint" style="margin-top:0; margin-bottom:12px;">Maakt alle tekst in de app groter en makkelijker leesbaar.</p>
-        <nav class="segmented" role="tablist" aria-label="Tekstgrootte">
-          <button type="button" id="textSizeNormalButton" data-text-size="normal" role="tab">Standaard</button>
-          <button type="button" id="textSizeLargeButton" data-text-size="large" role="tab">Groot</button>
-          <button type="button" id="textSizeXlargeButton" data-text-size="xlarge" role="tab">Extra groot</button>
-        </nav>
-      </div>
-
-      <div class="settings-row" style="margin-bottom:0;">
-        <div class="settings-row-text">
-          <div class="settings-row-title" id="contrastSectionTitle">Hoog contrast</div>
-          <p class="field-hint" id="contrastSectionHint" style="margin-top:4px;">Dikkere randen en meer contrast, zodat knoppen en kaarten beter te zien zijn.</p>
+      <div class="settings-group-label" id="settingsAppearanceGroupLabel">Weergave</div>
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-accent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg>
+            </span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="languageSectionTitle">Taal</div>
+              <p class="settings-item-hint" id="languageSectionHint">Kies de taal van de app.</p>
+            </div>
+          </div>
+          <div class="settings-item-control">
+            <nav class="segmented" role="tablist" aria-label="Taal">
+              <button type="button" id="languageNlButton" role="tab">🇳🇱 Nederlands</button>
+              <button type="button" id="languageEnButton" role="tab">🇬🇧 English</button>
+            </nav>
+          </div>
         </div>
-        <button type="button" id="contrastToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Hoog contrast">
-          <span class="toggle-knob"></span>
-        </button>
+
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="themeSectionTitle">Thema</div>
+              <p class="settings-item-hint" id="themeSectionHint">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
+            </div>
+          </div>
+          <div class="settings-item-control">
+            <nav class="theme-picker" role="tablist" aria-label="Thema">
+              <button type="button" id="themeLightButton" class="theme-tab" data-theme="light" role="tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                <span>Licht</span>
+              </button>
+              <button type="button" id="themeDarkButton" class="theme-tab" data-theme="dark" role="tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6.36 6.36 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                <span>Donker</span>
+              </button>
+              <button type="button" id="themeAutoButton" class="theme-tab" data-theme="auto" role="tab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg>
+                <span>Automatisch</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-accent" style="font-weight:800; font-size:0.9375rem;">Aa</span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="textSizeSectionTitle">Tekstgrootte</div>
+              <p class="settings-item-hint" id="textSizeSectionHint">Maakt alle tekst in de app groter en makkelijker leesbaar.</p>
+            </div>
+          </div>
+          <div class="settings-item-control">
+            <nav class="segmented" role="tablist" aria-label="Tekstgrootte">
+              <button type="button" id="textSizeNormalButton" data-text-size="normal" role="tab">Standaard</button>
+              <button type="button" id="textSizeLargeButton" data-text-size="large" role="tab">Groot</button>
+              <button type="button" id="textSizeXlargeButton" data-text-size="xlarge" role="tab">Extra groot</button>
+            </nav>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item-row">
+            <span class="settings-item-icon icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg>
+            </span>
+            <div class="settings-item-body">
+              <div class="settings-item-title" id="contrastSectionTitle">Hoog contrast</div>
+              <p class="settings-item-hint" id="contrastSectionHint">Dikkere randen en meer contrast, zodat knoppen en kaarten beter te zien zijn.</p>
+            </div>
+            <button type="button" id="contrastToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Hoog contrast">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1659,44 +1761,55 @@
         </div>
       </div>
 
-      <div class="profile-menu" style="display:flex; flex-direction:column; gap:10px;">
-        <button type="button" id="openAccountButton" class="settings-link">
-          <span class="settings-link-icon settings-link-icon-accent">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </span>
-          <span class="settings-link-label">Account</span>
-          <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
+      <div class="settings-group">
+        <div class="settings-item">
+          <button type="button" id="openAccountButton" class="settings-item-nav">
+            <span class="settings-item-icon icon-accent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <span class="settings-item-body"><span class="settings-link-label">Account</span></span>
+            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
 
-        <button type="button" id="openMedicalButton" class="settings-link">
-          <span class="settings-link-icon settings-link-icon-medical">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-          </span>
-          <span class="settings-link-label">Medische informatie</span>
-          <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
+        <div class="settings-item">
+          <button type="button" id="openMedicalButton" class="settings-item-nav">
+            <span class="settings-item-icon icon-danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+            </span>
+            <span class="settings-item-body"><span class="settings-link-label">Medische informatie</span></span>
+            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
 
-        <button type="button" id="openExtraInfoButton" class="settings-link">
-          <span class="settings-link-icon settings-link-icon-extra">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 9.5 1 1"/><path d="m2 22 6.4-6.4"/><circle cx="16.5" cy="7.5" r="5.5"/></svg>
-          </span>
-          <span class="settings-link-label">Overige informatie</span>
-          <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
+        <div class="settings-item">
+          <button type="button" id="openExtraInfoButton" class="settings-item-nav">
+            <span class="settings-item-icon icon-amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 9.5 1 1"/><path d="m2 22 6.4-6.4"/><circle cx="16.5" cy="7.5" r="5.5"/></svg>
+            </span>
+            <span class="settings-item-body"><span class="settings-link-label">Overige informatie</span></span>
+            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
 
-        <button type="button" id="openSettingsButton" class="settings-link">
-          <span class="settings-link-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </span>
-          <span class="settings-link-label">Instellingen</span>
-          <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
+        <div class="settings-item">
+          <button type="button" id="openSettingsButton" class="settings-item-nav">
+            <span class="settings-item-icon icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span class="settings-item-body"><span class="settings-link-label">Instellingen</span></span>
+            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
       </div>
 
-      <div class="danger-zone">
-        <button type="button" id="profileLogoutButton" class="logout-link" style="width:100%;">Uitloggen</button>
-        <button type="button" id="deleteAccountButton" class="danger-button">Account verwijderen</button>
+      <div class="settings-group" style="margin-top:24px;">
+        <div class="settings-item">
+          <button type="button" id="profileLogoutButton" class="settings-item-signout">Uitloggen</button>
+        </div>
       </div>
+
+      <button type="button" id="deleteAccountButton" class="danger-button" style="margin-top:24px;">Account verwijderen</button>
     </section>
 
   </section>
@@ -1779,6 +1892,9 @@
     { sel: '#locationToggle', attr: 'aria-label', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
     { sel: '#locationSectionTitle', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
     { sel: '#locationSectionHint', nl: 'Dan weten je noodcontacten meteen waar je bent zodra jij op ALARM drukt.', en: 'That way your emergency contacts instantly know where you are the moment you press ALARM.' },
+    { sel: '#settingsSafetyGroupLabel', nl: 'Veiligheid', en: 'Safety' },
+    { sel: '#settingsAppearanceGroupLabel', nl: 'Weergave', en: 'Appearance' },
+    { sel: '#installStatusTitle', nl: 'App-installatie', en: 'App installation' },
     { sel: '#locationTestSectionTitle', nl: 'Werkt je locatie?', en: 'Does your location work?' },
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
     { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
@@ -1790,8 +1906,9 @@
     { sel: '#sirenClassicButton', nl: 'Klassiek', en: 'Classic' },
     { sel: '#sirenPulseButton', nl: 'Puls', en: 'Pulse' },
     { sel: '#sirenDigitalButton', nl: 'Digitaal', en: 'Digital' },
-    { sel: '#themeSectionTitle', nl: 'Weergave', en: 'Appearance' },
+    { sel: '#themeSectionTitle', nl: 'Thema', en: 'Theme' },
     { sel: '#themeSectionHint', nl: 'Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.', en: 'Light, dark, or automatically match the time of day.' },
+    { sel: '.theme-picker', attr: 'aria-label', nl: 'Thema', en: 'Theme' },
     { sel: '#themeLightButton span', nl: 'Licht', en: 'Light' },
     { sel: '#themeDarkButton span', nl: 'Donker', en: 'Dark' },
     { sel: '#themeAutoButton span', nl: 'Automatisch', en: 'Automatic' },
@@ -4595,19 +4712,19 @@
     if (!els.locationTestButton) return;
     if (!('geolocation' in navigator)){
       els.locationTestStatus.textContent = t('locationTest.unsupported');
-      els.locationTestStatus.className = 'field-hint bad';
+      els.locationTestStatus.className = 'settings-item-hint bad';
       return;
     }
     els.locationTestButton.disabled = true;
     els.locationTestResult.classList.add('hidden');
     els.locationTestStatus.textContent = t('locationTest.busy');
-    els.locationTestStatus.className = 'field-hint';
+    els.locationTestStatus.className = 'settings-item-hint';
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         els.locationTestButton.disabled = false;
         const lat = pos.coords.latitude, lng = pos.coords.longitude;
         els.locationTestStatus.textContent = t('locationTest.success', { n: Math.round(pos.coords.accuracy) });
-        els.locationTestStatus.className = 'field-hint ok';
+        els.locationTestStatus.className = 'settings-item-hint ok';
         els.locationTestOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
         els.locationTestAddress.textContent = t('location.fetchingAddress');
         els.locationTestResult.classList.remove('hidden');
@@ -4619,7 +4736,7 @@
         els.locationTestResult.classList.add('hidden');
         const key = err.code === 1 ? 'locationTest.denied' : err.code === 3 ? 'locationTest.timeout' : 'locationTest.unavailable';
         els.locationTestStatus.textContent = t(key);
-        els.locationTestStatus.className = 'field-hint bad';
+        els.locationTestStatus.className = 'settings-item-hint bad';
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
