@@ -931,15 +931,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg>
         </div>
         <h2 class="onboarding-title">Zet NORI op je scherm</h2>
-        <p class="onboarding-text">Dit is heel belangrijk: <strong>zonder dit mis je een noodmelding</strong> van een contact. Het kost maar 10 seconden.</p>
+        <p class="onboarding-text" id="onboardingStepInstallText">Dit is heel belangrijk: <strong>zonder dit mis je een noodmelding</strong> van een contact. Het kost maar 10 seconden.</p>
         <div id="onboardingInstallIos" class="install-steps hidden">
           <div class="install-step">
             <span class="install-step-num">1</span>
-            <span class="install-step-text">Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon)</span>
+            <span class="install-step-text" id="installStepIos1">Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon)</span>
           </div>
           <div class="install-step">
             <span class="install-step-num">2</span>
-            <span class="install-step-text">Kies <strong>"Zet op beginscherm"</strong></span>
+            <span class="install-step-text" id="installStepIos2">Kies <strong>"Zet op beginscherm"</strong></span>
           </div>
         </div>
         <div id="onboardingInstallAndroid" class="hidden" style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
@@ -1017,6 +1017,15 @@
         </button>
       </div>
 
+      <div style="margin-bottom:24px;">
+        <div class="settings-row-title" id="languageSectionTitle" style="margin-bottom:8px;">Taal</div>
+        <p class="field-hint" id="languageSectionHint" style="margin-top:0; margin-bottom:12px;">Kies de taal van de app.</p>
+        <nav class="segmented" role="tablist" aria-label="Taal">
+          <button type="button" id="languageNlButton" role="tab">🇳🇱 Nederlands</button>
+          <button type="button" id="languageEnButton" role="tab">🇬🇧 English</button>
+        </nav>
+      </div>
+
       <div class="settings-row" id="installStatusRow" style="margin-bottom:24px;">
         <div class="settings-row-text">
           <div class="settings-row-title">App-installatie</div>
@@ -1027,8 +1036,8 @@
 
       <div class="settings-row">
         <div class="settings-row-text">
-          <div class="settings-row-title">Locatie delen bij alarm</div>
-          <p class="field-hint" style="margin-top:4px;">NORI vraagt dit eenmalig bij het openen van de app, zodat je locatie al klaarstaat zodra je ooit op ALARM drukt.</p>
+          <div class="settings-row-title" id="locationSectionTitle">Locatie delen bij alarm</div>
+          <p class="field-hint" id="locationSectionHint" style="margin-top:4px;">NORI vraagt dit eenmalig bij het openen van de app, zodat je locatie al klaarstaat zodra je ooit op ALARM drukt.</p>
         </div>
         <button type="button" id="locationToggle" class="toggle-switch" role="switch" aria-checked="true" aria-label="Locatie delen bij alarm">
           <span class="toggle-knob"></span>
@@ -1036,8 +1045,8 @@
       </div>
 
       <div>
-        <div class="settings-row-title" style="margin-bottom:8px;">Weergave</div>
-        <p class="field-hint" style="margin-top:0; margin-bottom:12px;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
+        <div class="settings-row-title" id="themeSectionTitle" style="margin-bottom:8px;">Weergave</div>
+        <p class="field-hint" id="themeSectionHint" style="margin-top:0; margin-bottom:12px;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
         <nav class="theme-picker" role="tablist" aria-label="Weergave">
           <button type="button" id="themeLightButton" class="theme-tab" data-theme="light" role="tab">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
@@ -1055,8 +1064,8 @@
       </div>
 
       <div style="margin-top:24px;">
-        <div class="settings-row-title" style="margin-bottom:8px;">Tekstgrootte</div>
-        <p class="field-hint" style="margin-top:0; margin-bottom:12px;">Maakt alle tekst in de app groter en makkelijker leesbaar.</p>
+        <div class="settings-row-title" id="textSizeSectionTitle" style="margin-bottom:8px;">Tekstgrootte</div>
+        <p class="field-hint" id="textSizeSectionHint" style="margin-top:0; margin-bottom:12px;">Maakt alle tekst in de app groter en makkelijker leesbaar.</p>
         <nav class="segmented" role="tablist" aria-label="Tekstgrootte">
           <button type="button" id="textSizeNormalButton" data-text-size="normal" role="tab">Standaard</button>
           <button type="button" id="textSizeLargeButton" data-text-size="large" role="tab">Groot</button>
@@ -1066,8 +1075,8 @@
 
       <div class="settings-row" style="margin-top:24px; margin-bottom:0;">
         <div class="settings-row-text">
-          <div class="settings-row-title">Hoog contrast</div>
-          <p class="field-hint" style="margin-top:4px;">Dikkere randen en duidelijkere grijstinten, voor beter leesbare knoppen en kaarten.</p>
+          <div class="settings-row-title" id="contrastSectionTitle">Hoog contrast</div>
+          <p class="field-hint" id="contrastSectionHint" style="margin-top:4px;">Dikkere randen en duidelijkere grijstinten, voor beter leesbare knoppen en kaarten.</p>
         </div>
         <button type="button" id="contrastToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Hoog contrast">
           <span class="toggle-knob"></span>
@@ -1110,13 +1119,13 @@
           <p class="field-hint" style="margin-top:0;">Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert.</p>
         </div>
         <div class="field">
-          <label>Mag je gereanimeerd worden?</label>
+          <label id="resusFieldLabel">Mag je gereanimeerd worden?</label>
           <nav class="segmented resus-segmented" id="resusSegmented" role="tablist" aria-label="Reanimatievoorkeur">
             <button type="button" data-resus="" role="tab">Niet aangegeven</button>
             <button type="button" data-resus="yes" role="tab">Ja, reanimeer</button>
             <button type="button" data-resus="no" role="tab">Nee, niet reanimeren</button>
           </nav>
-          <div class="field-hint">Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.</div>
+          <div class="field-hint" id="resusFieldHint">Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.</div>
         </div>
         <div class="field">
           <label for="medicalAllergies">Allergieën</label>
@@ -1223,7 +1232,7 @@
         <button type="submit" id="loginSubmitButton" class="save-button">Inloggen</button>
         <button type="button" id="forgotPasswordButton" class="link-button" style="align-self:center;">Wachtwoord vergeten of instellen</button>
       </form>
-      <p class="auth-switch">Nog geen account? <button type="button" id="showRegisterButton">Account aanmaken</button></p>
+      <p class="auth-switch" id="showRegisterButtonText">Nog geen account? <button type="button" id="showRegisterButton">Account aanmaken</button></p>
 
       <!-- REGISTREREN -->
       <form id="registerForm" class="auth-form hidden">
@@ -1329,12 +1338,12 @@
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
 
           <div id="iosInstallHint" class="auth-message hidden">
-            📱 <strong>Op iPhone of iPad?</strong> Zonder dit installeren mis je een noodalarm van een contact: pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon) en kies daarna <strong>"Zet op beginscherm"</strong>.
+            <span id="iosInstallHintText">📱 <strong>Op iPhone of iPad?</strong> Zonder dit installeren mis je een noodalarm van een contact: pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon) en kies daarna <strong>"Zet op beginscherm"</strong>.</span>
             <div style="margin-top:10px;"><button type="button" id="iosInstallHintDismiss" class="link-button" style="padding:0;">Begrepen</button></div>
           </div>
 
           <div id="androidInstallHint" class="auth-message hidden">
-            📱 <strong>Installeer NORI</strong>: zonder dit mis je mogelijk een noodalarm van een contact. Ook zorgt het voor snellere toegang.
+            <span id="androidInstallHintText">📱 <strong>Installeer NORI</strong>: zonder dit mis je mogelijk een noodalarm van een contact. Ook zorgt het voor snellere toegang.</span>
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <button type="button" id="androidInstallButton" class="small-btn" style="display:flex; align-items:center; gap:6px;">
                 <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 19h16"/></svg>
@@ -1346,7 +1355,7 @@
           </div>
 
           <div id="medicalInfoHint" class="auth-message hidden">
-            🩺 <strong>Vul je medische info in</strong>: allergieën, medicatie of aandoeningen die je noodcontacten direct moeten kunnen zien als jij ooit op ALARM drukt.
+            <span id="medicalInfoHintText">🩺 <strong>Vul je medische info in</strong>: allergieën, medicatie of aandoeningen die je noodcontacten direct moeten kunnen zien als jij ooit op ALARM drukt.</span>
             <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <button type="button" id="medicalInfoHintButton" class="small-btn">Nu invullen</button>
               <button type="button" id="medicalInfoHintDismiss" class="link-button" style="padding:0;">Niet nu</button>
@@ -1362,8 +1371,8 @@
           </div>
 
           <div class="info-card">
-            <div class="info-row"><span>Geactiveerd door</span><strong id="sentBy">—</strong></div>
-            <div class="info-row"><span>Tijdstip</span><strong id="sentAt">—</strong></div>
+            <div class="info-row"><span id="sentByLabel">Geactiveerd door</span><strong id="sentBy">—</strong></div>
+            <div class="info-row"><span id="sentAtLabel">Tijdstip</span><strong id="sentAt">—</strong></div>
           </div>
 
           <div class="entries-card" id="entriesCard">
@@ -1571,7 +1580,414 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing', textSize: 'noodalarm.textSize', highContrast: 'noodalarm.highContrast', medicalHintDismissed: 'noodalarm.medicalHintDismissed' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing', textSize: 'noodalarm.textSize', highContrast: 'noodalarm.highContrast', medicalHintDismissed: 'noodalarm.medicalHintDismissed', language: 'noodalarm.language' };
+
+  /* =========================================================================
+     TAAL (NL/EN) — statische schermteksten via een CSS-selector, dynamische
+     (in JS opgebouwde) teksten via t('sleutel', vars). Standaard de taal van
+     het toestel; te wijzigen bij Instellingen, en dan onthouden per account.
+     ========================================================================= */
+  function detectDefaultLang(){
+    const langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'nl'];
+    return langs.some(l => l.toLowerCase().startsWith('en')) && !langs.some(l => l.toLowerCase().startsWith('nl')) ? 'en' : 'nl';
+  }
+  let currentLang = realStore.get(KEYS.language, null) || detectDefaultLang();
+
+  // Statische DOM-tekst: {sel, m:'t'|'h'|'f'|'l', attr, nl, en}. m ontbreekt = 't'
+  // (textContent — alleen voor elementen zonder kind-elementen). 'h' zet
+  // innerHTML (alleen gebruikt waar geen nagekeken kind-element een eigen id
+  // heeft die ergens anders aan JS hangt). 'f'/'l' herschrijven alleen de
+  // eerste/laatste tekstnode, zodat een genest element (bv. een knop of een
+  // door JS ingevulde naam) nooit wordt vervangen.
+  const STATIC_I18N = [
+    { sel: '#onboardingSkip', nl: 'Overslaan', en: 'Skip' },
+    { sel: '#onboardingStep1 .onboarding-title', nl: 'Welkom bij NORI', en: 'Welcome to NORI' },
+    { sel: '#onboardingStep1 .onboarding-text', m: 'h', nl: 'Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt.', en: 'With <strong>one press of the button</strong> you automatically alert the people you trust.' },
+    { sel: '#onboardingStepInstall .onboarding-title', nl: 'Zet NORI op je scherm', en: 'Add NORI to your home screen' },
+    { sel: '#onboardingStepInstallText', m: 'h', nl: 'Dit is heel belangrijk: <strong>zonder dit mis je een noodmelding</strong> van een contact. Het kost maar 10 seconden.', en: 'This is really important: <strong>without this you\'ll miss an emergency alert</strong> from a contact. It only takes 10 seconds.' },
+    { sel: '#installStepIos1', m: 'h', nl: 'Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon)', en: 'Tap <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (the share icon) at the bottom of Safari' },
+    { sel: '#installStepIos2', m: 'h', nl: 'Kies <strong>"Zet op beginscherm"</strong>', en: 'Choose <strong>"Add to Home Screen"</strong>' },
+    { sel: '#onboardingAndroidInstallButton', m: 'l', nl: 'NORI installeren', en: 'Install NORI' },
+    { sel: '#onboardingInstallAndroid .field-hint', m: 'h', nl: 'Zie je geen knop? Tik op <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg> (menu) rechtsboven en kies <strong>"App installeren"</strong>.', en: 'Don\'t see a button? Tap <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg> (menu) in the top right and choose <strong>"Install app"</strong>.' },
+    { sel: '#onboardingInstallDone', nl: '✅ Helemaal goed, NORI staat al op je scherm!', en: '✅ All good, NORI is already on your home screen!' },
+    { sel: '#onboardingInstallDesktop', nl: 'Dit is alleen nodig op je telefoon — op een computer hoef je niets te doen.', en: 'This is only needed on your phone — on a computer there\'s nothing you need to do.' },
+    { sel: '#onboardingStep2 .onboarding-title', nl: 'Stap 1: Zoek iemand op', en: 'Step 1: Find someone' },
+    { sel: '#onboardingStep2 .onboarding-text', m: 'h', nl: 'Ga naar <strong>"Contacten"</strong> en typ de naam van iemand die u vertrouwt. Druk daarna op "Toevoegen".', en: 'Go to <strong>"Contacts"</strong> and type the name of someone you trust. Then press "Add".' },
+    { sel: '#onboardingStep3 .onboarding-title', nl: 'Stap 2: Die persoon bevestigt', en: 'Step 2: That person confirms' },
+    { sel: '#onboardingStep3 .onboarding-text', m: 'h', nl: 'Diegene krijgt een melding (🔔) en drukt op <strong>Accepteren</strong>. Daarna staan jullie in elkaars lijst.', en: 'They get a notification (🔔) and press <strong>Accept</strong>. After that you\'re both in each other\'s list.' },
+    { sel: '#onboardingStep4 .onboarding-title', nl: 'Stap 3: Druk op ALARM bij nood', en: 'Step 3: Press ALARM in an emergency' },
+    { sel: '#onboardingStep4 .onboarding-text', m: 'h', nl: 'U heeft daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen uw contacten meteen een melding: in de app en per e-mail, mét uw locatie op dat moment.', en: 'You then have <strong>3 seconds</strong> to cancel. After that your contacts get an instant alert: in the app and by email, with your location at that moment.' },
+    { sel: '#deleteAccountOverlay .overlay-title', nl: 'Account verwijderen', en: 'Delete account' },
+    { sel: '#deleteAccountOverlay .onboarding-text', m: 'h', nl: 'Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.', en: 'This <strong>permanently</strong> deletes your account, profile, contacts and all notifications. This cannot be undone.' },
+    { sel: '#deleteAccountCancelButton', nl: 'Annuleren', en: 'Cancel' },
+    { sel: '#deleteAccountConfirmButton', nl: 'Definitief verwijderen', en: 'Delete permanently' },
+    { sel: '#settingsOverlay .overlay-title', nl: 'Instellingen', en: 'Settings' },
+    { sel: '#installStatusButton', nl: 'Bekijk hoe', en: 'Show me how' },
+    { sel: '#locationToggle', attr: 'aria-label', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
+    { sel: '#locationSectionTitle', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
+    { sel: '#locationSectionHint', nl: 'NORI vraagt dit eenmalig bij het openen van de app, zodat je locatie al klaarstaat zodra je ooit op ALARM drukt.', en: 'NORI asks this once when you open the app, so your location is ready the moment you ever press ALARM.' },
+    { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
+    { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
+    { sel: '#themeSectionTitle', nl: 'Weergave', en: 'Appearance' },
+    { sel: '#themeSectionHint', nl: 'Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.', en: 'Light, dark, or automatically match the time of day.' },
+    { sel: '#themeLightButton span', nl: 'Licht', en: 'Light' },
+    { sel: '#themeDarkButton span', nl: 'Donker', en: 'Dark' },
+    { sel: '#themeAutoButton span', nl: 'Automatisch', en: 'Automatic' },
+    { sel: '#textSizeSectionTitle', nl: 'Tekstgrootte', en: 'Text size' },
+    { sel: '#textSizeSectionHint', nl: 'Maakt alle tekst in de app groter en makkelijker leesbaar.', en: 'Makes all text in the app bigger and easier to read.' },
+    { sel: '#textSizeNormalButton', nl: 'Standaard', en: 'Default' },
+    { sel: '#textSizeLargeButton', nl: 'Groot', en: 'Large' },
+    { sel: '#textSizeXlargeButton', nl: 'Extra groot', en: 'Extra large' },
+    { sel: '#contrastSectionTitle', nl: 'Hoog contrast', en: 'High contrast' },
+    { sel: '#contrastSectionHint', nl: 'Dikkere randen en duidelijkere grijstinten, voor beter leesbare knoppen en kaarten.', en: 'Thicker borders and clearer greys, for more readable buttons and cards.' },
+    { sel: '#contrastToggle', attr: 'aria-label', nl: 'Hoog contrast', en: 'High contrast' },
+    { sel: '#accountOverlay .overlay-title', nl: 'Account', en: 'Account' },
+    { sel: 'label[for="profileFirstName"]', nl: 'Voornaam', en: 'First name' },
+    { sel: 'label[for="profileLastName"]', nl: 'Achternaam', en: 'Last name' },
+    { sel: 'label[for="profilePhone"]', m: 'f', nl: 'Telefoonnummer ', en: 'Phone number ' },
+    { sel: '#profilePhone', attr: 'placeholder', nl: '06 12345678', en: '06 12345678' },
+    { sel: '#profileForm .field-hint', nl: 'Zodat noodcontacten je direct kunnen bellen als je niet op een alarm reageert.', en: 'So emergency contacts can call you directly if you don\'t respond to an alarm.' },
+    { sel: '#profileSaveButton', nl: 'Wijzigingen opslaan', en: 'Save changes' },
+    { sel: '#medicalForm .settings-row-title', nl: 'Medische info', en: 'Medical info' },
+    { sel: '#medicalForm > div:first-child .field-hint', nl: 'Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert.', en: 'Everything is optional. Only shown to your emergency contacts the moment you activate an alarm yourself.' },
+    { sel: '#resusSegmented', attr: 'aria-label', nl: 'Reanimatievoorkeur', en: 'Resuscitation preference' },
+    { sel: '#resusFieldLabel', nl: 'Mag je gereanimeerd worden?', en: 'May you be resuscitated?' },
+    { sel: '#resusSegmented button[data-resus=""]', nl: 'Niet aangegeven', en: 'Not specified' },
+    { sel: '#resusSegmented button[data-resus="yes"]', nl: 'Ja, reanimeer', en: 'Yes, resuscitate' },
+    { sel: '#resusSegmented button[data-resus="no"]', nl: 'Nee, niet reanimeren', en: 'No, do not resuscitate' },
+    { sel: '#resusFieldHint', nl: 'Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.', en: 'Optional — shown at the top to whoever responds to your alarm.' },
+    { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën', en: 'Allergies' },
+    { sel: '#medicalAllergies', attr: 'placeholder', nl: 'Bijv. penicilline', en: 'E.g. penicillin' },
+    { sel: 'label[for="medicalMedications"]', nl: 'Medicatie', en: 'Medication' },
+    { sel: '#medicalMedications', attr: 'placeholder', nl: 'Bijv. bloedverdunners', en: 'E.g. blood thinners' },
+    { sel: 'label[for="medicalConditions"]', nl: 'Aandoeningen', en: 'Conditions' },
+    { sel: '#medicalConditions', attr: 'placeholder', nl: 'Bijv. diabetes, hartklachten', en: 'E.g. diabetes, heart condition' },
+    { sel: 'label[for="medicalDoctorName"]', nl: 'Huisarts', en: 'Doctor' },
+    { sel: '#medicalDoctorName', attr: 'placeholder', nl: 'Naam huisarts of praktijk', en: 'Doctor or practice name' },
+    { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Doctor\'s phone number' },
+    { sel: '#medicalDoctorPhone', attr: 'placeholder', nl: 'Praktijknummer', en: 'Practice number' },
+    { sel: 'label[for="medicalNotes"]', nl: 'Overige informatie', en: 'Other information' },
+    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. vaste contactpersoon, bijzonderheden', en: 'E.g. regular contact person, other notes' },
+    { sel: '#medicalSaveButton', nl: 'Medische info opslaan', en: 'Save medical info' },
+    { sel: '#notifOverlay .overlay-title', nl: 'Meldingen', en: 'Notifications' },
+    { sel: '#notifClearButton', nl: 'Alles wissen', en: 'Clear all' },
+    { sel: '#notifEmpty', nl: 'Nog geen meldingen.', en: 'No notifications yet.' },
+    { sel: '#chatMenuInfo', m: 'l', nl: 'Info', en: 'Info' },
+    { sel: '#chatMenuEdit', m: 'l', nl: 'Bewerken', en: 'Edit' },
+    { sel: '#chatMenuDelete', m: 'l', nl: 'Verwijderen', en: 'Delete' },
+    { sel: '#chatBubbleMenuInfoPanel .chat-bubble-menu-info-header span', nl: 'Gelezen door', en: 'Read by' },
+    { sel: '#readByEmpty', nl: 'Nog door niemand gelezen.', en: 'Not read by anyone yet.' },
+    { sel: '.auth-slogan', nl: 'Eén druk. Iedereen weet het.', en: 'One press. Everyone knows.' },
+    { sel: 'label[for="loginIdentifier"]', nl: 'E-mail of gebruikersnaam', en: 'Email or username' },
+    { sel: '#loginIdentifier', attr: 'placeholder', nl: 'E-mail of gebruikersnaam', en: 'Email or username' },
+    { sel: 'label[for="loginPassword"]', nl: 'Wachtwoord', en: 'Password' },
+    { sel: '#loginPassword', attr: 'placeholder', nl: 'Wachtwoord', en: 'Password' },
+    { sel: '#loginSubmitButton', nl: 'Inloggen', en: 'Log in' },
+    { sel: '#forgotPasswordButton', nl: 'Wachtwoord vergeten of instellen', en: 'Forgot or set password' },
+    { sel: '#showRegisterButtonText', m: 'f', nl: 'Nog geen account? ', en: 'No account yet? ' },
+    { sel: '#showRegisterButton', nl: 'Account aanmaken', en: 'Create account' },
+    { sel: 'label[for="regFirstName"]', nl: 'Voornaam', en: 'First name' },
+    { sel: '#regFirstName', attr: 'placeholder', nl: 'Voornaam', en: 'First name' },
+    { sel: 'label[for="regLastName"]', nl: 'Achternaam', en: 'Last name' },
+    { sel: '#regLastName', attr: 'placeholder', nl: 'Achternaam', en: 'Last name' },
+    { sel: 'label[for="regUsername"]', nl: 'Gebruikersnaam', en: 'Username' },
+    { sel: '#regUsername', attr: 'placeholder', nl: 'Gebruikersnaam', en: 'Username' },
+    { sel: '#regUsernameHint', nl: 'Alleen kleine letters, cijfers en _ (3-20 tekens)', en: 'Only lowercase letters, digits and _ (3-20 characters)' },
+    { sel: 'label[for="regEmail"]', nl: 'E-mail', en: 'Email' },
+    { sel: '#regEmail', attr: 'placeholder', nl: 'E-mail', en: 'Email' },
+    { sel: 'label[for="regPassword"]', nl: 'Wachtwoord', en: 'Password' },
+    { sel: '#regPassword', attr: 'placeholder', nl: 'Wachtwoord (minimaal 8 tekens)', en: 'Password (at least 8 characters)' },
+    { sel: '#registerSubmitButton', nl: 'Account aanmaken', en: 'Create account' },
+    { sel: '#showLoginRow', m: 'f', nl: 'Al een account? ', en: 'Already have an account? ' },
+    { sel: '#showLoginButton', nl: 'Inloggen', en: 'Log in' },
+    { sel: '.password-toggle', attr: 'aria-label', nl: 'Wachtwoord tonen', en: 'Show password' },
+    { sel: '#bellButton', attr: 'aria-label', nl: 'Meldingen', en: 'Notifications' },
+    { sel: '#topProfileButton', attr: 'aria-label', nl: 'Naar profiel', en: 'Go to profile' },
+    { sel: '.top-profile-label', nl: 'Profiel', en: 'Profile' },
+    { sel: '#tabContacts', m: 'f', nl: 'Contacten', en: 'Contacts' },
+    { sel: '#tabMessages', nl: 'Berichten', en: 'Messages' },
+    { sel: '#profileBackButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#brandHomeButton', attr: 'aria-label', nl: 'Naar Alarm', en: 'Go to Alarm' },
+    { sel: '.intro', nl: 'Druk op de knop om je contacten te waarschuwen.', en: 'Press the button to alert your contacts.' },
+    { sel: '#alarmButton', attr: 'aria-label', nl: 'Druk voor alarm', en: 'Press for alarm' },
+    { sel: '#alarmButtonSublabel', nl: 'tik om te annuleren', en: 'tap to cancel' },
+    { sel: '#cancelAlarmButton', nl: 'Annuleren', en: 'Cancel' },
+    { sel: '#testAlarmButton', nl: '🧪 Oefenen? Stuur een testalarm', en: '🧪 Want to practice? Send a test alarm' },
+    { sel: '#noGroupWarning', nl: 'Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.', en: 'You don\'t have any confirmed emergency contacts yet. Add someone under "Contacts" so there\'s someone to alert.' },
+    { sel: '#iosInstallHintText', m: 'h', nl: '📱 <strong>Op iPhone of iPad?</strong> Zonder dit installeren mis je een noodalarm van een contact: pushmeldingen werken hier alleen als je NORI aan je beginscherm toevoegt. Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon) en kies daarna <strong>"Zet op beginscherm"</strong>.', en: '📱 <strong>On iPhone or iPad?</strong> Without installing this you\'ll miss an emergency alert from a contact: push notifications only work here once you add NORI to your home screen. Tap <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (the share icon) at the bottom of Safari, then choose <strong>"Add to Home Screen"</strong>.' },
+    { sel: '#iosInstallHintDismiss', nl: 'Begrepen', en: 'Got it' },
+    { sel: '#androidInstallHintText', m: 'h', nl: '📱 <strong>Installeer NORI</strong>: zonder dit mis je mogelijk een noodalarm van een contact. Ook zorgt het voor snellere toegang.', en: '📱 <strong>Install NORI</strong>: without this you might miss an emergency alert from a contact. It also gives you faster access.' },
+    { sel: '#androidInstallButton', m: 'l', nl: 'NORI installeren', en: 'Install NORI' },
+    { sel: '#androidInstallHintDismiss', nl: 'Niet nu', en: 'Not now' },
+    { sel: '#androidInstallHint .field-hint', m: 'h', nl: 'Zie je geen knop? Tik op <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg> (menu) rechtsboven in Chrome en kies <strong>"App installeren"</strong>.', en: 'Don\'t see a button? Tap <svg class="platform-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg> (menu) in the top right of Chrome and choose <strong>"Install app"</strong>.' },
+    { sel: '#medicalInfoHintText', m: 'h', nl: '🩺 <strong>Vul je medische info in</strong>: allergieën, medicatie of aandoeningen die je noodcontacten direct moeten kunnen zien als jij ooit op ALARM drukt.', en: '🩺 <strong>Fill in your medical info</strong>: allergies, medication or conditions your emergency contacts need to see right away if you ever press ALARM.' },
+    { sel: '#medicalInfoHintButton', nl: 'Nu invullen', en: 'Fill in now' },
+    { sel: '#medicalInfoHintDismiss', nl: 'Niet nu', en: 'Not now' },
+    { sel: '#sentByLabel', nl: 'Geactiveerd door', en: 'Activated by' },
+    { sel: '#sentAtLabel', nl: 'Tijdstip', en: 'Time' },
+    { sel: '#entriesCard h3', nl: 'Noodcontacten', en: 'Emergency contacts' },
+    { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
+    { sel: '.note', m: 'l', nl: ' NORI. Alle rechten voorbehouden.', en: ' NORI. All rights reserved.' },
+    { sel: '#searchInput', attr: 'placeholder', nl: 'Zoek op naam of gebruikersnaam…', en: 'Search by name or username…' },
+    { sel: '#qrInviteToggle .settings-link-label', nl: 'Of nodig iemand uit (QR-code / link)', en: 'Or invite someone (QR code / link)' },
+    { sel: '#qrInviteImg', attr: 'alt', nl: 'QR-code om jou toe te voegen als noodcontact', en: 'QR code to add you as an emergency contact' },
+    { sel: '#qrInviteCard .field-hint', nl: 'Laat iemand deze code scannen met hun camera om jou meteen toe te voegen als noodcontact — geen gebruikersnaam typen nodig.', en: 'Have someone scan this code with their camera to add you as an emergency contact right away — no need to type a username.' },
+    { sel: '#copyInviteLinkButton', nl: 'Of kopieer de link', en: 'Or copy the link' },
+    { sel: '#searchResultsSection .section-title', nl: 'Zoekresultaten', en: 'Search results' },
+    { sel: '#searchEmpty', nl: 'Niemand gevonden met deze naam.', en: 'No one found with that name.' },
+    { sel: '#sentRequestsSection .section-title', nl: 'Openstaande verzoeken', en: 'Pending requests' },
+    { sel: '#contactsSection .section-title', nl: 'Mijn contacten', en: 'My contacts' },
+    { sel: '#contactsEmpty', nl: 'Nog geen contacten. Zoek hierboven naar iemand die u vertrouwt.', en: 'No contacts yet. Search above for someone you trust.' },
+    { sel: '#conversationsEmpty', nl: 'Nog geen gesprekken. Voeg eerst een noodcontact toe bij Contacten — dan verschijnt hier meteen een gesprek.', en: 'No conversations yet. Add an emergency contact under Contacts first — a conversation will appear here right away.' },
+    { sel: '#chatBackButton', m: 'l', nl: 'Gesprekken', en: 'Conversations' },
+    { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
+    { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
+    { sel: '#locationMapImg', attr: 'alt', nl: 'Kaart met locatie', en: 'Map with location' },
+    { sel: '#locationMapFallback', nl: 'Kaart kon niet worden geladen — gebruik "Open in Maps" hieronder.', en: 'Map couldn\'t be loaded — use "Open in Maps" below.' },
+    { sel: '#medicalInfoToggle > span', m: 'f', nl: '🩺 Medische info van ', en: '🩺 Medical info from ' },
+    { sel: '.escalation-text', nl: '⚠️ Nog niemand heeft gereageerd.', en: '⚠️ No one has responded yet.' },
+    { sel: '.escalation-call-button.emergency', nl: 'Bel 112', en: 'Call 112' },
+    { sel: '.chat-edit-banner-text strong', nl: 'Bericht bewerken', en: 'Editing message' },
+    { sel: '#chatEditCancelButton', attr: 'aria-label', nl: 'Bewerken annuleren', en: 'Cancel editing' },
+    { sel: '#chatAttachButton', attr: 'aria-label', nl: 'Foto of video versturen', en: 'Send photo or video' },
+    { sel: '#chatInput', attr: 'placeholder', nl: 'Typ een bericht…', en: 'Type a message…' },
+    { sel: '#chatSendButton', attr: 'aria-label', nl: 'Versturen', en: 'Send' },
+    { sel: '#editAvatarButton', attr: 'aria-label', nl: 'Foto wijzigen', en: 'Change photo' },
+    { sel: '#openAccountButton .settings-link-label', nl: 'Account', en: 'Account' },
+    { sel: '#openSettingsButton .settings-link-label', nl: 'Instellingen', en: 'Settings' },
+    { sel: '#profileLogoutButton', nl: 'Uitloggen', en: 'Log out' },
+    { sel: '#deleteAccountButton', nl: 'Account verwijderen', en: 'Delete account' },
+  ];
+  function applyStaticTranslations(){
+    document.documentElement.lang = currentLang;
+    STATIC_I18N.forEach(entry => {
+      const value = currentLang === 'en' ? entry.en : entry.nl;
+      document.querySelectorAll(entry.sel).forEach(el => {
+        if (entry.attr){ el.setAttribute(entry.attr, value); return; }
+        if (entry.m === 'h') el.innerHTML = value;
+        else if (entry.m === 'f'){ if (el.firstChild) el.firstChild.nodeValue = value; }
+        else if (entry.m === 'l'){ if (el.lastChild) el.lastChild.nodeValue = value; }
+        else el.textContent = value;
+      });
+    });
+  }
+
+  // Dynamische (in JS opgebouwde) teksten — toasts, confirm()/alert()-dialogen,
+  // sjablonen met een naam/aantal erin. t() zoekt de huidige taal op, valt
+  // terug op Nederlands, en vervangt {vars} in de string.
+  const I18N = {
+    nl: {
+      'onboarding.next': 'Volgende',
+      'onboarding.done': 'Begrepen, aan de slag',
+      'copy.copied': 'Gekopieerd!',
+      'copy.failed': 'Kopiëren mislukt. Link: {link}',
+      'confirm.removeContact': 'Verbinding verbreken? Jullie zien elkaar dan niet meer als noodcontact.',
+      'confirm.clearNotifications': 'Alle meldingen definitief wissen?',
+      'confirm.deleteMessageEveryone': 'Bericht verwijderen voor iedereen?',
+      'confirm.addFromInvite': '{name} (@{username}) toevoegen als noodcontact?',
+      'aria.removeContact': 'Verbinding verbreken',
+      'alert.addFailed': 'Toevoegen mislukt: {msg}',
+      'alert.requestSent': 'Verzoek verstuurd naar {name}.',
+      'alert.inviteFailed': 'Uitnodigen mislukt: {msg}',
+      'alert.withdrawFailed': 'Intrekken mislukt: {msg}',
+      'alert.disconnectFailed': 'Verbreken mislukt: {msg}',
+      'alert.editFailed': 'Bewerken mislukt: {msg}',
+      'alert.mediaTypeInvalid': 'Alleen foto\'s en video\'s kunnen worden verstuurd.',
+      'alert.mediaTooLarge': 'Dit bestand is te groot (max 25 MB).',
+      'alert.uploadFailed': 'Versturen mislukt: {msg}',
+      'common.busy': 'Bezig…',
+      'status.sendFailed': 'VERSTUREN MISLUKT',
+      'status.testSent': '🧪 TESTALARM VERZONDEN',
+      'status.alarmSent': 'NOODALARM VERZONDEN',
+      'entry.notified': 'Melding verstuurd',
+      'entry.inApp': 'In app gemeld',
+      'entry.noContacts': 'Geen noodcontacten gekoppeld',
+      'time.now': 'zojuist',
+      'time.minAgo': '{n} min geleden',
+      'time.hourAgo': '{n} uur geleden',
+      'location.justUpdated': 'zojuist bijgewerkt',
+      'location.minAgo': 'bijgewerkt {n} min geleden',
+      'location.hourAgo': 'bijgewerkt {n} u geleden',
+      'location.accuracy': '±{n} m nauwkeurig',
+      'location.you': 'jou',
+      'ack.responded': '{name} heeft gereageerd',
+      'ack.call': 'Bel {name}',
+      'medical.resusYes': '✅ {name} mag gereanimeerd worden',
+      'medical.resusNo': '⛔ {name} wil NIET gereanimeerd worden',
+      'medical.allergies': 'Allergieën:',
+      'medical.medications': 'Medicatie:',
+      'medical.conditions': 'Aandoeningen:',
+      'medical.doctor': 'Huisarts:',
+      'medical.other': 'Overig:',
+      'conversation.own': 'Jouw kring',
+      'conversation.unknown': 'Onbekend',
+      'conversation.someone': 'Iemand',
+      'chat.onMyWay': '✅ {name} komt eraan!',
+      'chat.loading': 'Bericht laden…',
+      'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
+      'location.fetchingAddress': 'Adres ophalen…',
+      'notif.accepted': 'Geaccepteerd',
+      'notif.accept': 'Accepteren',
+      'notif.reject': 'Verwijderen',
+      'notif.openMessages': 'Open Berichten',
+      'conversation.contactSingular': 'contact',
+      'conversation.contactPlural': 'contacten',
+      'conversation.noMessages': 'Nog geen berichten — stuur de eerste.',
+      'conversation.you': 'Jij: ',
+      'conversation.mediaPhoto': '📷 Foto',
+      'conversation.mediaVideo': '🎥 Video',
+      'conversation.default': 'Bericht',
+      'install.installed': '✅ Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
+      'install.notInstalled': '⚠️ Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
+      'install.installNow': 'Nu installeren',
+      'install.showHow': 'Bekijk hoe',
+      'requests.withdraw': 'Intrekken',
+      'contacts.add': '+ Toevoegen',
+      'contacts.sentInvite': 'Uitnodiging verzonden',
+      'contacts.connected': 'Verbonden',
+      'errorPrefix.save': 'Opslaan mislukt: {msg}',
+      'success.saved': 'Wijzigingen opgeslagen.',
+      'success.medicalSaved': 'Medische info opgeslagen.',
+      'validation.usernameHint': 'Alleen kleine letters, cijfers en _ (3-20 tekens)',
+      'validation.usernameAvailable': 'Deze gebruikersnaam is beschikbaar',
+      'validation.usernameTaken': 'Deze gebruikersnaam is al bezet',
+      'validation.usernameInvalid': 'Kies een geldige gebruikersnaam (kleine letters, cijfers, _; 3-20 tekens).',
+      'register.createAccount': 'Account aanmaken',
+      'register.failed': 'Registreren mislukt.',
+      'register.created': 'Account aangemaakt! Je kunt nu inloggen.',
+      'login.button': 'Inloggen',
+      'login.failed': 'Inloggen mislukt. Controleer je gegevens.',
+      'login.failedWithMsg': 'Inloggen mislukt: {msg}',
+      'password.prompt': 'Vul je e-mailadres in om een link te ontvangen waarmee je een (nieuw) wachtwoord kunt instellen:',
+      'password.emailFailed': 'Kon geen e-mail versturen: {msg}',
+      'password.emailSent': 'Check je e-mail voor de link om een wachtwoord in te stellen.',
+      'password.newPrompt': 'Stel je nieuwe wachtwoord in (minimaal 8 tekens):',
+      'password.set': 'Wachtwoord ingesteld. Je bent ingelogd.',
+      'account.deleting': 'Bezig met verwijderen…',
+      'account.deleteFailed': 'Verwijderen mislukt: {msg}',
+      'account.deleteButton': 'Definitief verwijderen',
+      'avatar.tooLarge': 'Afbeelding is te groot (max 3 MB).',
+      'avatar.uploading': 'Foto uploaden…',
+      'avatar.uploadFailed': 'Uploaden mislukt: {msg}',
+      'avatar.updated': 'Profielfoto bijgewerkt.',
+    },
+    en: {
+      'onboarding.next': 'Next',
+      'onboarding.done': 'Got it, let\'s go',
+      'copy.copied': 'Copied!',
+      'copy.failed': 'Copying failed. Link: {link}',
+      'confirm.removeContact': 'Disconnect? You\'ll no longer see each other as emergency contacts.',
+      'confirm.clearNotifications': 'Permanently clear all notifications?',
+      'confirm.deleteMessageEveryone': 'Delete this message for everyone?',
+      'confirm.addFromInvite': 'Add {name} (@{username}) as an emergency contact?',
+      'aria.removeContact': 'Disconnect',
+      'alert.addFailed': 'Adding failed: {msg}',
+      'alert.requestSent': 'Request sent to {name}.',
+      'alert.inviteFailed': 'Inviting failed: {msg}',
+      'alert.withdrawFailed': 'Withdrawing failed: {msg}',
+      'alert.disconnectFailed': 'Disconnecting failed: {msg}',
+      'alert.editFailed': 'Editing failed: {msg}',
+      'alert.mediaTypeInvalid': 'Only photos and videos can be sent.',
+      'alert.mediaTooLarge': 'This file is too large (max 25 MB).',
+      'alert.uploadFailed': 'Sending failed: {msg}',
+      'common.busy': 'Working…',
+      'status.sendFailed': 'SENDING FAILED',
+      'status.testSent': '🧪 TEST ALARM SENT',
+      'status.alarmSent': 'EMERGENCY ALARM SENT',
+      'entry.notified': 'Notification sent',
+      'entry.inApp': 'Reported in app',
+      'entry.noContacts': 'No emergency contacts linked',
+      'time.now': 'just now',
+      'time.minAgo': '{n} min ago',
+      'time.hourAgo': '{n} hr ago',
+      'location.justUpdated': 'just updated',
+      'location.minAgo': 'updated {n} min ago',
+      'location.hourAgo': 'updated {n} hr ago',
+      'location.accuracy': '±{n} m accurate',
+      'location.you': 'you',
+      'ack.responded': '{name} has responded',
+      'ack.call': 'Call {name}',
+      'medical.resusYes': '✅ {name} may be resuscitated',
+      'medical.resusNo': '⛔ {name} does NOT want to be resuscitated',
+      'medical.allergies': 'Allergies:',
+      'medical.medications': 'Medication:',
+      'medical.conditions': 'Conditions:',
+      'medical.doctor': 'Doctor:',
+      'medical.other': 'Other:',
+      'conversation.own': 'Your circle',
+      'conversation.unknown': 'Unknown',
+      'conversation.someone': 'Someone',
+      'chat.onMyWay': '✅ {name} is on their way!',
+      'chat.loading': 'Loading messages…',
+      'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
+      'location.fetchingAddress': 'Fetching address…',
+      'notif.accepted': 'Accepted',
+      'notif.accept': 'Accept',
+      'notif.reject': 'Remove',
+      'notif.openMessages': 'Open Messages',
+      'conversation.contactSingular': 'contact',
+      'conversation.contactPlural': 'contacts',
+      'conversation.noMessages': 'No messages yet — send the first one.',
+      'conversation.you': 'You: ',
+      'conversation.mediaPhoto': '📷 Photo',
+      'conversation.mediaVideo': '🎥 Video',
+      'conversation.default': 'Message',
+      'install.installed': '✅ Installed — you\'ll receive emergency alerts as expected.',
+      'install.notInstalled': '⚠️ Not installed yet — without this you could miss an emergency alert.',
+      'install.installNow': 'Install now',
+      'install.showHow': 'Show me how',
+      'requests.withdraw': 'Withdraw',
+      'contacts.add': '+ Add',
+      'contacts.sentInvite': 'Invite sent',
+      'contacts.connected': 'Connected',
+      'errorPrefix.save': 'Saving failed: {msg}',
+      'success.saved': 'Changes saved.',
+      'success.medicalSaved': 'Medical info saved.',
+      'validation.usernameHint': 'Only lowercase letters, digits and _ (3-20 characters)',
+      'validation.usernameAvailable': 'This username is available',
+      'validation.usernameTaken': 'This username is already taken',
+      'validation.usernameInvalid': 'Choose a valid username (lowercase letters, digits, _; 3-20 characters).',
+      'register.createAccount': 'Create account',
+      'register.failed': 'Registration failed.',
+      'register.created': 'Account created! You can now log in.',
+      'login.button': 'Log in',
+      'login.failed': 'Login failed. Check your details.',
+      'login.failedWithMsg': 'Login failed: {msg}',
+      'password.prompt': 'Enter your email address to receive a link to set a (new) password:',
+      'password.emailFailed': 'Could not send email: {msg}',
+      'password.emailSent': 'Check your email for the link to set a password.',
+      'password.newPrompt': 'Set your new password (at least 8 characters):',
+      'password.set': 'Password set. You are now logged in.',
+      'account.deleting': 'Deleting…',
+      'account.deleteFailed': 'Deleting failed: {msg}',
+      'account.deleteButton': 'Delete permanently',
+      'avatar.tooLarge': 'Image is too large (max 3 MB).',
+      'avatar.uploading': 'Uploading photo…',
+      'avatar.uploadFailed': 'Uploading failed: {msg}',
+      'avatar.updated': 'Profile photo updated.',
+    },
+  };
+  function t(key, vars){
+    let str = (I18N[currentLang] && I18N[currentLang][key]) || I18N.nl[key] || key;
+    if (vars) Object.keys(vars).forEach(k => { str = str.split('{' + k + '}').join(vars[k]); });
+    return str;
+  }
+  function localeTag(){ return currentLang === 'en' ? 'en-GB' : 'nl-NL'; }
+  function applyTranslations(){
+    applyStaticTranslations();
+  }
+  function setLanguage(lang){
+    currentLang = lang === 'en' ? 'en' : 'nl';
+    realStore.set(KEYS.language, currentLang);
+    applyTranslations();
+    if (currentSession) sb.from('profiles').update({ language: currentLang }).eq('id', currentSession.user.id);
+    renderLanguagePicker();
+  }
+  function renderLanguagePicker(){
+    if (!els.languageNlButton) return;
+    els.languageNlButton.classList.toggle('active', currentLang === 'nl');
+    els.languageEnButton.classList.toggle('active', currentLang === 'en');
+  }
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1595,11 +2011,11 @@
   function timeAgo(iso){
     const diffMs = Date.now() - new Date(iso).getTime();
     const mins = Math.round(diffMs / 60000);
-    if (mins < 1) return 'zojuist';
-    if (mins < 60) return mins + ' min geleden';
+    if (mins < 1) return t('time.now');
+    if (mins < 60) return t('time.minAgo', { n: mins });
     const hrs = Math.round(mins / 60);
-    if (hrs < 24) return hrs + ' uur geleden';
-    return new Date(iso).toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
+    if (hrs < 24) return t('time.hourAgo', { n: hrs });
+    return new Date(iso).toLocaleDateString(localeTag(), { day:'numeric', month:'short' });
   }
   function debounce(fn, ms){
     let t = null;
@@ -1812,6 +2228,8 @@
     onboardingInstallDone: document.getElementById('onboardingInstallDone'),
     onboardingInstallDesktop: document.getElementById('onboardingInstallDesktop'),
 
+    languageNlButton: document.getElementById('languageNlButton'),
+    languageEnButton: document.getElementById('languageEnButton'),
     themeColorMeta: document.getElementById('themeColorMeta'),
     themeLightButton: document.getElementById('themeLightButton'),
     themeDarkButton: document.getElementById('themeDarkButton'),
@@ -1835,6 +2253,11 @@
 
   const copyrightYearEl = document.getElementById('copyrightYear');
   if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
+
+  applyTranslations();
+  renderLanguagePicker();
+  if (els.languageNlButton) els.languageNlButton.addEventListener('click', () => setLanguage('nl'));
+  if (els.languageEnButton) els.languageEnButton.addEventListener('click', () => setLanguage('en'));
 
   // Houdt de inhoud precies onder de vaste header (topbalk + tabs), ongeacht
   // hoe hoog die is (verschilt per scherm door bv. de avatarrij bij Berichten).
@@ -2110,16 +2533,16 @@
   const checkUsername = debounce(async () => {
     const value = els.regUsername.value.trim().toLowerCase();
     if (!/^[a-z0-9_]{3,20}$/.test(value)){
-      els.regUsernameHint.textContent = 'Alleen kleine letters, cijfers en _ (3-20 tekens)';
+      els.regUsernameHint.textContent = t('validation.usernameHint');
       els.regUsernameHint.className = 'field-hint bad';
       return;
     }
     const { data: available } = await sb.rpc('is_username_available', { p_username: value });
     if (available){
-      els.regUsernameHint.textContent = 'Deze gebruikersnaam is beschikbaar';
+      els.regUsernameHint.textContent = t('validation.usernameAvailable');
       els.regUsernameHint.className = 'field-hint ok';
     } else {
-      els.regUsernameHint.textContent = 'Deze gebruikersnaam is al bezet';
+      els.regUsernameHint.textContent = t('validation.usernameTaken');
       els.regUsernameHint.className = 'field-hint bad';
     }
   }, 400);
@@ -2134,12 +2557,12 @@
     const password = els.regPassword.value;
 
     if (!/^[a-z0-9_]{3,20}$/.test(username)){
-      showAuthMessage('Kies een geldige gebruikersnaam (kleine letters, cijfers, _; 3-20 tekens).', 'error');
+      showAuthMessage(t('validation.usernameInvalid'), 'error');
       return;
     }
 
     els.registerSubmitButton.disabled = true;
-    els.registerSubmitButton.textContent = 'Bezig…';
+    els.registerSubmitButton.textContent = t('common.busy');
     showAuthMessage('', null);
 
     let data = null;
@@ -2150,25 +2573,38 @@
         body: JSON.stringify({ first_name, last_name, username, email, password })
       });
       data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registreren mislukt.');
+      if (!res.ok) throw new Error(data.error || t('register.failed'));
     } catch (err){
       els.registerSubmitButton.disabled = false;
-      els.registerSubmitButton.textContent = 'Account aanmaken';
+      els.registerSubmitButton.textContent = t('register.createAccount');
       showAuthMessage(err.message, 'error');
       return;
     }
 
     els.registerSubmitButton.disabled = false;
-    els.registerSubmitButton.textContent = 'Account aanmaken';
+    els.registerSubmitButton.textContent = t('register.createAccount');
 
     if (data.autoLogin && data.access_token){
+      const detectedLang = currentLang;
       await sb.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+      // Nieuw account: zet de taal die dit toestel al gebruikte (bv. Engels
+      // door een Engelstalig toestel) meteen op het profiel — anders staat
+      // een gloednieuw account altijd op de database-standaard (Nederlands).
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) await sb.from('profiles').update({ language: detectedLang }).eq('id', user.id);
+      // onSignedIn() kan intussen (op basis van de database-standaard) de
+      // taal al hebben teruggezet — nu de update binnen is, opnieuw de
+      // gedetecteerde taal forceren zodat er niets terugflitst naar NL.
+      currentLang = detectedLang;
+      realStore.set(KEYS.language, currentLang);
+      applyTranslations();
+      renderLanguagePicker();
       return;
     }
 
-    showAuthMessage('Account aangemaakt! Je kunt nu inloggen.', 'success');
+    showAuthMessage(t('register.created'), 'success');
     els.registerForm.reset();
-    els.regUsernameHint.textContent = 'Alleen kleine letters, cijfers en _ (3-20 tekens)';
+    els.regUsernameHint.textContent = t('validation.usernameHint');
     els.regUsernameHint.className = 'field-hint';
     els.showLoginButton.click();
   });
@@ -2179,7 +2615,7 @@
     const password = els.loginPassword.value;
 
     els.loginSubmitButton.disabled = true;
-    els.loginSubmitButton.textContent = 'Bezig…';
+    els.loginSubmitButton.textContent = t('common.busy');
     showAuthMessage('', null);
 
     try {
@@ -2190,25 +2626,25 @@
       });
       const data = await res.json();
       if (!res.ok){
-        showAuthMessage(data.error || 'Inloggen mislukt. Controleer je gegevens.', 'error');
+        showAuthMessage(data.error || t('login.failed'), 'error');
         return;
       }
       await sb.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
     } catch (err){
-      showAuthMessage('Inloggen mislukt: ' + err.message, 'error');
+      showAuthMessage(t('login.failedWithMsg', { msg: err.message }), 'error');
     } finally {
       els.loginSubmitButton.disabled = false;
-      els.loginSubmitButton.textContent = 'Inloggen';
+      els.loginSubmitButton.textContent = t('login.button');
     }
   });
 
   els.forgotPasswordButton.addEventListener('click', async () => {
-    const email = window.prompt('Vul je e-mailadres in om een link te ontvangen waarmee je een (nieuw) wachtwoord kunt instellen:');
+    const email = window.prompt(t('password.prompt'));
     if (!email) return;
     const { error } = await sb.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: window.location.origin + window.location.pathname
     });
-    showAuthMessage(error ? 'Kon geen e-mail versturen: ' + error.message : 'Check je e-mail voor de link om een wachtwoord in te stellen.', error ? 'error' : 'success');
+    showAuthMessage(error ? t('password.emailFailed', { msg: error.message }) : t('password.emailSent'), error ? 'error' : 'success');
   });
 
   function showAuthMessage(text, kind){
@@ -2230,7 +2666,7 @@
   els.deleteAccountButton.addEventListener('click', () => {
     showDeleteAccountMessage('', null);
     els.deleteAccountConfirmButton.disabled = false;
-    els.deleteAccountConfirmButton.textContent = 'Definitief verwijderen';
+    els.deleteAccountConfirmButton.textContent = t('account.deleteButton');
     els.deleteAccountOverlay.classList.remove('hidden');
   });
   els.deleteAccountCloseButton.addEventListener('click', () => els.deleteAccountOverlay.classList.add('hidden'));
@@ -2245,7 +2681,7 @@
 
   els.deleteAccountConfirmButton.addEventListener('click', async () => {
     els.deleteAccountConfirmButton.disabled = true;
-    els.deleteAccountConfirmButton.textContent = 'Bezig…';
+    els.deleteAccountConfirmButton.textContent = t('account.deleting');
     showDeleteAccountMessage('', null);
     try {
       const { data: { session } } = await sb.auth.getSession();
@@ -2262,9 +2698,9 @@
       els.deleteAccountOverlay.classList.add('hidden');
       await signOutNow();
     } catch (err){
-      showDeleteAccountMessage('Verwijderen mislukt: ' + err.message, 'error');
+      showDeleteAccountMessage(t('account.deleteFailed', { msg: err.message }), 'error');
       els.deleteAccountConfirmButton.disabled = false;
-      els.deleteAccountConfirmButton.textContent = 'Definitief verwijderen';
+      els.deleteAccountConfirmButton.textContent = t('account.deleteButton');
     }
   });
 
@@ -2283,10 +2719,10 @@
   // If we arrived via a recovery link, prompt to set a new password right away.
   sb.auth.onAuthStateChange(async (event) => {
     if (event === 'PASSWORD_RECOVERY'){
-      const pw = window.prompt('Stel je nieuwe wachtwoord in (minimaal 8 tekens):');
+      const pw = window.prompt(t('password.newPrompt'));
       if (pw && pw.length >= 8){
         const { error } = await sb.auth.updateUser({ password: pw });
-        showAuthMessage(error ? error.message : 'Wachtwoord ingesteld. Je bent ingelogd.', error ? 'error' : 'success');
+        showAuthMessage(error ? error.message : t('password.set'), error ? 'error' : 'success');
       }
     }
   });
@@ -2299,10 +2735,20 @@
     if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') switchScreen('alarm');
 
     const { data: profile } = await sb.from('profiles')
-      .select('first_name, last_name, full_name, username, avatar_url, phone_number')
+      .select('first_name, last_name, full_name, username, avatar_url, phone_number, language')
       .eq('id', currentSession.user.id).single();
     currentProfile = profile || { full_name: 'Onbekende gebruiker', username: '—' };
     renderProfile();
+
+    // De taal die op het account staat is leidend zodra je bent ingelogd
+    // (werkt zo ook mee op een ander toestel) — vóór het inloggen viel de
+    // app terug op de taal van dit toestel.
+    if (profile && profile.language && profile.language !== currentLang){
+      currentLang = profile.language;
+      realStore.set(KEYS.language, currentLang);
+      applyTranslations();
+      renderLanguagePicker();
+    }
 
     await loadMyGroupId();
     await refreshContacts();
@@ -2361,8 +2807,8 @@
     if (!alarmRow || !alarmRow.group_id) return;
     await sb.from('notifications').update({ is_read: true })
       .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmId);
-    const name = currentProfile ? currentProfile.full_name : 'Iemand';
-    await sb.from('alarm_messages').insert({ group_id: alarmRow.group_id, sender_id: currentSession.user.id, body: '✅ ' + name + ' komt eraan!' });
+    const name = currentProfile ? currentProfile.full_name : t('conversation.someone');
+    await sb.from('alarm_messages').insert({ group_id: alarmRow.group_id, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
     openMessages(alarmRow.group_id);
   }
   function maybeHandleOmwFromUrl(){
@@ -2390,7 +2836,7 @@
   function renderOnboardingStep(){
     els.onboardingSteps.forEach((el, i) => el.classList.toggle('hidden', i !== onboardingStep - 1));
     els.onboardingDots.forEach((dot, i) => dot.classList.toggle('active', i === onboardingStep - 1));
-    els.onboardingNextButton.textContent = onboardingStep === els.onboardingSteps.length ? 'Begrepen, aan de slag' : 'Volgende';
+    els.onboardingNextButton.textContent = onboardingStep === els.onboardingSteps.length ? t('onboarding.done') : t('onboarding.next');
   }
   // Laat op de installatie-stap alleen de variant zien die past bij dit
   // toestel — iPhone/iPad krijgt de 2-staps deel-icoon-uitleg, Android de
@@ -2449,17 +2895,17 @@
       if (n.type === 'connection_request' && n.related_connection_id){
         const status = n.connection ? n.connection.status : 'pending';
         if (status === 'accepted'){
-          actions = '<div class="notif-actions"><span class="status-pill accepted">Geaccepteerd</span></div>';
+          actions = '<div class="notif-actions"><span class="status-pill accepted">' + escapeHtml(t('notif.accepted')) + '</span></div>';
         } else if (status === 'pending'){
           actions = '<div class="notif-actions">' +
-            '<button type="button" class="save-button accept-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Accepteren</button>' +
-            '<button type="button" class="cancel-button reject-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">Verwijderen</button>' +
+            '<button type="button" class="save-button accept-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">' + escapeHtml(t('notif.accept')) + '</button>' +
+            '<button type="button" class="cancel-button reject-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">' + escapeHtml(t('notif.reject')) + '</button>' +
             '</div>';
         }
       }
       let chatAction = '';
       if (n.type === 'alarm' && n.related_alarm_id){
-        chatAction = '<div class="notif-actions"><button type="button" class="small-btn open-chat-notif" data-alarm="' + n.related_alarm_id + '">Open Berichten</button></div>';
+        chatAction = '<div class="notif-actions"><button type="button" class="small-btn open-chat-notif" data-alarm="' + n.related_alarm_id + '">' + escapeHtml(t('notif.openMessages')) + '</button></div>';
       }
       return '<div class="notif-card' + (n.is_read ? '' : ' unread') + (n.type === 'alarm' ? ' alarm' : '') + '" data-nid="' + n.id + '">' +
         '<div class="notif-title">' + icon + ' ' + escapeHtml(n.title) + '</div>' +
@@ -2497,7 +2943,7 @@
   });
   els.notifCloseButton.addEventListener('click', () => els.notifOverlay.classList.add('hidden'));
   els.notifClearButton.addEventListener('click', async () => {
-    if (!window.confirm('Alle meldingen definitief wissen?')) return;
+    if (!window.confirm(t('confirm.clearNotifications'))) return;
     await sb.from('notifications').delete().eq('user_id', currentSession.user.id);
     await refreshNotifications();
   });
@@ -2528,10 +2974,10 @@
       try {
         await navigator.clipboard.writeText(inviteLink());
         const original = els.copyInviteLinkButton.textContent;
-        els.copyInviteLinkButton.textContent = 'Gekopieerd!';
+        els.copyInviteLinkButton.textContent = t('copy.copied');
         setTimeout(() => { els.copyInviteLinkButton.textContent = original; }, 1800);
       } catch (err){
-        window.alert('Kopiëren mislukt. Link: ' + inviteLink());
+        window.alert(t('copy.failed', { link: inviteLink() }));
       }
     });
   }
@@ -2542,10 +2988,10 @@
     const profile = data && data[0];
     if (!profile) return;
     switchScreen('contacts');
-    if (!window.confirm(profile.full_name + ' (@' + profile.username + ') toevoegen als noodcontact?')) return;
+    if (!window.confirm(t('confirm.addFromInvite', { name: profile.full_name, username: profile.username }))) return;
     const { error } = await sb.rpc('send_connection_request', { p_target_id: inviterId });
-    if (error){ window.alert('Toevoegen mislukt: ' + error.message); return; }
-    window.alert('Verzoek verstuurd naar ' + profile.full_name + '.');
+    if (error){ window.alert(t('alert.addFailed', { msg: error.message })); return; }
+    window.alert(t('alert.requestSent', { name: profile.full_name }));
     refreshSentRequests();
   }
   function maybeHandleInviteFromUrl(){
@@ -2560,12 +3006,12 @@
 
   function statusButtonHtml(person){
     if (person.connection_status === 'accepted'){
-      return '<span class="status-pill accepted">Verbonden</span>';
+      return '<span class="status-pill accepted">' + escapeHtml(t('contacts.connected')) + '</span>';
     }
     if (person.connection_status === 'pending'){
-      return '<span class="status-pill pending">Uitnodiging verzonden</span>';
+      return '<span class="status-pill pending">' + escapeHtml(t('contacts.sentInvite')) + '</span>';
     }
-    return '<button type="button" class="small-btn send-invite" data-id="' + person.id + '">+ Toevoegen</button>';
+    return '<button type="button" class="small-btn send-invite" data-id="' + person.id + '">' + escapeHtml(t('contacts.add')) + '</button>';
   }
 
   function personCardHtml(person){
@@ -2602,12 +3048,12 @@
 
   async function sendInvite(btn){
     btn.disabled = true;
-    btn.textContent = 'Bezig…';
+    btn.textContent = t('common.busy');
     const { error } = await sb.rpc('send_connection_request', { p_target_id: btn.dataset.id });
     if (error){
-      window.alert('Uitnodigen mislukt: ' + error.message);
+      window.alert(t('alert.inviteFailed', { msg: error.message }));
       btn.disabled = false;
-      btn.textContent = '+ Toevoegen';
+      btn.textContent = t('contacts.add');
       return;
     }
     runSearch();
@@ -2624,7 +3070,7 @@
           '<div class="name">' + escapeHtml(r.full_name) + '</div>' +
           '<div class="handle">@' + escapeHtml(r.username) + '</div>' +
         '</div>' +
-        '<button type="button" class="small-btn cancel-request" data-id="' + r.connection_id + '">Intrekken</button>' +
+        '<button type="button" class="small-btn cancel-request" data-id="' + r.connection_id + '">' + escapeHtml(t('requests.withdraw')) + '</button>' +
       '</li>'
     )).join('');
     els.sentRequestsList.querySelectorAll('.cancel-request').forEach(btn =>
@@ -2635,12 +3081,12 @@
 
   async function cancelRequest(btn){
     btn.disabled = true;
-    btn.textContent = 'Bezig…';
+    btn.textContent = t('common.busy');
     const { error } = await sb.rpc('cancel_connection_request', { p_connection_id: btn.dataset.id });
     if (error){
-      window.alert('Intrekken mislukt: ' + error.message);
+      window.alert(t('alert.withdrawFailed', { msg: error.message }));
       btn.disabled = false;
-      btn.textContent = 'Intrekken';
+      btn.textContent = t('requests.withdraw');
       return;
     }
     await refreshSentRequests();
@@ -2662,7 +3108,7 @@
           '<div class="handle">@' + escapeHtml(c.username) + '</div>' +
         '</div>' +
         '<div class="person-actions">' +
-          '<button type="button" class="icon-btn danger remove-contact" data-id="' + c.connection_id + '" aria-label="Verbinding verbreken">' +
+          '<button type="button" class="icon-btn danger remove-contact" data-id="' + c.connection_id + '" aria-label="' + escapeHtml(t('aria.removeContact')) + '">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>' +
           '</button>' +
         '</div>' +
@@ -2677,11 +3123,11 @@
   }
 
   async function removeContact(btn){
-    if (!window.confirm('Verbinding verbreken? Jullie zien elkaar dan niet meer als noodcontact.')) return;
+    if (!window.confirm(t('confirm.removeContact'))) return;
     btn.disabled = true;
     const { error } = await sb.from('connections').update({ status: 'removed' }).eq('id', btn.dataset.id);
     if (error){
-      window.alert('Verbreken mislukt: ' + error.message);
+      window.alert(t('alert.disconnectFailed', { msg: error.message }));
       btn.disabled = false;
       return;
     }
@@ -2793,14 +3239,14 @@
     els.profileSaveButton.disabled = false;
 
     if (error){
-      showProfileMessage('Opslaan mislukt: ' + error.message, 'error');
+      showProfileMessage(t('errorPrefix.save', { msg: error.message }), 'error');
       return;
     }
     const { data: profile } = await sb.from('profiles')
       .select('first_name, last_name, full_name, username, avatar_url, phone_number').eq('id', currentSession.user.id).single();
     currentProfile = profile;
     renderProfile();
-    showProfileMessage('Wijzigingen opgeslagen.', 'success');
+    showProfileMessage(t('success.saved'), 'success');
   });
 
   /* -------- Medische info -------- */
@@ -2852,10 +3298,10 @@
     });
     els.medicalSaveButton.disabled = false;
     if (error){
-      showMedicalMessage('Opslaan mislukt: ' + error.message, 'error');
+      showMedicalMessage(t('errorPrefix.save', { msg: error.message }), 'error');
       return;
     }
-    showMedicalMessage('Medische info opgeslagen.', 'success');
+    showMedicalMessage(t('success.medicalSaved'), 'success');
   });
   function showMedicalMessage(text, kind){
     if (!text){ els.medicalMessage.classList.add('hidden'); return; }
@@ -2878,28 +3324,28 @@
     els.avatarInput.value = '';
     if (!file) return;
     if (file.size > 3 * 1024 * 1024){
-      showProfileMessage('Afbeelding is te groot (max 3 MB).', 'error');
+      showProfileMessage(t('avatar.tooLarge'), 'error');
       return;
     }
-    showProfileMessage('Foto uploaden…', null);
+    showProfileMessage(t('avatar.uploading'), null);
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
     const path = currentSession.user.id + '/avatar.' + ext;
 
     const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '3600' });
     if (upErr){
-      showProfileMessage('Uploaden mislukt: ' + upErr.message, 'error');
+      showProfileMessage(t('avatar.uploadFailed', { msg: upErr.message }), 'error');
       return;
     }
     const { data: pub } = sb.storage.from('avatars').getPublicUrl(path);
     const avatar_url = pub.publicUrl + '?t=' + Date.now();
     const { error: updErr } = await sb.from('profiles').update({ avatar_url }).eq('id', currentSession.user.id);
     if (updErr){
-      showProfileMessage('Opslaan mislukt: ' + updErr.message, 'error');
+      showProfileMessage(t('errorPrefix.save', { msg: updErr.message }), 'error');
       return;
     }
     currentProfile.avatar_url = avatar_url;
     renderProfile();
-    showProfileMessage('Profielfoto bijgewerkt.', 'success');
+    showProfileMessage(t('avatar.updated'), 'success');
   });
 
   /* =========================================================================
@@ -3119,17 +3565,17 @@
     }
 
     els.sentBy.textContent = activatorName;
-    els.sentAt.textContent = startedAt.toLocaleString('nl-NL', { dateStyle:'long', timeStyle:'medium' });
+    els.sentAt.textContent = startedAt.toLocaleString(localeTag(), { dateStyle:'long', timeStyle:'medium' });
 
     if (sendError){
       els.statusBadge.className = 'status-badge warn';
-      els.statusBadgeText.textContent = 'VERSTUREN MISLUKT';
+      els.statusBadgeText.textContent = t('status.sendFailed');
     } else if (testMode){
       els.statusBadge.className = 'status-badge test';
-      els.statusBadgeText.textContent = '🧪 TESTALARM VERZONDEN';
+      els.statusBadgeText.textContent = t('status.testSent');
     } else {
       els.statusBadge.className = 'status-badge sent';
-      els.statusBadgeText.textContent = 'NOODALARM VERZONDEN';
+      els.statusBadgeText.textContent = t('status.alarmSent');
     }
 
     const notifiedSet = new Set(result.notified || []);
@@ -3140,10 +3586,10 @@
             '<span class="entry-name">' + escapeHtml(c.full_name) + '</span>' +
             '<span class="entry-status ' + (wasNotified ? 'st-green' : 'st-amber') + '">' +
               '<span class="dot ' + (wasNotified ? 'dot-green' : 'dot-amber') + '"></span>' +
-              (wasNotified ? 'Melding verstuurd' : 'In app gemeld') +
+              (wasNotified ? t('entry.notified') : t('entry.inApp')) +
             '</span></li>';
         }).join('')
-      : '<li><span class="entry-name" style="color:var(--text-faint);">Geen noodcontacten gekoppeld</span></li>';
+      : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
 
     switchView(els.viewSent);
 
@@ -3238,7 +3684,7 @@
 
   function chatBubbleHtml(msg){
     const own = msg.sender_id === currentSession.user.id;
-    const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+    const time = new Date(msg.created_at).toLocaleTimeString(localeTag(), { hour:'2-digit', minute:'2-digit' });
     const media = !msg.media_url ? '' : (msg.media_type === 'video'
       ? '<div class="chat-video-wrap"><video src="' + escapeHtml(msg.media_url) + '" class="chat-media chat-video" playsinline preload="metadata"></video>' +
         '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span>' +
@@ -3270,21 +3716,24 @@
   // Gesprekkenlijst: elke kring waar je lid van bent (je eigen kring +
   // die van elk van je contacten) is een apart, doorlopend gesprek — dus
   // chatten werkt hier altijd, niet pas zodra iemand het alarm indrukt.
-  const MEDIA_PREVIEW_LABEL = { image: '📷 Foto', video: '🎥 Video' };
+  function mediaPreviewLabel(type){
+    return type === 'image' ? t('conversation.mediaPhoto') : type === 'video' ? t('conversation.mediaVideo') : t('conversation.default');
+  }
   function conversationPreviewText(row){
-    if (!row.last_message_at) return 'Nog geen berichten — stuur de eerste.';
+    if (!row.last_message_at) return t('conversation.noMessages');
     const mine = row.last_message_sender_id === currentSession.user.id;
-    const who = mine ? 'Jij: ' : (row.member_count > 2 && row.last_message_sender_name ? escapeHtml(row.last_message_sender_name) + ': ' : '');
-    const body = row.last_message_body ? escapeHtml(row.last_message_body) : (MEDIA_PREVIEW_LABEL[row.last_message_media_type] || 'Bericht');
+    const who = mine ? t('conversation.you') : (row.member_count > 2 && row.last_message_sender_name ? escapeHtml(row.last_message_sender_name) + ': ' : '');
+    const body = row.last_message_body ? escapeHtml(row.last_message_body) : mediaPreviewLabel(row.last_message_media_type);
     return who + body;
   }
   function conversationCardHtml(row){
     const unread = Number(row.unread_count) || 0;
-    const title = row.is_own ? 'Jouw kring' : (row.owner_name || 'Onbekend');
+    const title = row.is_own ? t('conversation.own') : (row.owner_name || t('conversation.unknown'));
+    const contactWord = row.member_count === 1 ? t('conversation.contactSingular') : t('conversation.contactPlural');
     return '<li class="person-card conversation-card' + (unread ? ' unread' : '') + '" data-group-id="' + row.group_id + '" tabindex="0" role="button">' +
       '<div class="avatar">' + avatarInner(row.owner_avatar_url) + '</div>' +
       '<div class="person-info conversation-info">' +
-        '<div class="name">' + escapeHtml(title) + (row.is_own ? '<span class="conversation-own-tag">' + row.member_count + ' contact' + (row.member_count === 1 ? '' : 'en') + '</span>' : '') + '</div>' +
+        '<div class="name">' + escapeHtml(title) + (row.is_own ? '<span class="conversation-own-tag">' + row.member_count + ' ' + escapeHtml(contactWord) + '</span>' : '') + '</div>' +
         '<div class="conversation-preview">' + conversationPreviewText(row) + '</div>' +
       '</div>' +
       '<div class="conversation-meta">' +
@@ -3310,7 +3759,7 @@
     cancelEditingMessage();
     els.notifOverlay.classList.add('hidden');
     switchScreen('messages');
-    els.chatMessages.innerHTML = '<p class="chat-empty-hint">Bericht laden…</p>';
+    els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.loading')) + '</p>';
     els.locationCard.classList.add('hidden');
     els.medicalInfoCard.classList.add('hidden');
     els.ackStatusCard.classList.add('hidden');
@@ -3384,8 +3833,8 @@
     const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
     const isOwn = triggered_by === currentSession.user.id;
     const activator = chatParticipantById[triggered_by];
-    els.locationName.textContent = isOwn ? 'jou' : (activator ? activator.full_name : 'de activator');
-    lastAccuracyText = location_accuracy ? ('±' + Math.round(location_accuracy) + ' m nauwkeurig') : '';
+    els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
+    lastAccuracyText = location_accuracy ? t('location.accuracy', { n: Math.round(location_accuracy) }) : '';
     els.locationMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
       '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
     els.locationOpenButton.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
@@ -3399,7 +3848,7 @@
     const moved = !lastAddressCoords || haversineMeters(lastAddressCoords.lat, lastAddressCoords.lng, lat, lng) > 30;
     if (moved){
       lastAddressCoords = { lat, lng };
-      els.locationAddress.textContent = 'Adres ophalen…';
+      els.locationAddress.textContent = t('location.fetchingAddress');
       fetchStreetAddress(lat, lng);
     }
   }
@@ -3422,9 +3871,9 @@
     if (!iso){ els.locationMeta.textContent = lastAccuracyText; return; }
     const paint = () => {
       const seconds = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
-      const updatedText = seconds < 60 ? 'zojuist bijgewerkt' :
-        seconds < 3600 ? 'bijgewerkt ' + Math.floor(seconds / 60) + ' min geleden' :
-        'bijgewerkt ' + Math.floor(seconds / 3600) + ' u geleden';
+      const updatedText = seconds < 60 ? t('location.justUpdated') :
+        seconds < 3600 ? t('location.minAgo', { n: Math.floor(seconds / 60) }) :
+        t('location.hourAgo', { n: Math.floor(seconds / 3600) });
       els.locationMeta.textContent = [lastAccuracyText, updatedText].filter(Boolean).join(' · ');
     };
     paint();
@@ -3447,22 +3896,22 @@
       return;
     }
     const activator = chatParticipantById[alarmRow.triggered_by];
-    const activatorName = activator ? activator.full_name : 'de activator';
+    const activatorName = activator ? activator.full_name : t('conversation.unknown');
     els.medicalInfoName.textContent = activatorName;
     if (hasResus){
       els.medicalResusBanner.textContent = info.resuscitate
-        ? '✅ ' + activatorName + ' mag gereanimeerd worden'
-        : '⛔ ' + activatorName + ' wil NIET gereanimeerd worden';
+        ? t('medical.resusYes', { name: activatorName })
+        : t('medical.resusNo', { name: activatorName });
       els.medicalResusBanner.className = 'medical-resus-banner ' + (info.resuscitate ? 'ok' : 'danger');
     } else {
       els.medicalResusBanner.classList.add('hidden');
     }
     const rows = [];
-    if (info.allergies) rows.push('<div class="medical-info-row"><strong>Allergieën:</strong> ' + escapeHtml(info.allergies) + '</div>');
-    if (info.medications) rows.push('<div class="medical-info-row"><strong>Medicatie:</strong> ' + escapeHtml(info.medications) + '</div>');
-    if (info.conditions) rows.push('<div class="medical-info-row"><strong>Aandoeningen:</strong> ' + escapeHtml(info.conditions) + '</div>');
-    if (info.doctor_name || info.doctor_phone) rows.push('<div class="medical-info-row"><strong>Huisarts:</strong> ' + escapeHtml([info.doctor_name, info.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
-    if (info.notes) rows.push('<div class="medical-info-row"><strong>Overig:</strong> ' + escapeHtml(info.notes) + '</div>');
+    if (info.allergies) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.allergies')) + '</strong> ' + escapeHtml(info.allergies) + '</div>');
+    if (info.medications) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.medications')) + '</strong> ' + escapeHtml(info.medications) + '</div>');
+    if (info.conditions) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.conditions')) + '</strong> ' + escapeHtml(info.conditions) + '</div>');
+    if (info.doctor_name || info.doctor_phone) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.doctor')) + '</strong> ' + escapeHtml([info.doctor_name, info.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
+    if (info.notes) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.other')) + '</strong> ' + escapeHtml(info.notes) + '</div>');
     els.medicalInfoBody.innerHTML = rows.join('');
     els.medicalInfoCard.classList.remove('hidden');
   }
@@ -3496,7 +3945,7 @@
     els.ackStatusList.innerHTML = others.map(id => {
       const acked = !!ackByUser[id];
       const name = chatParticipantById[id] ? chatParticipantById[id].full_name : 'Onbekend';
-      return '<span class="ack-pill' + (acked ? ' acked' : '') + '"><span class="ack-dot"></span>' + escapeHtml(acked ? (name + ' heeft gereageerd') : name) + '</span>';
+      return '<span class="ack-pill' + (acked ? ' acked' : '') + '"><span class="ack-dot"></span>' + escapeHtml(acked ? t('ack.responded', { name }) : name) + '</span>';
     }).join('');
     els.ackStatusCard.classList.remove('hidden');
 
@@ -3517,7 +3966,7 @@
     els.escalationContactButtons.innerHTML = otherIds
       .map(id => chatParticipantById[id])
       .filter(p => p && p.phone_number)
-      .map(p => '<a href="tel:' + escapeHtml(p.phone_number) + '" class="escalation-call-button contact">Bel ' + escapeHtml(p.full_name) + '</a>')
+      .map(p => '<a href="tel:' + escapeHtml(p.phone_number) + '" class="escalation-call-button contact">' + escapeHtml(t('ack.call', { name: p.full_name })) + '</a>')
       .join('');
     els.escalationBanner.classList.remove('hidden');
   }
@@ -3548,7 +3997,7 @@
     try {
       const res = await fetch(
         'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=17&addressdetails=1',
-        { headers: { 'Accept-Language': 'nl' } }
+        { headers: { 'Accept-Language': currentLang } }
       );
       const data = await res.json();
       const a = data && data.address;
@@ -3610,7 +4059,7 @@
           senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
           senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
         })).join('')
-      : '<p class="chat-empty-hint">Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.</p>';
+      : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
     els.chatMessages.querySelectorAll('.chat-media').forEach(el => {
@@ -3678,7 +4127,7 @@
         const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + id + '"]');
         if (row) row.remove();
         if (!els.chatMessages.querySelector('.chat-row')){
-          els.chatMessages.innerHTML = '<p class="chat-empty-hint">Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.</p>';
+          els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
         }
       })
       .on('postgres_changes', {
@@ -3835,7 +4284,7 @@
   els.chatBubbleMenuBackdrop.addEventListener('click', closeChatBubbleMenu);
 
   function formatReadTimestamp(iso){
-    return new Date(iso).toLocaleString('nl-NL', { dateStyle:'medium', timeStyle:'short' });
+    return new Date(iso).toLocaleString(localeTag(), { dateStyle:'medium', timeStyle:'short' });
   }
   // Info verschijnt binnen hetzelfde zwevende menu (net als WhatsApp) —
   // wisselt alleen de inhoud, opent geen aparte grote pop-up.
@@ -3898,7 +4347,7 @@
     const msg = chatMessageById[messageId];
     closeChatBubbleMenu();
     if (!msg) return;
-    if (!window.confirm('Bericht verwijderen voor iedereen?')) return;
+    if (!window.confirm(t('confirm.deleteMessageEveryone'))) return;
     if (editingMessageId === messageId) cancelEditingMessage();
     await sb.from('alarm_messages').delete().eq('id', messageId);
     if (msg.media_path) sb.storage.from('chat-media').remove([msg.media_path]);
@@ -3912,7 +4361,7 @@
       const id = editingMessageId;
       cancelEditingMessage();
       const { error } = await sb.from('alarm_messages').update({ body }).eq('id', id);
-      if (error) window.alert('Bewerken mislukt: ' + error.message);
+      if (error) window.alert(t('alert.editFailed', { msg: error.message }));
       return;
     }
     els.chatInput.value = '';
@@ -3929,11 +4378,11 @@
     if (!file || !currentChatGroupId) return;
     const isVideo = file.type.startsWith('video/');
     if (!isVideo && !file.type.startsWith('image/')){
-      window.alert('Alleen foto\'s en video\'s kunnen worden verstuurd.');
+      window.alert(t('alert.mediaTypeInvalid'));
       return;
     }
     if (file.size > CHAT_MEDIA_MAX_BYTES){
-      window.alert('Dit bestand is te groot (max 25 MB).');
+      window.alert(t('alert.mediaTooLarge'));
       return;
     }
     els.chatAttachButton.disabled = true;
@@ -3942,7 +4391,7 @@
     const { error: upErr } = await sb.storage.from('chat-media').upload(path, file, { contentType: file.type });
     if (upErr){
       els.chatAttachButton.disabled = false;
-      window.alert('Versturen mislukt: ' + upErr.message);
+      window.alert(t('alert.uploadFailed', { msg: upErr.message }));
       return;
     }
     await sb.from('alarm_messages').insert({
@@ -3982,11 +4431,11 @@
   function renderInstallStatusRow(){
     if (!els.installStatusRow) return;
     if (isStandalone()){
-      els.installStatusText.textContent = '✅ Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.';
+      els.installStatusText.textContent = t('install.installed');
       els.installStatusButton.classList.add('hidden');
     } else {
-      els.installStatusText.textContent = '⚠️ Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.';
-      els.installStatusButton.textContent = isAndroid() && deferredInstallPrompt ? 'Nu installeren' : 'Bekijk hoe';
+      els.installStatusText.textContent = t('install.notInstalled');
+      els.installStatusButton.textContent = isAndroid() && deferredInstallPrompt ? t('install.installNow') : t('install.showHow');
       els.installStatusButton.classList.remove('hidden');
     }
   }

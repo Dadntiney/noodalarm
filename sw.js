@@ -31,9 +31,11 @@ self.addEventListener('push', (event) => {
     data: { alarmId: data.alarmId || null },
     // Rechtstreeks vanaf de melding reageren, zonder de app te hoeven
     // openen — alleen zinvol bij een écht alarm, niet bij een oefening.
+    // De labels komen al vertaald mee in de payload (in de taal van DEZE
+    // ontvanger) — de service worker kent zelf geen taalvoorkeur.
     actions: data.alarmId && !data.testMode ? [
-      { action: 'omw', title: '✅ Ik kom eraan' },
-      { action: 'call112', title: '📞 Bel 112' }
+      { action: 'omw', title: data.actionOmwLabel || '✅ Ik kom eraan' },
+      { action: 'call112', title: data.actionCall112Label || '📞 Bel 112' }
     ] : []
   };
 
