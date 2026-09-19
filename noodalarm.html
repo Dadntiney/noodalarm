@@ -16,6 +16,12 @@
     } catch(e){
       document.documentElement.setAttribute('data-theme', 'light');
     }
+    try {
+      var textSize = JSON.parse(localStorage.getItem('noodalarm.textSize') || '"normal"');
+      if (textSize && textSize !== 'normal') document.documentElement.setAttribute('data-text-size', textSize);
+      var highContrast = JSON.parse(localStorage.getItem('noodalarm.highContrast') || 'false');
+      if (highContrast) document.documentElement.setAttribute('data-contrast', 'high');
+    } catch(e){ /* geen voorkeur opgeslagen, standaard blijft gelden */ }
   })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
@@ -30,6 +36,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
+  /* ---------- Tekstgrootte (Instellingen) — schaalt alles wat in rem staat ---------- */
+  html[data-text-size="large"]{ font-size:112.5%; }
+  html[data-text-size="xlarge"]{ font-size:127%; }
+
   :root{
     --red:#e3203d;
     --red-dark:#8c0f24;
@@ -84,6 +94,23 @@
     --chat-name-5:#fbbf24;
     --chat-name-6:#9aa4bf;
   }
+  /* ---------- Hoog contrast (Instellingen) — sterkere randen en duidelijker grijstinten ---------- */
+  :root[data-contrast="high"]{
+    --border:#8a8d91; --border-soft:#8a8d91; --text-muted:#3a3b3d; --text-faint:#4d4f52;
+    --shadow-card:none;
+  }
+  :root[data-theme="dark"][data-contrast="high"]{
+    --border:#8e8e93; --border-soft:#8e8e93; --text-muted:#d1d1d6; --text-faint:#aeaeb2;
+    --shadow-card:none;
+  }
+  :root[data-contrast="high"] .form-card, :root[data-contrast="high"] .info-card,
+  :root[data-contrast="high"] .actions-card, :root[data-contrast="high"] .entries-card,
+  :root[data-contrast="high"] .person-card, :root[data-contrast="high"] .notif-card,
+  :root[data-contrast="high"] .settings-link, :root[data-contrast="high"] .chat-bubble.other,
+  :root[data-contrast="high"] .theme-tab, :root[data-contrast="high"] .search-box,
+  :root[data-contrast="high"] .field input, :root[data-contrast="high"] .overlay-card{
+    border-width:2px;
+  }
 
   *{ box-sizing:border-box; }
   .hidden{ display:none !important; }
@@ -98,7 +125,7 @@
     background:var(--bg);
     color:var(--text);
     font-family:var(--font);
-    font-size:17px;
+    font-size:1.0625rem;
     -webkit-font-smoothing:antialiased;
     min-height:100vh;
     min-height:100dvh;
@@ -136,7 +163,7 @@
     background:radial-gradient(circle at 32% 24%, var(--red-bright), var(--red) 60%, var(--red-dark) 100%);
   }
   .brand-mark svg{ width:17px; height:17px; color:#fff; }
-  .brand-name{ font-weight:800; font-size:19px; letter-spacing:0.01em; }
+  .brand-name{ font-weight:800; font-size:1.1875rem; letter-spacing:0.01em; }
   .topbar-actions{ display:flex; align-items:center; gap:10px; }
   .bell-button{
     position:relative; width:46px; height:46px; border-radius:50%; border:none;
@@ -145,12 +172,12 @@
   .bell-button svg{ width:21px; height:21px; }
   .bell-badge{
     position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; border-radius:10px; background:var(--accent);
-    color:#fff; font-size:11.5px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 5px;
+    color:#fff; font-size:0.71875rem; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 5px;
     border:2px solid var(--bg);
   }
   .bell-badge.hidden{ display:none; }
   .logout-link{
-    background:none; border:none; color:var(--text-muted); font-size:14.5px; font-weight:600;
+    background:none; border:none; color:var(--text-muted); font-size:0.90625rem; font-weight:600;
     cursor:pointer; padding:8px; text-decoration:underline; text-underline-offset:3px;
   }
   .logout-link:hover{ color:var(--accent); }
@@ -159,7 +186,7 @@
     border-radius:999px; padding:5px 14px 5px 5px; cursor:pointer; color:var(--text);
   }
   .top-profile-button:hover{ border-color:var(--text-muted); }
-  .top-profile-label{ font-size:14.5px; font-weight:700; }
+  .top-profile-label{ font-size:0.90625rem; font-weight:700; }
 
   /* ---------- Segmented nav ---------- */
   .segmented{
@@ -168,7 +195,7 @@
   }
   .segmented button{
     flex:1; border:none; background:transparent; color:var(--text-muted);
-    font-weight:700; font-size:15px; padding:13px 0; border-radius:999px; cursor:pointer;
+    font-weight:700; font-size:0.9375rem; padding:13px 0; border-radius:999px; cursor:pointer;
     transition:background .15s ease, color .15s ease;
   }
   .segmented button.active{ background:var(--accent); color:#fff; }
@@ -179,14 +206,14 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
     background:var(--surface-2); border:1.5px solid var(--border-soft); border-radius:16px;
     padding:16px 4px 14px; cursor:pointer; color:var(--text-muted);
-    font-weight:700; font-size:13px; line-height:1.2; text-align:center;
+    font-weight:700; font-size:0.8125rem; line-height:1.2; text-align:center;
     transition:background .15s ease, color .15s ease, border-color .15s ease, transform .12s ease;
   }
   .theme-tab:active{ transform:scale(.96); }
   .theme-tab svg{ width:23px; height:23px; flex-shrink:0; }
   .theme-tab.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
   @media (max-width:360px){
-    .theme-tab{ font-size:12px; padding:14px 2px 12px; }
+    .theme-tab{ font-size:0.75rem; padding:14px 2px 12px; }
     .theme-tab svg{ width:21px; height:21px; }
   }
   .tab-count{ margin-left:6px; opacity:.75; }
@@ -223,8 +250,8 @@
   .view{ width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; gap:24px; }
   .view.hidden{ display:none; }
 
-  .intro{ color:var(--text-muted); font-size:17px; line-height:1.55; max-width:320px; margin:0; }
-  .hint{ color:var(--text-muted); font-size:16px; line-height:1.4; margin:0; }
+  .intro{ color:var(--text-muted); font-size:1.0625rem; line-height:1.55; max-width:320px; margin:0; }
+  .hint{ color:var(--text-muted); font-size:1rem; line-height:1.4; margin:0; }
 
   /* ---------- Auth screen ---------- */
   .auth-wrap{
@@ -238,19 +265,19 @@
     box-shadow:0 14px 30px rgba(227,32,61,.35);
   }
   .auth-logo svg{ width:42px; height:42px; color:#fff; }
-  .auth-title{ font-size:25px; font-weight:800; margin:0; }
-  .auth-slogan{ font-size:14.5px; font-weight:600; color:var(--text-muted); margin:-14px 0 0; letter-spacing:.01em; }
+  .auth-title{ font-size:1.5625rem; font-weight:800; margin:0; }
+  .auth-slogan{ font-size:0.90625rem; font-weight:600; color:var(--text-muted); margin:-14px 0 0; letter-spacing:.01em; }
   .auth-form{ width:100%; display:flex; flex-direction:column; gap:14px; text-align:left; }
   .auth-message{
     width:100%; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
-    padding:16px 18px; font-size:15.5px; line-height:1.5; color:var(--text-muted); text-align:left;
+    padding:16px 18px; font-size:0.96875rem; line-height:1.5; color:var(--text-muted); text-align:left;
   }
   .auth-message.success{ border-color:var(--green); color:var(--text); }
   .auth-message.error{ border-color:var(--danger); color:var(--text); }
   .auth-message.warn{ background:var(--amber-soft); border-color:var(--amber); color:var(--text); }
-  .auth-switch{ font-size:15.5px; color:var(--text-muted); margin:0; }
-  .auth-switch button{ background:none; border:none; color:var(--accent); font-weight:700; font-size:15.5px; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:3px; }
-  .field-hint{ font-size:13.5px; color:var(--text-faint); margin-top:6px; }
+  .auth-switch{ font-size:0.96875rem; color:var(--text-muted); margin:0; }
+  .auth-switch button{ background:none; border:none; color:var(--accent); font-weight:700; font-size:0.96875rem; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:3px; }
+  .field-hint{ font-size:0.84375rem; color:var(--text-faint); margin-top:6px; }
   .field-hint.ok{ color:var(--green); }
   .field-hint.bad{ color:var(--danger); }
 
@@ -259,17 +286,17 @@
     border-radius:var(--radius-md); padding:18px 20px; text-align:left; box-shadow:var(--shadow-card);
   }
   .field label{
-    display:block; font-size:15px; font-weight:700; color:var(--text-muted); margin-bottom:8px;
+    display:block; font-size:0.9375rem; font-weight:700; color:var(--text-muted); margin-bottom:8px;
   }
   .field input{
     width:100%; background:var(--surface-2); border:1.5px solid var(--border); border-radius:11px;
-    padding:14px 15px; font-size:17px; color:var(--text); min-height:52px;
+    padding:14px 15px; font-size:1.0625rem; color:var(--text); min-height:52px;
   }
   .field input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
   .field input::placeholder{ color:var(--text-faint); }
   .field-row{ display:grid; grid-template-columns:1fr; gap:14px; }
   .field{ display:flex; flex-direction:column; gap:7px; }
-  .field-error{ color:var(--danger); font-size:14px; font-weight:600; }
+  .field-error{ color:var(--danger); font-size:0.875rem; font-weight:600; }
 
   .password-field{ position:relative; }
   .password-field input{ padding-right:48px; }
@@ -315,7 +342,7 @@
     text-shadow:0 2px 4px rgba(0,0,0,.25); text-align:center; line-height:1.2; transition:font-size .1s ease;
   }
   .alarm-button .sublabel{
-    font-size:13px; font-weight:700; letter-spacing:.02em; color:rgba(255,255,255,.88); text-transform:uppercase;
+    font-size:0.8125rem; font-weight:700; letter-spacing:.02em; color:rgba(255,255,255,.88); text-transform:uppercase;
   }
   .alarm-button.counting{
     animation:alarm-pulse 1s ease-in-out infinite;
@@ -328,7 +355,7 @@
   .alarm-button:disabled{ cursor:not-allowed; opacity:.6; }
 
   .cancel-button, .end-button, .reset-button, .add-button, .save-button{
-    font-weight:700; font-size:17px; padding:17px 30px; min-height:56px; border-radius:999px; cursor:pointer;
+    font-weight:700; font-size:1.0625rem; padding:17px 30px; min-height:56px; border-radius:999px; cursor:pointer;
     transition:border-color .15s ease, background .15s ease, color .15s ease;
   }
   .cancel-button{ background:transparent; border:1.5px solid var(--border); color:var(--text); }
@@ -349,7 +376,7 @@
   }
   .settings-link-icon svg{ width:20px; height:20px; }
   .settings-link-icon-accent{ background:var(--accent); color:#fff; }
-  .settings-link-label{ flex:1; font-weight:700; font-size:16px; }
+  .settings-link-label{ flex:1; font-weight:700; font-size:1rem; }
   .settings-link-chevron{ width:18px; height:18px; color:var(--text-faint); flex-shrink:0; }
   .save-button{ background:var(--accent); border:1px solid var(--accent); color:#fff; }
   .save-button:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
@@ -357,7 +384,7 @@
 
   .danger-zone{ display:flex; flex-direction:column; gap:10px; margin-top:6px; padding-top:20px; border-top:1px solid var(--border-soft); }
   .danger-button{
-    background:transparent; border:1.5px solid var(--danger); color:var(--danger); font-weight:700; font-size:15.5px;
+    background:transparent; border:1.5px solid var(--danger); color:var(--danger); font-weight:700; font-size:0.96875rem;
     padding:14px; min-height:52px; border-radius:12px; cursor:pointer; width:100%; transition:background .15s ease;
   }
   .danger-button:hover{ background:rgba(239,68,68,.1); }
@@ -365,24 +392,24 @@
   /* ---------- Sent / status ---------- */
   .status-badge{
     display:inline-flex; align-items:center; gap:9px; background:var(--red); color:#fff;
-    font-weight:800; font-size:17px; letter-spacing:.02em; padding:14px 24px; border-radius:999px;
+    font-weight:800; font-size:1.0625rem; letter-spacing:.02em; padding:14px 24px; border-radius:999px;
     box-shadow:0 10px 24px rgba(227,32,61,.35);
   }
   .status-badge.sent{ background:var(--green); box-shadow:0 10px 24px rgba(43,182,115,.35); }
   .status-badge.warn{ background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); box-shadow:none; }
   .status-badge svg{ width:19px; height:19px; }
 
-  .info-row{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; font-size:16px; }
+  .info-row{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; font-size:1rem; }
   .info-row + .info-row{ border-top:1px solid var(--border-soft); }
   .info-row span{ color:var(--text-muted); flex-shrink:0; }
   .info-row strong{ font-weight:700; text-align:right; }
 
   .entries-card ul{ display:flex; flex-direction:column; gap:2px; }
-  .entries-card li{ display:flex; align-items:center; gap:12px; padding:12px 0; font-size:16px; }
+  .entries-card li{ display:flex; align-items:center; gap:12px; padding:12px 0; font-size:1rem; }
   .entries-card li + li{ border-top:1px solid var(--border-soft); }
   .entries-card .entry-name{ flex:1; font-weight:600; text-align:left; }
-  .entries-card h3{ font-size:14.5px; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
-  .entry-status{ font-size:14px; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:7px; }
+  .entries-card h3{ font-size:0.90625rem; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
+  .entry-status{ font-size:0.875rem; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:7px; }
   .entry-status.st-green{ color:var(--green); }
   .entry-status.st-amber{ color:var(--amber); }
   .dot{ width:10px; height:10px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
@@ -408,17 +435,17 @@
     border:2.5px solid var(--bg); margin-left:-12px; box-shadow:var(--shadow-card);
   }
   .facepile-avatar:first-child{ margin-left:0; }
-  .facepile-more{ background:var(--surface-2); color:var(--text-muted); font-size:12px; font-weight:800; }
+  .facepile-more{ background:var(--surface-2); color:var(--text-muted); font-size:0.75rem; font-weight:800; }
 
   /* ---------- Contacten / zoeken ---------- */
-  .section-title{ font-size:14.5px; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
+  .section-title{ font-size:0.90625rem; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
   .search-box{
     width:100%; display:flex; align-items:center; gap:10px; background:var(--surface); border:1.5px solid var(--border);
     border-radius:999px; padding:6px 8px 6px 18px;
   }
   .search-box svg{ width:20px; height:20px; color:var(--text-muted); flex-shrink:0; }
   .search-box input{
-    flex:1; background:none; border:none; color:var(--text); font-size:17px; padding:10px 4px; min-width:0;
+    flex:1; background:none; border:none; color:var(--text); font-size:1.0625rem; padding:10px 4px; min-width:0;
   }
   .search-box input:focus{ outline:none; }
   .search-box input::placeholder{ color:var(--text-faint); }
@@ -428,8 +455,8 @@
     border-radius:var(--radius-md); padding:14px 16px; box-shadow:var(--shadow-card);
   }
   .person-info{ flex:1; text-align:left; min-width:0; }
-  .person-info .name{ font-weight:700; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .person-info .handle{ color:var(--text-muted); font-size:14.5px; margin-top:1px; }
+  .person-info .name{ font-weight:700; font-size:1.0625rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .person-info .handle{ color:var(--text-muted); font-size:0.90625rem; margin-top:1px; }
   .person-actions{ display:flex; gap:8px; flex-shrink:0; }
   .icon-btn{
     width:46px; height:46px; border-radius:11px; border:1px solid var(--border); background:var(--surface-2);
@@ -441,7 +468,7 @@
   .icon-btn.confirm:hover{ color:var(--green); border-color:var(--green); }
   .people-list{ display:flex; flex-direction:column; gap:10px; }
   .status-pill{
-    font-size:13.5px; font-weight:700; padding:9px 14px; border-radius:999px; white-space:nowrap;
+    font-size:0.84375rem; font-weight:700; padding:9px 14px; border-radius:999px; white-space:nowrap;
     background:var(--surface-2); color:var(--text-muted); border:1px solid var(--border);
   }
   .status-pill.pending{ color:var(--amber); border-color:var(--amber); background:var(--amber-soft); }
@@ -449,11 +476,11 @@
 
   .empty-state{
     width:100%; padding:20px 18px; text-align:center; color:var(--text-muted);
-    font-size:15px; border:1.5px dashed var(--border); border-radius:var(--radius-md); line-height:1.5;
+    font-size:0.9375rem; border:1.5px dashed var(--border); border-radius:var(--radius-md); line-height:1.5;
   }
 
   .small-btn{
-    background:var(--surface-2); border:1px solid var(--border); color:var(--text); font-size:15px;
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text); font-size:0.9375rem;
     font-weight:600; padding:11px 16px; min-height:44px; border-radius:10px; cursor:pointer;
   }
   .small-btn:hover{ border-color:var(--text-muted); }
@@ -463,10 +490,10 @@
   .form-actions .cancel-button{ flex:1; }
   .form-actions .save-button{ flex:1; }
 
-  footer.note{ text-align:center; color:var(--text-muted); font-size:13.5px; padding-top:20px; line-height:1.5; }
+  footer.note{ text-align:center; color:var(--text-muted); font-size:0.84375rem; padding-top:20px; line-height:1.5; }
 
   .link-button{
-    background:none; border:none; color:var(--text-muted); font-size:14.5px; font-weight:600;
+    background:none; border:none; color:var(--text-muted); font-size:0.90625rem; font-weight:600;
     cursor:pointer; padding:8px 8px; border-radius:8px; text-decoration:underline; text-underline-offset:3px;
   }
   .link-button:hover{ color:var(--red-bright); }
@@ -474,7 +501,7 @@
   /* ---------- Instellingen ---------- */
   .settings-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:24px; }
   .settings-row-text{ flex:1; }
-  .settings-row-title{ font-size:16px; font-weight:700; }
+  .settings-row-title{ font-size:1rem; font-weight:700; }
   .toggle-switch{
     position:relative; width:52px; height:30px; border-radius:999px; border:none; cursor:pointer; flex-shrink:0;
     background:var(--border); transition:background .15s ease; padding:0;
@@ -494,8 +521,8 @@
     background:var(--accent); border:3px solid var(--bg); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
   .profile-photo-edit svg{ width:15px; height:15px; }
-  .profile-name{ font-size:23px; font-weight:800; margin:0; }
-  .profile-handle{ color:var(--text-muted); font-size:16px; margin:0; }
+  .profile-name{ font-size:1.4375rem; font-weight:800; margin:0; }
+  .profile-handle{ color:var(--text-muted); font-size:1rem; margin:0; }
 
   /* ---------- Overlays (uitleg, meldingen) ---------- */
   .overlay{
@@ -508,7 +535,7 @@
     border-radius:var(--radius-lg); padding:26px 22px; display:flex; flex-direction:column; gap:16px; box-shadow:var(--shadow-card);
   }
   .overlay-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-  .overlay-title{ font-size:20px; font-weight:800; margin:0; }
+  .overlay-title{ font-size:1.25rem; font-weight:800; margin:0; }
   .overlay-close{
     background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:38px; height:38px;
     border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
@@ -518,9 +545,9 @@
   .notif-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:14px 16px; text-align:left; }
   .notif-card.unread{ border-color:var(--accent); }
   .notif-card.alarm{ border-color:var(--red); }
-  .notif-title{ font-weight:700; font-size:15.5px; display:flex; align-items:center; gap:8px; }
-  .notif-message{ color:var(--text-muted); font-size:15px; margin-top:4px; line-height:1.4; }
-  .notif-time{ color:var(--text-faint); font-size:12.5px; margin-top:6px; }
+  .notif-title{ font-weight:700; font-size:0.96875rem; display:flex; align-items:center; gap:8px; }
+  .notif-message{ color:var(--text-muted); font-size:0.9375rem; margin-top:4px; line-height:1.4; }
+  .notif-time{ color:var(--text-faint); font-size:0.78125rem; margin-top:6px; }
   .notif-actions{ display:flex; gap:8px; margin-top:12px; }
   .notif-actions button{ flex:1; }
 
@@ -545,7 +572,7 @@
   .chat-back-button:hover{ background:var(--border-soft); }
   .profile-back-button{
     display:flex; align-items:center; gap:12px; background:none; border:none; padding:0; margin-bottom:24px;
-    cursor:pointer; color:var(--text); font-weight:700; font-size:16px;
+    cursor:pointer; color:var(--text); font-weight:700; font-size:1rem;
   }
   .profile-back-icon{
     width:40px; height:40px; border-radius:50%; background:var(--surface-2); color:var(--text);
@@ -554,9 +581,9 @@
   .profile-back-icon svg{ width:20px; height:20px; }
   .profile-back-button:hover .profile-back-icon{ background:var(--border-soft); }
   .chat-header-info{ min-width:0; }
-  .chat-header-title{ font-size:19px; font-weight:800; line-height:1.25; }
+  .chat-header-title{ font-size:1.1875rem; font-weight:800; line-height:1.25; }
   .chat-header-sub{
-    color:var(--text-muted); font-size:14.5px; margin-top:2px;
+    color:var(--text-muted); font-size:0.90625rem; margin-top:2px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .chat-messages{
@@ -568,16 +595,16 @@
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
     background-size:24px 24px;
   }
-  .chat-empty-hint{ color:var(--text-muted); font-size:16px; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
+  .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
   .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
   .chat-row .avatar{ margin-bottom:2px; }
-  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:18px; font-size:17px; line-height:1.45; }
+  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:18px; font-size:1.0625rem; line-height:1.45; }
   .chat-bubble.own{ background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
   .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); border-bottom-left-radius:4px; box-shadow:var(--shadow-card); }
-  .chat-bubble .who{ font-size:13.5px; opacity:.85; margin-bottom:3px; font-weight:700; }
+  .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
-  .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:12px; white-space:nowrap; display:flex; align-items:center; gap:3px; }
+  .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:0.75rem; white-space:nowrap; display:flex; align-items:center; gap:3px; }
   .when-time{ opacity:.65; }
   .msg-ticks{ display:inline-flex; align-items:center; }
   .tick-icon{ color:rgba(255,255,255,.75); }
@@ -597,7 +624,7 @@
   .chat-video-play svg{ width:24px; height:24px; margin-left:3px; }
   .chat-video-duration{
     position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.6); color:#fff;
-    font-size:12px; font-weight:700; padding:2px 7px; border-radius:6px; pointer-events:none; letter-spacing:.02em;
+    font-size:0.75rem; font-weight:700; padding:2px 7px; border-radius:6px; pointer-events:none; letter-spacing:.02em;
   }
   .chat-form{
     display:flex; flex-direction:column; flex-shrink:0;
@@ -612,8 +639,8 @@
     padding:10px 2px 0;
   }
   .chat-edit-banner-text{ display:flex; flex-direction:column; gap:1px; min-width:0; }
-  .chat-edit-banner-text strong{ font-size:13px; color:var(--accent); }
-  .chat-edit-banner-text span{ font-size:13.5px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chat-edit-banner-text strong{ font-size:0.8125rem; color:var(--accent); }
+  .chat-edit-banner-text span{ font-size:0.84375rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .chat-edit-cancel{
     width:32px; height:32px; border-radius:50%; border:none; background:var(--surface-2); color:var(--text-muted);
     display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
@@ -630,7 +657,7 @@
   }
   .chat-bubble-menu-item{
     display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:none; border:none;
-    padding:12px 14px; border-radius:9px; font-size:15.5px; font-weight:600; color:var(--text); cursor:pointer;
+    padding:12px 14px; border-radius:9px; font-size:0.96875rem; font-weight:600; color:var(--text); cursor:pointer;
   }
   .chat-bubble-menu-item:active{ background:var(--surface-2); }
   .chat-bubble-menu-item svg{ width:19px; height:19px; color:var(--text-muted); flex-shrink:0; }
@@ -638,7 +665,7 @@
   .chat-bubble-menu-item.danger svg{ color:var(--danger); }
   .chat-form input{
     flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:26px;
-    padding:14px 20px; font-size:17px; color:var(--text); min-height:52px;
+    padding:14px 20px; font-size:1.0625rem; color:var(--text); min-height:52px;
   }
   .chat-form input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
   .chat-form input::placeholder{ color:var(--text-faint); }
@@ -658,25 +685,61 @@
   .chat-attach-button:hover{ color:var(--text); background:var(--surface-2); }
   .chat-attach-button:disabled{ opacity:.5; cursor:not-allowed; }
   .location-card{ flex-shrink:0; background:var(--surface); border-bottom:1px solid var(--border-soft); padding:14px 16px; }
-  .location-header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:15.5px; margin-bottom:6px; }
+  .location-header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:0.96875rem; margin-bottom:6px; }
   .location-header strong{ font-weight:800; }
-  .location-accuracy{ color:var(--text-faint); font-size:12.5px; font-weight:600; white-space:nowrap; flex-shrink:0; }
-  .location-address{ color:var(--text-muted); font-size:14.5px; margin:0 0 10px; }
+  .location-accuracy{ color:var(--text-faint); font-size:0.78125rem; font-weight:600; white-space:nowrap; flex-shrink:0; }
+  .location-address{ color:var(--text-muted); font-size:0.90625rem; margin:0 0 10px; }
   .location-map-wrap{ border-radius:14px; overflow:hidden; border:1px solid var(--border-soft); height:150px; background:var(--surface-2); }
   .location-map-frame{ display:block; width:100%; height:100%; border:none; object-fit:cover; }
   .location-open-button{
     display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;
-    background:var(--accent); color:#fff; text-decoration:none; font-weight:700; font-size:15.5px;
+    background:var(--accent); color:#fff; text-decoration:none; font-weight:700; font-size:0.96875rem;
     padding:12px; border-radius:12px; min-height:48px;
   }
   .location-open-button:hover{ background:var(--accent-dark); }
   .location-open-button svg{ width:19px; height:19px; }
+  .location-live-badge{
+    display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,.12); color:var(--danger);
+    font-size:0.6875rem; font-weight:800; letter-spacing:.04em; padding:2px 7px 2px 6px; border-radius:999px; vertical-align:1px;
+  }
+  .location-live-badge::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--danger); animation:live-pulse 1.4s ease-in-out infinite; }
+  @keyframes live-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+  .location-updated{ color:var(--text-faint); font-size:0.75rem; margin:-2px 0 8px; }
   .platform-icon{ width:18px; height:18px; flex-shrink:0; vertical-align:-4px; margin:0 1px; }
+
+  /* ---------- Medische info-kaart ---------- */
+  .medical-info-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--amber-soft); margin-bottom:14px; overflow:hidden; }
+  .medical-info-toggle{
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:none; border:none; padding:14px 16px; cursor:pointer; color:var(--text); font-size:0.96875rem; font-weight:700; text-align:left;
+  }
+  .medical-info-chevron{ width:18px; height:18px; color:var(--text-muted); flex-shrink:0; transition:transform .15s ease; }
+  .medical-info-card.open .medical-info-chevron{ transform:rotate(180deg); }
+  .medical-info-body{ padding:0 16px 16px; display:flex; flex-direction:column; gap:8px; }
+  .medical-info-row{ font-size:0.90625rem; line-height:1.4; }
+  .medical-info-row strong{ font-weight:700; }
+
+  /* ---------- "Wie heeft gereageerd" + escalatie ---------- */
+  .ack-status-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--surface); padding:14px 16px; margin-bottom:14px; }
+  .ack-status-list{ display:flex; flex-wrap:wrap; gap:8px; }
+  .ack-pill{ display:inline-flex; align-items:center; gap:6px; font-size:0.8125rem; font-weight:600; padding:6px 10px; border-radius:999px; background:var(--surface-2); color:var(--text-muted); }
+  .ack-pill.acked{ color:var(--green); }
+  .ack-dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
+  .ack-pill.acked .ack-dot{ background:var(--green); }
+  .escalation-banner{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border-soft); }
+  .escalation-text{ margin:0 0 10px; font-weight:700; color:var(--danger); font-size:0.9375rem; }
+  .escalation-actions{ display:flex; flex-direction:column; gap:8px; }
+  .escalation-call-button{
+    display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; font-weight:700;
+    padding:12px; border-radius:12px; font-size:0.96875rem; color:#fff;
+  }
+  .escalation-call-button.emergency{ background:var(--danger); }
+  .escalation-call-button.contact{ background:var(--accent); }
 
   /* ---------- Onboarding (uitleg) ---------- */
   .onboarding-skip{
     align-self:flex-end; margin:-6px -6px -4px 0; background:none; border:none; color:var(--text-muted);
-    font-size:15px; font-weight:600; cursor:pointer; padding:8px 10px; text-decoration:underline; text-underline-offset:3px;
+    font-size:0.9375rem; font-weight:600; cursor:pointer; padding:8px 10px; text-decoration:underline; text-underline-offset:3px;
   }
   .onboarding-icon{
     width:84px; height:84px; border-radius:50%; flex-shrink:0; align-self:center;
@@ -689,8 +752,8 @@
     box-shadow:0 12px 26px rgba(227,32,61,.35);
   }
   .onboarding-icon svg{ width:40px; height:40px; color:#fff; }
-  .onboarding-title{ font-size:22px; font-weight:800; margin:0; line-height:1.3; text-align:center; }
-  .onboarding-text{ font-size:17px; line-height:1.55; color:var(--text-muted); margin:0; text-align:center; }
+  .onboarding-title{ font-size:1.375rem; font-weight:800; margin:0; line-height:1.3; text-align:center; }
+  .onboarding-text{ font-size:1.0625rem; line-height:1.55; color:var(--text-muted); margin:0; text-align:center; }
   .onboarding-text strong{ color:var(--text); }
   .onboarding-dots{ display:flex; gap:9px; justify-content:center; }
   .onboarding-dot{ width:10px; height:10px; border-radius:50%; background:var(--border); }
@@ -762,7 +825,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
-      <p class="onboarding-text" style="text-align:left; font-size:16px;">Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.</p>
+      <p class="onboarding-text" style="text-align:left; font-size:1rem;">Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.</p>
       <div id="deleteAccountMessage" class="auth-message hidden"></div>
       <div class="form-actions">
         <button type="button" id="deleteAccountCancelButton" class="cancel-button">Annuleren</button>
@@ -809,6 +872,26 @@
           </button>
         </nav>
       </div>
+
+      <div style="margin-top:24px;">
+        <div class="settings-row-title" style="margin-bottom:8px;">Tekstgrootte</div>
+        <p class="field-hint" style="margin-top:0; margin-bottom:12px;">Maakt alle tekst in de app groter en makkelijker leesbaar.</p>
+        <nav class="segmented" role="tablist" aria-label="Tekstgrootte">
+          <button type="button" id="textSizeNormalButton" data-text-size="normal" role="tab">Standaard</button>
+          <button type="button" id="textSizeLargeButton" data-text-size="large" role="tab">Groot</button>
+          <button type="button" id="textSizeXlargeButton" data-text-size="xlarge" role="tab">Extra groot</button>
+        </nav>
+      </div>
+
+      <div class="settings-row" style="margin-top:24px; margin-bottom:0;">
+        <div class="settings-row-text">
+          <div class="settings-row-title">Hoog contrast</div>
+          <p class="field-hint" style="margin-top:4px;">Dikkere randen en duidelijkere grijstinten, voor beter leesbare knoppen en kaarten.</p>
+        </div>
+        <button type="button" id="contrastToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Hoog contrast">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -831,9 +914,47 @@
           <label for="profileLastName">Achternaam</label>
           <input type="text" id="profileLastName" required>
         </div>
+        <div class="field">
+          <label for="profilePhone">Telefoonnummer <span style="font-weight:400; color:var(--text-faint);">(optioneel)</span></label>
+          <input type="tel" id="profilePhone" placeholder="06 12345678" autocomplete="tel">
+          <div class="field-hint">Zodat noodcontacten je direct kunnen bellen als je niet op een alarm reageert.</div>
+        </div>
         <button type="submit" id="profileSaveButton" class="save-button">Wijzigingen opslaan</button>
       </form>
       <div id="profileMessage" class="auth-message hidden"></div>
+
+      <form id="medicalForm" class="form-card" style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
+        <div>
+          <div class="settings-row-title" style="margin-bottom:4px;">Medische info</div>
+          <p class="field-hint" style="margin-top:0;">Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert.</p>
+        </div>
+        <div class="field">
+          <label for="medicalAllergies">Allergieën</label>
+          <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
+        </div>
+        <div class="field">
+          <label for="medicalMedications">Medicatie</label>
+          <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
+        </div>
+        <div class="field">
+          <label for="medicalConditions">Aandoeningen</label>
+          <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
+        </div>
+        <div class="field">
+          <label for="medicalDoctorName">Huisarts</label>
+          <input type="text" id="medicalDoctorName" placeholder="Naam huisarts of praktijk">
+        </div>
+        <div class="field">
+          <label for="medicalDoctorPhone">Telefoonnummer huisarts</label>
+          <input type="tel" id="medicalDoctorPhone" placeholder="Praktijknummer">
+        </div>
+        <div class="field">
+          <label for="medicalNotes">Overige informatie</label>
+          <input type="text" id="medicalNotes" placeholder="Bijv. vaste contactpersoon, bijzonderheden">
+        </div>
+        <button type="submit" id="medicalSaveButton" class="save-button">Medische info opslaan</button>
+      </form>
+      <div id="medicalMessage" class="auth-message hidden"></div>
     </div>
   </div>
 
@@ -843,7 +964,7 @@
       <div class="overlay-header">
         <h2 class="overlay-title">Meldingen</h2>
         <div style="display:flex; align-items:center; gap:16px;">
-          <button type="button" id="notifClearButton" class="link-button hidden" style="padding:0; font-size:14px;">Alles wissen</button>
+          <button type="button" id="notifClearButton" class="link-button hidden" style="padding:0; font-size:0.875rem;">Alles wissen</button>
           <button type="button" id="notifCloseButton" class="overlay-close" aria-label="Sluiten">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
@@ -1090,9 +1211,10 @@
 
       <div id="locationCard" class="location-card hidden" style="border-radius:var(--radius-md); border:1px solid var(--border-soft); margin-bottom:14px;">
         <div class="location-header">
-          <span>📍 Locatie van <strong id="locationName">—</strong></span>
+          <span>📍 Locatie van <strong id="locationName">—</strong> <span id="locationLiveBadge" class="location-live-badge hidden">LIVE</span></span>
           <span id="locationAccuracy" class="location-accuracy"></span>
         </div>
+        <div id="locationUpdatedAt" class="location-updated"></div>
         <div id="locationAddress" class="location-address"></div>
         <div class="location-map-wrap">
           <img id="locationMapImg" class="location-map-frame" alt="Kaart met locatie" loading="lazy">
@@ -1101,6 +1223,25 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>
           Open in Maps
         </a>
+      </div>
+
+      <div id="medicalInfoCard" class="medical-info-card hidden">
+        <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
+          <span>🩺 Medische info van <strong id="medicalInfoName">—</strong></span>
+          <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="medicalInfoBody" class="medical-info-body hidden"></div>
+      </div>
+
+      <div id="ackStatusCard" class="ack-status-card hidden">
+        <div id="ackStatusList" class="ack-status-list"></div>
+        <div id="escalationBanner" class="escalation-banner hidden">
+          <p class="escalation-text">⚠️ Nog niemand heeft gereageerd.</p>
+          <div class="escalation-actions">
+            <a href="tel:112" class="escalation-call-button emergency">Bel 112</a>
+            <div id="escalationContactButtons"></div>
+          </div>
+        </div>
       </div>
 
       <div id="chatMessages" class="chat-messages" style="flex:1; padding-left:0; padding-right:10px;"></div>
@@ -1201,7 +1342,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing', textSize: 'noodalarm.textSize', highContrast: 'noodalarm.highContrast' };
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1324,10 +1465,20 @@
     readByList: document.getElementById('readByList'),
     locationCard: document.getElementById('locationCard'),
     locationName: document.getElementById('locationName'),
+    locationLiveBadge: document.getElementById('locationLiveBadge'),
+    locationUpdatedAt: document.getElementById('locationUpdatedAt'),
     locationAccuracy: document.getElementById('locationAccuracy'),
     locationAddress: document.getElementById('locationAddress'),
     locationMapImg: document.getElementById('locationMapImg'),
     locationOpenButton: document.getElementById('locationOpenButton'),
+    medicalInfoCard: document.getElementById('medicalInfoCard'),
+    medicalInfoToggle: document.getElementById('medicalInfoToggle'),
+    medicalInfoName: document.getElementById('medicalInfoName'),
+    medicalInfoBody: document.getElementById('medicalInfoBody'),
+    ackStatusCard: document.getElementById('ackStatusCard'),
+    ackStatusList: document.getElementById('ackStatusList'),
+    escalationBanner: document.getElementById('escalationBanner'),
+    escalationContactButtons: document.getElementById('escalationContactButtons'),
 
     brandHomeButton: document.getElementById('brandHomeButton'),
     appHeader: document.getElementById('appHeader'),
@@ -1382,8 +1533,18 @@
     profileForm: document.getElementById('profileForm'),
     profileFirstName: document.getElementById('profileFirstName'),
     profileLastName: document.getElementById('profileLastName'),
+    profilePhone: document.getElementById('profilePhone'),
     profileSaveButton: document.getElementById('profileSaveButton'),
     profileMessage: document.getElementById('profileMessage'),
+    medicalForm: document.getElementById('medicalForm'),
+    medicalAllergies: document.getElementById('medicalAllergies'),
+    medicalMedications: document.getElementById('medicalMedications'),
+    medicalConditions: document.getElementById('medicalConditions'),
+    medicalDoctorName: document.getElementById('medicalDoctorName'),
+    medicalDoctorPhone: document.getElementById('medicalDoctorPhone'),
+    medicalNotes: document.getElementById('medicalNotes'),
+    medicalSaveButton: document.getElementById('medicalSaveButton'),
+    medicalMessage: document.getElementById('medicalMessage'),
 
     onboardingOverlay: document.getElementById('onboardingOverlay'),
     onboardingSkip: document.getElementById('onboardingSkip'),
@@ -1400,6 +1561,10 @@
     themeLightButton: document.getElementById('themeLightButton'),
     themeDarkButton: document.getElementById('themeDarkButton'),
     themeAutoButton: document.getElementById('themeAutoButton'),
+    textSizeNormalButton: document.getElementById('textSizeNormalButton'),
+    textSizeLargeButton: document.getElementById('textSizeLargeButton'),
+    textSizeXlargeButton: document.getElementById('textSizeXlargeButton'),
+    contrastToggle: document.getElementById('contrastToggle'),
 
     openAccountButton: document.getElementById('openAccountButton'),
     accountOverlay: document.getElementById('accountOverlay'),
@@ -1552,6 +1717,41 @@
   applyTheme();
   setInterval(() => { if (realStore.get(KEYS.theme, 'auto') === 'auto') applyTheme(); }, 5 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) applyTheme(); });
+
+  /* -------- Tekstgrootte -------- */
+  function applyTextSize(){
+    const size = realStore.get(KEYS.textSize, 'normal');
+    if (size === 'normal') document.documentElement.removeAttribute('data-text-size');
+    else document.documentElement.setAttribute('data-text-size', size);
+    [els.textSizeNormalButton, els.textSizeLargeButton, els.textSizeXlargeButton].forEach(btn => {
+      if (!btn) return;
+      const active = btn.dataset.textSize === size;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+  }
+  [els.textSizeNormalButton, els.textSizeLargeButton, els.textSizeXlargeButton].forEach(btn => {
+    if (btn) btn.addEventListener('click', () => { realStore.set(KEYS.textSize, btn.dataset.textSize); applyTextSize(); });
+  });
+  applyTextSize();
+
+  /* -------- Hoog contrast -------- */
+  function applyContrast(){
+    const on = realStore.get(KEYS.highContrast, false);
+    if (on) document.documentElement.setAttribute('data-contrast', 'high');
+    else document.documentElement.removeAttribute('data-contrast');
+    if (els.contrastToggle){
+      els.contrastToggle.classList.toggle('on', on);
+      els.contrastToggle.setAttribute('aria-checked', String(on));
+    }
+  }
+  if (els.contrastToggle){
+    els.contrastToggle.addEventListener('click', () => {
+      realStore.set(KEYS.highContrast, !realStore.get(KEYS.highContrast, false));
+      applyContrast();
+    });
+  }
+  applyContrast();
 
   /* =========================================================================
      INSTELLINGEN
@@ -1838,7 +2038,7 @@
     if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') switchScreen('alarm');
 
     const { data: profile } = await sb.from('profiles')
-      .select('first_name, last_name, full_name, username, avatar_url')
+      .select('first_name, last_name, full_name, username, avatar_url, phone_number')
       .eq('id', currentSession.user.id).single();
     currentProfile = profile || { full_name: 'Onbekende gebruiker', username: '—' };
     renderProfile();
@@ -2140,6 +2340,8 @@
       sb.removeChannel(chatChannel);
       chatChannel = null;
       currentChatGroupId = null;
+      stopAckWatcher();
+      clearInterval(locationUpdatedTimer);
     }
     els.screenAlarm.classList.toggle('hidden', name !== 'alarm');
     els.screenContacts.classList.toggle('hidden', name !== 'contacts');
@@ -2173,6 +2375,7 @@
     els.profileHandle.textContent = '@' + currentProfile.username;
     els.profileFirstName.value = currentProfile.first_name || '';
     els.profileLastName.value = currentProfile.last_name || '';
+    els.profilePhone.value = currentProfile.phone_number || '';
     els.profileAvatar.innerHTML = avatarInner(currentProfile.avatar_url);
     els.topProfileAvatar.innerHTML = avatarInner(currentProfile.avatar_url);
   }
@@ -2181,10 +2384,11 @@
     ev.preventDefault();
     const first_name = els.profileFirstName.value.trim();
     const last_name = els.profileLastName.value.trim();
+    const phone_number = els.profilePhone.value.trim() || null;
     if (!first_name || !last_name) return;
 
     els.profileSaveButton.disabled = true;
-    const { error } = await sb.from('profiles').update({ first_name, last_name }).eq('id', currentSession.user.id);
+    const { error } = await sb.from('profiles').update({ first_name, last_name, phone_number }).eq('id', currentSession.user.id);
     els.profileSaveButton.disabled = false;
 
     if (error){
@@ -2192,11 +2396,49 @@
       return;
     }
     const { data: profile } = await sb.from('profiles')
-      .select('first_name, last_name, full_name, username, avatar_url').eq('id', currentSession.user.id).single();
+      .select('first_name, last_name, full_name, username, avatar_url, phone_number').eq('id', currentSession.user.id).single();
     currentProfile = profile;
     renderProfile();
     showProfileMessage('Wijzigingen opgeslagen.', 'success');
   });
+
+  /* -------- Medische info -------- */
+  async function loadMedicalInfo(){
+    const { data } = await sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle();
+    els.medicalAllergies.value = data?.allergies || '';
+    els.medicalMedications.value = data?.medications || '';
+    els.medicalConditions.value = data?.conditions || '';
+    els.medicalDoctorName.value = data?.doctor_name || '';
+    els.medicalDoctorPhone.value = data?.doctor_phone || '';
+    els.medicalNotes.value = data?.notes || '';
+  }
+  els.medicalForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    els.medicalSaveButton.disabled = true;
+    const { error } = await sb.from('medical_info').upsert({
+      user_id: currentSession.user.id,
+      allergies: els.medicalAllergies.value.trim() || null,
+      medications: els.medicalMedications.value.trim() || null,
+      conditions: els.medicalConditions.value.trim() || null,
+      doctor_name: els.medicalDoctorName.value.trim() || null,
+      doctor_phone: els.medicalDoctorPhone.value.trim() || null,
+      notes: els.medicalNotes.value.trim() || null,
+      updated_at: new Date().toISOString()
+    });
+    els.medicalSaveButton.disabled = false;
+    if (error){
+      showMedicalMessage('Opslaan mislukt: ' + error.message, 'error');
+      return;
+    }
+    showMedicalMessage('Medische info opgeslagen.', 'success');
+  });
+  function showMedicalMessage(text, kind){
+    if (!text){ els.medicalMessage.classList.add('hidden'); return; }
+    els.medicalMessage.textContent = text;
+    els.medicalMessage.className = 'auth-message' + (kind ? ' ' + kind : '');
+    els.medicalMessage.classList.remove('hidden');
+  }
+  els.openAccountButton.addEventListener('click', loadMedicalInfo);
 
   function showProfileMessage(text, kind){
     if (!text){ els.profileMessage.classList.add('hidden'); return; }
@@ -2325,11 +2567,41 @@
 
   els.endAlarmButton.addEventListener('click', async () => {
     switchView(els.viewIdle);
+    stopLiveLocationSharing();
     if (lastTriggeredAlarmId){
       await sb.from('alarms').update({ status: 'ended' }).eq('id', lastTriggeredAlarmId);
       lastTriggeredAlarmId = null;
     }
   });
+
+  // Zolang je eigen alarm actief is, stuur je periodiek een nieuwe locatie
+  // door — zodat je contacten je zien bewegen i.p.v. één momentopname van
+  // het moment dat je drukte (bv. bij verplaatsing in een ambulance, of
+  // wegdwalen). Stopt vanzelf zodra het alarm eindigt.
+  const LIVE_LOCATION_INTERVAL_MS = 25000;
+  let liveLocationTimer = null;
+  function startLiveLocationSharing(alarmId){
+    stopLiveLocationSharing();
+    if (!isLocationSharingOn() || !('geolocation' in navigator)) return;
+    liveLocationTimer = setInterval(() => {
+      if (!isLocationSharingOn()) return;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          sb.from('alarms').update({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            location_accuracy: pos.coords.accuracy,
+            location_updated_at: new Date().toISOString()
+          }).eq('id', alarmId).eq('status', 'active');
+        },
+        () => { /* geen signaal deze ronde — gewoon volgende poging afwachten */ },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 5000 }
+      );
+    }, LIVE_LOCATION_INTERVAL_MS);
+  }
+  function stopLiveLocationSharing(){
+    if (liveLocationTimer){ clearInterval(liveLocationTimer); liveLocationTimer = null; }
+  }
 
   function switchView(target){
     [els.viewIdle, els.viewSent].forEach(v => v.classList.add('hidden'));
@@ -2400,6 +2672,7 @@
 
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;
+      startLiveLocationSharing(result.alarmId);
       openMessages(myGroupId);
     }
   }
@@ -2525,18 +2798,20 @@
     switchScreen('messages');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">Bericht laden…</p>';
     els.locationCard.classList.add('hidden');
+    els.medicalInfoCard.classList.add('hidden');
+    els.ackStatusCard.classList.add('hidden');
     chatMessageById = {};
     chatReceiptsByMessageId = {};
 
     const [{ data: members }, { data: alarmRow }] = await Promise.all([
       sb.rpc('get_group_participants', { p_group_id: groupId }),
-      sb.from('alarms').select('lat, lng, location_accuracy, triggered_by')
+      sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at')
         .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle()
     ]);
     chatParticipantById = {};
-    (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url }; });
+    (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number }; });
     renderMessagesFacepile();
-    renderLocationCard(alarmRow);
+    handleActiveAlarmChanged(alarmRow);
 
     await loadChatMessages(groupId);
     subscribeChat(groupId);
@@ -2551,24 +2826,175 @@
     if (alarmRow && alarmRow.group_id) openMessages(alarmRow.group_id);
   }
 
+  // Centraal punt waar alle UI die van het huidige actieve alarm afhangt
+  // (locatie, medische info, "wie heeft gereageerd") wordt bijgewerkt —
+  // zowel bij het openen van Berichten als bij elke realtime-update van
+  // de alarms-rij.
+  function handleActiveAlarmChanged(alarmRow){
+    renderLocationCard(alarmRow);
+    renderMedicalInfoCard(alarmRow);
+    if (alarmRow && alarmRow.status === 'active' && alarmRow.triggered_by === currentSession.user.id){
+      startAckWatcher(alarmRow.id, alarmRow.created_at);
+    } else {
+      stopAckWatcher();
+    }
+  }
+
+  let lastAddressCoords = null;
   function renderLocationCard(alarmRow){
     if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
       els.locationCard.classList.add('hidden');
       els.locationMapImg.src = '';
       els.locationAddress.textContent = '';
+      lastAddressCoords = null;
       return;
     }
-    const { lat, lng, location_accuracy, triggered_by } = alarmRow;
+    const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
     const isOwn = triggered_by === currentSession.user.id;
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? 'jou' : (activator ? activator.full_name : 'de activator');
     els.locationAccuracy.textContent = location_accuracy ? ('±' + Math.round(location_accuracy) + ' m') : '';
-    els.locationAddress.textContent = 'Adres ophalen…';
     els.locationMapImg.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat + ',' + lng +
       '&zoom=16&size=600x300&maptype=mapnik&markers=' + lat + ',' + lng + ',red-pushpin';
     els.locationOpenButton.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
-    fetchStreetAddress(lat, lng);
+    els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
+    renderLocationUpdatedAt(location_updated_at);
+
+    // Nominatim (gratis, geen API-sleutel) mag niet elke paar seconden
+    // bevraagd worden — alleen opnieuw ophalen als de positie écht
+    // noemenswaardig is verschoven (>30m) sinds de vorige keer.
+    const moved = !lastAddressCoords || haversineMeters(lastAddressCoords.lat, lastAddressCoords.lng, lat, lng) > 30;
+    if (moved){
+      lastAddressCoords = { lat, lng };
+      els.locationAddress.textContent = 'Adres ophalen…';
+      fetchStreetAddress(lat, lng);
+    }
+  }
+
+  function haversineMeters(lat1, lng1, lat2, lng2){
+    const R = 6371000;
+    const toRad = (d) => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  let locationUpdatedTimer = null;
+  function renderLocationUpdatedAt(iso){
+    clearInterval(locationUpdatedTimer);
+    if (!iso){ els.locationUpdatedAt.textContent = ''; return; }
+    const paint = () => {
+      const seconds = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+      const text = seconds < 60 ? 'zojuist bijgewerkt' :
+        seconds < 3600 ? 'bijgewerkt ' + Math.floor(seconds / 60) + ' min geleden' :
+        'bijgewerkt ' + Math.floor(seconds / 3600) + ' u geleden';
+      els.locationUpdatedAt.textContent = text;
+    };
+    paint();
+    locationUpdatedTimer = setInterval(paint, 15000);
+  }
+
+  // Medische info: alleen relevant (en zichtbaar) als iemand ANDERS dan
+  // jijzelf net een alarm heeft geactiveerd.
+  async function renderMedicalInfoCard(alarmRow){
+    if (!alarmRow || alarmRow.triggered_by === currentSession.user.id){
+      els.medicalInfoCard.classList.add('hidden');
+      return;
+    }
+    const { data } = await sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id });
+    const info = data && data[0];
+    const hasAny = info && (info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone || info.notes);
+    if (!hasAny){
+      els.medicalInfoCard.classList.add('hidden');
+      return;
+    }
+    const activator = chatParticipantById[alarmRow.triggered_by];
+    els.medicalInfoName.textContent = activator ? activator.full_name : 'de activator';
+    const rows = [];
+    if (info.allergies) rows.push('<div class="medical-info-row"><strong>Allergieën:</strong> ' + escapeHtml(info.allergies) + '</div>');
+    if (info.medications) rows.push('<div class="medical-info-row"><strong>Medicatie:</strong> ' + escapeHtml(info.medications) + '</div>');
+    if (info.conditions) rows.push('<div class="medical-info-row"><strong>Aandoeningen:</strong> ' + escapeHtml(info.conditions) + '</div>');
+    if (info.doctor_name || info.doctor_phone) rows.push('<div class="medical-info-row"><strong>Huisarts:</strong> ' + escapeHtml([info.doctor_name, info.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
+    if (info.notes) rows.push('<div class="medical-info-row"><strong>Overig:</strong> ' + escapeHtml(info.notes) + '</div>');
+    els.medicalInfoBody.innerHTML = rows.join('');
+    els.medicalInfoCard.classList.remove('hidden');
+  }
+  els.medicalInfoToggle.addEventListener('click', () => {
+    const open = els.medicalInfoCard.classList.toggle('open');
+    els.medicalInfoBody.classList.toggle('hidden', !open);
+  });
+
+  /* -------- "Wie heeft gereageerd" + escalatie bij geen reactie -------- */
+  const ESCALATION_TIMEOUT_MS = 2 * 60 * 1000;
+  let ackWatcherTimer = null;
+  let ackWatcherAlarmId = null;
+  let escalationTriggered = false;
+
+  function stopAckWatcher(){
+    if (ackWatcherTimer){ clearInterval(ackWatcherTimer); ackWatcherTimer = null; }
+    ackWatcherAlarmId = null;
+    escalationTriggered = false;
+    els.ackStatusCard.classList.add('hidden');
+    els.escalationBanner.classList.add('hidden');
+  }
+
+  async function pollAckStatus(alarmId, createdAt){
+    const others = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
+    if (!others.length){ els.ackStatusCard.classList.add('hidden'); return; }
+
+    const { data } = await sb.rpc('get_alarm_acknowledgments', { p_alarm_id: alarmId });
+    const ackByUser = {};
+    (data || []).forEach(r => { ackByUser[r.user_id] = r.is_read; });
+
+    els.ackStatusList.innerHTML = others.map(id => {
+      const acked = !!ackByUser[id];
+      const name = chatParticipantById[id] ? chatParticipantById[id].full_name : 'Onbekend';
+      return '<span class="ack-pill' + (acked ? ' acked' : '') + '"><span class="ack-dot"></span>' + escapeHtml(acked ? (name + ' heeft gereageerd') : name) + '</span>';
+    }).join('');
+    els.ackStatusCard.classList.remove('hidden');
+
+    const anyAcked = others.some(id => ackByUser[id]);
+    const elapsed = Date.now() - new Date(createdAt).getTime();
+    if (!anyAcked && elapsed >= ESCALATION_TIMEOUT_MS){
+      showEscalationBanner(others);
+      if (!escalationTriggered){
+        escalationTriggered = true;
+        resendAlert(alarmId);
+      }
+    } else {
+      els.escalationBanner.classList.add('hidden');
+    }
+  }
+
+  function showEscalationBanner(otherIds){
+    els.escalationContactButtons.innerHTML = otherIds
+      .map(id => chatParticipantById[id])
+      .filter(p => p && p.phone_number)
+      .map(p => '<a href="tel:' + escapeHtml(p.phone_number) + '" class="escalation-call-button contact">Bel ' + escapeHtml(p.full_name) + '</a>')
+      .join('');
+    els.escalationBanner.classList.remove('hidden');
+  }
+
+  async function resendAlert(alarmId){
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      await fetch(FUNCTIONS_URL + '/resend-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({ alarmId })
+      });
+    } catch (err){ /* stille poging — de belknoppen blijven hoe dan ook zichtbaar */ }
+  }
+
+  function startAckWatcher(alarmId, createdAt){
+    if (ackWatcherAlarmId === alarmId) return;
+    stopAckWatcher();
+    ackWatcherAlarmId = alarmId;
+    escalationTriggered = false;
+    pollAckStatus(alarmId, createdAt);
+    ackWatcherTimer = setInterval(() => pollAckStatus(alarmId, createdAt), 10000);
   }
 
   // Nominatim (OpenStreetMap) — gratis, geen API-sleutel nodig. Zet de
@@ -2662,8 +3088,8 @@
         chatMessageById[msg.id] = msg;
         let participant = chatParticipantById[msg.sender_id];
         if (!participant){
-          const { data: p } = await sb.from('profiles').select('full_name, avatar_url').eq('id', msg.sender_id).single();
-          participant = p ? { full_name: p.full_name, avatar_url: p.avatar_url } : { full_name: 'Onbekend', avatar_url: null };
+          const { data: p } = await sb.from('profiles').select('full_name, avatar_url, phone_number').eq('id', msg.sender_id).single();
+          participant = p ? { full_name: p.full_name, avatar_url: p.avatar_url, phone_number: p.phone_number } : { full_name: 'Onbekend', avatar_url: null, phone_number: null };
           chatParticipantById[msg.sender_id] = participant;
         }
         let mediaUrl = null;
@@ -2719,6 +3145,14 @@
         if (!chatReceiptsByMessageId[r.message_id]) chatReceiptsByMessageId[r.message_id] = {};
         chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
         refreshTicks(r.message_id);
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'alarms',
+        filter: 'group_id=eq.' + groupId
+      }, (payload) => {
+        const row = payload.new;
+        if (!row || row.status !== 'active') { handleActiveAlarmChanged(null); return; }
+        handleActiveAlarmChanged(row);
       })
       .subscribe();
   }
@@ -2846,8 +3280,8 @@
       '<div style="display:flex; align-items:center; gap:12px;">' +
         '<div class="avatar sm">' + avatarInner(p.avatar_url) + '</div>' +
         '<div style="flex:1; min-width:0;">' +
-          '<div style="font-weight:700; font-size:15.5px;">' + escapeHtml(p.full_name) + '</div>' +
-          '<div style="color:var(--text-muted); font-size:13.5px; margin-top:2px;">' + formatReadTimestamp(p.read_at) + '</div>' +
+          '<div style="font-weight:700; font-size:0.96875rem;">' + escapeHtml(p.full_name) + '</div>' +
+          '<div style="color:var(--text-muted); font-size:0.84375rem; margin-top:2px;">' + formatReadTimestamp(p.read_at) + '</div>' +
         '</div>' +
       '</div>'
     ).join('');
