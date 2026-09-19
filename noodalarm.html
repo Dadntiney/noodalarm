@@ -328,6 +328,12 @@
   .field-hint{ font-size:0.84375rem; color:var(--text-faint); margin-top:6px; }
   .field-hint.ok{ color:var(--green); }
   .field-hint.bad{ color:var(--danger); }
+  .privacy-text{ font-size:0.9375rem; line-height:1.55; color:var(--text-muted); margin:8px 6px 0; }
+  .privacy-text a{ color:var(--accent); }
+  .consent-row{ display:flex; align-items:flex-start; gap:14px; cursor:pointer; text-align:left; }
+  .consent-row input[type="checkbox"]{ width:26px; height:26px; flex-shrink:0; margin-top:2px; accent-color:var(--accent); cursor:pointer; }
+  .consent-row .field-hint{ margin:0; line-height:1.5; font-size:0.90625rem; }
+  .consent-row .field-hint button{ background:none; border:none; padding:0; color:var(--accent); font:inherit; font-weight:700; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
   .settings-item-hint.ok{ color:var(--green); font-weight:600; }
   .settings-item-hint.bad{ color:var(--danger); font-weight:600; }
 
@@ -1259,6 +1265,19 @@
           </div>
         </div>
       </div>
+
+      <div class="settings-group-label" id="settingsPrivacyGroupLabel" style="margin-top:30px;">Privacy</div>
+      <div class="settings-group">
+        <div class="settings-item">
+          <button type="button" id="openPrivacyButton" class="settings-item-nav">
+            <span class="settings-item-icon icon-accent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10Z"/></svg>
+            </span>
+            <span class="settings-item-body"><span class="settings-link-label">Privacybeleid</span></span>
+            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1399,7 +1418,17 @@
           </div>
         </div>
 
-        <button type="submit" id="medicalSaveButton" class="save-button" style="margin-top:30px;">Medische info opslaan</button>
+        <div class="form-card" style="margin-top:30px;">
+          <label class="consent-row" for="medicalConsentCheckbox">
+            <input type="checkbox" id="medicalConsentCheckbox" required>
+            <span class="field-hint">
+              <span id="medicalConsentText">Ik geef uitdrukkelijk toestemming om deze gezondheidsgegevens op te slaan, zodat mijn bevestigde noodcontacten ze kunnen zien tijdens een alarm.</span>
+              <button type="button" id="medicalPrivacyLinkButton">Lees het privacybeleid</button>
+            </span>
+          </label>
+        </div>
+
+        <button type="submit" id="medicalSaveButton" class="save-button" style="margin-top:20px;">Medische info opslaan</button>
       </form>
       <div id="medicalMessage" class="auth-message hidden"></div>
     </div>
@@ -1430,6 +1459,45 @@
         <button type="submit" id="extraInfoSaveButton" class="save-button">Opslaan</button>
       </form>
       <div id="extraInfoMessage" class="auth-message hidden"></div>
+    </div>
+  </div>
+
+  <!-- =========================== PRIVACYBELEID =========================== -->
+  <div id="privacyOverlay" class="slide-page hidden" style="z-index:110;">
+    <div class="slide-page-header">
+      <button type="button" id="privacyCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
+        <span class="profile-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        Terug
+      </button>
+    </div>
+    <div class="slide-page-content">
+      <h1 class="slide-page-title" id="privacyOverlayTitle">Privacybeleid</h1>
+      <p class="field-hint" id="privacyIntro" style="margin:-12px 0 26px;">Kort en duidelijk: welke gegevens NORI bewaart, waarom, en wat jouw rechten zijn.</p>
+
+      <div class="settings-group-label" id="privacyDataGroupLabel">Welke gegevens verzamelen we</div>
+      <p class="privacy-text" id="privacyDataText">Je profiel (naam, gebruikersnaam, telefoonnummer, profielfoto), optioneel gezondheidsgegevens (allergieën, medicijnen, aandoeningen, reanimatiewens, mobiliteit, speciale wensen, contactpersonen, huisarts, ziekenhuis), je locatie op het moment dat je op ALARM drukt, berichten in de groepschat, en optioneel overige info zoals waar een reservesleutel ligt.</p>
+
+      <div class="settings-group-label" id="privacyWhyGroupLabel" style="margin-top:26px;">Waarom</div>
+      <p class="privacy-text" id="privacyWhyText">Uitsluitend om het noodalarmsysteem te laten werken: zodat je noodcontacten je kunnen waarschuwen, vinden en helpen als dat nodig is.</p>
+
+      <div class="settings-group-label" id="privacyWhoGroupLabel" style="margin-top:26px;">Wie kan het zien</div>
+      <p class="privacy-text" id="privacyWhoText">Alleen mensen die jij zelf als noodcontact hebt bevestigd, en alleen vanaf het moment dat ze dat werden. Gezondheidsgegevens worden nooit standaard gedeeld — alleen zichtbaar tijdens een actief alarm.</p>
+
+      <div class="settings-group-label" id="privacyBasisGroupLabel" style="margin-top:26px;">Rechtsgrond</div>
+      <p class="privacy-text" id="privacyBasisText">Voor gezondheidsgegevens vragen we uitdrukkelijke toestemming, die je apart geeft bij het invullen van je medische informatie. Voor je overige gegevens is de grondslag de uitvoering van de afspraak die je met het gebruik van NORI aangaat, of ons gerechtvaardigd belang om de app te laten werken.</p>
+
+      <div class="settings-group-label" id="privacyRetentionGroupLabel" style="margin-top:26px;">Bewaartermijn</div>
+      <p class="privacy-text" id="privacyRetentionText">Zolang je een account hebt. Verwijder je je account, dan wordt alles direct en definitief verwijderd (Profiel → Account verwijderen).</p>
+
+      <div class="settings-group-label" id="privacyStorageGroupLabel" style="margin-top:26px;">Waar het wordt opgeslagen</div>
+      <p class="privacy-text" id="privacyStorageText">Bij Supabase, onze technische hostingpartij. Zij verwerken gegevens namens ons en mogen deze niet voor eigen doeleinden gebruiken.</p>
+
+      <div class="settings-group-label" id="privacyRightsGroupLabel" style="margin-top:26px;">Jouw rechten</div>
+      <p class="privacy-text" id="privacyRightsText">Je kunt je gegevens op elk moment zelf inzien, aanpassen of verwijderen, rechtstreeks in de app via Profiel. Vragen over je gegevens? Mail naar <a href="mailto:noodalarm-support@example.com" id="privacyContactLink">noodalarm-support@example.com</a>.</p>
+
+      <p class="field-hint" id="privacyUpdated" style="margin-top:26px;">Laatst bijgewerkt: 19 september 2026.</p>
     </div>
   </div>
 
@@ -1962,6 +2030,8 @@
     { sel: '#locationSectionHint', nl: 'Dan weten je noodcontacten meteen waar je bent zodra jij op ALARM drukt.', en: 'That way your emergency contacts instantly know where you are the moment you press ALARM.' },
     { sel: '#settingsSafetyGroupLabel', nl: 'Veiligheid', en: 'Safety' },
     { sel: '#settingsAppearanceGroupLabel', nl: 'Weergave', en: 'Appearance' },
+    { sel: '#settingsPrivacyGroupLabel', nl: 'Privacy', en: 'Privacy' },
+    { sel: '#openPrivacyButton .settings-link-label', nl: 'Privacybeleid', en: 'Privacy policy' },
     { sel: '#installStatusTitle', nl: 'App-installatie', en: 'App installation' },
     { sel: '#locationTestSectionTitle', nl: 'Werkt je locatie?', en: 'Does your location work?' },
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
@@ -2042,7 +2112,28 @@
     { sel: '#medicalHospital', attr: 'placeholder', nl: 'Bijv. Radboudumc, locatie X', en: 'E.g. Radboudumc, location X' },
     { sel: 'label[for="medicalNotes"]', nl: 'Nog iets anders belangrijks?', en: 'Anything else important?' },
     { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. bijzonderheden', en: 'E.g. other notes' },
+    { sel: '#medicalConsentText', nl: 'Ik geef uitdrukkelijk toestemming om deze gezondheidsgegevens op te slaan, zodat mijn bevestigde noodcontacten ze kunnen zien tijdens een alarm.', en: 'I explicitly consent to storing this health information, so my confirmed emergency contacts can see it during an alarm.' },
+    { sel: '#medicalPrivacyLinkButton', nl: 'Lees het privacybeleid', en: 'Read the privacy policy' },
     { sel: '#medicalSaveButton', nl: 'Medische info opslaan', en: 'Save medical info' },
+    { sel: '#privacyOverlay .slide-page-title', nl: 'Privacybeleid', en: 'Privacy policy' },
+    { sel: '#privacyCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#privacyCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
+    { sel: '#privacyIntro', nl: 'Kort en duidelijk: welke gegevens NORI bewaart, waarom, en wat jouw rechten zijn.', en: 'Short and clear: what data NORI keeps, why, and what your rights are.' },
+    { sel: '#privacyDataGroupLabel', nl: 'Welke gegevens verzamelen we', en: 'What data we collect' },
+    { sel: '#privacyDataText', nl: 'Je profiel (naam, gebruikersnaam, telefoonnummer, profielfoto), optioneel gezondheidsgegevens (allergieën, medicijnen, aandoeningen, reanimatiewens, mobiliteit, speciale wensen, contactpersonen, huisarts, ziekenhuis), je locatie op het moment dat je op ALARM drukt, berichten in de groepschat, en optioneel overige info zoals waar een reservesleutel ligt.', en: 'Your profile (name, username, phone number, profile photo), optional health information (allergies, medications, conditions, resuscitation wishes, mobility, special wishes, contact persons, doctor, hospital), your location at the moment you press ALARM, messages in the group chat, and optional other info such as where a spare key is.' },
+    { sel: '#privacyWhyGroupLabel', nl: 'Waarom', en: 'Why' },
+    { sel: '#privacyWhyText', nl: 'Uitsluitend om het noodalarmsysteem te laten werken: zodat je noodcontacten je kunnen waarschuwen, vinden en helpen als dat nodig is.', en: 'Solely to make the emergency alarm system work: so your emergency contacts can alert, find and help you when needed.' },
+    { sel: '#privacyWhoGroupLabel', nl: 'Wie kan het zien', en: 'Who can see it' },
+    { sel: '#privacyWhoText', nl: 'Alleen mensen die jij zelf als noodcontact hebt bevestigd, en alleen vanaf het moment dat ze dat werden. Gezondheidsgegevens worden nooit standaard gedeeld — alleen zichtbaar tijdens een actief alarm.', en: 'Only people you have confirmed as an emergency contact yourself, and only from the moment they became one. Health information is never shared by default — only visible during an active alarm.' },
+    { sel: '#privacyBasisGroupLabel', nl: 'Rechtsgrond', en: 'Legal basis' },
+    { sel: '#privacyBasisText', nl: 'Voor gezondheidsgegevens vragen we uitdrukkelijke toestemming, die je apart geeft bij het invullen van je medische informatie. Voor je overige gegevens is de grondslag de uitvoering van de afspraak die je met het gebruik van NORI aangaat, of ons gerechtvaardigd belang om de app te laten werken.', en: 'For health information we ask for explicit consent, which you give separately when filling in your medical information. For your other data, the basis is performance of the arrangement you enter into by using NORI, or our legitimate interest in making the app work.' },
+    { sel: '#privacyRetentionGroupLabel', nl: 'Bewaartermijn', en: 'Retention period' },
+    { sel: '#privacyRetentionText', nl: 'Zolang je een account hebt. Verwijder je je account, dan wordt alles direct en definitief verwijderd (Profiel → Account verwijderen).', en: 'For as long as you have an account. If you delete your account, everything is removed immediately and permanently (Profile → Delete account).' },
+    { sel: '#privacyStorageGroupLabel', nl: 'Waar het wordt opgeslagen', en: 'Where it is stored' },
+    { sel: '#privacyStorageText', nl: 'Bij Supabase, onze technische hostingpartij. Zij verwerken gegevens namens ons en mogen deze niet voor eigen doeleinden gebruiken.', en: 'At Supabase, our technical hosting partner. They process data on our behalf and may not use it for their own purposes.' },
+    { sel: '#privacyRightsGroupLabel', nl: 'Jouw rechten', en: 'Your rights' },
+    { sel: '#privacyRightsText', m: 'h', nl: 'Je kunt je gegevens op elk moment zelf inzien, aanpassen of verwijderen, rechtstreeks in de app via Profiel. Vragen over je gegevens? Mail naar <a href="mailto:noodalarm-support@example.com" id="privacyContactLink">noodalarm-support@example.com</a>.', en: 'You can view, change or delete your data yourself at any time, directly in the app via Profile. Questions about your data? Email <a href="mailto:noodalarm-support@example.com" id="privacyContactLink">noodalarm-support@example.com</a>.' },
+    { sel: '#privacyUpdated', nl: 'Laatst bijgewerkt: 19 september 2026.', en: 'Last updated: 19 September 2026.' },
     { sel: '#notifOverlay .slide-page-title', nl: 'Meldingen', en: 'Notifications' },
     { sel: '#notifClearButton', nl: 'Alles wissen', en: 'Clear all' },
     { sel: '#notifEmpty', nl: 'Nog geen meldingen.', en: 'No notifications yet.' },
@@ -2664,8 +2755,14 @@
     medicalDoctorPhone: document.getElementById('medicalDoctorPhone'),
     medicalHospital: document.getElementById('medicalHospital'),
     medicalNotes: document.getElementById('medicalNotes'),
+    medicalConsentCheckbox: document.getElementById('medicalConsentCheckbox'),
+    medicalPrivacyLinkButton: document.getElementById('medicalPrivacyLinkButton'),
     medicalSaveButton: document.getElementById('medicalSaveButton'),
     medicalMessage: document.getElementById('medicalMessage'),
+
+    privacyOverlay: document.getElementById('privacyOverlay'),
+    privacyCloseButton: document.getElementById('privacyCloseButton'),
+    openPrivacyButton: document.getElementById('openPrivacyButton'),
 
     onboardingOverlay: document.getElementById('onboardingOverlay'),
     onboardingSkip: document.getElementById('onboardingSkip'),
@@ -3093,6 +3190,14 @@
     renderInstallStatusRow();
   });
   els.settingsCloseButton.addEventListener('click', () => closeSlidePage(els.settingsOverlay));
+  els.openPrivacyButton.addEventListener('click', () => openSlidePage(els.privacyOverlay));
+  els.privacyCloseButton.addEventListener('click', () => closeSlidePage(els.privacyOverlay));
+  if (els.medicalPrivacyLinkButton){
+    els.medicalPrivacyLinkButton.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      openSlidePage(els.privacyOverlay);
+    });
+  }
 
   function isLocationSharingOn(){
     return realStore.get(KEYS.locationSharing, true);
@@ -4012,6 +4117,10 @@
     els.medicalDoctorPhone.value = data?.doctor_phone || '';
     els.medicalHospital.value = data?.hospital || '';
     els.medicalNotes.value = data?.notes || '';
+    // Wie al eerder expliciet toestemming gaf, hoeft het vinkje niet elke
+    // keer opnieuw aan te zetten — wél moet het nog steeds aan staan om
+    // een volgende wijziging te kunnen opslaan.
+    els.medicalConsentCheckbox.checked = !!data?.consent_given_at;
   }
   els.medicalForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -4034,6 +4143,10 @@
       doctor_phone: els.medicalDoctorPhone.value.trim() || null,
       hospital: els.medicalHospital.value.trim() || null,
       notes: els.medicalNotes.value.trim() || null,
+      // De checkbox is verplicht (HTML required) om dit formulier
+      // überhaupt te kunnen versturen — dit is dus altijd een bewuste,
+      // uitdrukkelijke bevestiging op het moment van opslaan (AVG art. 9).
+      consent_given_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     });
     els.medicalSaveButton.disabled = false;
