@@ -283,7 +283,7 @@
   }
   #screen-auth{ padding-top:max(20px, env(safe-area-inset-top)); }
   #screen-app{ padding-top:var(--header-height, 140px); min-height:0; }
-  #screen-messages{ min-height:0; padding-bottom:var(--footer-height, 76px); }
+  #screen-messages{ min-height:0; padding-top:14px; padding-bottom:var(--footer-height, 76px); }
 
   /* ---------- Views ---------- */
   .view{ width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; gap:24px; }
@@ -533,32 +533,6 @@
   }
   .status-pill.pending{ color:var(--amber); border-color:var(--amber); background:var(--amber-soft); }
   .status-pill.accepted{ color:var(--green); border-color:var(--green); }
-
-  /* ---------- Gesprekkenlijst ---------- */
-  .conversation-card{ cursor:pointer; text-align:left; width:100%; }
-  .conversation-card:active{ transform:scale(.98); }
-  .conversation-info .name{ display:flex; align-items:center; gap:7px; font-weight:700; font-size:1.0625rem; }
-  .conversation-own-tag{
-    font-size:0.65625rem; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--accent);
-    background:rgba(24,119,242,.12); border-radius:999px; padding:2px 8px; flex-shrink:0;
-  }
-  .conversation-preview{
-    color:var(--text-muted); font-size:0.90625rem; margin-top:2px; overflow:hidden; text-overflow:ellipsis;
-    white-space:nowrap; max-width:100%;
-  }
-  .conversation-card.unread .conversation-preview{ color:var(--text); font-weight:600; }
-  .conversation-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:7px; flex-shrink:0; }
-  .conversation-time{ color:var(--text-faint); font-size:0.78125rem; white-space:nowrap; }
-  .conversation-unread-badge{
-    min-width:21px; height:21px; padding:0 6px; border-radius:999px; background:var(--danger); color:#fff;
-    font-size:0.75rem; font-weight:800; display:flex; align-items:center; justify-content:center;
-  }
-  .chat-back-button{
-    display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--text-muted);
-    font-size:0.9375rem; font-weight:700; padding:14px 16px 4px; cursor:pointer; align-self:flex-start;
-  }
-  .chat-back-button svg{ width:19px; height:19px; }
-  .chat-back-button:hover{ color:var(--text); }
 
   .empty-state{
     width:100%; padding:20px 18px; text-align:center; color:var(--text-muted);
@@ -1429,19 +1403,8 @@
 
     </section>
 
-    <!-- =================== GESPREKKEN (overzicht) SCHERM =================== -->
-    <section id="screen-conversations" class="screen hidden">
-      <div id="conversationsEmpty" class="empty-state hidden">Nog geen gesprekken. Voeg eerst een noodcontact toe bij Contacten — dan verschijnt hier meteen een gesprek.</div>
-      <ul id="conversationsList" class="people-list"></ul>
-    </section>
-
     <!-- =========================== BERICHTEN SCHERM =========================== -->
     <section id="screen-messages" class="screen hidden" style="gap:0;">
-
-      <button type="button" id="chatBackButton" class="chat-back-button" aria-label="Terug naar gesprekken">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        Gesprekken
-      </button>
 
       <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.</div>
 
@@ -1738,8 +1701,6 @@
     { sel: '#sentRequestsSection .section-title', nl: 'Openstaande verzoeken', en: 'Pending requests' },
     { sel: '#contactsSection .section-title', nl: 'Mijn contacten', en: 'My contacts' },
     { sel: '#contactsEmpty', nl: 'Nog geen contacten. Zoek hierboven naar iemand die u vertrouwt.', en: 'No contacts yet. Search above for someone you trust.' },
-    { sel: '#conversationsEmpty', nl: 'Nog geen gesprekken. Voeg eerst een noodcontact toe bij Contacten — dan verschijnt hier meteen een gesprek.', en: 'No conversations yet. Add an emergency contact under Contacts first — a conversation will appear here right away.' },
-    { sel: '#chatBackButton', m: 'l', nl: 'Gesprekken', en: 'Conversations' },
     { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
     { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
     { sel: '#locationMapImg', attr: 'alt', nl: 'Kaart met locatie', en: 'Map with location' },
@@ -1819,7 +1780,6 @@
       'medical.conditions': 'Aandoeningen:',
       'medical.doctor': 'Huisarts:',
       'medical.other': 'Overig:',
-      'conversation.own': 'Jouw kring',
       'conversation.unknown': 'Onbekend',
       'conversation.someone': 'Iemand',
       'chat.onMyWay': '✅ {name} komt eraan!',
@@ -1830,13 +1790,6 @@
       'notif.accept': 'Accepteren',
       'notif.reject': 'Verwijderen',
       'notif.openMessages': 'Open Berichten',
-      'conversation.contactSingular': 'contact',
-      'conversation.contactPlural': 'contacten',
-      'conversation.noMessages': 'Nog geen berichten — stuur de eerste.',
-      'conversation.you': 'Jij: ',
-      'conversation.mediaPhoto': '📷 Foto',
-      'conversation.mediaVideo': '🎥 Video',
-      'conversation.default': 'Bericht',
       'install.installed': '✅ Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
       'install.notInstalled': '⚠️ Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
       'install.installNow': 'Nu installeren',
@@ -1914,7 +1867,6 @@
       'medical.conditions': 'Conditions:',
       'medical.doctor': 'Doctor:',
       'medical.other': 'Other:',
-      'conversation.own': 'Your circle',
       'conversation.unknown': 'Unknown',
       'conversation.someone': 'Someone',
       'chat.onMyWay': '✅ {name} is on their way!',
@@ -1925,13 +1877,6 @@
       'notif.accept': 'Accept',
       'notif.reject': 'Remove',
       'notif.openMessages': 'Open Messages',
-      'conversation.contactSingular': 'contact',
-      'conversation.contactPlural': 'contacts',
-      'conversation.noMessages': 'No messages yet — send the first one.',
-      'conversation.you': 'You: ',
-      'conversation.mediaPhoto': '📷 Photo',
-      'conversation.mediaVideo': '🎥 Video',
-      'conversation.default': 'Message',
       'install.installed': '✅ Installed — you\'ll receive emergency alerts as expected.',
       'install.notInstalled': '⚠️ Not installed yet — without this you could miss an emergency alert.',
       'install.installNow': 'Install now',
@@ -2141,10 +2086,6 @@
     tabMessages: document.getElementById('tabMessages'),
     screenAlarm: document.getElementById('screen-alarm'),
     screenContacts: document.getElementById('screen-contacts'),
-    screenConversations: document.getElementById('screen-conversations'),
-    conversationsList: document.getElementById('conversationsList'),
-    conversationsEmpty: document.getElementById('conversationsEmpty'),
-    chatBackButton: document.getElementById('chatBackButton'),
     screenMessages: document.getElementById('screen-messages'),
     screenProfile: document.getElementById('screen-profile'),
 
@@ -3177,8 +3118,7 @@
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
-  els.tabMessages.addEventListener('click', () => switchScreen('conversations'));
-  els.chatBackButton.addEventListener('click', () => switchScreen('conversations'));
+  els.tabMessages.addEventListener('click', () => openMessages(myGroupId));
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
     if (name !== 'messages' && chatChannel){
@@ -3190,15 +3130,14 @@
     }
     els.screenAlarm.classList.toggle('hidden', name !== 'alarm');
     els.screenContacts.classList.toggle('hidden', name !== 'contacts');
-    els.screenConversations.classList.toggle('hidden', name !== 'conversations');
     els.screenMessages.classList.toggle('hidden', name !== 'messages');
     els.screenProfile.classList.toggle('hidden', name !== 'profile');
     els.tabAlarm.classList.toggle('active', name === 'alarm');
     els.tabContacts.classList.toggle('active', name === 'contacts');
-    els.tabMessages.classList.toggle('active', name === 'conversations' || name === 'messages');
+    els.tabMessages.classList.toggle('active', name === 'messages');
     els.tabAlarm.setAttribute('aria-selected', String(name === 'alarm'));
     els.tabContacts.setAttribute('aria-selected', String(name === 'contacts'));
-    els.tabMessages.setAttribute('aria-selected', String(name === 'conversations' || name === 'messages'));
+    els.tabMessages.setAttribute('aria-selected', String(name === 'messages'));
     els.mainNav.classList.toggle('hidden', name === 'profile');
     els.profileBackButton.classList.toggle('hidden', name !== 'profile');
     els.messagesParticipants.classList.toggle('hidden', name !== 'messages');
@@ -3210,7 +3149,6 @@
       refreshContacts();
       refreshSentRequests();
     }
-    if (name === 'conversations') loadConversations();
   }
 
   /* =========================================================================
@@ -3711,46 +3649,6 @@
     els.messagesParticipants.innerHTML = shown.map(p =>
       '<span class="avatar sm facepile-avatar">' + avatarInner(p.avatar_url) + '</span>'
     ).join('') + (extra > 0 ? '<span class="avatar sm facepile-avatar facepile-more">+' + extra + '</span>' : '');
-  }
-
-  // Gesprekkenlijst: elke kring waar je lid van bent (je eigen kring +
-  // die van elk van je contacten) is een apart, doorlopend gesprek — dus
-  // chatten werkt hier altijd, niet pas zodra iemand het alarm indrukt.
-  function mediaPreviewLabel(type){
-    return type === 'image' ? t('conversation.mediaPhoto') : type === 'video' ? t('conversation.mediaVideo') : t('conversation.default');
-  }
-  function conversationPreviewText(row){
-    if (!row.last_message_at) return t('conversation.noMessages');
-    const mine = row.last_message_sender_id === currentSession.user.id;
-    const who = mine ? t('conversation.you') : (row.member_count > 2 && row.last_message_sender_name ? escapeHtml(row.last_message_sender_name) + ': ' : '');
-    const body = row.last_message_body ? escapeHtml(row.last_message_body) : mediaPreviewLabel(row.last_message_media_type);
-    return who + body;
-  }
-  function conversationCardHtml(row){
-    const unread = Number(row.unread_count) || 0;
-    const title = row.is_own ? t('conversation.own') : (row.owner_name || t('conversation.unknown'));
-    const contactWord = row.member_count === 1 ? t('conversation.contactSingular') : t('conversation.contactPlural');
-    return '<li class="person-card conversation-card' + (unread ? ' unread' : '') + '" data-group-id="' + row.group_id + '" tabindex="0" role="button">' +
-      '<div class="avatar">' + avatarInner(row.owner_avatar_url) + '</div>' +
-      '<div class="person-info conversation-info">' +
-        '<div class="name">' + escapeHtml(title) + (row.is_own ? '<span class="conversation-own-tag">' + row.member_count + ' ' + escapeHtml(contactWord) + '</span>' : '') + '</div>' +
-        '<div class="conversation-preview">' + conversationPreviewText(row) + '</div>' +
-      '</div>' +
-      '<div class="conversation-meta">' +
-        (row.last_message_at ? '<span class="conversation-time">' + timeAgo(row.last_message_at) + '</span>' : '') +
-        (unread ? '<span class="conversation-unread-badge">' + (unread > 99 ? '99+' : unread) + '</span>' : '') +
-      '</div></li>';
-  }
-  async function loadConversations(){
-    els.conversationsList.innerHTML = '<li class="empty-state">Gesprekken laden…</li>';
-    els.conversationsEmpty.classList.add('hidden');
-    const { data, error } = await sb.rpc('get_my_conversations');
-    const rows = error ? [] : (data || []);
-    els.conversationsEmpty.classList.toggle('hidden', rows.length > 0);
-    els.conversationsList.innerHTML = rows.map(conversationCardHtml).join('');
-    els.conversationsList.querySelectorAll('.conversation-card').forEach(card =>
-      card.addEventListener('click', () => openMessages(card.dataset.groupId))
-    );
   }
 
   async function openMessages(groupId){
