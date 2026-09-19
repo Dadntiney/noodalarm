@@ -430,7 +430,12 @@
     box-shadow:0 10px 24px rgba(227,32,61,.35);
   }
   .status-badge.sent{ background:var(--green); box-shadow:0 10px 24px rgba(43,182,115,.35); }
+  .status-badge.test{ background:var(--amber); box-shadow:0 10px 24px rgba(242,169,59,.35); }
   .status-badge.warn{ background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); box-shadow:none; }
+  .test-mode-banner{
+    background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); border-radius:var(--radius-md);
+    padding:12px 16px; font-weight:700; font-size:0.9375rem; text-align:center; margin-bottom:14px;
+  }
   .status-badge svg{ width:19px; height:19px; }
 
   .info-row{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; font-size:1rem; }
@@ -1246,6 +1251,8 @@
 
           <button type="button" id="cancelAlarmButton" class="cancel-button hidden">Annuleren</button>
 
+          <button type="button" id="testAlarmButton" class="link-button">🧪 Oefenen? Stuur een testalarm</button>
+
           <div id="noGroupWarning" class="auth-message warn hidden">Je hebt nog geen bevestigde noodcontacten. Voeg iemand toe via "Contacten" zodat er iemand is om te waarschuwen.</div>
 
           <div id="iosInstallHint" class="auth-message hidden">
@@ -1328,6 +1335,8 @@
 
     <!-- =========================== BERICHTEN SCHERM =========================== -->
     <section id="screen-messages" class="screen hidden" style="gap:0;">
+
+      <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.</div>
 
       <div id="locationCard" class="location-card hidden" style="border-radius:var(--radius-md); border:1px solid var(--border-soft); margin-bottom:14px;">
         <div class="location-header">
@@ -1623,6 +1632,8 @@
     alarmIcon: document.getElementById('alarmIcon'),
     holdProgress: document.getElementById('holdProgress'),
     cancelAlarmButton: document.getElementById('cancelAlarmButton'),
+    testAlarmButton: document.getElementById('testAlarmButton'),
+    testModeBanner: document.getElementById('testModeBanner'),
     noGroupWarning: document.getElementById('noGroupWarning'),
     iosInstallHint: document.getElementById('iosInstallHint'),
     iosInstallHintDismiss: document.getElementById('iosInstallHintDismiss'),
@@ -2702,11 +2713,14 @@
     els.alarmButton.classList.remove('counting');
     els.alarmButton.setAttribute('aria-label', 'Druk voor alarm');
     els.cancelAlarmButton.classList.add('hidden');
+    els.testAlarmButton.classList.remove('hidden');
     setHoldProgress(0);
   }
 
-  function startCountdown(){
+  let pendingTestMode = false;
+  function startCountdown(testMode){
     if (countdownActive || els.alarmButton.disabled) return;
+    pendingTestMode = !!testMode;
     countdownActive = true;
     countdownStartedAt = performance.now();
     pendingLocation = requestLocation();
@@ -2715,6 +2729,7 @@
     els.alarmIcon.classList.add('hidden');
     els.alarmButtonSublabel.classList.remove('hidden');
     els.cancelAlarmButton.classList.remove('hidden');
+    els.testAlarmButton.classList.add('hidden');
     if (navigator.vibrate) navigator.vibrate(20);
 
     let lastBeepSecond = null;
@@ -2733,7 +2748,7 @@
       if (fraction >= 1){
         countdownActive = false;
         resetAlarmButton();
-        activateAlarm();
+        activateAlarm(pendingTestMode);
         return;
       }
       countdownRafId = requestAnimationFrame(tick);
@@ -2750,9 +2765,10 @@
 
   els.alarmButton.addEventListener('click', () => {
     if (countdownActive) cancelCountdown();
-    else startCountdown();
+    else startCountdown(false);
   });
   els.cancelAlarmButton.addEventListener('click', cancelCountdown);
+  els.testAlarmButton.addEventListener('click', () => startCountdown(true));
 
   els.endAlarmButton.addEventListener('click', async () => {
     switchView(els.viewIdle);
@@ -2797,7 +2813,7 @@
     target.classList.remove('hidden');
   }
 
-  async function activateAlarm(){
+  async function activateAlarm(testMode){
     els.alarmButton.disabled = true;
     if (navigator.vibrate) navigator.vibrate([80,40,80]);
 
@@ -2819,7 +2835,7 @@
           Authorization: 'Bearer ' + session.access_token
         },
         body: JSON.stringify({
-          testMode: false,
+          testMode: !!testMode,
           lat: location ? location.lat : null,
           lng: location ? location.lng : null,
           accuracy: location ? location.accuracy : null
@@ -2838,6 +2854,9 @@
     if (sendError){
       els.statusBadge.className = 'status-badge warn';
       els.statusBadgeText.textContent = 'VERSTUREN MISLUKT';
+    } else if (testMode){
+      els.statusBadge.className = 'status-badge test';
+      els.statusBadgeText.textContent = '🧪 TESTALARM VERZONDEN';
     } else {
       els.statusBadge.className = 'status-badge sent';
       els.statusBadgeText.textContent = 'NOODALARM VERZONDEN';
@@ -2994,7 +3013,7 @@
 
     const [{ data: members }, { data: alarmRow }] = await Promise.all([
       sb.rpc('get_group_participants', { p_group_id: groupId }),
-      sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at')
+      sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
         .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle()
     ]);
     chatParticipantById = {};
@@ -3020,9 +3039,12 @@
   // zowel bij het openen van Berichten als bij elke realtime-update van
   // de alarms-rij.
   function handleActiveAlarmChanged(alarmRow){
+    els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
     renderLocationCard(alarmRow);
     renderMedicalInfoCard(alarmRow);
-    if (alarmRow && alarmRow.status === 'active' && alarmRow.triggered_by === currentSession.user.id){
+    // Een oefenalarm hoeft nooit escalatie/"nog geen reactie" te tonen —
+    // niemand hoeft ooit 112 te bellen voor een test.
+    if (alarmRow && alarmRow.status === 'active' && !alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id){
       startAckWatcher(alarmRow.id, alarmRow.created_at);
     } else {
       stopAckWatcher();
