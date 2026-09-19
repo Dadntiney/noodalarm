@@ -1436,6 +1436,25 @@
     let pulling = false;
     let atTop = true;
     let atBottom = true;
+    let pendingPull = null;
+    let rafId = null;
+
+    // Compositor-hint: laat de browser dit alvast op een eigen laag zetten
+    // zodat de transform-updates los van het hoofdproces geschilderd worden
+    // — dat is wat 120Hz-vloeiend bewegen op een ProMotion-scherm mogelijk
+    // maakt, i.p.v. gebonden aan de trager main-thread paint-cyclus.
+    el.style.willChange = 'transform';
+
+    function applyPull(){
+      rafId = null;
+      if (pendingPull !== null){
+        el.style.transform = pendingPull === 0 ? '' : 'translateY(' + pendingPull + 'px)';
+      }
+    }
+    function schedulePull(px){
+      pendingPull = px;
+      if (rafId === null) rafId = requestAnimationFrame(applyPull);
+    }
 
     function readBoundaries(){
       if (windowScroll){
@@ -1468,15 +1487,20 @@
         // afkap. Nadert maxPull asymptotisch.
         const magnitude = Math.abs(delta);
         const pull = Math.sign(delta) * (maxPull * magnitude) / (maxPull + magnitude);
-        el.style.transform = 'translateY(' + pull + 'px)';
+        // Alleen de waarde bijwerken; het echte schilderen gebeurt via rAF,
+        // maximaal één keer per beeldverversing (60Hz of 120Hz), voor de
+        // vloeiendste beweging die het scherm aankan.
+        schedulePull(pull);
         if (ev.cancelable) ev.preventDefault();
       } else if (pulling){
-        el.style.transform = '';
+        schedulePull(0);
         pulling = false;
       }
     }, { passive: false });
 
     function release(){
+      if (rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
+      pendingPull = null;
       if (pulling){
         // Lichte overshoot-easing (zoals een iOS-spring) zodat hij niet
         // hard stopt op 0, maar er nog heel even voorbij "veert".
