@@ -2432,10 +2432,12 @@
   function ticksInnerHtml(messageId){
     const state = messageTickState(messageId);
     const readClass = state === 'read' ? ' read' : '';
-    const paths = state === 'sent'
-      ? '<path d="M2 6.5 6 10.5 16 1"/>'
-      : '<path d="M1 6.5 4.5 10 11 2.5"/><path d="M6.5 6.5 10 10 17 1.5"/>';
-    return '<svg class="tick-icon' + readClass + '" viewBox="0 0 18 12" width="17" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>';
+    // Dunne, gevulde vinkjes (i.p.v. dikke gestreken lijntjes) voor een
+    // strakkere, WhatsApp-achtige uitstraling op zo'n klein formaat.
+    const path = state === 'sent'
+      ? 'M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'
+      : 'M18 7l-1.41-1.41-6.34 6.34 1.41 1.41zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12zM.41 13.41 6 19l1.41-1.41L1.83 12z';
+    return '<svg class="tick-icon' + readClass + '" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="' + path + '"/></svg>';
   }
   function chatTicksHtml(messageId){
     return '<span class="msg-ticks" data-message-id="' + messageId + '">' + ticksInnerHtml(messageId) + '</span>';
