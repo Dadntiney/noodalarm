@@ -166,6 +166,13 @@
      grijze achtergrond als een harde balk oogde. */
   body.messages-open .app-header{ background:var(--surface); }
   body.messages-open .facepile-avatar{ border-color:var(--surface); }
+  /* Op het berichtenscherm mag de header (merk/bel/profiel + tabs +
+     avatarrij) compacter, zodat er meer ruimte overblijft voor het
+     gesprek zelf — net als bij WhatsApp. Andere schermen behouden hun
+     normale, ruimere header. */
+  body.messages-open .topbar{ padding-bottom:8px; }
+  body.messages-open .segmented{ margin-bottom:12px; }
+  body.messages-open .segmented button{ padding:9px 0; }
   /* De vaste header/typebalk lopen al helemaal tot de randen (position:fixed
      met eigen padding). De berichtenlijst zelf zat daartussen nog steeds
      ingesprongen, omdat die normaal binnen de padding van .app valt — hier
@@ -547,10 +554,13 @@
      zijn uiteindelijke hoogte heeft — anders schuift de header (en dus
      de berichtenlijst eronder) zichtbaar op zodra de avatars een fractie
      later worden ingeladen. */
-  .facepile{ display:flex; align-items:center; margin-top:-6px; padding-bottom:14px; min-height:38px; }
+  .facepile{ display:flex; align-items:center; margin-top:-4px; padding-bottom:8px; min-height:30px; }
   .facepile-avatar{
-    border:2.5px solid var(--bg); margin-left:-12px; box-shadow:var(--shadow-card);
+    border:2px solid var(--bg); margin-left:-10px; box-shadow:var(--shadow-card);
   }
+  /* Hogere specificiteit nodig om de 38px van .avatar.sm te overschrijven —
+     compacter dan de standaard avatarmaat, voor een slankere headerrij. */
+  .avatar.sm.facepile-avatar{ width:30px; height:30px; }
   .facepile-avatar:first-child{ margin-left:0; }
   .facepile-more{ background:var(--surface-2); color:var(--text-muted); font-size:0.75rem; font-weight:800; }
 
@@ -790,10 +800,10 @@
     display:flex; flex-direction:column; flex-shrink:0;
     position:fixed; bottom:0; left:0; right:0; z-index:10;
     max-width:480px; margin:0 auto;
-    padding:0 var(--app-pad-x) max(14px, env(safe-area-inset-bottom));
+    padding:0 var(--app-pad-x) max(10px, env(safe-area-inset-bottom));
     background:var(--surface); border-top:1px solid var(--border-soft);
   }
-  .chat-form-row{ display:flex; align-items:center; gap:10px; padding-top:14px; }
+  .chat-form-row{ display:flex; align-items:center; gap:8px; padding-top:10px; }
   .chat-edit-banner{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     padding:10px 2px 0;
@@ -844,24 +854,24 @@
   .chat-bubble-menu-info-row-time{ color:var(--text-muted); font-size:0.8125rem; margin-top:1px; }
   .chat-bubble-menu-info-empty{ color:var(--text-muted); font-size:0.875rem; padding:10px 8px 4px; text-align:center; }
   .chat-form input{
-    flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:26px;
-    padding:14px 20px; font-size:1.0625rem; color:var(--text); min-height:52px;
+    flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:23px;
+    padding:11px 18px; font-size:1.0625rem; color:var(--text); min-height:46px;
   }
   .chat-form input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
   .chat-form input::placeholder{ color:var(--text-faint); }
   .chat-send-button{
-    width:52px; height:52px; min-height:52px; border-radius:50%; flex-shrink:0;
+    width:46px; height:46px; min-height:46px; border-radius:50%; flex-shrink:0;
     background:var(--accent); border:none; color:#fff;
     display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
-  .chat-send-button svg{ width:24px; height:24px; }
+  .chat-send-button svg{ width:21px; height:21px; }
   .chat-send-button:hover{ background:var(--accent-dark); }
   .chat-attach-button{
-    width:44px; height:44px; min-height:44px; border-radius:50%; flex-shrink:0;
+    width:42px; height:42px; min-height:42px; border-radius:50%; flex-shrink:0;
     background:none; border:none; color:var(--text-muted);
     display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
-  .chat-attach-button svg{ width:22px; height:22px; }
+  .chat-attach-button svg{ width:20px; height:20px; }
   .chat-attach-button:hover{ color:var(--text); background:var(--surface-2); }
   .chat-attach-button:disabled{ opacity:.5; cursor:not-allowed; }
   .location-card{
