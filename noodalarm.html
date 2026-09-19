@@ -238,6 +238,8 @@
   .resus-segmented button[data-resus="yes"].active{ background:var(--green); }
   .resus-segmented button[data-resus="no"].active{ background:var(--danger); }
   @media (max-width:360px){ .resus-segmented button{ font-size:0.71875rem; padding:10px 2px; } }
+  .siren-segmented button{ font-size:0.8125rem; padding:11px 4px; }
+  @media (max-width:380px){ .siren-segmented button{ font-size:0.71875rem; padding:10px 2px; } }
 
   /* ---------- Weergave (thema)-keuze ---------- */
   .theme-picker{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
@@ -1023,6 +1025,18 @@
         </nav>
       </div>
 
+      <div style="margin-bottom:24px;">
+        <div class="settings-row-title" id="sirenSectionTitle" style="margin-bottom:8px;">Alarmgeluid</div>
+        <p class="field-hint" id="sirenSectionHint" style="margin-top:0; margin-bottom:12px;">Geluid dat NORI zelf afspeelt zodra een noodcontact een alarm activeert, terwijl de app open staat. Tik om te beluisteren en te kiezen.</p>
+        <nav class="segmented siren-segmented" role="tablist" aria-label="Alarmgeluid">
+          <button type="button" id="sirenOffButton" data-siren="off" role="tab">Uit</button>
+          <button type="button" id="sirenClassicButton" data-siren="classic" role="tab">Klassiek</button>
+          <button type="button" id="sirenPulseButton" data-siren="pulse" role="tab">Puls</button>
+          <button type="button" id="sirenDigitalButton" data-siren="digital" role="tab">Digitaal</button>
+        </nav>
+        <div id="sirenPlatformNote" class="field-hint" style="margin-top:10px;"></div>
+      </div>
+
       <div class="settings-row" id="installStatusRow" style="margin-bottom:24px; align-items:center;">
         <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
           <div id="installStatusIcon" class="install-status-icon warn">
@@ -1580,7 +1594,7 @@
     };
   }
   const realStore = createStore(window.localStorage);
-  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing', textSize: 'noodalarm.textSize', highContrast: 'noodalarm.highContrast', medicalHintDismissed: 'noodalarm.medicalHintDismissed', language: 'noodalarm.language' };
+  const KEYS = { onboarded: 'noodalarm.onboarded', theme: 'noodalarm.theme', iosHintDismissed: 'noodalarm.iosHintDismissed', androidHintDismissed: 'noodalarm.androidHintDismissed', locationSharing: 'noodalarm.locationSharing', textSize: 'noodalarm.textSize', highContrast: 'noodalarm.highContrast', medicalHintDismissed: 'noodalarm.medicalHintDismissed', language: 'noodalarm.language', alarmSiren: 'noodalarm.alarmSiren' };
 
   /* =========================================================================
      TAAL (NL/EN) — statische schermteksten via een CSS-selector, dynamische
@@ -1628,6 +1642,12 @@
     { sel: '#locationSectionHint', nl: 'NORI vraagt dit eenmalig bij het openen van de app, zodat je locatie al klaarstaat zodra je ooit op ALARM drukt.', en: 'NORI asks this once when you open the app, so your location is ready the moment you ever press ALARM.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
+    { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
+    { sel: '#sirenSectionHint', nl: 'Geluid dat NORI zelf afspeelt zodra een noodcontact een alarm activeert, terwijl de app open staat. Tik om te beluisteren en te kiezen.', en: 'Sound NORI itself plays the moment an emergency contact activates an alarm, while the app is open. Tap to preview and choose.' },
+    { sel: '#sirenOffButton', nl: 'Uit', en: 'Off' },
+    { sel: '#sirenClassicButton', nl: 'Klassiek', en: 'Classic' },
+    { sel: '#sirenPulseButton', nl: 'Puls', en: 'Pulse' },
+    { sel: '#sirenDigitalButton', nl: 'Digitaal', en: 'Digital' },
     { sel: '#themeSectionTitle', nl: 'Weergave', en: 'Appearance' },
     { sel: '#themeSectionHint', nl: 'Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.', en: 'Light, dark, or automatically match the time of day.' },
     { sel: '#themeLightButton span', nl: 'Licht', en: 'Light' },
@@ -1835,6 +1855,9 @@
       'install.notInstalled': 'Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
       'install.installNow': 'Nu installeren',
       'install.showHow': 'Bekijk hoe',
+      'siren.noteAndroid': 'Dit geluid speelt alleen terwijl NORI open staat. Voor het geluid van de pushmelding zelf (als je telefoon vergrendeld is) bepaalt Android dit: ga naar Instellingen → Apps → NORI (of Chrome) → Meldingen, en kies daar zelf een luider meldingsgeluid.',
+      'siren.noteIos': 'Dit geluid speelt alleen terwijl NORI open staat. Voor het geluid van de pushmelding zelf (als je telefoon vergrendeld is) gebruikt iOS altijd het systeemgeluid — Apple biedt websites en apps zoals NORI geen manier om dat aan te passen.',
+      'siren.noteDesktop': 'Dit geluid speelt alleen terwijl deze pagina open staat in je browser.',
       'requests.withdraw': 'Intrekken',
       'contacts.add': '+ Toevoegen',
       'contacts.sentInvite': 'Uitnodiging verzonden',
@@ -1922,6 +1945,9 @@
       'install.notInstalled': 'Not installed yet — without this you could miss an emergency alert.',
       'install.installNow': 'Install now',
       'install.showHow': 'Show me how',
+      'siren.noteAndroid': 'This sound only plays while NORI is open. For the push notification\'s own sound (when your phone is locked), Android decides that: go to Settings → Apps → NORI (or Chrome) → Notifications, and choose a louder notification sound there yourself.',
+      'siren.noteIos': 'This sound only plays while NORI is open. For the push notification\'s own sound (when your phone is locked), iOS always uses the system sound — Apple gives websites and apps like NORI no way to change that.',
+      'siren.noteDesktop': 'This sound only plays while this page is open in your browser.',
       'requests.withdraw': 'Withdraw',
       'contacts.add': '+ Add',
       'contacts.sentInvite': 'Invite sent',
@@ -2215,6 +2241,11 @@
 
     languageNlButton: document.getElementById('languageNlButton'),
     languageEnButton: document.getElementById('languageEnButton'),
+    sirenOffButton: document.getElementById('sirenOffButton'),
+    sirenClassicButton: document.getElementById('sirenClassicButton'),
+    sirenPulseButton: document.getElementById('sirenPulseButton'),
+    sirenDigitalButton: document.getElementById('sirenDigitalButton'),
+    sirenPlatformNote: document.getElementById('sirenPlatformNote'),
     themeColorMeta: document.getElementById('themeColorMeta'),
     themeLightButton: document.getElementById('themeLightButton'),
     themeDarkButton: document.getElementById('themeDarkButton'),
@@ -2244,6 +2275,115 @@
   renderLanguagePicker();
   if (els.languageNlButton) els.languageNlButton.addEventListener('click', () => setLanguage('nl'));
   if (els.languageEnButton) els.languageEnButton.addEventListener('click', () => setLanguage('en'));
+
+  /* =========================================================================
+     ALARMGELUID — een pushmelding kan op geen enkel platform (iOS, Android,
+     desktop) een eigen geluidsbestand laten afspelen; dat is een harde
+     grens van de Web Push-standaard zelf, geen bug die met meer JS is op
+     te lossen. Wat wél kan: zolang NORI open staat (voor- of achtergrond-
+     tab), zelf hard een sirene afspelen zodra er een echt alarm binnenkomt
+     — puur synthetisch via Web Audio, geen geluidsbestand nodig.
+     ========================================================================= */
+  let sirenAudioCtx = null;
+  function getSirenAudioCtx(){
+    if (!sirenAudioCtx) sirenAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (sirenAudioCtx.state === 'suspended') sirenAudioCtx.resume();
+    return sirenAudioCtx;
+  }
+  // iOS/Safari staat geluid pas toe na een directe tik — deze alvast
+  // "ontgrendelen" bij de allereerste tik ergens in de app, zodat een
+  // sirene die later vanzelf afgaat (bij een binnenkomend alarm) ook
+  // daadwerkelijk hoorbaar is.
+  document.addEventListener('touchstart', () => getSirenAudioCtx(), { once: true, passive: true });
+  document.addEventListener('click', () => getSirenAudioCtx(), { once: true });
+
+  function playSirenTone(ctx, freq, startAt, duration, volume){
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startAt);
+    osc.stop(startAt + duration + 0.02);
+  }
+  // Elke sirene is een functie die één cyclus inplant vanaf t0 en teruggeeft
+  // hoe lang (in seconden) die cyclus duurt — playSirenLoop roept 'm daarna
+  // steeds opnieuw aan tot de gewenste totale duur voorbij is.
+  const SIREN_PATTERNS = {
+    classic: (ctx, t0) => {
+      playSirenTone(ctx, 880, t0, 0.45, 0.35);
+      playSirenTone(ctx, 660, t0 + 0.45, 0.45, 0.35);
+      return 0.9;
+    },
+    pulse: (ctx, t0) => {
+      playSirenTone(ctx, 950, t0, 0.15, 0.4);
+      playSirenTone(ctx, 950, t0 + 0.25, 0.15, 0.4);
+      return 0.55;
+    },
+    digital: (ctx, t0) => {
+      playSirenTone(ctx, 1220, t0, 0.11, 0.35);
+      playSirenTone(ctx, 700, t0 + 0.16, 0.11, 0.35);
+      return 0.34;
+    }
+  };
+  let sirenLoopTimer = null;
+  function stopSirenLoop(){
+    if (sirenLoopTimer){ clearTimeout(sirenLoopTimer); sirenLoopTimer = null; }
+    document.removeEventListener('touchstart', stopSirenLoop);
+    document.removeEventListener('click', stopSirenLoop);
+  }
+  function playSirenLoop(name, totalSeconds){
+    stopSirenLoop();
+    const pattern = SIREN_PATTERNS[name];
+    if (!pattern) return;
+    const ctx = getSirenAudioCtx();
+    const endAt = Date.now() + totalSeconds * 1000;
+    (function tick(){
+      if (Date.now() >= endAt){ sirenLoopTimer = null; return; }
+      const cycleLen = pattern(ctx, ctx.currentTime);
+      sirenLoopTimer = setTimeout(tick, cycleLen * 1000);
+    })();
+    // Overal een tik op het scherm mag de sirene meteen stilzetten — net
+    // als een wekker die je uitzet door 'm aan te raken.
+    document.addEventListener('touchstart', stopSirenLoop, { once: true, passive: true });
+    document.addEventListener('click', stopSirenLoop, { once: true });
+  }
+  function alarmSirenChoice(){
+    return realStore.get(KEYS.alarmSiren, 'classic');
+  }
+  function playChosenAlarmSiren(){
+    const choice = alarmSirenChoice();
+    if (choice === 'off') return;
+    playSirenLoop(choice, 12);
+  }
+  function renderSirenButtons(){
+    const choice = alarmSirenChoice();
+    [els.sirenOffButton, els.sirenClassicButton, els.sirenPulseButton, els.sirenDigitalButton].forEach(btn => {
+      if (!btn) return;
+      const active = btn.dataset.siren === choice;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+  }
+  function renderSirenPlatformNote(){
+    if (!els.sirenPlatformNote) return;
+    els.sirenPlatformNote.textContent = isIos() ? t('siren.noteIos') : isAndroid() ? t('siren.noteAndroid') : t('siren.noteDesktop');
+  }
+  [els.sirenOffButton, els.sirenClassicButton, els.sirenPulseButton, els.sirenDigitalButton].forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      realStore.set(KEYS.alarmSiren, btn.dataset.siren);
+      renderSirenButtons();
+      // Kiezen = meteen beluisteren, net als een "kies je beltoon"-scherm.
+      if (btn.dataset.siren !== 'off') playSirenLoop(btn.dataset.siren, 2.2);
+    });
+  });
+  renderSirenButtons();
+  renderSirenPlatformNote();
 
   // Houdt de inhoud precies onder de vaste header (topbalk + tabs), ongeacht
   // hoe hoog die is (verschilt per scherm door bv. de avatarrij bij Berichten).
@@ -2766,6 +2906,7 @@
         const n = payload.new;
         if (n && n.type === 'alarm' && n.related_alarm_id){
           if (navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
+          playChosenAlarmSiren();
           openChatByAlarm(n.related_alarm_id);
         }
       })
@@ -4225,16 +4366,16 @@
     activeMenuBubble = null;
   }
 
-  // preventDefault op touchstart is de enige manier die iOS' eigen
-  // selectie-/callout-gebaar echt en altijd blokkeert, hoe hard je ook
-  // drukt — CSS user-select:none alleen bleek daar niet tegen bestand.
-  // Dat onderdrukt op zijn beurt de synthetische 'click' voor deze tik,
-  // dus tikken op een video wordt hieronder zelf afgehandeld i.p.v. via
-  // de click-listener hierboven (die blijft puur voor desktop/muis).
+  // preventDefault NIET meer op touchstart zelf — dat blokkeerde iOS' eigen
+  // selectie-/callout-gebaar inderdaad altijd, maar nam zo ook het native
+  // scrollen mee zodra een sleep-beweging toevallig op een bubbel begon (je
+  // moest dan tussen de bubbels door drukken om te kunnen scrollen). In
+  // plaats daarvan: pas voorkomen zolang de vinger nog nauwelijks bewogen
+  // is (dus nog steeds een houd-gebaar kán zijn) — zodra er duidelijk
+  // bewogen wordt, laten we het gewoon aan de browser over om te scrollen.
   els.chatMessages.addEventListener('touchstart', (ev) => {
     const bubble = ev.target.closest('.chat-bubble');
     if (!bubble || ev.touches.length !== 1){ bubbleTouch = null; return; }
-    ev.preventDefault();
     const video = ev.target.closest('.chat-video');
     bubbleTouch = { bubble, video, startTime: Date.now(), moved: false };
     longPressStartXY = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
@@ -4244,7 +4385,7 @@
       if (navigator.vibrate) navigator.vibrate(15);
       openChatBubbleMenu(bubble);
     }, LONG_PRESS_MS);
-  }, { passive: false });
+  }, { passive: true });
   els.chatMessages.addEventListener('touchmove', (ev) => {
     if (!longPressStartXY) return;
     const dx = ev.touches[0].clientX - longPressStartXY.x;
@@ -4252,18 +4393,27 @@
     if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_TOLERANCE){
       cancelLongPress();
       if (bubbleTouch) bubbleTouch.moved = true;
+    } else {
+      // Vinger staat (nagenoeg) stil: dit kán nog een houd-gebaar worden,
+      // dus nu wél blokkeren — dat is precies het moment waarop iOS' eigen
+      // selectie-callout normaal gesproken zou verschijnen.
+      ev.preventDefault();
     }
-  }, { passive: true });
-  els.chatMessages.addEventListener('touchend', () => {
+  }, { passive: false });
+  els.chatMessages.addEventListener('touchend', (ev) => {
     cancelLongPress();
     const touch = bubbleTouch;
     bubbleTouch = null;
+    // Zelf afgehandeld i.p.v. via de synthetische 'click' (die op mobiel
+    // hierdoor onderdrukt wordt) — zo blijft precies dezelfde tik nooit
+    // dubbel afgevuurd worden.
+    if (touch) ev.preventDefault();
     // Alleen een echte, korte tik (niet verschoven, geen lang-indrukken,
     // geen menu geopend) op een video telt als "afspelen".
     if (touch && touch.video && !touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
       playVideoFullscreen(touch.video);
     }
-  });
+  }, { passive: false });
   els.chatMessages.addEventListener('touchcancel', () => { cancelLongPress(); bubbleTouch = null; });
   els.chatMessages.addEventListener('contextmenu', (ev) => {
     const bubble = ev.target.closest('.chat-bubble');
