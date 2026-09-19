@@ -2504,68 +2504,126 @@
   document.addEventListener('touchstart', () => getSirenAudioCtx(), { once: true, passive: true });
   document.addEventListener('click', () => getSirenAudioCtx(), { once: true });
 
-  function playSirenTone(ctx, freq, startAt, duration, volume){
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'square';
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.0001, startAt);
-    gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(startAt);
-    osc.stop(startAt + duration + 0.02);
-  }
-  // Elke sirene is een functie die één cyclus inplant vanaf t0 en teruggeeft
-  // hoe lang (in seconden) die cyclus duurt — playSirenLoop roept 'm daarna
-  // steeds opnieuw aan tot de gewenste totale duur voorbij is.
+  // Elke sirene automatiseert frequentie + volume van ÉÉN doorlopende
+  // oscillator (geen losse pieptonen die telkens opnieuw starten) — dat
+  // klinkt vloeiender en veel meer als een échte sirene. Elke functie plant
+  // één cyclus in vanaf t0 en geeft terug hoe lang (in seconden) die duurt;
+  // de scheduler roept 'm daarna steeds opnieuw aan.
+  const SIREN_WAVEFORM = { classic: 'sawtooth', pulse: 'square', digital: 'square' };
   const SIREN_PATTERNS = {
-    classic: (ctx, t0) => {
-      playSirenTone(ctx, 880, t0, 0.45, 0.35);
-      playSirenTone(ctx, 660, t0 + 0.45, 0.45, 0.35);
-      return 0.9;
+    // Klassieke "nee-naw"-wisseltoon, maar vloeiend glijdend tussen de twee
+    // tonen i.p.v. pieptonen met stiltes — sneller en voller dan een echte
+    // ambulance, bewust wat heftiger zodat 'ie niet te missen is.
+    classic: (ctx, osc, gain, t0) => {
+      const half = 0.8;
+      gain.gain.cancelScheduledValues(t0);
+      gain.gain.setValueAtTime(gain.gain.value, t0);
+      gain.gain.linearRampToValueAtTime(0.6, t0 + 0.03);
+      osc.frequency.cancelScheduledValues(t0);
+      osc.frequency.setValueAtTime(650, t0);
+      osc.frequency.linearRampToValueAtTime(950, t0 + half);
+      osc.frequency.linearRampToValueAtTime(650, t0 + half * 2);
+      return half * 2;
     },
-    pulse: (ctx, t0) => {
-      playSirenTone(ctx, 950, t0, 0.15, 0.4);
-      playSirenTone(ctx, 950, t0 + 0.25, 0.15, 0.4);
-      return 0.55;
+    // Amerikaanse "yelp"-sirene: snelle, scherpe stoten op één hoge toon.
+    pulse: (ctx, osc, gain, t0) => {
+      const dur = 0.32;
+      osc.frequency.cancelScheduledValues(t0);
+      osc.frequency.setValueAtTime(1100, t0);
+      gain.gain.cancelScheduledValues(t0);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.65, t0 + 0.02);
+      gain.gain.setValueAtTime(0.65, t0 + dur - 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur - 0.02);
+      return dur;
     },
-    digital: (ctx, t0) => {
-      playSirenTone(ctx, 1220, t0, 0.11, 0.35);
-      playSirenTone(ctx, 700, t0 + 0.16, 0.11, 0.35);
-      return 0.34;
+    // Digitale klaxon: rappe af wisseling tussen twee hoge tonen, net als
+    // een rookmelder/brandalarm — snel, piercend, moeilijk te negeren.
+    digital: (ctx, osc, gain, t0) => {
+      const dur = 0.22;
+      gain.gain.cancelScheduledValues(t0);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.6, t0 + 0.01);
+      osc.frequency.cancelScheduledValues(t0);
+      osc.frequency.setValueAtTime(1300, t0);
+      gain.gain.setValueAtTime(0.6, t0 + 0.09);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.1);
+      gain.gain.setValueAtTime(0.0001, t0 + 0.11);
+      gain.gain.exponentialRampToValueAtTime(0.6, t0 + 0.12);
+      osc.frequency.setValueAtTime(820, t0 + 0.11);
+      gain.gain.setValueAtTime(0.6, t0 + dur - 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      return dur;
     }
   };
-  let sirenLoopTimer = null;
+  let sirenOsc = null;
+  let sirenGain = null;
+  let sirenRefillTimer = null;
+  let sirenScheduledUntil = 0;
+  let sirenEndAt = 0;
   function stopSirenLoop(){
-    if (sirenLoopTimer){ clearTimeout(sirenLoopTimer); sirenLoopTimer = null; }
+    if (sirenRefillTimer){ clearTimeout(sirenRefillTimer); sirenRefillTimer = null; }
+    if (sirenOsc && sirenGain){
+      const ctx = getSirenAudioCtx();
+      const now = ctx.currentTime;
+      sirenGain.gain.cancelScheduledValues(now);
+      sirenGain.gain.setValueAtTime(sirenGain.gain.value, now);
+      sirenGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      const oscToStop = sirenOsc;
+      setTimeout(() => { try { oscToStop.stop(); } catch (e) { /* al gestopt */ } }, 200);
+    }
+    sirenOsc = null;
+    sirenGain = null;
     document.removeEventListener('touchstart', stopSirenLoop);
     document.removeEventListener('click', stopSirenLoop);
   }
+  // Plant steeds een paar seconden vooruit in i.p.v. per cyclus een nieuwe
+  // setTimeout — Web Audio's eigen klok blijft precies doorlopen, ook als
+  // deze tab op de achtergrond staat en de browser JS-timers vertraagt.
+  // Zo blijft de sirene ononderbroken doorgaan, precies zoals een echte.
   function playSirenLoop(name, totalSeconds){
     stopSirenLoop();
     const pattern = SIREN_PATTERNS[name];
     if (!pattern) return;
     const ctx = getSirenAudioCtx();
-    const endAt = Date.now() + totalSeconds * 1000;
-    (function tick(){
-      if (Date.now() >= endAt){ sirenLoopTimer = null; return; }
-      const cycleLen = pattern(ctx, ctx.currentTime);
-      sirenLoopTimer = setTimeout(tick, cycleLen * 1000);
+    sirenOsc = ctx.createOscillator();
+    sirenGain = ctx.createGain();
+    sirenOsc.type = SIREN_WAVEFORM[name] || 'square';
+    sirenGain.gain.value = 0.0001;
+    sirenOsc.connect(sirenGain);
+    sirenGain.connect(ctx.destination);
+    sirenOsc.start();
+    sirenEndAt = ctx.currentTime + totalSeconds;
+    sirenScheduledUntil = ctx.currentTime;
+    (function refill(){
+      while (sirenScheduledUntil < Math.min(ctx.currentTime + 4, sirenEndAt)){
+        sirenScheduledUntil += pattern(ctx, sirenOsc, sirenGain, sirenScheduledUntil);
+      }
+      if (ctx.currentTime >= sirenEndAt){ stopSirenLoop(); return; }
+      sirenRefillTimer = setTimeout(refill, 1000);
     })();
     // Overal een tik op het scherm mag de sirene meteen stilzetten — net
-    // als een wekker die je uitzet door 'm aan te raken.
-    document.addEventListener('touchstart', stopSirenLoop, { once: true, passive: true });
-    document.addEventListener('click', stopSirenLoop, { once: true });
+    // als een wekker die je uitzet door 'm aan te raken. Pas na deze
+    // event-cyclus registreren: anders vangt dit z'n eigen klik-event nog
+    // op (bv. bij het kiezen van een sirene in Instellingen, waarbij die
+    // klik verder omhoog bubbelt naar document) en stopt 'ie zichzelf
+    // meteen weer.
+    setTimeout(() => {
+      document.addEventListener('touchstart', stopSirenLoop, { once: true, passive: true });
+      document.addEventListener('click', stopSirenLoop, { once: true });
+    }, 0);
   }
   function alarmSirenChoice(){
     return realStore.get(KEYS.alarmSiren, 'classic');
   }
+  // Loopt net zo lang door als de escalatie-timer op reactie wacht (2 min)
+  // — daarna is sowieso al duidelijk of iemand het gezien heeft, en stopt
+  // 'ie vanzelf i.p.v. voor altijd door te blijven loeien.
+  const ALARM_SIREN_LOOP_SECONDS = 120;
   function playChosenAlarmSiren(){
     const choice = alarmSirenChoice();
     if (choice === 'off') return;
-    playSirenLoop(choice, 12);
+    playSirenLoop(choice, ALARM_SIREN_LOOP_SECONDS);
   }
   function renderSirenButtons(){
     const choice = alarmSirenChoice();
@@ -2586,7 +2644,7 @@
       realStore.set(KEYS.alarmSiren, btn.dataset.siren);
       renderSirenButtons();
       // Kiezen = meteen beluisteren, net als een "kies je beltoon"-scherm.
-      if (btn.dataset.siren !== 'off') playSirenLoop(btn.dataset.siren, 2.2);
+      if (btn.dataset.siren !== 'off') playSirenLoop(btn.dataset.siren, 3);
     });
   });
   renderSirenButtons();
