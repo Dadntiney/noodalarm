@@ -800,6 +800,7 @@
     display:block; max-height:280px; border-radius:12px;
     margin:-2px -6px 6px; width:calc(100% + 12px); object-fit:cover; background:var(--surface-2);
   }
+  img.chat-media{ cursor:pointer; }
   .chat-video-wrap{ position:relative; margin:-2px -6px 6px; width:calc(100% + 12px); cursor:pointer; }
   .chat-video-wrap .chat-media{ margin:0; width:100%; }
   .chat-video-play{
@@ -812,6 +813,18 @@
     position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.6); color:#fff;
     font-size:0.75rem; font-weight:700; padding:2px 7px; border-radius:6px; pointer-events:none; letter-spacing:.02em;
   }
+  /* ---------- Foto volledig scherm (tik op een foto, net als video) ---------- */
+  .media-lightbox{
+    position:fixed; inset:0; z-index:400; background:rgba(0,0,0,.94);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .media-lightbox img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .media-lightbox-close{
+    position:absolute; top:max(16px, env(safe-area-inset-top)); right:16px; z-index:1;
+    width:44px; height:44px; border-radius:50%; border:none; background:rgba(255,255,255,.12); color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .media-lightbox-close svg{ width:20px; height:20px; }
   .chat-form{
     display:flex; flex-direction:column; flex-shrink:0;
     position:fixed; bottom:0; left:0; right:0; z-index:10;
@@ -1554,6 +1567,14 @@
       <div id="notifEmpty" class="empty-state hidden">Nog geen meldingen.</div>
       <div id="notifList" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
+  </div>
+
+  <!-- =========================== FOTO VOLLEDIG SCHERM =========================== -->
+  <div id="mediaLightbox" class="media-lightbox hidden">
+    <button type="button" id="mediaLightboxClose" class="media-lightbox-close" aria-label="Sluiten">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <img id="mediaLightboxImg" alt="">
   </div>
 
   <!-- =========================== BERICHT-MENU (lang indrukken) =========================== -->
@@ -2687,6 +2708,9 @@
     chatEditCancelButton: document.getElementById('chatEditCancelButton'),
     chatBubbleMenu: document.getElementById('chatBubbleMenu'),
     chatBubbleMenuBackdrop: document.getElementById('chatBubbleMenuBackdrop'),
+    mediaLightbox: document.getElementById('mediaLightbox'),
+    mediaLightboxImg: document.getElementById('mediaLightboxImg'),
+    mediaLightboxClose: document.getElementById('mediaLightboxClose'),
     chatBubbleMenuActions: document.getElementById('chatBubbleMenuActions'),
     chatBubbleMenuInfoPanel: document.getElementById('chatBubbleMenuInfoPanel'),
     chatMenuInfo: document.getElementById('chatMenuInfo'),
@@ -4323,13 +4347,17 @@
 
   // Een korte piep per seconde tijdens het aftellen, zodat je ook zonder
   // ernaar te kijken merkt dat de klok loopt. Puur synthetisch via Web
-  // Audio (geen geluidsbestand nodig) — start altijd vanuit een echte
-  // tik op de knop, dus browsers staan het gewoon toe.
-  let countdownAudioCtx = null;
+  // Audio (geen geluidsbestand nodig). Gebruikt bewust dezelfde, gedeelde
+  // AudioContext als de sirene (getSirenAudioCtx) i.p.v. een eigen, pas
+  // hier voor het eerst aangemaakte context — die van de sirene is al
+  // "ontgrendeld" bij de allereerste tik ergens in de app (zie hierboven),
+  // dus deze piepjes profiteren daarvan mee i.p.v. zelf nog een niet-
+  // ontgrendelde context te moeten starten op het moment dat het al
+  // menens is. Dit voorkomt een bekende iOS/Safari-eigenaardigheid waarbij
+  // een tweede, later aangemaakte AudioContext soms stil blijft.
   function playCountdownBeep(urgent){
     try {
-      if (!countdownAudioCtx) countdownAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const ctx = countdownAudioCtx;
+      const ctx = getSirenAudioCtx();
       const fire = () => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -4356,8 +4384,7 @@
   // wachten op het netwerkverzoek erna.
   function playFiredTone(){
     try {
-      if (!countdownAudioCtx) countdownAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const ctx = countdownAudioCtx;
+      const ctx = getSirenAudioCtx();
       const fire = () => {
         [ [523.25, 0], [392.00, 0.09] ].forEach(([freq, delay]) => {
           const osc = ctx.createOscillator();
@@ -5320,6 +5347,24 @@
       .subscribe();
   }
 
+  // Tikken op een foto toont 'm schermvullend, net als bij video hieronder
+  // — maar via een eigen overlay i.p.v. de native Fullscreen API: die
+  // ondersteunt op iOS Safari alleen <video> betrouwbaar (webkitEnterFullscreen
+  // is video-only), voor een <img> zou requestFullscreen() daar vaak gewoon
+  // niets doen.
+  function openImageLightbox(src){
+    els.mediaLightboxImg.src = src;
+    els.mediaLightbox.classList.remove('hidden');
+  }
+  function closeImageLightbox(){
+    els.mediaLightbox.classList.add('hidden');
+    els.mediaLightboxImg.src = '';
+  }
+  els.mediaLightboxClose.addEventListener('click', closeImageLightbox);
+  els.mediaLightbox.addEventListener('click', (ev) => {
+    if (ev.target === els.mediaLightbox) closeImageLightbox();
+  });
+
   // Tikken op een video speelt hem direct fullscreen af, net als WhatsApp.
   function playVideoFullscreen(video){
     video.controls = true;
@@ -5338,7 +5383,9 @@
   // preventDefault aan zodra een druk op een bubbel begint.
   els.chatMessages.addEventListener('click', (ev) => {
     const video = ev.target.closest('.chat-video');
-    if (video) playVideoFullscreen(video);
+    if (video) { playVideoFullscreen(video); return; }
+    const img = ev.target.closest('img.chat-media');
+    if (img) openImageLightbox(img.src);
   });
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement){
@@ -5415,7 +5462,8 @@
     const bubble = ev.target.closest('.chat-bubble');
     if (!bubble || ev.touches.length !== 1){ bubbleTouch = null; return; }
     const video = ev.target.closest('.chat-video');
-    bubbleTouch = { bubble, video, startTime: Date.now(), moved: false };
+    const image = ev.target.closest('img.chat-media');
+    bubbleTouch = { bubble, video, image, startTime: Date.now(), moved: false };
     longPressStartXY = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
     longPressTimer = setTimeout(() => {
       longPressTimer = null;
@@ -5447,9 +5495,11 @@
     // dubbel afgevuurd worden.
     if (touch) ev.preventDefault();
     // Alleen een echte, korte tik (niet verschoven, geen lang-indrukken,
-    // geen menu geopend) op een video telt als "afspelen".
-    if (touch && touch.video && !touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
-      playVideoFullscreen(touch.video);
+    // geen menu geopend) op een video telt als "afspelen", op een foto als
+    // "schermvullend tonen".
+    if (touch && !touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
+      if (touch.video) playVideoFullscreen(touch.video);
+      else if (touch.image) openImageLightbox(touch.image.src);
     }
   }, { passive: false });
   els.chatMessages.addEventListener('touchcancel', () => { cancelLongPress(); bubbleTouch = null; });
