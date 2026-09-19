@@ -3467,10 +3467,16 @@
   }
 
   // Herinnert (nieuwe) gebruikers aan de medische info, zolang ze die nog
-  // niet hebben ingevuld — verdwijnt vanzelf zodra er iets staat.
+  // niet hebben ingevuld — verdwijnt vanzelf zodra er iets staat. "Niet nu"
+  // is bewust geen permanent afvinken maar een snooze: bij iets dat pas
+  // tijdens een écht noodgeval nuttig is, mag één wegklik het niet voorgoed
+  // laten verdwijnen — na een paar weken komt hij terug tot 'ie is ingevuld.
+  const MEDICAL_HINT_SNOOZE_MS = 21 * 24 * 60 * 60 * 1000;
   async function maybeShowMedicalInfoHint(){
-    if (!els.medicalInfoHint || realStore.get(KEYS.medicalHintDismissed, false)){
-      if (els.medicalInfoHint) els.medicalInfoHint.classList.add('hidden');
+    if (!els.medicalInfoHint) return;
+    const snoozedAt = realStore.get(KEYS.medicalHintDismissed, 0);
+    if (snoozedAt && Date.now() - snoozedAt < MEDICAL_HINT_SNOOZE_MS){
+      els.medicalInfoHint.classList.add('hidden');
       return;
     }
     const { data } = await sb.from('medical_info')
@@ -3492,7 +3498,7 @@
   }
   if (els.medicalInfoHintDismiss){
     els.medicalInfoHintDismiss.addEventListener('click', () => {
-      realStore.set(KEYS.medicalHintDismissed, true);
+      realStore.set(KEYS.medicalHintDismissed, Date.now());
       els.medicalInfoHint.classList.add('hidden');
     });
   }
