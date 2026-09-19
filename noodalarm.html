@@ -161,6 +161,11 @@
   body.messages-open{ height:100vh; height:100dvh; overflow:hidden; background:var(--surface); }
   body.messages-open .app{ height:100vh; height:100dvh; overflow:hidden; }
   body.messages-open #screen-app{ overflow:hidden; }
+  /* Zelfde reden als hierboven, maar dan aan de bovenkant: de vaste
+     header stond op de gewone (zwarte) paginakleur, wat nu tegen de
+     grijze achtergrond als een harde balk oogde. */
+  body.messages-open .app-header{ background:var(--surface); }
+  body.messages-open .facepile-avatar{ border-color:var(--surface); }
   body{
     background:var(--bg);
     color:var(--text);
@@ -533,7 +538,11 @@
     position:absolute; right:-1px; bottom:-1px; width:14px; height:14px; border-radius:50%;
     background:var(--green); border:2.5px solid var(--surface);
   }
-  .facepile{ display:flex; align-items:center; margin-top:-6px; padding-bottom:14px; }
+  /* min-height gereserveerd op de avatarmaat, zodat deze rij al meteen
+     zijn uiteindelijke hoogte heeft — anders schuift de header (en dus
+     de berichtenlijst eronder) zichtbaar op zodra de avatars een fractie
+     later worden ingeladen. */
+  .facepile{ display:flex; align-items:center; margin-top:-6px; padding-bottom:14px; min-height:38px; }
   .facepile-avatar{
     border:2.5px solid var(--bg); margin-left:-12px; box-shadow:var(--shadow-card);
   }
@@ -729,8 +738,6 @@
     padding:18px; -webkit-overflow-scrolling:touch;
     color:var(--text);
     background-color:var(--bg);
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
-    background-size:24px 24px;
   }
   /* Zonder dit selecteert een lang indrukken (voor het berichtmenu) ook de
      omliggende pagina-tekst, met de bekende blauwe selectie-highlight en op
