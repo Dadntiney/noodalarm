@@ -418,20 +418,6 @@
   .end-button:hover{ background:rgba(227,32,61,.12); }
   .add-button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:100%; }
   .add-button:hover{ border-color:var(--text-muted); }
-  .settings-link{
-    width:100%; display:flex; align-items:center; gap:14px; text-align:left;
-    background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
-    padding:14px 16px; cursor:pointer; color:var(--text);
-  }
-  .settings-link:hover{ border-color:var(--text-muted); }
-  .settings-link-icon{
-    width:40px; height:40px; border-radius:50%; background:var(--surface-2); color:var(--text-muted);
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  }
-  .settings-link-icon svg{ width:20px; height:20px; }
-  .settings-link-icon-accent{ background:var(--accent); color:#fff; }
-  .settings-link-icon-medical{ background:var(--danger); color:#fff; }
-  .settings-link-icon-extra{ background:var(--amber); color:#fff; }
   .install-status-icon{
     width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     flex-shrink:0; transition:background .15s ease, color .15s ease;
@@ -440,7 +426,6 @@
   .install-status-icon.ok{ background:rgba(43,182,115,.15); color:var(--green); }
   .install-status-icon.warn{ background:var(--amber-soft); color:var(--amber); }
   .settings-link-label{ flex:1; font-weight:700; font-size:1.0625rem; }
-  .settings-link-chevron{ width:18px; height:18px; color:var(--text-faint); flex-shrink:0; }
 
   /* ---------- iOS-stijl gegroepeerde lijst (Profiel-menu, Instellingen) ----------
      Eén nette kaart per groep, dunne scheidingslijnen tussen items i.p.v. losse
@@ -466,6 +451,7 @@
   .settings-item-icon.icon-danger{ background:var(--danger); }
   .settings-item-icon.icon-green{ background:var(--green); }
   .settings-item-icon.icon-amber{ background:var(--amber); }
+  .settings-item-icon.icon-violet{ background:#8b6fe8; }
   .settings-item-body{ flex:1; min-width:0; }
   .settings-item-title{ font-weight:700; font-size:1.0625rem; }
   .settings-item-hint{ color:var(--text-faint); font-size:0.875rem; margin-top:3px; line-height:1.4; }
@@ -647,8 +633,8 @@
     background:var(--accent); border:3px solid var(--bg); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
   .profile-photo-edit svg{ width:15px; height:15px; }
-  .profile-name{ font-size:1.4375rem; font-weight:800; margin:0; }
-  .profile-handle{ color:var(--text-muted); font-size:1rem; margin:0; }
+  .profile-name{ font-size:1.5625rem; font-weight:800; margin:0; }
+  .profile-handle{ color:var(--text-muted); font-size:1.0625rem; margin:4px 0 0; }
 
   /* ---------- Overlays (uitleg, meldingen) ---------- */
   .overlay{
@@ -1624,13 +1610,17 @@
         <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
       </div>
 
-      <button type="button" id="qrInviteToggle" class="settings-link" style="margin:12px 0 16px;">
-        <span class="settings-link-icon settings-link-icon-accent">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
-        </span>
-        <span class="settings-link-label">Of nodig iemand uit (QR-code / link)</span>
-        <svg class="settings-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
+      <div class="settings-group" style="margin:12px 0 16px;">
+        <div class="settings-item">
+          <button type="button" id="qrInviteToggle" class="settings-item-nav">
+            <span class="settings-item-icon icon-accent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M14 21h3"/><path d="M21 14v3"/><path d="M21 21v.01"/></svg>
+            </span>
+            <span class="settings-item-body"><span class="settings-link-label">Of nodig iemand uit (QR-code / link)</span></span>
+            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
 
       <div id="qrInviteCard" class="qr-invite-card hidden">
         <img id="qrInviteImg" alt="QR-code om jou toe te voegen als noodcontact">
@@ -1794,7 +1784,7 @@
 
         <div class="settings-item">
           <button type="button" id="openSettingsButton" class="settings-item-nav">
-            <span class="settings-item-icon icon-green">
+            <span class="settings-item-icon icon-violet">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </span>
             <span class="settings-item-body"><span class="settings-link-label">Instellingen</span></span>
