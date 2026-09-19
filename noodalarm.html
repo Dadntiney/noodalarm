@@ -664,6 +664,7 @@
   .chat-bubble-menu{
     position:fixed; z-index:300; background:var(--surface); border:1px solid var(--border-soft);
     border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,.28); padding:6px; min-width:190px;
+    max-width:calc(100vw - 20px); max-height:min(60vh, 420px); overflow-y:auto;
     display:flex; flex-direction:column; animation:screen-in .16s ease;
   }
   .chat-bubble-menu-item{
@@ -674,6 +675,25 @@
   .chat-bubble-menu-item svg{ width:19px; height:19px; color:var(--text-muted); flex-shrink:0; }
   .chat-bubble-menu-item.danger{ color:var(--danger); }
   .chat-bubble-menu-item.danger svg{ color:var(--danger); }
+
+  /* Info verschijnt in datzelfde kleine menu (net als WhatsApp) i.p.v. een
+     grote losse pop-up — alleen de inhoud wisselt. */
+  .chat-bubble-menu-info-header{
+    display:flex; align-items:center; gap:8px; padding:6px 8px 10px; font-weight:800; font-size:0.9375rem;
+    border-bottom:1px solid var(--border-soft); margin-bottom:6px;
+  }
+  .chat-bubble-menu-back{
+    width:28px; height:28px; border-radius:50%; border:none; background:var(--surface-2); color:var(--text);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .chat-bubble-menu-back svg{ width:16px; height:16px; }
+  .chat-bubble-menu-info-list{ display:flex; flex-direction:column; gap:4px; min-width:220px; }
+  .chat-bubble-menu-info-row{ display:flex; align-items:center; gap:10px; padding:8px; border-radius:9px; }
+  .chat-bubble-menu-info-row .avatar{ flex-shrink:0; }
+  .chat-bubble-menu-info-row-text{ min-width:0; }
+  .chat-bubble-menu-info-row-name{ font-weight:700; font-size:0.90625rem; }
+  .chat-bubble-menu-info-row-time{ color:var(--text-muted); font-size:0.8125rem; margin-top:1px; }
+  .chat-bubble-menu-info-empty{ color:var(--text-muted); font-size:0.875rem; padding:10px 8px 4px; text-align:center; }
   .chat-form input{
     flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:26px;
     padding:14px 20px; font-size:1.0625rem; color:var(--text); min-height:52px;
@@ -986,35 +1006,33 @@
     </div>
   </div>
 
-  <!-- =========================== GELEZEN DOOR =========================== -->
-  <div id="readByOverlay" class="overlay hidden">
-    <div class="overlay-card">
-      <div class="overlay-header">
-        <h2 class="overlay-title">Gelezen door</h2>
-        <button type="button" id="readByCloseButton" class="overlay-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
-      <div id="readByEmpty" class="empty-state hidden">Nog door niemand gelezen.</div>
-      <div id="readByList" style="display:flex; flex-direction:column; gap:10px;"></div>
-    </div>
-  </div>
-
   <!-- =========================== BERICHT-MENU (lang indrukken) =========================== -->
   <div id="chatBubbleMenuBackdrop" class="chat-bubble-menu-backdrop hidden"></div>
   <div id="chatBubbleMenu" class="chat-bubble-menu hidden">
-    <button type="button" id="chatMenuInfo" class="chat-bubble-menu-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>
-      Info
-    </button>
-    <button type="button" id="chatMenuEdit" class="chat-bubble-menu-item hidden">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-      Bewerken
-    </button>
-    <button type="button" id="chatMenuDelete" class="chat-bubble-menu-item danger hidden">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-      Verwijderen
-    </button>
+    <div id="chatBubbleMenuActions">
+      <button type="button" id="chatMenuInfo" class="chat-bubble-menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>
+        Info
+      </button>
+      <button type="button" id="chatMenuEdit" class="chat-bubble-menu-item hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Bewerken
+      </button>
+      <button type="button" id="chatMenuDelete" class="chat-bubble-menu-item danger hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        Verwijderen
+      </button>
+    </div>
+    <div id="chatBubbleMenuInfoPanel" class="chat-bubble-menu-info hidden">
+      <div class="chat-bubble-menu-info-header">
+        <button type="button" id="chatMenuInfoBack" class="chat-bubble-menu-back" aria-label="Terug">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span>Gelezen door</span>
+      </div>
+      <div id="readByEmpty" class="chat-bubble-menu-info-empty hidden">Nog door niemand gelezen.</div>
+      <div id="readByList" class="chat-bubble-menu-info-list"></div>
+    </div>
   </div>
 
   <!-- =========================== INLOG / REGISTRATIE =========================== -->
@@ -1467,11 +1485,12 @@
     chatEditCancelButton: document.getElementById('chatEditCancelButton'),
     chatBubbleMenu: document.getElementById('chatBubbleMenu'),
     chatBubbleMenuBackdrop: document.getElementById('chatBubbleMenuBackdrop'),
+    chatBubbleMenuActions: document.getElementById('chatBubbleMenuActions'),
+    chatBubbleMenuInfoPanel: document.getElementById('chatBubbleMenuInfoPanel'),
     chatMenuInfo: document.getElementById('chatMenuInfo'),
+    chatMenuInfoBack: document.getElementById('chatMenuInfoBack'),
     chatMenuEdit: document.getElementById('chatMenuEdit'),
     chatMenuDelete: document.getElementById('chatMenuDelete'),
-    readByOverlay: document.getElementById('readByOverlay'),
-    readByCloseButton: document.getElementById('readByCloseButton'),
     readByEmpty: document.getElementById('readByEmpty'),
     readByList: document.getElementById('readByList'),
     locationCard: document.getElementById('locationCard'),
@@ -3233,6 +3252,8 @@
     els.chatMenuEdit.classList.toggle('hidden', !isTextOnly);
     els.chatMenuDelete.classList.remove('hidden');
     els.chatBubbleMenu.dataset.messageId = messageId;
+    els.chatBubbleMenuInfoPanel.classList.add('hidden');
+    els.chatBubbleMenuActions.classList.remove('hidden');
 
     bubbleEl.classList.add('menu-active');
     activeMenuBubble = bubbleEl;
@@ -3287,7 +3308,9 @@
   function formatReadTimestamp(iso){
     return new Date(iso).toLocaleString('nl-NL', { dateStyle:'medium', timeStyle:'short' });
   }
-  function openReadByOverlay(messageId){
+  // Info verschijnt binnen hetzelfde zwevende menu (net als WhatsApp) —
+  // wisselt alleen de inhoud, opent geen aparte grote pop-up.
+  function showReadByPanel(messageId){
     const others = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
     const receipts = chatReceiptsByMessageId[messageId] || {};
     const readers = others
@@ -3295,18 +3318,24 @@
       .map(id => ({ ...chatParticipantById[id], read_at: receipts[id].read_at }))
       .sort((a, b) => new Date(a.read_at) - new Date(b.read_at));
     els.readByList.innerHTML = readers.map(p =>
-      '<div style="display:flex; align-items:center; gap:12px;">' +
+      '<div class="chat-bubble-menu-info-row">' +
         '<div class="avatar sm">' + avatarInner(p.avatar_url) + '</div>' +
-        '<div style="flex:1; min-width:0;">' +
-          '<div style="font-weight:700; font-size:0.96875rem;">' + escapeHtml(p.full_name) + '</div>' +
-          '<div style="color:var(--text-muted); font-size:0.84375rem; margin-top:2px;">' + formatReadTimestamp(p.read_at) + '</div>' +
+        '<div class="chat-bubble-menu-info-row-text">' +
+          '<div class="chat-bubble-menu-info-row-name">' + escapeHtml(p.full_name) + '</div>' +
+          '<div class="chat-bubble-menu-info-row-time">' + formatReadTimestamp(p.read_at) + '</div>' +
         '</div>' +
       '</div>'
     ).join('');
     els.readByEmpty.classList.toggle('hidden', readers.length > 0);
-    els.readByOverlay.classList.remove('hidden');
+    els.chatBubbleMenuActions.classList.add('hidden');
+    els.chatBubbleMenuInfoPanel.classList.remove('hidden');
+    if (activeMenuBubble) positionChatBubbleMenu(activeMenuBubble);
   }
-  els.readByCloseButton.addEventListener('click', () => els.readByOverlay.classList.add('hidden'));
+  els.chatMenuInfoBack.addEventListener('click', () => {
+    els.chatBubbleMenuInfoPanel.classList.add('hidden');
+    els.chatBubbleMenuActions.classList.remove('hidden');
+    if (activeMenuBubble) positionChatBubbleMenu(activeMenuBubble);
+  });
 
   function showEditBanner(text){
     els.chatEditBannerText.textContent = text.length > 60 ? text.slice(0, 60) + '…' : text;
@@ -3327,8 +3356,7 @@
 
   els.chatMenuInfo.addEventListener('click', () => {
     const messageId = els.chatBubbleMenu.dataset.messageId;
-    closeChatBubbleMenu();
-    openReadByOverlay(messageId);
+    showReadByPanel(messageId);
   });
   els.chatMenuEdit.addEventListener('click', () => {
     const messageId = els.chatBubbleMenu.dataset.messageId;
