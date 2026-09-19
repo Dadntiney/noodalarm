@@ -595,6 +595,12 @@
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='currentColor' fill-opacity='0.05'/%3E%3C/svg%3E");
     background-size:24px 24px;
   }
+  /* Zonder dit selecteert een lang indrukken (voor het berichtmenu) ook de
+     omliggende pagina-tekst, met de bekende blauwe selectie-highlight en op
+     iOS het systeem-uitknipbordmenu erbovenop ons eigen menu. */
+  .chat-messages, .chat-messages *{
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+  }
   .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
   .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
