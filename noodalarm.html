@@ -1343,7 +1343,7 @@
           </div>
           <div class="field">
             <label for="medicalAdvanceDirective" id="advanceDirectiveLabel">Speciale wensen bij ernstige zorg</label>
-            <textarea id="medicalAdvanceDirective" rows="3" placeholder="Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…"></textarea>
+            <textarea id="medicalAdvanceDirective" rows="3" placeholder="Bijv. niet naar het ziekenhuis, geen beademing…"></textarea>
             <div class="field-hint" id="advanceDirectiveHint">Helemaal jouw keuze — alleen tekst, geen documenten nodig.</div>
           </div>
         </div>
@@ -1380,16 +1380,16 @@
             <label id="contact1Label">Contactpersoon 1 (bel deze eerst)</label>
             <input type="text" id="medicalContact1Name" placeholder="Naam">
             <div class="field-row" style="grid-template-columns:1fr 1fr;">
-              <input type="text" id="medicalContact1Relation" placeholder="Relatie, bijv. partner">
-              <input type="tel" id="medicalContact1Phone" placeholder="Telefoonnummer">
+              <input type="text" id="medicalContact1Relation" placeholder="Relatie">
+              <input type="tel" id="medicalContact1Phone" placeholder="Telefoon">
             </div>
           </div>
           <div class="field">
             <label id="contact2Label">Contactpersoon 2 (bel deze als 1 niet opneemt)</label>
             <input type="text" id="medicalContact2Name" placeholder="Naam">
             <div class="field-row" style="grid-template-columns:1fr 1fr;">
-              <input type="text" id="medicalContact2Relation" placeholder="Relatie, bijv. buur">
-              <input type="tel" id="medicalContact2Phone" placeholder="Telefoonnummer">
+              <input type="text" id="medicalContact2Relation" placeholder="Relatie">
+              <input type="tel" id="medicalContact2Phone" placeholder="Telefoon">
             </div>
           </div>
         </div>
@@ -1454,7 +1454,7 @@
         </div>
         <div class="field">
           <label for="extraInfoSpareKey" id="spareKeyLabel">Waar ligt een reservesleutel?</label>
-          <input type="text" id="extraInfoSpareKey" placeholder="Bijv. sleutelkluisje naast de voordeur, code 1234 — of bij de buren op nr. 12">
+          <input type="text" id="extraInfoSpareKey" placeholder="Bijv. kluisje bij de voordeur">
         </div>
         <button type="submit" id="extraInfoSaveButton" class="save-button">Opslaan</button>
       </form>
@@ -2081,7 +2081,7 @@
     { sel: '#resusSegmented button[data-resus="no"]', nl: 'Nee, niet reanimeren', en: 'No, do not resuscitate' },
     { sel: '#resusFieldHint', nl: 'Reanimeren betekent: iemand probeert je hart weer te laten kloppen als het gestopt is. Jij bepaalt of dat mag.', en: 'Resuscitation means: someone tries to get your heart beating again if it has stopped. You decide whether that\'s allowed.' },
     { sel: '#advanceDirectiveLabel', nl: 'Speciale wensen bij ernstige zorg', en: 'Special wishes for serious care' },
-    { sel: '#medicalAdvanceDirective', attr: 'placeholder', nl: 'Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…', en: 'E.g. no hospital, no ventilation, call contact person first…' },
+    { sel: '#medicalAdvanceDirective', attr: 'placeholder', nl: 'Bijv. niet naar het ziekenhuis, geen beademing…', en: 'E.g. no hospital, no ventilation…' },
     { sel: '#advanceDirectiveHint', nl: 'Helemaal jouw keuze — alleen tekst, geen documenten nodig.', en: 'Entirely your choice — text only, no documents needed.' },
     { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën', en: 'Allergies' },
     { sel: '#medicalAllergies', attr: 'placeholder', nl: 'Bijv. penicilline', en: 'E.g. penicillin' },
@@ -2098,12 +2098,12 @@
     { sel: '#mobilitySegmented button[data-mobility="wheelchair"]', nl: 'Rolstoel', en: 'Wheelchair' },
     { sel: '#contact1Label', nl: 'Contactpersoon 1 (bel deze eerst)', en: 'Contact person 1 (call this one first)' },
     { sel: '#medicalContact1Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
-    { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Relatie, bijv. partner', en: 'Relation, e.g. partner' },
-    { sel: '#medicalContact1Phone', attr: 'placeholder', nl: 'Telefoonnummer', en: 'Phone number' },
+    { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Relatie', en: 'Relation' },
+    { sel: '#medicalContact1Phone', attr: 'placeholder', nl: 'Telefoon', en: 'Phone' },
     { sel: '#contact2Label', nl: 'Contactpersoon 2 (bel deze als 1 niet opneemt)', en: 'Contact person 2 (call this one if 1 doesn\'t answer)' },
     { sel: '#medicalContact2Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
-    { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Relatie, bijv. buur', en: 'Relation, e.g. neighbour' },
-    { sel: '#medicalContact2Phone', attr: 'placeholder', nl: 'Telefoonnummer', en: 'Phone number' },
+    { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Relatie', en: 'Relation' },
+    { sel: '#medicalContact2Phone', attr: 'placeholder', nl: 'Telefoon', en: 'Phone' },
     { sel: 'label[for="medicalDoctorName"]', nl: 'Huisarts', en: 'Doctor' },
     { sel: '#medicalDoctorName', attr: 'placeholder', nl: 'Naam huisarts of praktijk', en: 'Doctor or practice name' },
     { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Doctor\'s phone number' },
@@ -2243,7 +2243,7 @@
     { sel: '#extraInfoSectionTitle', nl: 'Praktische info', en: 'Practical info' },
     { sel: '#extraInfoSectionHint', nl: 'Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.', en: 'You don\'t have to fill this in. Your emergency contacts only see it once you press ALARM yourself.' },
     { sel: '#spareKeyLabel', nl: 'Waar ligt een reservesleutel?', en: 'Where is a spare key?' },
-    { sel: '#extraInfoSpareKey', attr: 'placeholder', nl: 'Bijv. sleutelkluisje naast de voordeur, code 1234 — of bij de buren op nr. 12', en: 'E.g. lockbox next to the front door, code 1234 — or with the neighbours at no. 12' },
+    { sel: '#extraInfoSpareKey', attr: 'placeholder', nl: 'Bijv. kluisje bij de voordeur', en: 'E.g. lockbox by the front door' },
     { sel: '#extraInfoSaveButton', nl: 'Opslaan', en: 'Save' },
     { sel: '#openSettingsButton .settings-link-label', nl: 'Instellingen', en: 'Settings' },
     { sel: '#profileLogoutButton', nl: 'Uitloggen', en: 'Log out' },
