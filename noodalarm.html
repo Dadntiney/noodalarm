@@ -154,7 +154,11 @@
   html,body{ margin:0; padding:0; overscroll-behavior-x:none; overscroll-behavior-y:none; }
   /* Op de Berichten-pagina scrolt alleen de berichtenlijst zelf (zoals
      WhatsApp): header en typebalk staan los vast, de pagina eromheen niet. */
-  body.messages-open{ height:100vh; height:100dvh; overflow:hidden; }
+  /* Zelfde kleur als de typebalk, niet de gewone paginakleur — zodat een
+     eventuele naad/reepje daarachter (bv. door het in-/uitschuiven van de
+     adresbalk of het toetsenbord op mobiel) nooit als een zwarte balk
+     opvalt, maar gewoon in de grijze typebalk lijkt te verdwijnen. */
+  body.messages-open{ height:100vh; height:100dvh; overflow:hidden; background:var(--surface); }
   body.messages-open .app{ height:100vh; height:100dvh; overflow:hidden; }
   body.messages-open #screen-app{ overflow:hidden; }
   body{
