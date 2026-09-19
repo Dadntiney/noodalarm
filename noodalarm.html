@@ -550,6 +550,14 @@
     display:block; max-height:280px; border-radius:12px;
     margin:-2px -6px 6px; width:calc(100% + 12px); object-fit:cover; background:var(--surface-2);
   }
+  .chat-video-wrap{ position:relative; margin:-2px -6px 6px; width:calc(100% + 12px); cursor:pointer; }
+  .chat-video-wrap .chat-media{ margin:0; width:100%; }
+  .chat-video-play{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:52px; height:52px; border-radius:50%; background:rgba(0,0,0,.55);
+    display:flex; align-items:center; justify-content:center; color:#fff; pointer-events:none;
+  }
+  .chat-video-play svg{ width:24px; height:24px; margin-left:3px; }
   .chat-form{
     display:flex; align-items:center; gap:10px; flex-shrink:0;
     position:fixed; bottom:0; left:0; right:0; z-index:10;
@@ -2181,7 +2189,8 @@
     const own = msg.sender_id === currentSession.user.id;
     const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
     const media = !msg.media_url ? '' : (msg.media_type === 'video'
-      ? '<video src="' + escapeHtml(msg.media_url) + '" class="chat-media" controls playsinline preload="metadata"></video>'
+      ? '<div class="chat-video-wrap"><video src="' + escapeHtml(msg.media_url) + '" class="chat-media chat-video" playsinline preload="metadata"></video>' +
+        '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span></div>'
       : '<img src="' + escapeHtml(msg.media_url) + '" class="chat-media" loading="lazy" alt="">');
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
       (own ? '' : '<div class="who" style="color:' + chatNameColor(msg.sender_id) + ';">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
@@ -2334,6 +2343,28 @@
       })
       .subscribe();
   }
+
+  // Tikken op een video speelt hem direct fullscreen af, net als WhatsApp —
+  // geen inline afspelen met kleine bediening eerst.
+  els.chatMessages.addEventListener('click', (ev) => {
+    const video = ev.target.closest('.chat-video');
+    if (!video) return;
+    video.controls = true;
+    if (video.webkitEnterFullscreen){
+      video.webkitEnterFullscreen();
+      video.play();
+    } else if (video.requestFullscreen){
+      video.requestFullscreen().catch(() => {});
+      video.play();
+    } else {
+      video.play();
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement){
+      els.chatMessages.querySelectorAll('.chat-video').forEach(v => { v.controls = false; });
+    }
+  });
 
   els.chatForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
