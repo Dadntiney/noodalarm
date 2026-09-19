@@ -1033,27 +1033,8 @@
         </button>
       </div>
 
-      <div style="margin-bottom:24px;">
-        <div class="settings-row-title" id="languageSectionTitle" style="margin-bottom:8px;">Taal</div>
-        <p class="field-hint" id="languageSectionHint" style="margin-top:0; margin-bottom:12px;">Kies de taal van de app.</p>
-        <nav class="segmented" role="tablist" aria-label="Taal">
-          <button type="button" id="languageNlButton" role="tab">🇳🇱 Nederlands</button>
-          <button type="button" id="languageEnButton" role="tab">🇬🇧 English</button>
-        </nav>
-      </div>
-
-      <div style="margin-bottom:24px;">
-        <div class="settings-row-title" id="sirenSectionTitle" style="margin-bottom:8px;">Alarmgeluid</div>
-        <p class="field-hint" id="sirenSectionHint" style="margin-top:0; margin-bottom:12px;">Geluid dat NORI zelf afspeelt zodra een noodcontact een alarm activeert, terwijl de app open staat. Tik om te beluisteren en te kiezen.</p>
-        <nav class="segmented siren-segmented" role="tablist" aria-label="Alarmgeluid">
-          <button type="button" id="sirenOffButton" data-siren="off" role="tab">Uit</button>
-          <button type="button" id="sirenClassicButton" data-siren="classic" role="tab">Klassiek</button>
-          <button type="button" id="sirenPulseButton" data-siren="pulse" role="tab">Puls</button>
-          <button type="button" id="sirenDigitalButton" data-siren="digital" role="tab">Digitaal</button>
-        </nav>
-        <div id="sirenPlatformNote" class="field-hint" style="margin-top:10px;"></div>
-      </div>
-
+      <!-- Eerst de dingen die zorgen dat een alarm ook echt aankomt, daarna
+           pas hoe de app eruitziet — dat is voor iedereen het belangrijkst. -->
       <div class="settings-row" id="installStatusRow" style="margin-bottom:24px; align-items:center;">
         <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
           <div id="installStatusIcon" class="install-status-icon warn">
@@ -1067,17 +1048,39 @@
         <button type="button" id="installStatusButton" class="small-btn hidden">Bekijk hoe</button>
       </div>
 
-      <div class="settings-row">
+      <div style="margin-bottom:24px;">
+        <div class="settings-row-title" id="sirenSectionTitle" style="margin-bottom:8px;">Alarmgeluid</div>
+        <p class="field-hint" id="sirenSectionHint" style="margin-top:0; margin-bottom:12px;">Dit geluid hoor je als een noodcontact op ALARM drukt, terwijl de app open staat. Tik op een geluid om het te beluisteren.</p>
+        <nav class="segmented siren-segmented" role="tablist" aria-label="Alarmgeluid">
+          <button type="button" id="sirenOffButton" data-siren="off" role="tab">Uit</button>
+          <button type="button" id="sirenClassicButton" data-siren="classic" role="tab">Klassiek</button>
+          <button type="button" id="sirenPulseButton" data-siren="pulse" role="tab">Puls</button>
+          <button type="button" id="sirenDigitalButton" data-siren="digital" role="tab">Digitaal</button>
+        </nav>
+        <div id="sirenPlatformNote" class="field-hint" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="settings-row" style="margin-bottom:24px;">
         <div class="settings-row-text">
           <div class="settings-row-title" id="locationSectionTitle">Locatie delen bij alarm</div>
-          <p class="field-hint" id="locationSectionHint" style="margin-top:4px;">NORI vraagt dit eenmalig bij het openen van de app, zodat je locatie al klaarstaat zodra je ooit op ALARM drukt.</p>
+          <p class="field-hint" id="locationSectionHint" style="margin-top:4px;">Dan weten je noodcontacten meteen waar je bent zodra jij op ALARM drukt.</p>
         </div>
         <button type="button" id="locationToggle" class="toggle-switch" role="switch" aria-checked="true" aria-label="Locatie delen bij alarm">
           <span class="toggle-knob"></span>
         </button>
       </div>
 
-      <div>
+      <!-- Daarna: hoe de app eruitziet en klinkt voor jou persoonlijk. -->
+      <div style="margin-bottom:24px;">
+        <div class="settings-row-title" id="languageSectionTitle" style="margin-bottom:8px;">Taal</div>
+        <p class="field-hint" id="languageSectionHint" style="margin-top:0; margin-bottom:12px;">Kies de taal van de app.</p>
+        <nav class="segmented" role="tablist" aria-label="Taal">
+          <button type="button" id="languageNlButton" role="tab">🇳🇱 Nederlands</button>
+          <button type="button" id="languageEnButton" role="tab">🇬🇧 English</button>
+        </nav>
+      </div>
+
+      <div style="margin-bottom:24px;">
         <div class="settings-row-title" id="themeSectionTitle" style="margin-bottom:8px;">Weergave</div>
         <p class="field-hint" id="themeSectionHint" style="margin-top:0; margin-bottom:12px;">Licht, donker, of automatisch aanpassen aan het tijdstip van de dag.</p>
         <nav class="theme-picker" role="tablist" aria-label="Weergave">
@@ -1096,7 +1099,7 @@
         </nav>
       </div>
 
-      <div style="margin-top:24px;">
+      <div style="margin-bottom:24px;">
         <div class="settings-row-title" id="textSizeSectionTitle" style="margin-bottom:8px;">Tekstgrootte</div>
         <p class="field-hint" id="textSizeSectionHint" style="margin-top:0; margin-bottom:12px;">Maakt alle tekst in de app groter en makkelijker leesbaar.</p>
         <nav class="segmented" role="tablist" aria-label="Tekstgrootte">
@@ -1106,10 +1109,10 @@
         </nav>
       </div>
 
-      <div class="settings-row" style="margin-top:24px; margin-bottom:0;">
+      <div class="settings-row" style="margin-bottom:0;">
         <div class="settings-row-text">
           <div class="settings-row-title" id="contrastSectionTitle">Hoog contrast</div>
-          <p class="field-hint" id="contrastSectionHint" style="margin-top:4px;">Dikkere randen en duidelijkere grijstinten, voor beter leesbare knoppen en kaarten.</p>
+          <p class="field-hint" id="contrastSectionHint" style="margin-top:4px;">Dikkere randen en meer contrast, zodat knoppen en kaarten beter te zien zijn.</p>
         </div>
         <button type="button" id="contrastToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Hoog contrast">
           <span class="toggle-knob"></span>
@@ -1160,45 +1163,46 @@
 
       <form id="medicalForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
         <div>
-          <p class="field-hint" style="margin-top:0;">Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert.</p>
+          <p class="field-hint" style="margin-top:0;">Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.</p>
         </div>
         <div class="field">
           <label id="resusFieldLabel">Mag je gereanimeerd worden?</label>
           <nav class="segmented resus-segmented" id="resusSegmented" role="tablist" aria-label="Reanimatievoorkeur">
-            <button type="button" data-resus="" role="tab">Niet aangegeven</button>
+            <button type="button" data-resus="" role="tab">Nog niet gekozen</button>
             <button type="button" data-resus="yes" role="tab">Ja, reanimeer</button>
             <button type="button" data-resus="no" role="tab">Nee, niet reanimeren</button>
           </nav>
-          <div class="field-hint" id="resusFieldHint">Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.</div>
+          <div class="field-hint" id="resusFieldHint">Reanimeren betekent: iemand probeert je hart weer te laten kloppen als het gestopt is. Jij bepaalt of dat mag.</div>
         </div>
         <div class="field">
-          <label for="medicalAdvanceDirective" id="advanceDirectiveLabel">Behandelverbod / wilsverklaring / wensen</label>
+          <label for="medicalAdvanceDirective" id="advanceDirectiveLabel">Speciale wensen bij ernstige zorg</label>
           <textarea id="medicalAdvanceDirective" rows="3" placeholder="Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…"></textarea>
-          <div class="field-hint" id="advanceDirectiveHint">Optioneel, puur tekst. Geen documenten te uploaden — zo blijft dit veld overzichtelijk en blijft er geen bestand van jou ergens los rondslingeren.</div>
+          <div class="field-hint" id="advanceDirectiveHint">Bijvoorbeeld: niet naar het ziekenhuis, of eerst iemand anders bellen. Helemaal jouw keuze. Alleen tekst, geen documenten — dat houdt dit simpel.</div>
         </div>
         <div class="field">
-          <label id="mobilityFieldLabel">Mobiliteit</label>
+          <label for="medicalAllergies">Allergieën</label>
+          <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
+          <div class="field-hint" id="medicalAllergiesHint">Iets waar je ziek van wordt, zoals een medicijn of eten.</div>
+        </div>
+        <div class="field">
+          <label for="medicalMedications">Medicijnen die je gebruikt</label>
+          <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
+        </div>
+        <div class="field">
+          <label for="medicalConditions">Ziektes die je hebt</label>
+          <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
+        </div>
+        <div class="field">
+          <label id="mobilityFieldLabel">Hoe goed kun je lopen?</label>
           <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
-            <button type="button" data-mobility="" role="tab">Niet aangegeven</button>
+            <button type="button" data-mobility="" role="tab">Nog niet gekozen</button>
             <button type="button" data-mobility="good" role="tab">Goed mobiel</button>
             <button type="button" data-mobility="walker" role="tab">Rollator</button>
             <button type="button" data-mobility="wheelchair" role="tab">Rolstoel</button>
           </nav>
         </div>
         <div class="field">
-          <label for="medicalAllergies">Allergieën / contra-indicaties</label>
-          <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
-        </div>
-        <div class="field">
-          <label for="medicalMedications">Medicatie</label>
-          <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
-        </div>
-        <div class="field">
-          <label for="medicalConditions">Belangrijke ziekten / aandoeningen</label>
-          <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
-        </div>
-        <div class="field">
-          <label id="contact1Label">1e contactpersoon</label>
+          <label id="contact1Label">Contactpersoon 1 (bel deze eerst)</label>
           <input type="text" id="medicalContact1Name" placeholder="Naam">
           <div class="field-row" style="grid-template-columns:1fr 1fr;">
             <input type="text" id="medicalContact1Relation" placeholder="Relatie, bijv. partner">
@@ -1206,7 +1210,7 @@
           </div>
         </div>
         <div class="field">
-          <label id="contact2Label">2e contactpersoon</label>
+          <label id="contact2Label">Contactpersoon 2 (bel deze als 1 niet opneemt)</label>
           <input type="text" id="medicalContact2Name" placeholder="Naam">
           <div class="field-row" style="grid-template-columns:1fr 1fr;">
             <input type="text" id="medicalContact2Relation" placeholder="Relatie, bijv. buur">
@@ -1222,11 +1226,11 @@
           <input type="tel" id="medicalDoctorPhone" placeholder="Praktijknummer">
         </div>
         <div class="field">
-          <label for="medicalHospital">Bekend in ziekenhuis</label>
+          <label for="medicalHospital">In welk ziekenhuis ben je bekend?</label>
           <input type="text" id="medicalHospital" placeholder="Bijv. Radboudumc, locatie X">
         </div>
         <div class="field">
-          <label for="medicalNotes">Overige medische bijzonderheden</label>
+          <label for="medicalNotes">Nog iets anders belangrijks?</label>
           <input type="text" id="medicalNotes" placeholder="Bijv. bijzonderheden">
         </div>
         <button type="submit" id="medicalSaveButton" class="save-button">Medische info opslaan</button>
@@ -1248,7 +1252,7 @@
       <form id="extraInfoForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
         <div>
           <div class="settings-row-title" id="extraInfoSectionTitle" style="margin-bottom:4px;">Praktische info</div>
-          <p class="field-hint" id="extraInfoSectionHint" style="margin-top:0;">Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert — los van je medische gegevens.</p>
+          <p class="field-hint" id="extraInfoSectionHint" style="margin-top:0;">Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.</p>
         </div>
         <div class="field">
           <label for="extraInfoSpareKey" id="spareKeyLabel">Sleutel buitenshuis</label>
@@ -1760,11 +1764,11 @@
     { sel: '#installStatusButton', nl: 'Bekijk hoe', en: 'Show me how' },
     { sel: '#locationToggle', attr: 'aria-label', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
     { sel: '#locationSectionTitle', nl: 'Locatie delen bij alarm', en: 'Share location during an alarm' },
-    { sel: '#locationSectionHint', nl: 'NORI vraagt dit eenmalig bij het openen van de app, zodat je locatie al klaarstaat zodra je ooit op ALARM drukt.', en: 'NORI asks this once when you open the app, so your location is ready the moment you ever press ALARM.' },
+    { sel: '#locationSectionHint', nl: 'Dan weten je noodcontacten meteen waar je bent zodra jij op ALARM drukt.', en: 'That way your emergency contacts instantly know where you are the moment you press ALARM.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
-    { sel: '#sirenSectionHint', nl: 'Geluid dat NORI zelf afspeelt zodra een noodcontact een alarm activeert, terwijl de app open staat. Tik om te beluisteren en te kiezen.', en: 'Sound NORI itself plays the moment an emergency contact activates an alarm, while the app is open. Tap to preview and choose.' },
+    { sel: '#sirenSectionHint', nl: 'Dit geluid hoor je als een noodcontact op ALARM drukt, terwijl de app open staat. Tik op een geluid om het te beluisteren.', en: 'You\'ll hear this sound when an emergency contact presses ALARM, while the app is open. Tap a sound to preview it.' },
     { sel: '#sirenOffButton', nl: 'Uit', en: 'Off' },
     { sel: '#sirenClassicButton', nl: 'Klassiek', en: 'Classic' },
     { sel: '#sirenPulseButton', nl: 'Puls', en: 'Pulse' },
@@ -1780,7 +1784,7 @@
     { sel: '#textSizeLargeButton', nl: 'Groot', en: 'Large' },
     { sel: '#textSizeXlargeButton', nl: 'Extra groot', en: 'Extra large' },
     { sel: '#contrastSectionTitle', nl: 'Hoog contrast', en: 'High contrast' },
-    { sel: '#contrastSectionHint', nl: 'Dikkere randen en duidelijkere grijstinten, voor beter leesbare knoppen en kaarten.', en: 'Thicker borders and clearer greys, for more readable buttons and cards.' },
+    { sel: '#contrastSectionHint', nl: 'Dikkere randen en meer contrast, zodat knoppen en kaarten beter te zien zijn.', en: 'Thicker borders and more contrast, so buttons and cards are easier to see.' },
     { sel: '#contrastToggle', attr: 'aria-label', nl: 'Hoog contrast', en: 'High contrast' },
     { sel: '#accountOverlay .overlay-title', nl: 'Account', en: 'Account' },
     { sel: 'label[for="profileFirstName"]', nl: 'Voornaam', en: 'First name' },
@@ -1790,33 +1794,34 @@
     { sel: '#profileForm .field-hint', nl: 'Zodat noodcontacten je direct kunnen bellen als je niet op een alarm reageert.', en: 'So emergency contacts can call you directly if you don\'t respond to an alarm.' },
     { sel: '#profileSaveButton', nl: 'Wijzigingen opslaan', en: 'Save changes' },
     { sel: '#medicalOverlayTitle', nl: 'Medische informatie', en: 'Medical information' },
-    { sel: '#medicalForm > div:first-child .field-hint', nl: 'Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert.', en: 'Everything is optional. Only shown to your emergency contacts the moment you activate an alarm yourself.' },
+    { sel: '#medicalForm > div:first-child .field-hint', nl: 'Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.', en: 'You don\'t have to fill this in. Your emergency contacts only see it once you press ALARM yourself.' },
     { sel: '#resusSegmented', attr: 'aria-label', nl: 'Reanimatievoorkeur', en: 'Resuscitation preference' },
     { sel: '#resusFieldLabel', nl: 'Mag je gereanimeerd worden?', en: 'May you be resuscitated?' },
-    { sel: '#resusSegmented button[data-resus=""]', nl: 'Niet aangegeven', en: 'Not specified' },
+    { sel: '#resusSegmented button[data-resus=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
     { sel: '#resusSegmented button[data-resus="yes"]', nl: 'Ja, reanimeer', en: 'Yes, resuscitate' },
     { sel: '#resusSegmented button[data-resus="no"]', nl: 'Nee, niet reanimeren', en: 'No, do not resuscitate' },
-    { sel: '#resusFieldHint', nl: 'Optioneel — wordt bovenaan getoond aan wie er op je alarm reageert.', en: 'Optional — shown at the top to whoever responds to your alarm.' },
-    { sel: '#advanceDirectiveLabel', nl: 'Behandelverbod / wilsverklaring / wensen', en: 'Treatment refusal / advance directive / wishes' },
+    { sel: '#resusFieldHint', nl: 'Reanimeren betekent: iemand probeert je hart weer te laten kloppen als het gestopt is. Jij bepaalt of dat mag.', en: 'Resuscitation means: someone tries to get your heart beating again if it has stopped. You decide whether that\'s allowed.' },
+    { sel: '#advanceDirectiveLabel', nl: 'Speciale wensen bij ernstige zorg', en: 'Special wishes for serious care' },
     { sel: '#medicalAdvanceDirective', attr: 'placeholder', nl: 'Bijv. niet naar het ziekenhuis, geen beademing, contactpersoon eerst bellen…', en: 'E.g. no hospital, no ventilation, call contact person first…' },
-    { sel: '#advanceDirectiveHint', nl: 'Optioneel, puur tekst. Geen documenten te uploaden — zo blijft dit veld overzichtelijk en blijft er geen bestand van jou ergens los rondslingeren.', en: 'Optional, plain text only. No document uploads — this keeps the field simple and means no file of yours sits stored somewhere.' },
-    { sel: '#mobilityFieldLabel', nl: 'Mobiliteit', en: 'Mobility' },
+    { sel: '#advanceDirectiveHint', nl: 'Bijvoorbeeld: niet naar het ziekenhuis, of eerst iemand anders bellen. Helemaal jouw keuze. Alleen tekst, geen documenten — dat houdt dit simpel.', en: 'For example: no hospital, or call someone else first. Entirely your choice. Text only, no documents — that keeps this simple.' },
+    { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën', en: 'Allergies' },
+    { sel: '#medicalAllergies', attr: 'placeholder', nl: 'Bijv. penicilline', en: 'E.g. penicillin' },
+    { sel: '#medicalAllergiesHint', nl: 'Iets waar je ziek van wordt, zoals een medicijn of eten.', en: 'Something that makes you ill, like a medicine or a food.' },
+    { sel: 'label[for="medicalMedications"]', nl: 'Medicijnen die je gebruikt', en: 'Medicines you take' },
+    { sel: '#medicalMedications', attr: 'placeholder', nl: 'Bijv. bloedverdunners', en: 'E.g. blood thinners' },
+    { sel: 'label[for="medicalConditions"]', nl: 'Ziektes die je hebt', en: 'Illnesses you have' },
+    { sel: '#medicalConditions', attr: 'placeholder', nl: 'Bijv. diabetes, hartklachten', en: 'E.g. diabetes, heart condition' },
+    { sel: '#mobilityFieldLabel', nl: 'Hoe goed kun je lopen?', en: 'How well can you walk?' },
     { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Mobiliteit', en: 'Mobility' },
-    { sel: '#mobilitySegmented button[data-mobility=""]', nl: 'Niet aangegeven', en: 'Not specified' },
+    { sel: '#mobilitySegmented button[data-mobility=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
     { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Goed mobiel', en: 'Fully mobile' },
     { sel: '#mobilitySegmented button[data-mobility="walker"]', nl: 'Rollator', en: 'Walker' },
     { sel: '#mobilitySegmented button[data-mobility="wheelchair"]', nl: 'Rolstoel', en: 'Wheelchair' },
-    { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën / contra-indicaties', en: 'Allergies / contra-indications' },
-    { sel: '#medicalAllergies', attr: 'placeholder', nl: 'Bijv. penicilline', en: 'E.g. penicillin' },
-    { sel: 'label[for="medicalMedications"]', nl: 'Medicatie', en: 'Medication' },
-    { sel: '#medicalMedications', attr: 'placeholder', nl: 'Bijv. bloedverdunners', en: 'E.g. blood thinners' },
-    { sel: 'label[for="medicalConditions"]', nl: 'Belangrijke ziekten / aandoeningen', en: 'Important illnesses / conditions' },
-    { sel: '#medicalConditions', attr: 'placeholder', nl: 'Bijv. diabetes, hartklachten', en: 'E.g. diabetes, heart condition' },
-    { sel: '#contact1Label', nl: '1e contactpersoon', en: '1st contact person' },
+    { sel: '#contact1Label', nl: 'Contactpersoon 1 (bel deze eerst)', en: 'Contact person 1 (call this one first)' },
     { sel: '#medicalContact1Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
     { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Relatie, bijv. partner', en: 'Relation, e.g. partner' },
     { sel: '#medicalContact1Phone', attr: 'placeholder', nl: 'Telefoonnummer', en: 'Phone number' },
-    { sel: '#contact2Label', nl: '2e contactpersoon', en: '2nd contact person' },
+    { sel: '#contact2Label', nl: 'Contactpersoon 2 (bel deze als 1 niet opneemt)', en: 'Contact person 2 (call this one if 1 doesn\'t answer)' },
     { sel: '#medicalContact2Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
     { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Relatie, bijv. buur', en: 'Relation, e.g. neighbour' },
     { sel: '#medicalContact2Phone', attr: 'placeholder', nl: 'Telefoonnummer', en: 'Phone number' },
@@ -1824,9 +1829,9 @@
     { sel: '#medicalDoctorName', attr: 'placeholder', nl: 'Naam huisarts of praktijk', en: 'Doctor or practice name' },
     { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Doctor\'s phone number' },
     { sel: '#medicalDoctorPhone', attr: 'placeholder', nl: 'Praktijknummer', en: 'Practice number' },
-    { sel: 'label[for="medicalHospital"]', nl: 'Bekend in ziekenhuis', en: 'Known at hospital' },
+    { sel: 'label[for="medicalHospital"]', nl: 'In welk ziekenhuis ben je bekend?', en: 'Which hospital knows you?' },
     { sel: '#medicalHospital', attr: 'placeholder', nl: 'Bijv. Radboudumc, locatie X', en: 'E.g. Radboudumc, location X' },
-    { sel: 'label[for="medicalNotes"]', nl: 'Overige medische bijzonderheden', en: 'Other medical details' },
+    { sel: 'label[for="medicalNotes"]', nl: 'Nog iets anders belangrijks?', en: 'Anything else important?' },
     { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. bijzonderheden', en: 'E.g. other notes' },
     { sel: '#medicalSaveButton', nl: 'Medische info opslaan', en: 'Save medical info' },
     { sel: '#notifOverlay .overlay-title', nl: 'Meldingen', en: 'Notifications' },
@@ -1925,7 +1930,7 @@
     { sel: '#openExtraInfoButton .settings-link-label', nl: 'Overige informatie', en: 'Other information' },
     { sel: '#extraInfoOverlayTitle', nl: 'Overige informatie', en: 'Other information' },
     { sel: '#extraInfoSectionTitle', nl: 'Praktische info', en: 'Practical info' },
-    { sel: '#extraInfoSectionHint', nl: 'Alles optioneel. Wordt alleen getoond aan je noodcontacten op het moment dat jij zelf een alarm activeert — los van je medische gegevens.', en: 'Everything is optional. Only shown to your emergency contacts the moment you activate an alarm yourself — separate from your medical info.' },
+    { sel: '#extraInfoSectionHint', nl: 'Dit hoef je niet in te vullen. Je noodcontacten zien dit pas als jij zelf op ALARM drukt.', en: 'You don\'t have to fill this in. Your emergency contacts only see it once you press ALARM yourself.' },
     { sel: '#spareKeyLabel', nl: 'Sleutel buitenshuis', en: 'Spare key location' },
     { sel: '#extraInfoSpareKey', attr: 'placeholder', nl: 'Bijv. sleutelkluisje naast de voordeur, code 1234 — of bij de buren op nr. 12', en: 'E.g. lockbox next to the front door, code 1234 — or with the neighbours at no. 12' },
     { sel: '#extraInfoSaveButton', nl: 'Opslaan', en: 'Save' },
@@ -1990,16 +1995,16 @@
       'ack.call': 'Bel {name}',
       'medical.resusYes': '✅ {name} mag gereanimeerd worden',
       'medical.resusNo': '⛔ {name} wil NIET gereanimeerd worden',
-      'medical.advanceDirective': 'Wilsverklaring / behandelwensen:',
+      'medical.advanceDirective': 'Speciale wensen:',
       'medical.allergies': 'Allergieën:',
-      'medical.medications': 'Medicatie:',
-      'medical.conditions': 'Aandoeningen:',
-      'medical.mobility': 'Mobiliteit:',
+      'medical.medications': 'Medicijnen:',
+      'medical.conditions': 'Ziektes:',
+      'medical.mobility': 'Hoe goed lopen:',
       'medical.mobilityGood': 'Goed mobiel',
       'medical.mobilityWalker': 'Rollator',
       'medical.mobilityWheelchair': 'Rolstoel',
-      'medical.contact1': '1e contactpersoon:',
-      'medical.contact2': '2e contactpersoon:',
+      'medical.contact1': 'Contactpersoon 1:',
+      'medical.contact2': 'Contactpersoon 2:',
       'medical.doctor': 'Huisarts:',
       'medical.hospital': 'Ziekenhuis:',
       'medical.other': 'Overige medische bijzonderheden:',
@@ -2098,16 +2103,16 @@
       'ack.call': 'Call {name}',
       'medical.resusYes': '✅ {name} may be resuscitated',
       'medical.resusNo': '⛔ {name} does NOT want to be resuscitated',
-      'medical.advanceDirective': 'Advance directive / treatment wishes:',
+      'medical.advanceDirective': 'Special wishes:',
       'medical.allergies': 'Allergies:',
-      'medical.medications': 'Medication:',
-      'medical.conditions': 'Conditions:',
-      'medical.mobility': 'Mobility:',
+      'medical.medications': 'Medicines:',
+      'medical.conditions': 'Illnesses:',
+      'medical.mobility': 'How well they walk:',
       'medical.mobilityGood': 'Fully mobile',
       'medical.mobilityWalker': 'Walker',
       'medical.mobilityWheelchair': 'Wheelchair',
-      'medical.contact1': '1st contact person:',
-      'medical.contact2': '2nd contact person:',
+      'medical.contact1': 'Contact person 1:',
+      'medical.contact2': 'Contact person 2:',
       'medical.doctor': 'Doctor:',
       'medical.hospital': 'Hospital:',
       'medical.other': 'Other medical details:',
