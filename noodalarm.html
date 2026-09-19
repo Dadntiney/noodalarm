@@ -288,6 +288,12 @@
 
   .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; animation:screen-in .22s cubic-bezier(.25,.8,.4,1); }
   .screen.hidden{ display:none; }
+  /* Contacten had losse inline margins BOVENOP deze flex-gap staan (dus
+     dubbel uitgelijnde, wisselende sprongen tussen de blokken) én rekte
+     als enige met flex:1 leeg uit tot de onderkant van het scherm — dat
+     gaf een rommelige, hologige indruk. Hier dus een eigen, strakkere
+     ritme: vaste, kleinere gap, en niet geforceerd oprekken. */
+  #screen-contacts{ flex:none; gap:18px; }
   @keyframes screen-in{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
   @media (prefers-reduced-motion:reduce){ .screen{ animation:none; } .slide-page{ transition:none; } }
 
@@ -1789,12 +1795,12 @@
         <ul id="contactsList" class="people-list"></ul>
       </div>
 
-      <div id="sentRequestsSection" class="hidden" style="margin-top:20px;">
+      <div id="sentRequestsSection" class="hidden">
         <div class="section-title">Openstaande verzoeken</div>
         <ul id="sentRequestsList" class="people-list"></ul>
       </div>
 
-      <div class="settings-group" style="margin:20px 0 0;">
+      <div class="settings-group">
         <div class="settings-item">
           <button type="button" id="addContactToggle" class="settings-item-nav">
             <span class="settings-item-icon icon-accent">
@@ -1806,7 +1812,7 @@
         </div>
       </div>
 
-      <div id="addContactPanel" class="hidden" style="margin-top:16px;">
+      <div id="addContactPanel" class="hidden">
         <div class="search-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
           <input type="text" id="searchInput" placeholder="Zoek op naam of gebruikersnaam…" autocomplete="off">
