@@ -5266,11 +5266,17 @@
     chatReceiptsByMessageId = {};
 
     const { data: memberships } = await sb.from('alarm_group_members')
-      .select('group_id')
+      .select('group_id, added_at')
       .eq('user_id', currentSession.user.id);
     if (gen !== chatOpenGen) return;
     memberGroupIds = (memberships || []).map(m => m.group_id).filter(Boolean);
     if (myGroupId && memberGroupIds.indexOf(myGroupId) === -1) memberGroupIds.push(myGroupId);
+    // Per groep: vanaf wanneer jij lid werd — oudere berichten hoor je niet
+    // te zien (nieuwe contacten starten schoon).
+    const memberSinceByGroup = {};
+    (memberships || []).forEach(m => {
+      if (m.group_id) memberSinceByGroup[m.group_id] = m.added_at || null;
+    });
 
     if (!memberGroupIds.length){
       chatParticipantById = {};
@@ -5300,7 +5306,11 @@
     renderChatHeader();
     handleActiveAlarmChanged(alarmRow);
 
-    const list = messages || [];
+    const list = (messages || []).filter(m => {
+      const since = memberSinceByGroup[m.group_id];
+      if (!since) return true; // eigen groep zonder lid-rij, of onbekend — toon
+      return new Date(m.created_at) >= new Date(since);
+    });
     chatMessageById = {};
     list.forEach(m => { chatMessageById[m.id] = m; });
     chatReceiptsByMessageId = {};
