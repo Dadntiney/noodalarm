@@ -315,6 +315,17 @@
      gaf een rommelige, hologige indruk. Hier dus een eigen, strakkere
      ritme: vaste, kleinere gap, en niet geforceerd oprekken. */
   #screen-contacts{ flex:none; gap:18px; }
+  .contacts-community-note{
+    margin-top:8px;
+    padding:14px 18px max(10px, env(safe-area-inset-bottom));
+    text-align:center;
+    color:var(--text-muted);
+    font-size:0.9375rem;
+    line-height:1.5;
+    font-weight:500;
+  }
+  .contacts-community-note.hidden{ display:none; }
+  .contacts-community-note strong{ color:var(--text); font-weight:750; }
   /* #addContactPanel (zoekveld + QR-kaart + zoekresultaten) had geen eigen
      ritme — de afstand tussen het zoekveld en "Zoekresultaten" kwam toevallig
      uit een kleinere, impliciete waarde i.p.v. dezelfde 18px als de rest van
@@ -2015,6 +2026,8 @@
         </div>
       </div>
 
+      <p id="contactsCommunityNote" class="contacts-community-note hidden" aria-live="polite"></p>
+
     </section>
 
     <!-- =========================== BERICHTEN SCHERM =========================== -->
@@ -2619,6 +2632,7 @@
       'contacts.add': '+ Toevoegen',
       'contacts.sentInvite': 'Uitnodiging verzonden',
       'contacts.connected': 'Verbonden',
+      'contacts.communityCount': 'Inmiddels maken al {n} mensen met plezier en in alle veiligheid gebruik van NORI.',
       'errorPrefix.save': 'Opslaan mislukt: {msg}',
       'success.saved': 'Wijzigingen opgeslagen.',
       'success.medicalSaved': 'Medische info opgeslagen.',
@@ -2745,6 +2759,7 @@
       'contacts.add': '+ Add',
       'contacts.sentInvite': 'Invite sent',
       'contacts.connected': 'Connected',
+      'contacts.communityCount': 'Already {n} people are using NORI safely and with joy.',
       'errorPrefix.save': 'Saving failed: {msg}',
       'success.saved': 'Changes saved.',
       'success.medicalSaved': 'Medical info saved.',
@@ -2780,6 +2795,7 @@
   function localeTag(){ return currentLang === 'en' ? 'en-GB' : 'nl-NL'; }
   function applyTranslations(){
     applyStaticTranslations();
+    renderCommunityUserCount();
   }
   function setLanguage(lang){
     currentLang = lang === 'en' ? 'en' : 'nl';
@@ -3031,6 +3047,7 @@
     contactsSection: document.getElementById('contactsSection'),
     contactsEmpty: document.getElementById('contactsEmpty'),
     contactsFilterEmpty: document.getElementById('contactsFilterEmpty'),
+    contactsCommunityNote: document.getElementById('contactsCommunityNote'),
     contactsList: document.getElementById('contactsList'),
 
     profileAvatar: document.getElementById('profileAvatar'),
@@ -4249,6 +4266,32 @@
     return myContactsData;
   }
 
+  // Warm zinnetje onderaan Contacten met het echte totaal aantal
+  // NORI-gebruikers. Alleen een getal — geen namen. Bron: RPC
+  // public_user_count (systeemaccount @nori telt niet mee).
+  let communityUserCount = null;
+  function renderCommunityUserCount(){
+    if (!els.contactsCommunityNote) return;
+    if (communityUserCount == null || !isFinite(communityUserCount) || communityUserCount < 1){
+      els.contactsCommunityNote.classList.add('hidden');
+      els.contactsCommunityNote.textContent = '';
+      return;
+    }
+    const formatted = escapeHtml(Number(communityUserCount).toLocaleString(localeTag()));
+    els.contactsCommunityNote.innerHTML = t('contacts.communityCount', { n: '<strong>' + formatted + '</strong>' });
+    els.contactsCommunityNote.classList.remove('hidden');
+  }
+  async function refreshCommunityUserCount(){
+    if (!els.contactsCommunityNote) return;
+    let count = null;
+    try {
+      const { data, error } = await sb.rpc('public_user_count');
+      if (!error && data != null && data !== '') count = Number(data);
+    } catch (err){ /* RPC kan nog ontbreken vóór migratie */ }
+    communityUserCount = (count != null && isFinite(count)) ? count : null;
+    renderCommunityUserCount();
+  }
+
   async function removeContact(btn){
     if (!window.confirm(t('confirm.removeContact'))) return;
     btn.disabled = true;
@@ -4362,6 +4405,7 @@
       if (els.addContactPanel) els.addContactPanel.classList.add('hidden');
       refreshContacts();
       refreshSentRequests();
+      refreshCommunityUserCount();
     }
   }
 
