@@ -3131,12 +3131,15 @@
     if (sirenAudioCtx.state === 'suspended') sirenAudioCtx.resume();
     return sirenAudioCtx;
   }
-  // iOS/Safari staat geluid pas toe na een directe tik — deze alvast
-  // "ontgrendelen" bij de allereerste tik ergens in de app, zodat een
-  // sirene die later vanzelf afgaat (bij een binnenkomend alarm) ook
-  // daadwerkelijk hoorbaar is.
-  document.addEventListener('touchstart', () => getSirenAudioCtx(), { once: true, passive: true });
-  document.addEventListener('click', () => getSirenAudioCtx(), { once: true });
+  // iOS/Safari staat geluid pas toe na een directe tik. Eén keer ontgrendelen
+  // bij de allereerste tik is niet genoeg: iOS zet een AudioContext die een
+  // tijdje niets deed vanzelf weer op "suspended" (na inactiviteit, het
+  // vergrendelen van het scherm, of de tab op de achtergrond) — precies dát
+  // veroorzaakte het "het aftel-geluid speelt soms wel, soms niet"-gedrag.
+  // Daarom nu bij ÉLKE tik ergens in de app opnieuw resume() proberen (goedkoop
+  // als de context al draait) i.p.v. maar één keer voor de rest van de sessie.
+  document.addEventListener('touchstart', () => getSirenAudioCtx(), { passive: true });
+  document.addEventListener('click', () => getSirenAudioCtx());
 
   // Elke sirene automatiseert frequentie + volume van ÉÉN doorlopende
   // oscillator (geen losse pieptonen die telkens opnieuw starten) — dat
@@ -4640,6 +4643,11 @@
   let pendingTestMode = false;
   function startCountdown(testMode){
     if (countdownActive || els.alarmButton.disabled) return;
+    // Zo dicht mogelijk bij de eigenlijke tik ontgrendelen (i.p.v. pas
+    // straks in playCountdownBeep, dat via requestAnimationFrame pas een
+    // frame later loopt) — geeft de browser de beste kans om dit nog als
+    // een directe gebruikersactie te herkennen.
+    getSirenAudioCtx();
     pendingTestMode = !!testMode;
     countdownActive = true;
     countdownStartedAt = performance.now();
@@ -6275,11 +6283,17 @@
   // hoeven nooit zelf de hele opname te downloaden alleen om de golfvorm te
   // kunnen tonen (die staat al klaar in het bericht zelf).
   async function computeVoiceWaveformPeaks(blob, bucketCount){
+    // Losse, eigen AudioContext (i.p.v. de gedeelde sirenAudioCtx) — moet
+    // ALTIJD gesloten worden, ook als decodeAudioData faalt, anders blijft
+    // 'm voor de rest van de sessie hangen. iOS staat maar een beperkt
+    // aantal tegelijk actieve AudioContexts toe; te veel lekken kan zelfs
+    // ander geluid (zoals de aftel-piepjes) in de app gaan verstoren.
+    let ctx = null;
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return null;
       const arrayBuffer = await blob.arrayBuffer();
-      const ctx = new AudioCtx();
+      ctx = new AudioCtx();
       const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
       const channelData = audioBuffer.getChannelData(0);
       const bucketSize = Math.max(1, Math.floor(channelData.length / bucketCount));
@@ -6294,11 +6308,12 @@
         }
         peaks.push(max);
       }
-      if (ctx.close) ctx.close();
       const loudest = Math.max(0.01, ...peaks);
       return peaks.map(p => Math.round(Math.min(1, Math.max(0.08, p / loudest)) * 100) / 100);
     } catch (err) {
       return null;
+    } finally {
+      if (ctx && ctx.close) ctx.close();
     }
   }
 
