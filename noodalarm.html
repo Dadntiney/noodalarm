@@ -588,6 +588,18 @@
     position:absolute; right:-1px; bottom:-1px; width:14px; height:14px; border-radius:50%;
     background:var(--green); border:2.5px solid var(--surface);
   }
+  /* Klein microfoon-badge over de avatar heen bij spraakberichten — zo zie
+     je in de gesprekkenweergave meteen dat het om een memo gaat, net als
+     op de referentie-screenshot. Alleen bij inkomende berichten (avatar
+     staat sowieso alleen daar), en verborgen zodra de avatar zelf ook
+     verborgen is (vervolgbericht in een reeks). */
+  .voice-mic-badge{
+    position:absolute; right:-2px; bottom:-2px; width:17px; height:17px; border-radius:50%;
+    background:#2f9bf0; color:#fff; display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--bg);
+  }
+  .voice-mic-badge svg{ width:9px; height:9px; }
+  .chat-row.other.grouped .voice-mic-badge{ visibility:hidden; }
 
   /* ---------- Contacten / zoeken ---------- */
   .section-title{ font-size:0.90625rem; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
@@ -967,7 +979,7 @@
   .chat-recording-time{ font-weight:700; font-variant-numeric:tabular-nums; }
   .chat-recording-hint{ flex:1; color:var(--text-muted); font-size:0.9375rem; }
   /* ---------- Spraakbericht-bubbel (afspelen) ---------- */
-  .voice-msg{ display:flex; align-items:center; gap:10px; min-width:180px; padding:2px 0; }
+  .voice-msg{ display:flex; align-items:center; gap:10px; min-width:212px; padding:2px 0; }
   .voice-msg-play{
     width:38px; height:38px; min-height:38px; border-radius:50%; flex-shrink:0; border:none; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
@@ -976,11 +988,24 @@
   .chat-bubble.other .voice-msg-play{ background:var(--accent); color:#fff; }
   .voice-msg-play svg{ width:16px; height:16px; margin-left:2px; }
   .voice-msg-play .voice-msg-pause-icon{ margin-left:0; }
-  /* color-mix i.p.v. opacity: opacity zou via de stacking context ook de
-     kind-voortgangsbalk mee laten vervagen, dat willen we niet. */
-  .voice-msg-track{ flex:1; height:3px; border-radius:2px; background:color-mix(in srgb, currentColor 28%, transparent); position:relative; }
-  .voice-msg-progress{ position:absolute; inset:0; width:0%; border-radius:2px; background:currentColor; }
-  .voice-msg-time{ font-size:0.8125rem; font-variant-numeric:tabular-nums; opacity:.8; flex-shrink:0; }
+  .voice-msg-main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  /* Echte, uit de opname berekende golfvorm (of voor oudere berichten
+     zonder opgeslagen data een vast pseudo-willekeurig patroon) i.p.v. een
+     platte balk — precies zoals de referentie. De "fill"-laag is een
+     letterlijke kopie van dezelfde balkjes, feller gekleurd, en schuift
+     met een clip-path mee met de afspeelvoortgang (zie primeVoiceMessages);
+     dat is goedkoper dan elk balkje los bijwerken. */
+  .voice-msg-waveform{ position:relative; height:26px; touch-action:none; cursor:pointer; }
+  .voice-msg-bars{ position:absolute; inset:0; display:flex; align-items:center; gap:2px; pointer-events:none; }
+  .voice-msg-bars-base{ color:color-mix(in srgb, currentColor 30%, transparent); }
+  .voice-msg-bars-fill{ color:currentColor; clip-path:inset(0 100% 0 0); }
+  .voice-msg-bar{ flex:1; min-width:2.5px; max-width:3px; border-radius:2px; background:currentColor; }
+  .voice-msg-scrubber{
+    position:absolute; top:50%; left:0%; width:12px; height:12px; border-radius:50%;
+    background:#2f9bf0; box-shadow:0 1px 3px rgba(0,0,0,.4); transform:translate(-50%,-50%);
+    pointer-events:none;
+  }
+  .voice-msg-time{ font-size:0.75rem; font-variant-numeric:tabular-nums; opacity:.75; }
   .location-card{
     flex-shrink:0; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
     box-shadow:var(--shadow-card); padding:16px; margin:14px 0 0;
@@ -2710,6 +2735,7 @@
     }).join('');
   }
   const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
+  const VOICE_MIC_BADGE_HTML = '<span class="voice-mic-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg></span>';
   function avatarInner(url){
     return url ? '<img src="' + url + '" alt="">' : PERSON_ICON;
   }
@@ -4820,6 +4846,48 @@
     return m + ':' + String(s).padStart(2, '0');
   }
 
+  // Aantal balkjes in de golfvorm van een spraakbericht.
+  const VOICE_WAVEFORM_BARS = 42;
+  // Voor oudere berichten die vóór deze functie zijn opgenomen (of waarvan
+  // het decoderen van de golfvorm bij het versturen om wat voor reden dan
+  // ook mislukte) is er geen echte amplitude-data — dan tonen we in plaats
+  // van een lege/platte balk een vast, per bericht uniek pseudo-willekeurig
+  // patroon (gehashed op het bericht-id), zodat het er nooit kapot uitziet.
+  function pseudoWaveformPeaks(seed, count){
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    const peaks = [];
+    for (let i = 0; i < count; i++){
+      h = (h * 1103515245 + 12345) >>> 0;
+      peaks.push(0.15 + (h % 1000) / 1000 * 0.75);
+    }
+    return peaks;
+  }
+  function voiceMsgWaveformBars(msg){
+    const peaks = Array.isArray(msg.media_waveform) && msg.media_waveform.length
+      ? msg.media_waveform
+      : pseudoWaveformPeaks(String(msg.id || msg.media_path || 'x'), VOICE_WAVEFORM_BARS);
+    return peaks.map(p => '<span class="voice-msg-bar" style="height:' + Math.round(Math.max(12, Math.min(100, p * 100))) + '%"></span>').join('');
+  }
+  function voiceMsgHtml(msg, srcAttr, pathAttr){
+    const bars = voiceMsgWaveformBars(msg);
+    return '<div class="voice-msg">' +
+        '<audio class="voice-msg-audio"' + srcAttr + pathAttr + ' preload="metadata"></audio>' +
+        '<button type="button" class="voice-msg-play" aria-label="Afspelen">' +
+          '<svg class="voice-msg-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>' +
+          '<svg class="voice-msg-pause-icon hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>' +
+        '</button>' +
+        '<div class="voice-msg-main">' +
+          '<div class="voice-msg-waveform">' +
+            '<div class="voice-msg-bars voice-msg-bars-base">' + bars + '</div>' +
+            '<div class="voice-msg-bars voice-msg-bars-fill">' + bars + '</div>' +
+            '<span class="voice-msg-scrubber"></span>' +
+          '</div>' +
+          '<span class="voice-msg-time">0:00</span>' +
+        '</div>' +
+      '</div>';
+  }
+
   // Met preload="metadata" laat de browser standaard een leeg (wit/zwart)
   // vlak zien totdat je op play drukt. Even naar een piepklein moment in de
   // video seeken dwingt 'm om dat frame alvast te decoderen en te tonen als
@@ -4848,13 +4916,20 @@
       wrap.dataset.voicePrimed = '1';
       const audio = wrap.querySelector('.voice-msg-audio');
       const playBtn = wrap.querySelector('.voice-msg-play');
-      const progress = wrap.querySelector('.voice-msg-progress');
+      const waveform = wrap.querySelector('.voice-msg-waveform');
+      const fill = wrap.querySelector('.voice-msg-bars-fill');
+      const scrubber = wrap.querySelector('.voice-msg-scrubber');
       const timeLabel = wrap.querySelector('.voice-msg-time');
       const playIcon = wrap.querySelector('.voice-msg-play-icon');
       const pauseIcon = wrap.querySelector('.voice-msg-pause-icon');
       const showPlaying = (playing) => {
         playIcon.classList.toggle('hidden', playing);
         pauseIcon.classList.toggle('hidden', !playing);
+      };
+      const setProgress = (ratio) => {
+        const pct = Math.min(1, Math.max(0, ratio)) * 100;
+        fill.style.clipPath = 'inset(0 ' + (100 - pct) + '% 0 0)';
+        scrubber.style.left = pct + '%';
       };
       audio.addEventListener('loadedmetadata', () => {
         if (isFinite(audio.duration)){
@@ -4864,8 +4939,9 @@
         // Bekende eigenaardigheid van door MediaRecorder opgenomen webm-
         // bestanden: de duur staat niet in de header, dus meldt audio.duration
         // zich als Infinity totdat je eenmaal helemaal doorspoelt. Dit forceert
-        // dat éénmalig, waarna zowel de duur als de voortgangsbalk (die anders
-        // altijd door Infinity deelt en op 0% blijft hangen) gewoon werken.
+        // dat éénmalig, waarna zowel de duur als de golfvorm-voortgang (die
+        // anders altijd door Infinity deelt en op 0% blijft hangen) gewoon
+        // werken.
         const forceDuration = () => {
           audio.removeEventListener('timeupdate', forceDuration);
           audio.currentTime = 0;
@@ -4876,7 +4952,7 @@
       });
       audio.addEventListener('timeupdate', () => {
         if (isFinite(audio.duration) && audio.duration > 0){
-          progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
+          setProgress(audio.currentTime / audio.duration);
           timeLabel.textContent = formatDuration(audio.currentTime);
         }
       });
@@ -4884,7 +4960,7 @@
       audio.addEventListener('pause', () => showPlaying(false));
       audio.addEventListener('ended', () => {
         showPlaying(false);
-        progress.style.width = '0%';
+        setProgress(0);
         if (isFinite(audio.duration)) timeLabel.textContent = formatDuration(audio.duration);
       });
       playBtn.addEventListener('click', () => {
@@ -4894,6 +4970,33 @@
         if (audio.paused) audio.play().catch(() => {});
         else audio.pause();
       });
+
+      // Tikken/slepen op de golfvorm zelf spoelt naar die positie, net als
+      // WhatsApp — via Pointer Events zodat muis, touch en pen op dezelfde
+      // manier werken. Dit loopt bewust los van de gedelegeerde long-press/
+      // tik-afhandeling op #chatMessages (die ziet deze aanraking ook, maar
+      // doet er niets mee omdat het target geen .voice-msg-play/video/image
+      // is en de sleepbeweging 'm meteen als "bewogen" markeert).
+      let dragging = false;
+      const seekAtClientX = (clientX) => {
+        if (!isFinite(audio.duration) || audio.duration <= 0) return;
+        const rect = waveform.getBoundingClientRect();
+        const ratio = rect.width ? Math.min(1, Math.max(0, (clientX - rect.left) / rect.width)) : 0;
+        audio.currentTime = ratio * audio.duration;
+        setProgress(ratio);
+      };
+      waveform.addEventListener('pointerdown', (ev) => {
+        dragging = true;
+        if (waveform.setPointerCapture) waveform.setPointerCapture(ev.pointerId);
+        seekAtClientX(ev.clientX);
+      });
+      waveform.addEventListener('pointermove', (ev) => {
+        if (!dragging) return;
+        seekAtClientX(ev.clientX);
+      });
+      const endDrag = () => { dragging = false; };
+      waveform.addEventListener('pointerup', endDrag);
+      waveform.addEventListener('pointercancel', endDrag);
     });
   }
 
@@ -4960,15 +5063,7 @@
         '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span>' +
         '<span class="chat-video-duration"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4Z"/></svg><span class="chat-video-duration-text"></span></span></div>'
       : msg.media_type === 'audio'
-      ? '<div class="voice-msg">' +
-          '<audio class="voice-msg-audio"' + srcAttr + pathAttr + ' preload="metadata"></audio>' +
-          '<button type="button" class="voice-msg-play" aria-label="Afspelen">' +
-            '<svg class="voice-msg-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>' +
-            '<svg class="voice-msg-pause-icon hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>' +
-          '</button>' +
-          '<div class="voice-msg-track"><div class="voice-msg-progress"></div></div>' +
-          '<span class="voice-msg-time">0:00</span>' +
-        '</div>'
+      ? voiceMsgHtml(msg, srcAttr, pathAttr)
       : '<img' + srcAttr + pathAttr + ' class="chat-media" loading="lazy" alt="">');
     const ticks = own ? chatTicksHtml(msg.id) : '';
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
@@ -4977,8 +5072,9 @@
       '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
     if (own) return '<div class="chat-row own" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' + bubble + '</div>';
+    const isVoice = msg.media_type === 'audio';
     return '<div class="chat-row other' + (showMeta ? '' : ' grouped') + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
-      '<div class="avatar sm">' + avatarInner(msg.senderAvatar) + '</div>' +
+      '<span class="avatar-wrap"><div class="avatar sm">' + avatarInner(msg.senderAvatar) + '</div>' + (isVoice ? VOICE_MIC_BADGE_HTML : '') + '</span>' +
       bubble +
       '</div>';
   }
@@ -6051,6 +6147,40 @@
     return 'webm';
   }
 
+  // Berekent de echte golfvorm van de zojuist opgenomen memo (i.p.v. een
+  // fake patroon): decodeert de opname lokaal naar ruwe samples en pakt per
+  // segment de piekamplitude. Dit gebeurt op het toestel van de verzender,
+  // parallel aan de upload — dus geen extra netwerklatency, en ontvangers
+  // hoeven nooit zelf de hele opname te downloaden alleen om de golfvorm te
+  // kunnen tonen (die staat al klaar in het bericht zelf).
+  async function computeVoiceWaveformPeaks(blob, bucketCount){
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      const arrayBuffer = await blob.arrayBuffer();
+      const ctx = new AudioCtx();
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+      const channelData = audioBuffer.getChannelData(0);
+      const bucketSize = Math.max(1, Math.floor(channelData.length / bucketCount));
+      const peaks = [];
+      for (let i = 0; i < bucketCount; i++){
+        const start = i * bucketSize;
+        const end = Math.min(channelData.length, start + bucketSize);
+        let max = 0;
+        for (let j = start; j < end; j++){
+          const v = Math.abs(channelData[j]);
+          if (v > max) max = v;
+        }
+        peaks.push(max);
+      }
+      if (ctx.close) ctx.close();
+      const loudest = Math.max(0.01, ...peaks);
+      return peaks.map(p => Math.round(Math.min(1, Math.max(0.08, p / loudest)) * 100) / 100);
+    } catch (err) {
+      return null;
+    }
+  }
+
   async function onVoiceRecordingStopped(){
     const chunks = voiceChunks;
     const mimeType = (voiceRecorder && voiceRecorder.mimeType) || 'audio/webm';
@@ -6065,7 +6195,10 @@
     const contentType = mimeType.split(';')[0];
     const ext = extFromAudioMimeType(mimeType);
     const path = currentChatGroupId + '/' + crypto.randomUUID() + '.' + ext;
-    const { error: upErr } = await sb.storage.from('chat-media').upload(path, blob, { contentType });
+    const [{ error: upErr }, waveformPeaks] = await Promise.all([
+      sb.storage.from('chat-media').upload(path, blob, { contentType }),
+      computeVoiceWaveformPeaks(blob, VOICE_WAVEFORM_BARS)
+    ]);
     if (upErr){
       els.chatVoiceButton.disabled = false;
       window.alert(t('alert.uploadFailed', { msg: upErr.message }));
@@ -6073,7 +6206,7 @@
     }
     await sb.from('alarm_messages').insert({
       group_id: currentChatGroupId, sender_id: currentSession.user.id, body: null,
-      media_path: path, media_type: 'audio'
+      media_path: path, media_type: 'audio', media_waveform: waveformPeaks || null
     });
     els.chatVoiceButton.disabled = false;
     scrollChatToBottom();
