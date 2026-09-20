@@ -390,11 +390,16 @@
     width:100%; background:var(--surface-2); border:1.5px solid var(--border); border-radius:11px;
     padding:14px 15px; font-size:1.0625rem; color:var(--text); min-height:52px;
   }
-  /* input[type=date] heeft in iOS Safari een eigen, vaste minimumbreedte
-     voor zijn ingebouwde datum-widget — daardoor negeert het anders
-     width:100% en steekt het (net als bij de eerdere min-width:auto-bug in
-     de typebalk) buiten de kaart uit. */
-  .field input[type="date"]{ min-width:0; }
+  /* input[type=date] heeft in iOS Safari zijn EIGEN systeem-uiterlijk
+     (-webkit-appearance) met een intrinsieke minimumbreedte voor de
+     ingebouwde datum-widget — die negeert width:100% volledig, en
+     min-width:0 alleen hielp niet omdat de native chrome de opgelegde
+     minimumbreedte is, niet een flexbox-effect. appearance:none haalt dat
+     systeem-uiterlijk weg zodat het veld weer een gewone, door ons
+     gestylede box wordt die wél gewoon width:100% respecteert. */
+  .field input[type="date"]{
+    min-width:0; -webkit-appearance:none; appearance:none;
+  }
   .field input:focus, .field textarea:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
   .field input::placeholder, .field textarea::placeholder{ color:var(--text-faint); }
   .field textarea{
