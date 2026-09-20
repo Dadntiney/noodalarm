@@ -2533,6 +2533,7 @@
       'alert.requestSent': 'Verzoek verstuurd naar {name}.',
       'invite.useHomeScreen': 'Heb je NORI al op je beginscherm staan? Gebruik voortaan dát icoon in plaats van deze pagina — alleen zo komen noodmeldingen goed binnen. Nog niet geïnstalleerd? Dat kan via Instellingen.',
       'alert.inviteFailed': 'Uitnodigen mislukt: {msg}',
+      'alert.respondFailed': 'Reageren op verzoek mislukt: {msg}',
       'alert.withdrawFailed': 'Intrekken mislukt: {msg}',
       'alert.disconnectFailed': 'Verbreken mislukt: {msg}',
       'alert.editFailed': 'Bewerken mislukt: {msg}',
@@ -2657,6 +2658,7 @@
       'alert.requestSent': 'Request sent to {name}.',
       'invite.useHomeScreen': 'Already have NORI on your home screen? Use that icon from now on instead of this page — that\'s the only way emergency alerts come through reliably. Not installed yet? You can do that via Settings.',
       'alert.inviteFailed': 'Inviting failed: {msg}',
+      'alert.respondFailed': 'Responding to request failed: {msg}',
       'alert.withdrawFailed': 'Withdrawing failed: {msg}',
       'alert.disconnectFailed': 'Disconnecting failed: {msg}',
       'alert.editFailed': 'Editing failed: {msg}',
@@ -4002,7 +4004,11 @@
   }
 
   async function respondToInvite(connectionId, status){
-    await sb.from('connections').update({ status }).eq('id', connectionId);
+    const { error } = await sb.from('connections').update({ status }).eq('id', connectionId);
+    if (error){
+      window.alert(t('alert.respondFailed', { msg: error.message }));
+      return;
+    }
     await refreshNotifications();
     await refreshContacts();
   }
