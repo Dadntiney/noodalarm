@@ -1726,23 +1726,6 @@
     </div>
   </div>
 
-  <!-- =========================== GESPREKKEN =========================== -->
-  <div id="conversationsOverlay" class="slide-page hidden">
-    <div class="slide-page-header">
-      <button type="button" id="conversationsCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
-        <span class="profile-back-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </span>
-        Terug
-      </button>
-    </div>
-    <div class="slide-page-content">
-      <h1 class="slide-page-title" id="conversationsTitle">Gesprekken</h1>
-      <div id="conversationsEmpty" class="empty-state hidden">Nog geen gesprekken.</div>
-      <ul id="conversationsList" class="people-list"></ul>
-    </div>
-  </div>
-
   <!-- =========================== FOTO VOLLEDIG SCHERM =========================== -->
   <div id="mediaLightbox" class="media-lightbox hidden">
     <button type="button" id="mediaLightboxClose" class="media-lightbox-close" aria-label="Sluiten">
@@ -2099,7 +2082,6 @@
       </div>
 
       <div id="chatMessages" class="chat-messages"></div>
-      <div id="chatReadOnlyNotice" class="empty-state hidden" style="margin:0 14px 14px;">Je kunt hier alleen meelezen. Een bericht sturen kan in jouw eigen kring, of hier zodra er een actief alarm loopt.</div>
       <form id="chatForm" class="chat-form">
         <div id="chatEditBanner" class="chat-edit-banner hidden">
           <div class="chat-edit-banner-text">
@@ -2447,10 +2429,6 @@
     { sel: '#extraInfoOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
-    { sel: '#conversationsCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
-    { sel: '#conversationsCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
-    { sel: '#conversationsTitle', nl: 'Gesprekken', en: 'Conversations' },
-    { sel: '#conversationsEmpty', nl: 'Nog geen gesprekken.', en: 'No conversations yet.' },
     { sel: '#brandHomeButton', attr: 'aria-label', nl: 'Naar Alarm', en: 'Go to Alarm' },
     { sel: '.intro', nl: 'Druk op de knop om je contacten te waarschuwen.', en: 'Press the button to alert your contacts.' },
     { sel: '#alarmButton', attr: 'aria-label', nl: 'Druk voor alarm', en: 'Press for alarm' },
@@ -2505,7 +2483,6 @@
     { sel: '#chatCameraButton', attr: 'aria-label', nl: 'Foto maken', en: 'Take photo' },
     { sel: '#chatInput', attr: 'placeholder', nl: 'Typ een bericht…', en: 'Type a message…' },
     { sel: '#chatSendButton', attr: 'aria-label', nl: 'Versturen', en: 'Send' },
-    { sel: '#chatReadOnlyNotice', nl: 'Je kunt hier alleen meelezen. Een bericht sturen kan in jouw eigen kring, of hier zodra er een actief alarm loopt.', en: 'You can only read along here. You can send a message in your own circle, or here once an alarm is active.' },
     { sel: '#chatVoiceButton', attr: 'aria-label', nl: 'Spraakbericht opnemen', en: 'Record voice message' },
     { sel: '#chatRecordingCancel', attr: 'aria-label', nl: 'Opname annuleren', en: 'Cancel recording' },
     { sel: '#chatRecordingSend', attr: 'aria-label', nl: 'Spraakbericht versturen', en: 'Send voice message' },
@@ -2615,8 +2592,8 @@
       'conversation.unknown': 'Onbekend',
       'conversation.someone': 'Iemand',
       'chat.onMyWay': '✅ {name} komt eraan!',
-      'chat.headerTitle': 'Noodkring',
-      'chat.headerTitleOther': 'Kring van {name}',
+      'chat.headerTitle': 'Berichten',
+      'chat.headerSub': 'Je berichten met je contacten',
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
       'location.fetchingAddress': 'Adres ophalen…',
@@ -2630,9 +2607,6 @@
       'notif.rejected': 'Geweigerd',
       'notif.accept': 'Accepteren',
       'notif.reject': 'Weigeren',
-      'conversations.own': 'Jouw kring',
-      'conversations.ownHint': 'Berichten met iedereen die aan jou gekoppeld is',
-      'conversations.readOnlyHint': 'Alleen meelezen — typen kan in jouw eigen kring',
       'notif.openMessages': 'Open Berichten',
       'install.installed': 'Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
       'install.notInstalled': 'Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
@@ -2744,8 +2718,8 @@
       'conversation.unknown': 'Unknown',
       'conversation.someone': 'Someone',
       'chat.onMyWay': '✅ {name} is on their way!',
-      'chat.headerTitle': 'Emergency circle',
-      'chat.headerTitleOther': '{name}\'s circle',
+      'chat.headerTitle': 'Messages',
+      'chat.headerSub': 'Your messages with your contacts',
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
       'location.fetchingAddress': 'Fetching address…',
@@ -2759,9 +2733,6 @@
       'notif.rejected': 'Declined',
       'notif.accept': 'Accept',
       'notif.reject': 'Decline',
-      'conversations.own': 'Your circle',
-      'conversations.ownHint': 'Messages with everyone connected to you',
-      'conversations.readOnlyHint': 'Read only — you can type in your own circle',
       'notif.openMessages': 'Open Messages',
       'install.installed': 'Installed — you\'ll receive emergency alerts as expected.',
       'install.notInstalled': 'Not installed yet — without this you could miss an emergency alert.',
@@ -2940,18 +2911,12 @@
     notifEmpty: document.getElementById('notifEmpty'),
     notifList: document.getElementById('notifList'),
 
-    conversationsOverlay: document.getElementById('conversationsOverlay'),
-    conversationsCloseButton: document.getElementById('conversationsCloseButton'),
-    conversationsEmpty: document.getElementById('conversationsEmpty'),
-    conversationsList: document.getElementById('conversationsList'),
-
     chatHeader: document.getElementById('chatHeader'),
     chatBackButton: document.getElementById('chatBackButton'),
     chatHeaderAvatar: document.getElementById('chatHeaderAvatar'),
     chatHeaderTitle: document.getElementById('chatHeaderTitle'),
     chatHeaderSub: document.getElementById('chatHeaderSub'),
     chatMessages: document.getElementById('chatMessages'),
-    chatReadOnlyNotice: document.getElementById('chatReadOnlyNotice'),
     chatForm: document.getElementById('chatForm'),
     chatMediaInput: document.getElementById('chatMediaInput'),
     chatCameraInput: document.getElementById('chatCameraInput'),
@@ -3918,10 +3883,13 @@
     await sb.from('notifications').update({ is_read: true })
       .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmId);
     const name = currentProfile ? currentProfile.full_name : t('conversation.someone');
-    await sb.from('alarm_messages').insert({ group_id: alarmRow.group_id, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
-    chatReturnToConversations = false;
-    currentChatPeerName = null;
-    openMessages(alarmRow.group_id);
+    // Altijd in de EIGEN kring posten — de activator ziet 't via de
+    // samengevoegde tijdlijn (die is lid van jouw groep).
+    if (!myGroupId) await loadMyGroupId();
+    if (myGroupId){
+      await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
+    }
+    openMessages();
   }
   function maybeHandleOmwFromUrl(){
     const params = new URLSearchParams(window.location.search);
@@ -4359,74 +4327,18 @@
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
-  // "Berichten" opende altijd jouw EIGEN groep — maar een bevestigd contact
-  // heeft (naast jouw groep) ook zijn/haar eigen groep waar jij weer lid van
-  // bent. Twee losse groepen voor dezelfde twee mensen: berichten die je
-  // contact in HAAR groep stuurt kwamen hier dus nooit aan, en omgekeerd.
-  // Bij precies 1 groep (nog geen bevestigde contacten) is er niets te
-  // kiezen en openen we zoals voorheen meteen die ene groep.
-  // chatReturnToConversations: als je via de gesprekkenlijst een kring
-  // opende, brengt de terug-knop je daar weer heen i.p.v. naar Alarm.
-  let chatReturnToConversations = false;
-  let currentChatPeerName = null;
-  async function openBerichtenTab(){
-    const { data } = await sb.from('alarm_group_members')
-      .select('group_id, group:group_id(owner_id, owner:owner_id(full_name, avatar_url))')
-      .eq('user_id', currentSession.user.id);
-    const rows = (data || []).filter(r => r.group);
-    if (rows.length <= 1){
-      chatReturnToConversations = false;
-      currentChatPeerName = null;
-      openMessages(myGroupId);
-      return;
-    }
-    renderConversations(rows);
-    openSlidePage(els.conversationsOverlay);
-  }
-  function renderConversations(rows){
-    const sorted = rows.slice().sort((a, b) => {
-      const aOwn = a.group.owner_id === currentSession.user.id;
-      const bOwn = b.group.owner_id === currentSession.user.id;
-      if (aOwn !== bOwn) return aOwn ? -1 : 1;
-      return (a.group.owner.full_name || '').localeCompare(b.group.owner.full_name || '');
-    });
-    els.conversationsEmpty.classList.toggle('hidden', sorted.length > 0);
-    els.conversationsList.innerHTML = sorted.map(conversationCardHtml).join('');
-    els.conversationsList.querySelectorAll('.person-card[data-group-id]').forEach(li => {
-      li.addEventListener('click', () => {
-        chatReturnToConversations = true;
-        currentChatPeerName = li.dataset.peerName || null;
-        openMessages(li.dataset.groupId);
-      });
-    });
-  }
-  function conversationCardHtml(row){
-    const isOwn = row.group.owner_id === currentSession.user.id;
-    const name = isOwn ? t('conversations.own') : (row.group.owner.full_name || t('conversation.unknown'));
-    const hint = isOwn ? t('conversations.ownHint') : t('conversations.readOnlyHint');
-    const peerName = isOwn ? '' : (row.group.owner.full_name || '');
-    return '<li class="person-card" data-group-id="' + row.group_id + '" data-peer-name="' + escapeHtml(peerName) + '" style="cursor:pointer;">' +
-      '<div class="avatar">' + avatarInner(isOwn ? null : row.group.owner.avatar_url) + '</div>' +
-      '<div class="person-info">' +
-        '<div class="name">' + escapeHtml(name) + '</div>' +
-        (hint ? '<div class="handle">' + escapeHtml(hint) + '</div>' : '') +
-      '</div>' +
-      '</li>';
-  }
-  els.tabMessages.addEventListener('click', openBerichtenTab);
-  els.conversationsCloseButton.addEventListener('click', () => closeSlidePage(els.conversationsOverlay));
+  // Berichten = altijd één scherm: jouw contactenkring. Versturen gaat
+  // altijd naar jouw eigen groep; berichten van contacten (die zij in
+  // HUN groep plaatsten) verschijnen in dezelfde tijdlijn omdat jij
+  // lid bent van hun groep. Geen gesprekkenlijst, geen 1-op-1.
+  els.tabMessages.addEventListener('click', () => openMessages());
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
-  els.chatBackButton.addEventListener('click', () => {
-    const returnToConvos = chatReturnToConversations;
-    chatReturnToConversations = false;
-    switchScreen('alarm');
-    if (returnToConvos) openBerichtenTab();
-  });
+  els.chatBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
-    if (name !== 'messages' && chatChannel){
-      sb.removeChannel(chatChannel);
-      chatChannel = null;
+    if (name !== 'messages'){
+      unsubscribeChat();
       currentChatGroupId = null;
+      memberGroupIds = [];
       stopAckWatcher();
       clearInterval(locationUpdatedTimer);
     }
@@ -4851,11 +4763,7 @@
     await endMyActiveAlarm();
   });
   if (els.openMessagesFromSentButton){
-    els.openMessagesFromSentButton.addEventListener('click', () => {
-      chatReturnToConversations = false;
-      currentChatPeerName = null;
-      openMessages(myGroupId);
-    });
+    els.openMessagesFromSentButton.addEventListener('click', () => openMessages());
   }
   // Zelfde actie, maar dan direct vanuit het berichtenscherm — zonder dit
   // blijft een alarm dat je hier ooit activeerde voor altijd "actief" staan
@@ -5038,18 +4946,27 @@
   }
 
   /* =========================================================================
-     BERICHTEN — een doorlopend groepsgesprek tussen jou en je bevestigde
-     noodcontacten. Slaat iemand alarm, dan verschijnt boven dit gesprek
-     de locatie van diegene die het alarm activeerde.
+     BERICHTEN — één groepsgesprek met je bevestigde noodcontacten.
+     Versturen gaat altijd naar jouw eigen kring. Berichten die een contact
+     in ZIJN/HAAR kring plaatst, zie je hier ook (samengevoegde tijdlijn),
+     omdat jij lid bent van die groep — zonder dat diens andere contacten
+     jouw berichten zien. Geen gesprekkenlijst, geen 1-op-1.
      ========================================================================= */
-  let chatChannel = null;
-  let currentChatGroupId = null;
+  let chatChannels = [];
+  let currentChatGroupId = null; // blijft myGroupId zolang Berichten open is (compose-doel)
+  let memberGroupIds = [];
+  let chatOpenGen = 0;
   let editingMessageId = null;
   let activeMenuBubble = null;
 
   let chatParticipantById = {};
   let chatMessageById = {};
   let chatReceiptsByMessageId = {};
+
+  function unsubscribeChat(){
+    chatChannels.forEach(ch => { try { sb.removeChannel(ch); } catch (e){ /* ignore */ } });
+    chatChannels = [];
+  }
 
   const CHAT_NAME_COLOR_COUNT = 6;
   function chatNameColor(userId){
@@ -5327,27 +5244,20 @@
       .filter(id => id !== currentSession.user.id)
       .map(id => chatParticipantById[id]);
     els.chatHeaderAvatar.innerHTML = chatHeaderFacepileHtml(others);
-    const isOwn = currentChatGroupId === myGroupId;
-    els.chatHeaderTitle.textContent = isOwn
-      ? t('chat.headerTitle')
-      : t('chat.headerTitleOther', { name: currentChatPeerName || t('conversation.unknown') });
-    els.chatHeaderSub.textContent = others.length
-      ? others.map(p => p.full_name).join(', ')
-      : t('entry.noContacts');
+    els.chatHeaderTitle.textContent = t('chat.headerTitle');
+    els.chatHeaderSub.textContent = t('chat.headerSub');
   }
 
-  // Alle vier onafhankelijke query's tegelijk op de kabel i.p.v. na elkaar
-  // (was: leden+alarm, dan pas berichten, dan pas gelezen-vinkjes, dan pas
-  // media — vier hele netwerk-rondjes na elkaar) scheelt op een matige
-  // verbinding zomaar een paar honderd ms tot ruim een seconde bij het
-  // openen van Berichten, precies het moment waarop niemand wil wachten.
-  async function openMessages(groupId){
-    if (!groupId) return;
-    currentChatGroupId = groupId;
+  // Samengevoegde tijdlijn: berichten uit alle groepen waar jij lid van bent.
+  // Versturen (elders) gaat altijd naar myGroupId.
+  async function openMessages(){
+    const gen = ++chatOpenGen;
+    if (!myGroupId) await loadMyGroupId();
+    currentChatGroupId = myGroupId;
     cancelEditingMessage();
     closeSlidePage(els.notifOverlay);
-    closeSlidePage(els.conversationsOverlay);
     switchScreen('messages');
+    els.chatForm.classList.remove('hidden');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.loading')) + '</p>';
     els.locationCard.classList.add('hidden');
     els.medicalInfoCard.classList.add('hidden');
@@ -5355,30 +5265,38 @@
     chatMessageById = {};
     chatReceiptsByMessageId = {};
 
-    const [{ data: members }, { data: alarmRow }, { data: messages }, { data: receiptRows }, groupOwnerRes] = await Promise.all([
-      sb.rpc('get_group_participants', { p_group_id: groupId }),
-      sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
-        .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle(),
-      sb.from('alarm_messages').select('*').eq('group_id', groupId).order('created_at', { ascending:true }).limit(200),
-      sb.from('message_receipts').select('message_id, user_id, delivered_at, read_at').eq('group_id', groupId),
-      // Alleen nodig voor andermans kring (header "Kring van …"); bij eigen
-      // kring slaan we de query over.
-      groupId === myGroupId || currentChatPeerName
-        ? Promise.resolve({ data: null })
-        : sb.from('alarm_groups').select('owner:owner_id(full_name)').eq('id', groupId).maybeSingle()
-    ]);
-    // Als iemand tussen twee gesprekken heen en weer tikt kan een trager
-    // netwerkantwoord van een OUDERE openMessages()-aanroep hier pas na een
-    // nieuwere aankomen — zonder deze guard zou dat het net geopende, juiste
-    // gesprek alsnog overschrijven met het verkeerde (berichten, medische
-    // info, locatie van de vorige activator). currentChatGroupId staat
-    // inmiddels al op de nieuwste aanroep (bovenaan deze functie gezet).
-    if (groupId !== currentChatGroupId) return;
-    if (groupId !== myGroupId && !currentChatPeerName && groupOwnerRes && groupOwnerRes.data && groupOwnerRes.data.owner){
-      currentChatPeerName = groupOwnerRes.data.owner.full_name || null;
+    const { data: memberships } = await sb.from('alarm_group_members')
+      .select('group_id')
+      .eq('user_id', currentSession.user.id);
+    if (gen !== chatOpenGen) return;
+    memberGroupIds = (memberships || []).map(m => m.group_id).filter(Boolean);
+    if (myGroupId && memberGroupIds.indexOf(myGroupId) === -1) memberGroupIds.push(myGroupId);
+
+    if (!memberGroupIds.length){
+      chatParticipantById = {};
+      renderChatHeader();
+      handleActiveAlarmChanged(null);
+      els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
+      unsubscribeChat();
+      return;
     }
+
+    const participantPromises = memberGroupIds.map(gid => sb.rpc('get_group_participants', { p_group_id: gid }));
+    const [participantResults, { data: alarmRow }, { data: messages }, { data: receiptRows }] = await Promise.all([
+      Promise.all(participantPromises),
+      sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
+        .in('group_id', memberGroupIds).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle(),
+      sb.from('alarm_messages').select('*').in('group_id', memberGroupIds).order('created_at', { ascending:true }).limit(300),
+      sb.from('message_receipts').select('message_id, user_id, delivered_at, read_at').in('group_id', memberGroupIds)
+    ]);
+    if (gen !== chatOpenGen) return;
+
     chatParticipantById = {};
-    (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at }; });
+    participantResults.forEach(res => {
+      (res.data || []).forEach(m => {
+        chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at };
+      });
+    });
     renderChatHeader();
     handleActiveAlarmChanged(alarmRow);
 
@@ -5391,9 +5309,6 @@
       chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
     });
 
-    // Meteen renderen met de tekst — een foto/video-URL vraagt nog een
-    // eigen rondje (getekende storage-URL) en volgt hierna op de
-    // achtergrond, zodat tekstberichten daar nooit op hoeven te wachten.
     els.chatMessages.innerHTML = list.length
       ? list.map((m, i) => {
           const next = list[i + 1];
@@ -5413,7 +5328,7 @@
     const mediaPaths = list.filter(m => m.media_path).map(m => m.media_path);
     if (mediaPaths.length){
       resolveMediaUrls(mediaPaths).then(urlByPath => {
-        if (groupId !== currentChatGroupId) return; // zie guard hierboven
+        if (gen !== chatOpenGen) return;
         els.chatMessages.querySelectorAll('[data-media-path]').forEach(el => {
           const loadEvent = (el.tagName === 'VIDEO' || el.tagName === 'AUDIO') ? 'loadedmetadata' : 'load';
           el.addEventListener(loadEvent, scrollChatToBottom);
@@ -5425,40 +5340,22 @@
       });
     }
 
-    subscribeChat(groupId);
+    subscribeChat(memberGroupIds);
   }
 
-  // Alarmmeldingen wijzen naar een specifiek alarm; zoek daarvan de kring op
-  // en open die als doorlopend gesprek.
+  // Alarmmeldingen openen gewoon het ene Berichten-scherm (samengevoegd).
   async function openChatByAlarm(alarmId){
     if (!alarmId) return;
-    chatReturnToConversations = false;
-    currentChatPeerName = null;
-    const { data: alarmRow } = await sb.from('alarms').select('group_id').eq('id', alarmId).single();
-    if (alarmRow && alarmRow.group_id) openMessages(alarmRow.group_id);
+    openMessages();
   }
 
-  // Centraal punt waar alle UI die van het huidige actieve alarm afhangt
-  // (locatie, medische info, "wie heeft gereageerd") wordt bijgewerkt —
-  // zowel bij het openen van Berichten als bij elke realtime-update van
-  // de alarms-rij.
-  // Zelfde regel als de database-policy (alarm_messages_insert): een bericht
-  // typen mag altijd in je eigen kring, en in andermans kring alleen zolang
-  // daar een actief alarm loopt (voor "Ik kom eraan" en coördinatie tijdens
-  // een noodgeval) — buiten een noodgeval kun je in andermans kring alleen
-  // meelezen, niet versturen.
-  function updateChatComposeAccess(alarmRow){
-    const canCompose = currentChatGroupId === myGroupId || !!(alarmRow && alarmRow.status === 'active');
-    els.chatForm.classList.toggle('hidden', !canCompose);
-    els.chatReadOnlyNotice.classList.toggle('hidden', canCompose);
-  }
+  // Locatie / medische info / escalatie hangen van een actief alarm af —
+  // compose is altijd aan (versturen = eigen kring).
   function handleActiveAlarmChanged(alarmRow){
-    updateChatComposeAccess(alarmRow);
+    els.chatForm.classList.remove('hidden');
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
     renderLocationCard(alarmRow);
     renderMedicalInfoCard(alarmRow);
-    // Een oefenalarm hoeft nooit escalatie/"nog geen reactie" te tonen —
-    // niemand hoeft ooit 112 te bellen voor een test.
     if (alarmRow && alarmRow.status === 'active' && !alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id){
       startAckWatcher(alarmRow.id, alarmRow.created_at);
     } else {
@@ -5586,16 +5483,16 @@
       return;
     }
     // Zelfde reden als de guard in openMessages(): als iemand tijdens deze
-    // await naar een ander gesprek wisselt, mag de medische info van DEZE
-    // (oudere) activator niet alsnog over het nieuwe gesprek heen geplakt
+    // await Berichten opnieuw opent, mag de medische info van DEZE
+    // (oudere) activator niet alsnog over het nieuwe scherm heen geplakt
     // worden.
-    const groupIdAtStart = currentChatGroupId;
+    const genAtStart = chatOpenGen;
     els.medicalInfoCard.classList.remove('hidden');
     const [{ data }, { data: practicalData }] = await Promise.all([
       sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id }),
       sb.rpc('get_activator_practical_info', { p_alarm_id: alarmRow.id })
     ]);
-    if (currentChatGroupId !== groupIdAtStart) return;
+    if (genAtStart !== chatOpenGen) return;
     const info = data && data[0];
     const practical = practicalData && practicalData[0];
     const hasResus = info && typeof info.resuscitate === 'boolean';
@@ -5844,15 +5741,15 @@
     }
   });
 
-  function subscribeChat(groupId){
-    if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
-    chatChannel = sb
-      .channel('group-chat-' + groupId)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'alarm_messages',
-        filter: 'group_id=eq.' + groupId
-      }, async (payload) => {
-        const msg = payload.new;
+  function subscribeChat(groupIds){
+    unsubscribeChat();
+    const ids = (groupIds || []).filter(Boolean);
+    if (!ids.length) return;
+
+    function onMessageInsert(payload){
+      const msg = payload.new;
+      if (!msg || chatMessageById[msg.id]) return;
+      (async () => {
         chatMessageById[msg.id] = msg;
         let participant = chatParticipantById[msg.sender_id];
         if (!participant){
@@ -5867,9 +5764,6 @@
         }
         const emptyHint = els.chatMessages.querySelector('.chat-empty-hint');
         if (emptyHint) emptyHint.remove();
-        // Als de vorige laatste rij van dezelfde afzender is, hoort die nu
-        // niet meer bij het einde van de reeks — avatar/naam daar alsnog
-        // verbergen (puur een klasse-toggle, geen herbouw nodig).
         const prevLastRow = els.chatMessages.querySelector('.chat-row:last-child');
         if (prevLastRow && !prevLastRow.classList.contains('own') && prevLastRow.getAttribute('data-sender-id') === msg.sender_id){
           prevLastRow.classList.add('grouped');
@@ -5885,70 +5779,79 @@
         primeVideoPosters(els.chatMessages);
         primeVoiceMessages(els.chatMessages);
         if (msg.sender_id !== currentSession.user.id) markIncomingMessagesSeen([msg.id]);
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'alarm_messages',
-        filter: 'group_id=eq.' + groupId
-      }, (payload) => {
-        const msg = payload.new;
-        chatMessageById[msg.id] = msg;
-        const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + msg.id + '"]');
-        if (row){
-          const textEl = row.querySelector('.chat-bubble .text');
-          if (textEl){
-            const whenEl = textEl.querySelector('.when');
-            textEl.innerHTML = (msg.body ? linkifyHtml(msg.body) : '') + (whenEl ? whenEl.outerHTML : '');
-          }
+      })();
+    }
+
+    function onMessageUpdate(payload){
+      const msg = payload.new;
+      if (!msg) return;
+      chatMessageById[msg.id] = msg;
+      const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + msg.id + '"]');
+      if (row){
+        const textEl = row.querySelector('.chat-bubble .text');
+        if (textEl){
+          const whenEl = textEl.querySelector('.when');
+          textEl.innerHTML = (msg.body ? linkifyHtml(msg.body) : '') + (whenEl ? whenEl.outerHTML : '');
         }
-      })
-      .on('postgres_changes', {
-        event: 'DELETE', schema: 'public', table: 'alarm_messages',
-        filter: 'group_id=eq.' + groupId
-      }, (payload) => {
-        const id = payload.old && payload.old.id;
-        if (!id) return;
-        delete chatMessageById[id];
-        delete chatReceiptsByMessageId[id];
-        const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + id + '"]');
-        if (row){
-          // Als het verwijderde bericht het laatste van een reeks was, moet
-          // het bericht ervoor (indien van dezelfde afzender) nu weer
-          // avatar/naam tonen — het is immers zelf het nieuwe laatste.
-          const prevSib = row.previousElementSibling;
-          row.remove();
-          if (prevSib && prevSib.classList.contains('chat-row') && !prevSib.classList.contains('own')){
-            const nextOfPrev = prevSib.nextElementSibling;
-            const stillGrouped = nextOfPrev && nextOfPrev.classList.contains('chat-row') &&
-              nextOfPrev.getAttribute('data-sender-id') === prevSib.getAttribute('data-sender-id');
-            prevSib.classList.toggle('grouped', !!stillGrouped);
-          }
+      }
+    }
+
+    function onMessageDelete(payload){
+      const id = payload.old && payload.old.id;
+      if (!id) return;
+      delete chatMessageById[id];
+      delete chatReceiptsByMessageId[id];
+      const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + id + '"]');
+      if (row){
+        const prevSib = row.previousElementSibling;
+        row.remove();
+        if (prevSib && prevSib.classList.contains('chat-row') && !prevSib.classList.contains('own')){
+          const nextOfPrev = prevSib.nextElementSibling;
+          const stillGrouped = nextOfPrev && nextOfPrev.classList.contains('chat-row') &&
+            nextOfPrev.getAttribute('data-sender-id') === prevSib.getAttribute('data-sender-id');
+          prevSib.classList.toggle('grouped', !!stillGrouped);
         }
-        if (!els.chatMessages.querySelector('.chat-row')){
-          els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
-        }
-      })
-      .on('postgres_changes', {
-        event: '*', schema: 'public', table: 'message_receipts',
-        filter: 'group_id=eq.' + groupId
-      }, (payload) => {
-        const r = payload.new;
-        if (!r) return;
-        if (!chatReceiptsByMessageId[r.message_id]) chatReceiptsByMessageId[r.message_id] = {};
-        chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
-        refreshTicks(r.message_id);
-      })
-      .on('postgres_changes', {
-        // INSERT én UPDATE: een nieuw alarm in andermans kring moet meteen
-        // de typebalk ontgrendelen (en locatie/medische info tonen), niet
-        // pas bij een latere UPDATE van diezelfde rij.
-        event: '*', schema: 'public', table: 'alarms',
-        filter: 'group_id=eq.' + groupId
-      }, (payload) => {
-        const row = payload.new;
-        if (!row || row.status !== 'active') { handleActiveAlarmChanged(null); return; }
+      }
+      if (!els.chatMessages.querySelector('.chat-row')){
+        els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
+      }
+    }
+
+    function onReceipt(payload){
+      const r = payload.new;
+      if (!r) return;
+      if (!chatReceiptsByMessageId[r.message_id]) chatReceiptsByMessageId[r.message_id] = {};
+      chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
+      refreshTicks(r.message_id);
+    }
+
+    async function onAlarmChange(payload){
+      const row = payload.new;
+      if (row && row.status === 'active'){
         handleActiveAlarmChanged(row);
-      })
-      .subscribe();
+        return;
+      }
+      // Alarm beëindigd: kijk of er elders in jouw kringen nog een actief
+      // alarm loopt voordat je de kaarten weghaalt.
+      if (!memberGroupIds.length){ handleActiveAlarmChanged(null); return; }
+      const { data } = await sb.from('alarms')
+        .select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
+        .in('group_id', memberGroupIds).eq('status', 'active')
+        .order('created_at', { ascending:false }).limit(1).maybeSingle();
+      handleActiveAlarmChanged(data || null);
+    }
+
+    ids.forEach(groupId => {
+      const ch = sb
+        .channel('group-chat-' + groupId)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alarm_messages', filter: 'group_id=eq.' + groupId }, onMessageInsert)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'alarm_messages', filter: 'group_id=eq.' + groupId }, onMessageUpdate)
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'alarm_messages', filter: 'group_id=eq.' + groupId }, onMessageDelete)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'message_receipts', filter: 'group_id=eq.' + groupId }, onReceipt)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'alarms', filter: 'group_id=eq.' + groupId }, onAlarmChange)
+        .subscribe();
+      chatChannels.push(ch);
+    });
   }
 
   // Tikken op een foto toont 'm schermvullend, net als bij video hieronder
@@ -6252,7 +6155,7 @@
   els.chatForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const body = els.chatInput.value.trim();
-    if (!body || !currentChatGroupId) return;
+    if (!body || !myGroupId) return;
     if (editingMessageId){
       const id = editingMessageId;
       cancelEditingMessage();
@@ -6262,7 +6165,7 @@
     }
     els.chatInput.value = '';
     updateChatSendVoiceToggle();
-    await sb.from('alarm_messages').insert({ group_id: currentChatGroupId, sender_id: currentSession.user.id, body });
+    await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body });
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
   });
@@ -6312,7 +6215,7 @@
   // knop (#chatCameraInput) — dezelfde verkleining/upload/verstuur-logica,
   // alleen de knop die tijdens het versturen disabled wordt verschilt.
   async function handleChatMediaFile(file, triggerButton){
-    if (!file || !currentChatGroupId) return;
+    if (!file || !myGroupId) return;
     const isVideo = file.type.startsWith('video/');
     if (!isVideo && !file.type.startsWith('image/')){
       window.alert(t('alert.mediaTypeInvalid'));
@@ -6328,7 +6231,7 @@
     const ext = isVideo
       ? ((file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4')
       : 'jpg';
-    const path = currentChatGroupId + '/' + crypto.randomUUID() + '.' + ext;
+    const path = myGroupId + '/' + crypto.randomUUID() + '.' + ext;
     const { error: upErr } = await sb.storage.from('chat-media').upload(path, uploadFile, { contentType });
     if (upErr){
       triggerButton.disabled = false;
@@ -6336,7 +6239,7 @@
       return;
     }
     await sb.from('alarm_messages').insert({
-      group_id: currentChatGroupId, sender_id: currentSession.user.id, body: null,
+      group_id: myGroupId, sender_id: currentSession.user.id, body: null,
       media_path: path, media_type: isVideo ? 'video' : 'image'
     });
     triggerButton.disabled = false;
@@ -6385,7 +6288,7 @@
   }
 
   async function startVoiceRecording(){
-    if (!currentChatGroupId || voiceRecorder) return;
+    if (!myGroupId || voiceRecorder) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
       window.alert(t('alert.micUnsupported'));
       return;
@@ -6495,13 +6398,13 @@
     stopVoiceStream();
     // Een supersnelle tik (per ongeluk) levert vrijwel niets op — dan
     // stilletjes niets versturen i.p.v. een kapot bestandje.
-    if (canceled || !chunks.length || !currentChatGroupId) return;
+    if (canceled || !chunks.length || !myGroupId) return;
     const blob = new Blob(chunks, { type: mimeType });
     if (blob.size < 500) return;
     els.chatVoiceButton.disabled = true;
     const contentType = mimeType.split(';')[0];
     const ext = extFromAudioMimeType(mimeType);
-    const path = currentChatGroupId + '/' + crypto.randomUUID() + '.' + ext;
+    const path = myGroupId + '/' + crypto.randomUUID() + '.' + ext;
     const [{ error: upErr }, waveformPeaks] = await Promise.all([
       sb.storage.from('chat-media').upload(path, blob, { contentType }),
       computeVoiceWaveformPeaks(blob, VOICE_WAVEFORM_BARS)
@@ -6512,7 +6415,7 @@
       return;
     }
     await sb.from('alarm_messages').insert({
-      group_id: currentChatGroupId, sender_id: currentSession.user.id, body: null,
+      group_id: myGroupId, sender_id: currentSession.user.id, body: null,
       media_path: path, media_type: 'audio', media_waveform: waveformPeaks || null
     });
     els.chatVoiceButton.disabled = false;
