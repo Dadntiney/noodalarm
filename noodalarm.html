@@ -409,7 +409,8 @@
   .privacy-text a{ color:var(--accent); }
   .consent-row{ display:flex; align-items:flex-start; gap:14px; cursor:pointer; text-align:left; }
   .consent-row input[type="checkbox"]{ width:26px; height:26px; flex-shrink:0; margin-top:2px; accent-color:var(--accent); cursor:pointer; }
-  .consent-row .field-hint{ margin:0; line-height:1.5; font-size:0.90625rem; }
+  .consent-row > span{ margin:0; line-height:1.5; font-size:0.90625rem; color:var(--text); }
+  .consent-row .field-hint{ margin:0; line-height:1.5; font-size:0.90625rem; color:var(--text-muted); }
   .consent-row .field-hint button{ background:none; border:none; padding:0; color:var(--accent); font:inherit; font-weight:700; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
   .settings-item-hint.ok{ color:var(--green); font-weight:600; }
   .settings-item-hint.bad{ color:var(--danger); font-weight:600; }
@@ -729,10 +730,10 @@
      “afgeknipt” oogt; iets meer lucht tussen knop en uitlegtekst. */
   #screen-alarm > .stage{
     width:100%;
-    padding-top:32px;
+    padding-top:40px;
   }
   #view-idle{
-    gap:36px;
+    gap:40px;
   }
   #screen-alarm > footer.note{
     margin-top:auto;
@@ -1645,46 +1646,67 @@
           <div class="field">
             <label for="medicalMedications">Medicijnen die je gebruikt</label>
             <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
+            <div class="field-hint" id="medicalMedicationsHint">Alles wat je dagelijks of regelmatig inneemt — ook als het van de drogist komt.</div>
           </div>
           <div class="field">
-            <label for="medicalConditions">Ziektes die je hebt</label>
+            <label for="medicalConditions">Ziektes of aandoeningen</label>
             <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
+            <div class="field-hint" id="medicalConditionsHint">Zaken die helpers moeten weten, zoals diabetes, epilepsie of hartproblemen.</div>
           </div>
           <label class="consent-row" for="medicalPacemaker">
             <input type="checkbox" id="medicalPacemaker">
-            <span class="field-hint" id="medicalPacemakerLabel">Ik heb een pacemaker of ICD</span>
+            <span id="medicalPacemakerLabel">Ik heb een pacemaker of ICD</span>
           </label>
           <label class="consent-row" for="medicalPregnant">
             <input type="checkbox" id="medicalPregnant">
-            <span class="field-hint" id="medicalPregnantLabel">Ik ben zwanger</span>
+            <span id="medicalPregnantLabel">Ik ben zwanger</span>
           </label>
           <div class="field">
-            <label id="mobilityFieldLabel">Hoe goed kun je lopen?</label>
-            <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
+            <label id="mobilityFieldLabel">Heb je hulp nodig bij lopen?</label>
+            <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Lopen">
               <button type="button" data-mobility="" role="tab">Nog niet gekozen</button>
-              <button type="button" data-mobility="good" role="tab">Goed mobiel</button>
+              <button type="button" data-mobility="good" role="tab">Nee, ik loop zelf</button>
               <button type="button" data-mobility="walker" role="tab">Rollator</button>
               <button type="button" data-mobility="wheelchair" role="tab">Rolstoel</button>
             </nav>
           </div>
         </div>
 
-        <div class="settings-group-label" id="medicalContactsGroupLabel" style="margin-top:30px;">Contactpersonen</div>
-        <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
-          <div class="field">
-            <label id="contact1Label">Contactpersoon 1 (bel deze eerst)</label>
-            <input type="text" id="medicalContact1Name" placeholder="Naam">
+        <div class="settings-group-label" id="medicalContactsGroupLabel" style="margin-top:30px;">Wie moet er gebeld worden?</div>
+        <p class="field-hint" id="medicalContactsGroupHint" style="margin:0 6px 12px;">Dit zijn mensen die je noodcontacten kunnen bellen tijdens een alarm — bijvoorbeeld familie. Dit is iets anders dan je NORI-noodcontacten in de app.</p>
+        <div class="form-card" style="display:flex; flex-direction:column; gap:18px;">
+          <div class="field" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="settings-row-title" id="contact1Label">Eerste persoon om te bellen</div>
+            <div class="field">
+              <label for="medicalContact1Name" id="contact1NameLabel">Naam</label>
+              <input type="text" id="medicalContact1Name" placeholder="Bijv. Marie">
+            </div>
             <div class="field-row" style="grid-template-columns:1fr 1fr;">
-              <input type="text" id="medicalContact1Relation" placeholder="Relatie">
-              <input type="tel" id="medicalContact1Phone" placeholder="Telefoon">
+              <div class="field">
+                <label for="medicalContact1Relation" id="contact1RelationLabel">Relatie</label>
+                <input type="text" id="medicalContact1Relation" placeholder="Bijv. dochter">
+              </div>
+              <div class="field">
+                <label for="medicalContact1Phone" id="contact1PhoneLabel">Telefoon</label>
+                <input type="tel" id="medicalContact1Phone" placeholder="06-…">
+              </div>
             </div>
           </div>
-          <div class="field">
-            <label id="contact2Label">Contactpersoon 2 (bel deze als 1 niet opneemt)</label>
-            <input type="text" id="medicalContact2Name" placeholder="Naam">
+          <div class="field" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="settings-row-title" id="contact2Label">Tweede persoon (als de eerste niet opneemt)</div>
+            <div class="field">
+              <label for="medicalContact2Name" id="contact2NameLabel">Naam</label>
+              <input type="text" id="medicalContact2Name" placeholder="Bijv. Jan">
+            </div>
             <div class="field-row" style="grid-template-columns:1fr 1fr;">
-              <input type="text" id="medicalContact2Relation" placeholder="Relatie">
-              <input type="tel" id="medicalContact2Phone" placeholder="Telefoon">
+              <div class="field">
+                <label for="medicalContact2Relation" id="contact2RelationLabel">Relatie</label>
+                <input type="text" id="medicalContact2Relation" placeholder="Bijv. buurman">
+              </div>
+              <div class="field">
+                <label for="medicalContact2Phone" id="contact2PhoneLabel">Telefoon</label>
+                <input type="tel" id="medicalContact2Phone" placeholder="06-…">
+              </div>
             </div>
           </div>
         </div>
@@ -1709,7 +1731,8 @@
         <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
           <div class="field">
             <label for="medicalNotes">Nog iets anders belangrijks?</label>
-            <input type="text" id="medicalNotes" placeholder="Bijv. bijzonderheden">
+            <textarea id="medicalNotes" rows="3" placeholder="Bijv. slechthorend, sleutel bij de buren, spreekt alleen Nederlands…"></textarea>
+            <div class="field-hint" id="medicalNotesHint">Alles wat helpers verder nog moeten weten.</div>
           </div>
         </div>
 
@@ -2419,7 +2442,8 @@
     { sel: '#medicalForm > p.field-hint', nl: 'Vul dit zeker in — dit kan doorslaggevend zijn als je zelf niet kunt vertellen wat er aan de hand is. Je noodcontacten zien het pas op het moment dat jij op ALARM drukt.', en: 'Please fill this in — it can be decisive if you can\'t speak for yourself. Your emergency contacts only see it the moment you press ALARM yourself.' },
     { sel: '#medicalResusGroupLabel', nl: 'Reanimatie & wensen', en: 'Resuscitation & wishes' },
     { sel: '#medicalHealthGroupLabel', nl: 'Gezondheid', en: 'Health' },
-    { sel: '#medicalContactsGroupLabel', nl: 'Contactpersonen', en: 'Contact persons' },
+    { sel: '#medicalContactsGroupLabel', nl: 'Wie moet er gebeld worden?', en: 'Who should be called?' },
+    { sel: '#medicalContactsGroupHint', nl: 'Dit zijn mensen die je noodcontacten kunnen bellen tijdens een alarm — bijvoorbeeld familie. Dit is iets anders dan je NORI-noodcontacten in de app.', en: 'These are people your emergency contacts can call during an alarm — for example family. This is different from your NORI emergency contacts in the app.' },
     { sel: '#medicalCareGroupLabel', nl: 'Zorgverleners', en: 'Care providers' },
     { sel: '#medicalOtherGroupLabel', nl: 'Overig', en: 'Other' },
     { sel: '#resusSegmented', attr: 'aria-label', nl: 'Reanimatievoorkeur', en: 'Resuscitation preference' },
@@ -2441,32 +2465,41 @@
     { sel: '#medicalAllergiesHint', nl: 'Iets waar je ziek van wordt, zoals een medicijn of eten.', en: 'Something that makes you ill, like a medicine or a food.' },
     { sel: 'label[for="medicalMedications"]', nl: 'Medicijnen die je gebruikt', en: 'Medicines you take' },
     { sel: '#medicalMedications', attr: 'placeholder', nl: 'Bijv. bloedverdunners', en: 'E.g. blood thinners' },
-    { sel: 'label[for="medicalConditions"]', nl: 'Ziektes die je hebt', en: 'Illnesses you have' },
+    { sel: '#medicalMedicationsHint', nl: 'Alles wat je dagelijks of regelmatig inneemt — ook als het van de drogist komt.', en: 'Everything you take daily or regularly — including over-the-counter medicine.' },
+    { sel: 'label[for="medicalConditions"]', nl: 'Ziektes of aandoeningen', en: 'Illnesses or conditions' },
     { sel: '#medicalConditions', attr: 'placeholder', nl: 'Bijv. diabetes, hartklachten', en: 'E.g. diabetes, heart condition' },
+    { sel: '#medicalConditionsHint', nl: 'Zaken die helpers moeten weten, zoals diabetes, epilepsie of hartproblemen.', en: 'Things helpers need to know, such as diabetes, epilepsy or heart problems.' },
     { sel: '#medicalPacemakerLabel', nl: 'Ik heb een pacemaker of ICD', en: 'I have a pacemaker or ICD' },
     { sel: '#medicalPregnantLabel', nl: 'Ik ben zwanger', en: 'I am pregnant' },
-    { sel: '#mobilityFieldLabel', nl: 'Hoe goed kun je lopen?', en: 'How well can you walk?' },
-    { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Mobiliteit', en: 'Mobility' },
+    { sel: '#mobilityFieldLabel', nl: 'Heb je hulp nodig bij lopen?', en: 'Do you need help walking?' },
+    { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Lopen', en: 'Walking' },
     { sel: '#mobilitySegmented button[data-mobility=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
-    { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Goed mobiel', en: 'Fully mobile' },
+    { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Nee, ik loop zelf', en: 'No, I walk myself' },
     { sel: '#mobilitySegmented button[data-mobility="walker"]', nl: 'Rollator', en: 'Walker' },
     { sel: '#mobilitySegmented button[data-mobility="wheelchair"]', nl: 'Rolstoel', en: 'Wheelchair' },
-    { sel: '#contact1Label', nl: 'Contactpersoon 1 (bel deze eerst)', en: 'Contact person 1 (call this one first)' },
-    { sel: '#medicalContact1Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
-    { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Relatie', en: 'Relation' },
-    { sel: '#medicalContact1Phone', attr: 'placeholder', nl: 'Telefoon', en: 'Phone' },
-    { sel: '#contact2Label', nl: 'Contactpersoon 2 (bel deze als 1 niet opneemt)', en: 'Contact person 2 (call this one if 1 doesn\'t answer)' },
-    { sel: '#medicalContact2Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
-    { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Relatie', en: 'Relation' },
-    { sel: '#medicalContact2Phone', attr: 'placeholder', nl: 'Telefoon', en: 'Phone' },
-    { sel: 'label[for="medicalDoctorName"]', nl: 'Huisarts', en: 'Doctor' },
+    { sel: '#contact1Label', nl: 'Eerste persoon om te bellen', en: 'First person to call' },
+    { sel: '#contact1NameLabel', nl: 'Naam', en: 'Name' },
+    { sel: '#medicalContact1Name', attr: 'placeholder', nl: 'Bijv. Marie', en: 'E.g. Marie' },
+    { sel: '#contact1RelationLabel', nl: 'Relatie', en: 'Relation' },
+    { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Bijv. dochter', en: 'E.g. daughter' },
+    { sel: '#contact1PhoneLabel', nl: 'Telefoon', en: 'Phone' },
+    { sel: '#medicalContact1Phone', attr: 'placeholder', nl: '06-…', en: 'Phone number' },
+    { sel: '#contact2Label', nl: 'Tweede persoon (als de eerste niet opneemt)', en: 'Second person (if the first doesn\'t answer)' },
+    { sel: '#contact2NameLabel', nl: 'Naam', en: 'Name' },
+    { sel: '#medicalContact2Name', attr: 'placeholder', nl: 'Bijv. Jan', en: 'E.g. Jan' },
+    { sel: '#contact2RelationLabel', nl: 'Relatie', en: 'Relation' },
+    { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Bijv. buurman', en: 'E.g. neighbour' },
+    { sel: '#contact2PhoneLabel', nl: 'Telefoon', en: 'Phone' },
+    { sel: '#medicalContact2Phone', attr: 'placeholder', nl: '06-…', en: 'Phone number' },
+    { sel: 'label[for="medicalDoctorName"]', nl: 'Huisarts', en: 'Family doctor' },
     { sel: '#medicalDoctorName', attr: 'placeholder', nl: 'Naam huisarts of praktijk', en: 'Doctor or practice name' },
-    { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Doctor\'s phone number' },
+    { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Family doctor\'s phone number' },
     { sel: '#medicalDoctorPhone', attr: 'placeholder', nl: 'Praktijknummer', en: 'Practice number' },
     { sel: 'label[for="medicalHospital"]', nl: 'In welk ziekenhuis ben je bekend?', en: 'Which hospital knows you?' },
     { sel: '#medicalHospital', attr: 'placeholder', nl: 'Bijv. Radboudumc, locatie X', en: 'E.g. Radboudumc, location X' },
     { sel: 'label[for="medicalNotes"]', nl: 'Nog iets anders belangrijks?', en: 'Anything else important?' },
-    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. bijzonderheden', en: 'E.g. other notes' },
+    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. slechthorend, sleutel bij de buren, spreekt alleen Nederlands…', en: 'E.g. hard of hearing, spare key with neighbours, only speaks Dutch…' },
+    { sel: '#medicalNotesHint', nl: 'Alles wat helpers verder nog moeten weten.', en: 'Anything else helpers still need to know.' },
     { sel: '#medicalConsentText', nl: 'Ik geef uitdrukkelijk toestemming om deze gezondheidsgegevens op te slaan, zodat mijn bevestigde noodcontacten ze kunnen zien tijdens een alarm.', en: 'I explicitly consent to storing this health information, so my confirmed emergency contacts can see it during an alarm.' },
     { sel: '#medicalPrivacyLinkButton', nl: 'Lees het privacybeleid', en: 'Read the privacy policy' },
     { sel: '#medicalSaveButton', nl: 'Medische info opslaan', en: 'Save medical info' },
@@ -2678,16 +2711,16 @@
       'medical.pregnant': '⚠️ Is zwanger',
       'medical.allergies': 'Allergieën:',
       'medical.medications': 'Medicijnen:',
-      'medical.conditions': 'Ziektes:',
-      'medical.mobility': 'Hoe goed lopen:',
-      'medical.mobilityGood': 'Goed mobiel',
+      'medical.conditions': 'Ziektes / aandoeningen:',
+      'medical.mobility': 'Lopen:',
+      'medical.mobilityGood': 'Loopt zelf',
       'medical.mobilityWalker': 'Rollator',
       'medical.mobilityWheelchair': 'Rolstoel',
-      'medical.contact1': 'Contactpersoon 1:',
-      'medical.contact2': 'Contactpersoon 2:',
+      'medical.contact1': 'Eerst bellen:',
+      'medical.contact2': 'Daarna bellen:',
       'medical.doctor': 'Huisarts:',
       'medical.hospital': 'Ziekenhuis:',
-      'medical.other': 'Overige medische bijzonderheden:',
+      'medical.other': 'Overige bijzonderheden:',
       'extra.spareKey': '🔑 Sleutel buitenshuis:',
       'ehbo.step1': 'Zorg eerst voor je eigen veiligheid voordat je dichterbij komt.',
       'ehbo.step2': 'Spreek het slachtoffer aan en schud voorzichtig aan de schouders. Geen reactie? Ga door naar de volgende stap.',
@@ -2810,16 +2843,16 @@
       'medical.pregnant': '⚠️ Is pregnant',
       'medical.allergies': 'Allergies:',
       'medical.medications': 'Medicines:',
-      'medical.conditions': 'Illnesses:',
-      'medical.mobility': 'How well they walk:',
-      'medical.mobilityGood': 'Fully mobile',
+      'medical.conditions': 'Illnesses / conditions:',
+      'medical.mobility': 'Walking:',
+      'medical.mobilityGood': 'Walks independently',
       'medical.mobilityWalker': 'Walker',
       'medical.mobilityWheelchair': 'Wheelchair',
-      'medical.contact1': 'Contact person 1:',
-      'medical.contact2': 'Contact person 2:',
-      'medical.doctor': 'Doctor:',
+      'medical.contact1': 'Call first:',
+      'medical.contact2': 'Call next:',
+      'medical.doctor': 'Family doctor:',
       'medical.hospital': 'Hospital:',
-      'medical.other': 'Other medical details:',
+      'medical.other': 'Other details:',
       'extra.spareKey': '🔑 Spare key location:',
       'ehbo.step1': 'First make sure the scene is safe before you approach.',
       'ehbo.step2': 'Speak to the person and gently shake their shoulders. No response? Move to the next step.',
