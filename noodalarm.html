@@ -2593,6 +2593,7 @@
       'locationTest.unavailable': 'Kon je locatie niet vinden. Probeer het nog eens, het liefst buiten of bij een raam.',
       'locationTest.unsupported': 'Je toestel of browser ondersteunt dit niet.',
       'notif.accepted': 'Geaccepteerd',
+      'notif.rejected': 'Geweigerd',
       'notif.accept': 'Accepteren',
       'notif.reject': 'Weigeren',
       'notif.openMessages': 'Open Berichten',
@@ -2715,6 +2716,7 @@
       'locationTest.unavailable': 'Couldn\'t find your location. Try again, ideally outside or near a window.',
       'locationTest.unsupported': 'Your device or browser doesn\'t support this.',
       'notif.accepted': 'Accepted',
+      'notif.rejected': 'Declined',
       'notif.accept': 'Accept',
       'notif.reject': 'Decline',
       'notif.openMessages': 'Open Messages',
@@ -3950,12 +3952,14 @@
     els.notifList.innerHTML = items.map(n => {
       const icon = n.type === 'connection_request' && n.connection && n.connection.requester
         ? '<span class="avatar sm">' + avatarInner(n.connection.requester.avatar_url) + '</span>'
-        : (n.type === 'alarm' ? '🚨' : (n.type === 'connection_accepted' ? '✅' : '👋'));
+        : (n.type === 'alarm' ? '🚨' : (n.type === 'connection_accepted' ? '✅' : (n.type === 'connection_rejected' ? '🙅' : '👋')));
       let actions = '';
       if (n.type === 'connection_request' && n.related_connection_id){
         const status = n.connection ? n.connection.status : 'pending';
         if (status === 'accepted'){
           actions = '<div class="notif-actions"><span class="status-pill accepted">' + escapeHtml(t('notif.accepted')) + '</span></div>';
+        } else if (status === 'rejected'){
+          actions = '<div class="notif-actions"><span class="status-pill">' + escapeHtml(t('notif.rejected')) + '</span></div>';
         } else if (status === 'pending'){
           actions = '<div class="notif-actions">' +
             '<button type="button" class="save-button accept-notif" data-cid="' + n.related_connection_id + '" data-nid="' + n.id + '">' + escapeHtml(t('notif.accept')) + '</button>' +
