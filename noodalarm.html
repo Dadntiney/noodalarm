@@ -1665,7 +1665,7 @@
             <label id="mobilityFieldLabel">Heb je hulp nodig bij lopen?</label>
             <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Lopen">
               <button type="button" data-mobility="" role="tab">Nog niet gekozen</button>
-              <button type="button" data-mobility="good" role="tab">Nee, ik loop zelf</button>
+              <button type="button" data-mobility="good" role="tab">Zonder hulp</button>
               <button type="button" data-mobility="walker" role="tab">Rollator</button>
               <button type="button" data-mobility="wheelchair" role="tab">Rolstoel</button>
             </nav>
@@ -1730,8 +1730,12 @@
         <div class="settings-group-label" id="medicalOtherGroupLabel" style="margin-top:30px;">Overig</div>
         <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
           <div class="field">
+            <label for="medicalSpareKey" id="spareKeyLabel">Waar ligt een reservesleutel?</label>
+            <input type="text" id="medicalSpareKey" placeholder="Bijv. kluisje bij de voordeur">
+          </div>
+          <div class="field">
             <label for="medicalNotes">Nog iets anders belangrijks?</label>
-            <textarea id="medicalNotes" rows="3" placeholder="Bijv. slechthorend, sleutel bij de buren, spreekt alleen Nederlands…"></textarea>
+            <textarea id="medicalNotes" rows="3" placeholder="Bijv. slechthorend, spreekt alleen Nederlands…"></textarea>
             <div class="field-hint" id="medicalNotesHint">Alles wat helpers verder nog moeten weten.</div>
           </div>
         </div>
@@ -1749,34 +1753,6 @@
         <button type="submit" id="medicalSaveButton" class="save-button" style="margin-top:20px;">Medische info opslaan</button>
       </form>
       <div id="medicalMessage" class="auth-message hidden" style="margin:20px 0;"></div>
-    </div>
-  </div>
-
-  <!-- =========================== OVERIGE INFORMATIE =========================== -->
-  <div id="extraInfoOverlay" class="slide-page hidden">
-    <div class="slide-page-header">
-      <button type="button" id="extraInfoOverlayCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
-        <span class="profile-back-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </span>
-        Terug
-      </button>
-    </div>
-    <div class="slide-page-content">
-      <h1 class="slide-page-title" id="extraInfoOverlayTitle">Overige informatie</h1>
-
-      <form id="extraInfoForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
-        <div>
-          <div class="settings-row-title" id="extraInfoSectionTitle" style="margin-bottom:4px;">Praktische info</div>
-          <p class="field-hint" id="extraInfoSectionHint" style="margin-top:0;">Vul dit zeker in — hiermee kunnen je noodcontacten je sneller helpen als het nodig is. Ze zien het pas op het moment dat jij op ALARM drukt.</p>
-        </div>
-        <div class="field">
-          <label for="extraInfoSpareKey" id="spareKeyLabel">Waar ligt een reservesleutel?</label>
-          <input type="text" id="extraInfoSpareKey" placeholder="Bijv. kluisje bij de voordeur">
-        </div>
-        <button type="submit" id="extraInfoSaveButton" class="save-button">Opslaan</button>
-      </form>
-      <div id="extraInfoMessage" class="auth-message hidden" style="margin:20px 0;"></div>
     </div>
   </div>
 
@@ -2274,16 +2250,6 @@
         </div>
 
         <div class="settings-item">
-          <button type="button" id="openExtraInfoButton" class="settings-item-nav">
-            <span class="settings-item-icon icon-amber">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 9.5 1 1"/><path d="m2 22 6.4-6.4"/><circle cx="16.5" cy="7.5" r="5.5"/></svg>
-            </span>
-            <span class="settings-item-body"><span class="settings-link-label">Overige informatie</span></span>
-            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
-        </div>
-
-        <div class="settings-item">
           <button type="button" id="openSettingsButton" class="settings-item-nav">
             <span class="settings-item-icon icon-violet">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -2474,7 +2440,7 @@
     { sel: '#mobilityFieldLabel', nl: 'Heb je hulp nodig bij lopen?', en: 'Do you need help walking?' },
     { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Lopen', en: 'Walking' },
     { sel: '#mobilitySegmented button[data-mobility=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
-    { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Nee, ik loop zelf', en: 'No, I walk myself' },
+    { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Zonder hulp', en: 'Without help' },
     { sel: '#mobilitySegmented button[data-mobility="walker"]', nl: 'Rollator', en: 'Walker' },
     { sel: '#mobilitySegmented button[data-mobility="wheelchair"]', nl: 'Rolstoel', en: 'Wheelchair' },
     { sel: '#contact1Label', nl: 'Eerste persoon om te bellen', en: 'First person to call' },
@@ -2497,8 +2463,10 @@
     { sel: '#medicalDoctorPhone', attr: 'placeholder', nl: 'Praktijknummer', en: 'Practice number' },
     { sel: 'label[for="medicalHospital"]', nl: 'In welk ziekenhuis ben je bekend?', en: 'Which hospital knows you?' },
     { sel: '#medicalHospital', attr: 'placeholder', nl: 'Bijv. Radboudumc, locatie X', en: 'E.g. Radboudumc, location X' },
+    { sel: '#spareKeyLabel', nl: 'Waar ligt een reservesleutel?', en: 'Where is a spare key?' },
+    { sel: '#medicalSpareKey', attr: 'placeholder', nl: 'Bijv. kluisje bij de voordeur', en: 'E.g. lockbox by the front door' },
     { sel: 'label[for="medicalNotes"]', nl: 'Nog iets anders belangrijks?', en: 'Anything else important?' },
-    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. slechthorend, sleutel bij de buren, spreekt alleen Nederlands…', en: 'E.g. hard of hearing, spare key with neighbours, only speaks Dutch…' },
+    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. slechthorend, spreekt alleen Nederlands…', en: 'E.g. hard of hearing, only speaks Dutch…' },
     { sel: '#medicalNotesHint', nl: 'Alles wat helpers verder nog moeten weten.', en: 'Anything else helpers still need to know.' },
     { sel: '#medicalConsentText', nl: 'Ik geef uitdrukkelijk toestemming om deze gezondheidsgegevens op te slaan, zodat mijn bevestigde noodcontacten ze kunnen zien tijdens een alarm.', en: 'I explicitly consent to storing this health information, so my confirmed emergency contacts can see it during an alarm.' },
     { sel: '#medicalPrivacyLinkButton', nl: 'Lees het privacybeleid', en: 'Read the privacy policy' },
@@ -2566,8 +2534,6 @@
     { sel: '#accountCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#medicalOverlayCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
     { sel: '#medicalOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
-    { sel: '#extraInfoOverlayCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
-    { sel: '#extraInfoOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#brandHomeButton', attr: 'aria-label', nl: 'Naar Alarm', en: 'Go to Alarm' },
@@ -2631,13 +2597,6 @@
     { sel: '#editAvatarButton', attr: 'aria-label', nl: 'Foto wijzigen', en: 'Change photo' },
     { sel: '#openAccountButton .settings-link-label', nl: 'Account', en: 'Account' },
     { sel: '#openMedicalButton .settings-link-label', nl: 'Medische informatie', en: 'Medical information' },
-    { sel: '#openExtraInfoButton .settings-link-label', nl: 'Overige informatie', en: 'Other information' },
-    { sel: '#extraInfoOverlayTitle', nl: 'Overige informatie', en: 'Other information' },
-    { sel: '#extraInfoSectionTitle', nl: 'Praktische info', en: 'Practical info' },
-    { sel: '#extraInfoSectionHint', nl: 'Vul dit zeker in — hiermee kunnen je noodcontacten je sneller helpen als het nodig is. Ze zien het pas op het moment dat jij op ALARM drukt.', en: 'Please fill this in — it helps your emergency contacts reach you faster when it matters. They only see it the moment you press ALARM yourself.' },
-    { sel: '#spareKeyLabel', nl: 'Waar ligt een reservesleutel?', en: 'Where is a spare key?' },
-    { sel: '#extraInfoSpareKey', attr: 'placeholder', nl: 'Bijv. kluisje bij de voordeur', en: 'E.g. lockbox by the front door' },
-    { sel: '#extraInfoSaveButton', nl: 'Opslaan', en: 'Save' },
     { sel: '#openSettingsButton .settings-link-label', nl: 'Instellingen', en: 'Settings' },
     { sel: '#profileLogoutButton', nl: 'Uitloggen', en: 'Log out' },
     { sel: '#deleteAccountButton', nl: 'Account verwijderen', en: 'Delete account' },
@@ -2713,7 +2672,7 @@
       'medical.medications': 'Medicijnen:',
       'medical.conditions': 'Ziektes / aandoeningen:',
       'medical.mobility': 'Lopen:',
-      'medical.mobilityGood': 'Loopt zelf',
+      'medical.mobilityGood': 'Zonder hulpmiddel',
       'medical.mobilityWalker': 'Rollator',
       'medical.mobilityWheelchair': 'Rolstoel',
       'medical.contact1': 'Eerst bellen:',
@@ -2845,7 +2804,7 @@
       'medical.medications': 'Medicines:',
       'medical.conditions': 'Illnesses / conditions:',
       'medical.mobility': 'Walking:',
-      'medical.mobilityGood': 'Walks independently',
+      'medical.mobilityGood': 'Without aid',
       'medical.mobilityWalker': 'Walker',
       'medical.mobilityWheelchair': 'Wheelchair',
       'medical.contact1': 'Call first:',
@@ -3219,6 +3178,7 @@
     medicalDoctorName: document.getElementById('medicalDoctorName'),
     medicalDoctorPhone: document.getElementById('medicalDoctorPhone'),
     medicalHospital: document.getElementById('medicalHospital'),
+    medicalSpareKey: document.getElementById('medicalSpareKey'),
     medicalNotes: document.getElementById('medicalNotes'),
     medicalConsentCheckbox: document.getElementById('medicalConsentCheckbox'),
     medicalPrivacyLinkButton: document.getElementById('medicalPrivacyLinkButton'),
@@ -3268,13 +3228,6 @@
     openMedicalButton: document.getElementById('openMedicalButton'),
     medicalOverlay: document.getElementById('medicalOverlay'),
     medicalOverlayCloseButton: document.getElementById('medicalOverlayCloseButton'),
-    openExtraInfoButton: document.getElementById('openExtraInfoButton'),
-    extraInfoOverlay: document.getElementById('extraInfoOverlay'),
-    extraInfoOverlayCloseButton: document.getElementById('extraInfoOverlayCloseButton'),
-    extraInfoForm: document.getElementById('extraInfoForm'),
-    extraInfoSpareKey: document.getElementById('extraInfoSpareKey'),
-    extraInfoSaveButton: document.getElementById('extraInfoSaveButton'),
-    extraInfoMessage: document.getElementById('extraInfoMessage'),
     openSettingsButton: document.getElementById('openSettingsButton'),
     settingsOverlay: document.getElementById('settingsOverlay'),
     settingsCloseButton: document.getElementById('settingsCloseButton'),
@@ -3651,8 +3604,6 @@
   els.accountCloseButton.addEventListener('click', () => closeSlidePage(els.accountOverlay));
   els.openMedicalButton.addEventListener('click', () => openSlidePage(els.medicalOverlay));
   els.medicalOverlayCloseButton.addEventListener('click', () => closeSlidePage(els.medicalOverlay));
-  els.openExtraInfoButton.addEventListener('click', () => openSlidePage(els.extraInfoOverlay));
-  els.extraInfoOverlayCloseButton.addEventListener('click', () => closeSlidePage(els.extraInfoOverlay));
   els.openSettingsButton.addEventListener('click', () => {
     openSlidePage(els.settingsOverlay);
     renderInstallStatusRow();
@@ -4614,7 +4565,10 @@
   });
 
   async function loadMedicalInfo(){
-    const { data } = await sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle();
+    const [{ data }, { data: practical }] = await Promise.all([
+      sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle(),
+      sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle()
+    ]);
     setResusSelection(data && typeof data.resuscitate === 'boolean' ? data.resuscitate : null);
     setMobilitySelection(data?.mobility || null);
     els.medicalAdvanceDirective.value = data?.advance_directive || '';
@@ -4634,6 +4588,7 @@
     els.medicalDoctorName.value = data?.doctor_name || '';
     els.medicalDoctorPhone.value = data?.doctor_phone || '';
     els.medicalHospital.value = data?.hospital || '';
+    els.medicalSpareKey.value = practical?.spare_key_location || '';
     els.medicalNotes.value = data?.notes || '';
     // Wie al eerder expliciet toestemming gaf, hoeft het vinkje niet elke
     // keer opnieuw aan te zetten — wél moet het nog steeds aan staan om
@@ -4643,37 +4598,47 @@
   els.medicalForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     els.medicalSaveButton.disabled = true;
-    const { error } = await sb.from('medical_info').upsert({
-      user_id: currentSession.user.id,
-      resuscitate: getResusSelection(),
-      mobility: getMobilitySelection(),
-      advance_directive: els.medicalAdvanceDirective.value.trim() || null,
-      birth_date: els.medicalBirthDate.value || null,
-      weight_kg: els.medicalWeight.value !== '' ? Number(els.medicalWeight.value) : null,
-      allergies: els.medicalAllergies.value.trim() || null,
-      medications: els.medicalMedications.value.trim() || null,
-      conditions: els.medicalConditions.value.trim() || null,
-      pacemaker_icd: els.medicalPacemaker.checked,
-      pregnant: els.medicalPregnant.checked,
-      contact1_name: els.medicalContact1Name.value.trim() || null,
-      contact1_relation: els.medicalContact1Relation.value.trim() || null,
-      contact1_phone: els.medicalContact1Phone.value.trim() || null,
-      contact2_name: els.medicalContact2Name.value.trim() || null,
-      contact2_relation: els.medicalContact2Relation.value.trim() || null,
-      contact2_phone: els.medicalContact2Phone.value.trim() || null,
-      doctor_name: els.medicalDoctorName.value.trim() || null,
-      doctor_phone: els.medicalDoctorPhone.value.trim() || null,
-      hospital: els.medicalHospital.value.trim() || null,
-      notes: els.medicalNotes.value.trim() || null,
-      // De checkbox is verplicht (HTML required) om dit formulier
-      // überhaupt te kunnen versturen — dit is dus altijd een bewuste,
-      // uitdrukkelijke bevestiging op het moment van opslaan (AVG art. 9).
-      consent_given_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    });
+    const userId = currentSession.user.id;
+    const now = new Date().toISOString();
+    const [{ error }, { error: practicalError }] = await Promise.all([
+      sb.from('medical_info').upsert({
+        user_id: userId,
+        resuscitate: getResusSelection(),
+        mobility: getMobilitySelection(),
+        advance_directive: els.medicalAdvanceDirective.value.trim() || null,
+        birth_date: els.medicalBirthDate.value || null,
+        weight_kg: els.medicalWeight.value !== '' ? Number(els.medicalWeight.value) : null,
+        allergies: els.medicalAllergies.value.trim() || null,
+        medications: els.medicalMedications.value.trim() || null,
+        conditions: els.medicalConditions.value.trim() || null,
+        pacemaker_icd: els.medicalPacemaker.checked,
+        pregnant: els.medicalPregnant.checked,
+        contact1_name: els.medicalContact1Name.value.trim() || null,
+        contact1_relation: els.medicalContact1Relation.value.trim() || null,
+        contact1_phone: els.medicalContact1Phone.value.trim() || null,
+        contact2_name: els.medicalContact2Name.value.trim() || null,
+        contact2_relation: els.medicalContact2Relation.value.trim() || null,
+        contact2_phone: els.medicalContact2Phone.value.trim() || null,
+        doctor_name: els.medicalDoctorName.value.trim() || null,
+        doctor_phone: els.medicalDoctorPhone.value.trim() || null,
+        hospital: els.medicalHospital.value.trim() || null,
+        notes: els.medicalNotes.value.trim() || null,
+        // De checkbox is verplicht (HTML required) om dit formulier
+        // überhaupt te kunnen versturen — dit is dus altijd een bewuste,
+        // uitdrukkelijke bevestiging op het moment van opslaan (AVG art. 9).
+        consent_given_at: now,
+        updated_at: now
+      }),
+      // Reservesleutel is geen gezondheidsgegeven — apart in practical_info.
+      sb.from('practical_info').upsert({
+        user_id: userId,
+        spare_key_location: els.medicalSpareKey.value.trim() || null,
+        updated_at: now
+      })
+    ]);
     els.medicalSaveButton.disabled = false;
-    if (error){
-      showMedicalMessage(t('errorPrefix.save', { msg: error.message }), 'error');
+    if (error || practicalError){
+      showMedicalMessage(t('errorPrefix.save', { msg: (error || practicalError).message }), 'error');
       return;
     }
     showMedicalMessage(t('success.medicalSaved'), 'success');
@@ -4685,34 +4650,6 @@
     els.medicalMessage.classList.remove('hidden');
   }
   els.openMedicalButton.addEventListener('click', loadMedicalInfo);
-
-  /* -------- Overige informatie (sleutel buitenshuis, e.d.) -------- */
-  async function loadExtraInfo(){
-    const { data } = await sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle();
-    els.extraInfoSpareKey.value = data?.spare_key_location || '';
-  }
-  els.openExtraInfoButton.addEventListener('click', loadExtraInfo);
-  els.extraInfoForm.addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    els.extraInfoSaveButton.disabled = true;
-    const { error } = await sb.from('practical_info').upsert({
-      user_id: currentSession.user.id,
-      spare_key_location: els.extraInfoSpareKey.value.trim() || null,
-      updated_at: new Date().toISOString()
-    });
-    els.extraInfoSaveButton.disabled = false;
-    if (error){
-      showExtraInfoMessage(t('errorPrefix.save', { msg: error.message }), 'error');
-      return;
-    }
-    showExtraInfoMessage(t('success.saved'), 'success');
-  });
-  function showExtraInfoMessage(text, kind){
-    if (!text){ els.extraInfoMessage.classList.add('hidden'); return; }
-    els.extraInfoMessage.textContent = text;
-    els.extraInfoMessage.className = 'auth-message' + (kind ? ' ' + kind : '');
-    els.extraInfoMessage.classList.remove('hidden');
-  }
 
   function showProfileMessage(text, kind){
     if (!text){ els.profileMessage.classList.add('hidden'); return; }
