@@ -1507,6 +1507,11 @@
         <div class="settings-group-label" id="medicalHealthGroupLabel" style="margin-top:30px;">Gezondheid</div>
         <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
           <div class="field">
+            <label for="medicalBirthDate">Geboortedatum</label>
+            <input type="date" id="medicalBirthDate">
+            <div class="field-hint" id="medicalBirthDateHint">Belangrijk voor de juiste medicatiedosering als je zelf niet kunt spreken.</div>
+          </div>
+          <div class="field">
             <label for="medicalAllergies">Allergieën</label>
             <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
             <div class="field-hint" id="medicalAllergiesHint">Iets waar je ziek van wordt, zoals een medicijn of eten.</div>
@@ -1519,6 +1524,14 @@
             <label for="medicalConditions">Ziektes die je hebt</label>
             <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
           </div>
+          <label class="consent-row" for="medicalPacemaker">
+            <input type="checkbox" id="medicalPacemaker">
+            <span class="field-hint" id="medicalPacemakerLabel">Ik heb een pacemaker of ICD</span>
+          </label>
+          <label class="consent-row" for="medicalPregnant">
+            <input type="checkbox" id="medicalPregnant">
+            <span class="field-hint" id="medicalPregnantLabel">Ik ben zwanger</span>
+          </label>
           <div class="field">
             <label id="mobilityFieldLabel">Hoe goed kun je lopen?</label>
             <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
@@ -2274,6 +2287,8 @@
     { sel: '#advanceDirectiveLabel', nl: 'Speciale wensen bij ernstige zorg', en: 'Special wishes for serious care' },
     { sel: '#medicalAdvanceDirective', attr: 'placeholder', nl: 'Bijv. niet naar het ziekenhuis, geen beademing…', en: 'E.g. no hospital, no ventilation…' },
     { sel: '#advanceDirectiveHint', nl: 'Helemaal jouw keuze — alleen tekst, geen documenten nodig.', en: 'Entirely your choice — text only, no documents needed.' },
+    { sel: 'label[for="medicalBirthDate"]', nl: 'Geboortedatum', en: 'Date of birth' },
+    { sel: '#medicalBirthDateHint', nl: 'Belangrijk voor de juiste medicatiedosering als je zelf niet kunt spreken.', en: 'Important for correct medication dosing if you can\'t speak for yourself.' },
     { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën', en: 'Allergies' },
     { sel: '#medicalAllergies', attr: 'placeholder', nl: 'Bijv. penicilline', en: 'E.g. penicillin' },
     { sel: '#medicalAllergiesHint', nl: 'Iets waar je ziek van wordt, zoals een medicijn of eten.', en: 'Something that makes you ill, like a medicine or a food.' },
@@ -2281,6 +2296,8 @@
     { sel: '#medicalMedications', attr: 'placeholder', nl: 'Bijv. bloedverdunners', en: 'E.g. blood thinners' },
     { sel: 'label[for="medicalConditions"]', nl: 'Ziektes die je hebt', en: 'Illnesses you have' },
     { sel: '#medicalConditions', attr: 'placeholder', nl: 'Bijv. diabetes, hartklachten', en: 'E.g. diabetes, heart condition' },
+    { sel: '#medicalPacemakerLabel', nl: 'Ik heb een pacemaker of ICD', en: 'I have a pacemaker or ICD' },
+    { sel: '#medicalPregnantLabel', nl: 'Ik ben zwanger', en: 'I am pregnant' },
     { sel: '#mobilityFieldLabel', nl: 'Hoe goed kun je lopen?', en: 'How well can you walk?' },
     { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Mobiliteit', en: 'Mobility' },
     { sel: '#mobilitySegmented button[data-mobility=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
@@ -2506,6 +2523,10 @@
       'medical.resusYes': '✅ {name} mag gereanimeerd worden',
       'medical.resusNo': '⛔ {name} wil NIET gereanimeerd worden',
       'medical.advanceDirective': 'Speciale wensen:',
+      'medical.birthDate': 'Geboren:',
+      'medical.yearsOld': '{n} jaar',
+      'medical.pacemaker': '⚠️ Heeft een pacemaker/ICD',
+      'medical.pregnant': '⚠️ Is zwanger',
       'medical.allergies': 'Allergieën:',
       'medical.medications': 'Medicijnen:',
       'medical.conditions': 'Ziektes:',
@@ -2624,6 +2645,10 @@
       'medical.resusYes': '✅ {name} may be resuscitated',
       'medical.resusNo': '⛔ {name} does NOT want to be resuscitated',
       'medical.advanceDirective': 'Special wishes:',
+      'medical.birthDate': 'Born:',
+      'medical.yearsOld': '{n} years old',
+      'medical.pacemaker': '⚠️ Has a pacemaker/ICD',
+      'medical.pregnant': '⚠️ Is pregnant',
       'medical.allergies': 'Allergies:',
       'medical.medications': 'Medicines:',
       'medical.conditions': 'Illnesses:',
@@ -2960,9 +2985,12 @@
     resusSegmented: document.getElementById('resusSegmented'),
     medicalAdvanceDirective: document.getElementById('medicalAdvanceDirective'),
     mobilitySegmented: document.getElementById('mobilitySegmented'),
+    medicalBirthDate: document.getElementById('medicalBirthDate'),
     medicalAllergies: document.getElementById('medicalAllergies'),
     medicalMedications: document.getElementById('medicalMedications'),
     medicalConditions: document.getElementById('medicalConditions'),
+    medicalPacemaker: document.getElementById('medicalPacemaker'),
+    medicalPregnant: document.getElementById('medicalPregnant'),
     medicalContact1Name: document.getElementById('medicalContact1Name'),
     medicalContact1Relation: document.getElementById('medicalContact1Relation'),
     medicalContact1Phone: document.getElementById('medicalContact1Phone'),
@@ -4329,9 +4357,12 @@
     setResusSelection(data && typeof data.resuscitate === 'boolean' ? data.resuscitate : null);
     setMobilitySelection(data?.mobility || null);
     els.medicalAdvanceDirective.value = data?.advance_directive || '';
+    els.medicalBirthDate.value = data?.birth_date || '';
     els.medicalAllergies.value = data?.allergies || '';
     els.medicalMedications.value = data?.medications || '';
     els.medicalConditions.value = data?.conditions || '';
+    els.medicalPacemaker.checked = !!data?.pacemaker_icd;
+    els.medicalPregnant.checked = !!data?.pregnant;
     els.medicalContact1Name.value = data?.contact1_name || '';
     els.medicalContact1Relation.value = data?.contact1_relation || '';
     els.medicalContact1Phone.value = data?.contact1_phone || '';
@@ -4355,9 +4386,12 @@
       resuscitate: getResusSelection(),
       mobility: getMobilitySelection(),
       advance_directive: els.medicalAdvanceDirective.value.trim() || null,
+      birth_date: els.medicalBirthDate.value || null,
       allergies: els.medicalAllergies.value.trim() || null,
       medications: els.medicalMedications.value.trim() || null,
       conditions: els.medicalConditions.value.trim() || null,
+      pacemaker_icd: els.medicalPacemaker.checked,
+      pregnant: els.medicalPregnant.checked,
       contact1_name: els.medicalContact1Name.value.trim() || null,
       contact1_relation: els.medicalContact1Relation.value.trim() || null,
       contact1_phone: els.medicalContact1Phone.value.trim() || null,
@@ -4849,6 +4883,16 @@
     return m + ':' + String(s).padStart(2, '0');
   }
 
+  function medicalAgeLabel(birthDateStr){
+    const bd = new Date(birthDateStr + 'T00:00:00');
+    if (isNaN(bd.getTime())) return '';
+    const now = new Date();
+    let age = now.getFullYear() - bd.getFullYear();
+    const hadBirthdayThisYear = now.getMonth() > bd.getMonth() || (now.getMonth() === bd.getMonth() && now.getDate() >= bd.getDate());
+    if (!hadBirthdayThisYear) age--;
+    return age >= 0 ? t('medical.yearsOld', { n: age }) : '';
+  }
+
   // Aantal balkjes in de golfvorm van een spraakbericht.
   const VOICE_WAVEFORM_BARS = 42;
   // Voor oudere berichten die vóór deze functie zijn opgenomen (of waarvan
@@ -5324,7 +5368,8 @@
     const practical = practicalData && practicalData[0];
     const hasResus = info && typeof info.resuscitate === 'boolean';
     const hasAny = (info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
-      || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital))
+      || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital
+      || info.birth_date || info.pacemaker_icd || info.pregnant))
       || (practical && practical.spare_key_location);
     els.medicalInfoToggle.classList.toggle('hidden', !hasAny);
     if (!hasAny){
@@ -5334,6 +5379,11 @@
       els.medicalResusBanner.classList.add('hidden');
       return;
     }
+    // Voor een ambulanceteam dat binnenkomt terwijl jij CPR doet, is elke
+    // extra tik vertraging die je niet wilt — het kaartje staat daarom
+    // meteen opengeklapt in plaats van pas na een tik op de titel.
+    els.medicalInfoCard.classList.add('open');
+    els.medicalInfoBody.classList.remove('hidden');
     const activator = chatParticipantById[alarmRow.triggered_by];
     const activatorName = activator ? activator.full_name : t('conversation.unknown');
     els.medicalInfoName.textContent = activatorName;
@@ -5355,9 +5405,20 @@
     // "hoe kom ik binnen" letterlijk de eerste stap voor wie ter plekke komt.
     if (practical && practical.spare_key_location) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('extra.spareKey')) + '</strong> ' + escapeHtml(practical.spare_key_location) + '</div>');
     if (medical.advance_directive) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.advanceDirective')) + '</strong> ' + escapeHtml(medical.advance_directive) + '</div>');
+    // Pacemaker/ICD en zwangerschap veranderen direct hoe een ambulanceteam
+    // reanimeert (waar ze wel/niet defibrilleren, ander protocol) — daarom
+    // net als de wilsverklaring in het rood, vlak onder de reanimatiebanner.
+    if (medical.pacemaker_icd) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pacemaker')) + '</strong></div>');
+    if (medical.pregnant) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pregnant')) + '</strong></div>');
     if (medical.allergies) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.allergies')) + '</strong> ' + escapeHtml(medical.allergies) + '</div>');
     if (medical.medications) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.medications')) + '</strong> ' + escapeHtml(medical.medications) + '</div>');
     if (medical.conditions) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.conditions')) + '</strong> ' + escapeHtml(medical.conditions) + '</div>');
+    if (medical.birth_date){
+      const bd = new Date(medical.birth_date + 'T00:00:00');
+      const dateLabel = isNaN(bd.getTime()) ? medical.birth_date : bd.toLocaleDateString(localeTag());
+      const ageLabel = medicalAgeLabel(medical.birth_date);
+      rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.birthDate')) + '</strong> ' + escapeHtml(dateLabel + (ageLabel ? ' (' + ageLabel + ')' : '')) + '</div>');
+    }
     if (mobilityLabel) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.mobility')) + '</strong> ' + escapeHtml(mobilityLabel) + '</div>');
     if (medical.contact1_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact1')) + '</strong> ' + escapeHtml(contact1) + '</div>');
     if (medical.contact2_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact2')) + '</strong> ' + escapeHtml(contact2) + '</div>');
@@ -6290,10 +6351,11 @@
       return;
     }
     const { data } = await sb.from('medical_info')
-      .select('allergies, medications, conditions, doctor_name, doctor_phone, notes, mobility, advance_directive, contact1_name, contact2_name, hospital')
+      .select('allergies, medications, conditions, doctor_name, doctor_phone, notes, mobility, advance_directive, contact1_name, contact2_name, hospital, birth_date, pacemaker_icd, pregnant')
       .eq('user_id', currentSession.user.id).maybeSingle();
     const hasAny = data && (data.allergies || data.medications || data.conditions || data.doctor_name || data.doctor_phone || data.notes
-      || data.mobility || data.advance_directive || data.contact1_name || data.contact2_name || data.hospital);
+      || data.mobility || data.advance_directive || data.contact1_name || data.contact2_name || data.hospital
+      || data.birth_date || data.pacemaker_icd || data.pregnant);
     els.medicalInfoHint.classList.toggle('hidden', !!hasAny);
   }
   if (els.medicalInfoHintButton){
