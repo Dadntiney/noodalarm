@@ -1,15 +1,14 @@
-// NORI — dagelijkse update-samenvatting naar Danny's groepschat.
+// NORI — dagelijkse update-samenvatting naar élke gebruikers-groepschat.
 //
 // Getriggerd via pg_cron om 08:00 UTC (job: nori-daily-update-digest).
 // Bundelt alle rijen in public.release_notes met announced_at IS NULL tot
-// één vriendelijk, niet-technisch bericht. Op stille dagen (geen rijen)
-// gebeurt er niets — geen lege chatbubbel.
+// één vriendelijk, niet-technisch bericht en post dat in elke alarm_group
+// (afzender = groeps-eigenaar). Op stille dagen gebeurt er niets.
 //
 // Vereiste secrets / env:
 //   SUPABASE_URL
 //   SUPABASE_SERVICE_ROLE_KEY
-//   DIGEST_GROUP_ID   — alarm_groups.id van Danny's kring
-//   DIGEST_SENDER_ID  — auth.users.id die als afzender fungeert (Danny)
+//   DIGEST_SENDER_ID — optioneel fallback-afzender als een groep geen owner heeft
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -26,11 +25,10 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const groupId = Deno.env.get('DIGEST_GROUP_ID');
-    const senderId = Deno.env.get('DIGEST_SENDER_ID');
+    const fallbackSenderId = Deno.env.get('DIGEST_SENDER_ID');
 
-    if (!supabaseUrl || !serviceKey || !groupId || !senderId) {
-      return json({ error: 'Missing DIGEST_GROUP_ID / DIGEST_SENDER_ID or Supabase secrets' }, 500);
+    if (!supabaseUrl || !serviceKey) {
+      return json({ error: 'Missing Supabase secrets' }, 500);
     }
 
     const sb = createClient(supabaseUrl, serviceKey);
@@ -43,7 +41,6 @@ Deno.serve(async (req) => {
 
     if (notesErr) return json({ error: notesErr.message }, 500);
 
-    // Stille dag: niets posten, niets markeren.
     if (!notes || notes.length === 0) {
       return json({ ok: true, posted: false, reason: 'nothing_to_announce' });
     }
@@ -61,14 +58,28 @@ Deno.serve(async (req) => {
         ? `🆕 Update van NORI\n\n${bullets[0]}`
         : `🆕 Updates van NORI\n\n${bullets.map((b) => `• ${b}`).join('\n')}`;
 
-    // alarm_messages_body_check eist minstens body of media_path — body
-    // mag dus nooit null/leeg zijn. Trim + expliciete check hierboven.
-    const { error: insertErr } = await sb.from('alarm_messages').insert({
-      group_id: groupId,
-      sender_id: senderId,
-      body,
-    });
+    const { data: groups, error: groupsErr } = await sb
+      .from('alarm_groups')
+      .select('id, owner_id');
 
+    if (groupsErr) return json({ error: groupsErr.message }, 500);
+    if (!groups || groups.length === 0) {
+      return json({ ok: true, posted: false, reason: 'no_groups' });
+    }
+
+    const rows = groups
+      .map((g) => ({
+        group_id: g.id,
+        sender_id: g.owner_id || fallbackSenderId,
+        body,
+      }))
+      .filter((r) => !!r.sender_id);
+
+    if (!rows.length) {
+      return json({ error: 'No valid sender for any group (set DIGEST_SENDER_ID)' }, 500);
+    }
+
+    const { error: insertErr } = await sb.from('alarm_messages').insert(rows);
     if (insertErr) return json({ error: insertErr.message }, 500);
 
     const ids = notes.map((n) => n.id);
@@ -79,7 +90,12 @@ Deno.serve(async (req) => {
 
     if (markErr) return json({ error: markErr.message }, 500);
 
-    return json({ ok: true, posted: true, count: bullets.length });
+    return json({
+      ok: true,
+      posted: true,
+      noteCount: bullets.length,
+      groupCount: rows.length,
+    });
   } catch (err) {
     return json({ error: err instanceof Error ? err.message : String(err) }, 500);
   }
