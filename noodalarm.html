@@ -5091,9 +5091,9 @@
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
   // NORI is een uitzondering: vast systeem-afzender, zichtbaar in je eigen
   // kring-groep (niet via andermans groepen, anders zie je dezelfde update
-  // meerdere keren). Welkomstbericht komt uit de DB bij het eerste
-  // geaccepteerde contact (send_nori_welcome_if_first_contact) — nooit
-  // opnieuw aanmaken in de frontend.
+  // meerdere keren). Welkomstbericht komt uit de DB bij succesvolle
+  // aanmelding (create_personal_alarm_group) — nooit opnieuw aanmaken
+  // in de frontend bij login, refresh of nieuwe contacten.
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
     if (isNoriSystemSender(msg.sender_id)){
