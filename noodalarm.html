@@ -66,6 +66,7 @@
     --danger:#ef4444;
     --accent:#1877f2;
     --accent-dark:#125fcc;
+    --nori-msg:#0f766e;
     --font:'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
     --radius-lg:24px;
     --radius-md:16px;
@@ -106,6 +107,7 @@
     --amber-soft:#332a1a;
     --shadow-card:0 2px 10px rgba(0,0,0,.5);
     --scrim:rgba(0,0,0,.92);
+    --nori-msg:#5eead4;
     --chat-name-1:#a78bfa;
     --chat-name-2:#f472b6;
     --chat-name-3:#2dd4bf;
@@ -136,6 +138,7 @@
       --amber-soft:#332a1a;
       --shadow-card:0 2px 10px rgba(0,0,0,.5);
       --scrim:rgba(0,0,0,.92);
+      --nori-msg:#5eead4;
       --chat-name-1:#a78bfa;
       --chat-name-2:#f472b6;
       --chat-name-3:#2dd4bf;
@@ -859,13 +862,16 @@
   .chat-bubble:has(.chat-media){ max-width:90%; }
   .chat-bubble.own{ background:var(--accent); color:#fff; }
   .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); box-shadow:var(--shadow-card); }
+  /* NORI-systeemberichten: warm & vriendelijk (zacht teal), geen rood —
+     rood is voor alarm/gevaar en voelde hier te dreigend. Logo blijft
+     het officiële NORI-beeldmerk in de avatar. */
   .chat-bubble.system{
-    background:linear-gradient(180deg, color-mix(in srgb, var(--red) 6%, var(--surface)), var(--surface));
-    border:1px solid color-mix(in srgb, var(--red) 28%, var(--border-soft));
+    background:linear-gradient(180deg, color-mix(in srgb, var(--nori-msg) 9%, var(--surface)), var(--surface));
+    border:1px solid color-mix(in srgb, var(--nori-msg) 22%, var(--border-soft));
     box-shadow:var(--shadow-card);
   }
   .chat-bubble.system .who{
-    color:var(--red);
+    color:var(--nori-msg);
     opacity:1;
     display:flex;
     align-items:center;
@@ -878,15 +884,16 @@
     font-weight:800;
     letter-spacing:0.04em;
     text-transform:uppercase;
-    color:var(--red);
-    background:color-mix(in srgb, var(--red) 12%, transparent);
+    color:var(--nori-msg);
+    background:color-mix(in srgb, var(--nori-msg) 14%, transparent);
     border-radius:999px;
     padding:2px 7px;
   }
   .avatar.nori-system-avatar{
-    background:radial-gradient(circle at 32% 24%, var(--red-bright), var(--red) 60%, var(--red-dark) 100%);
+    background:var(--surface-2);
     color:#fff;
     overflow:hidden;
+    border:1.5px solid color-mix(in srgb, var(--nori-msg) 28%, var(--border-soft));
   }
   .avatar.nori-system-avatar img{ width:100%; height:100%; object-fit:cover; }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
