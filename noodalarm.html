@@ -6677,7 +6677,7 @@
         auth_key: raw.keys.auth,
         last_seen_at: new Date().toISOString()
       }, { onConflict: 'endpoint' });
-    } catch (err){ /* stil negeren als push niet lukt — app blijft werken via app-melding en e-mail */ }
+    } catch (err){ /* stil negeren als push niet lukt — app blijft werken via in-app meldingen */ }
   }
 
 })();
