@@ -785,7 +785,11 @@
      blijft wel gereserveerd zodat de tekstballonnen niet opschuiven. */
   .chat-row.other.grouped .avatar{ visibility:hidden; }
   .chat-row.other.grouped .who{ display:none; }
-  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:20px; font-size:1.0625rem; line-height:1.45; }
+  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:20px; font-size:1.0625rem; line-height:1.45; overflow:hidden; }
+  /* Net als bij WhatsApp: een bubbel met een foto/video mag flink breder
+     zijn dan een gewone tekstbubbel — media moet groot en duidelijk ogen,
+     niet ingeklemd in dezelfde smalle breedte als een kort berichtje. */
+  .chat-bubble:has(.chat-media){ max-width:90%; }
   .chat-bubble.own{ background:var(--accent); color:#fff; }
   .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); box-shadow:var(--shadow-card); }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
@@ -796,23 +800,30 @@
   .tick-icon{ color:rgba(255,255,255,.75); }
   .tick-icon.read{ color:#6fd8ff; }
   .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
+  /* Foto/video vult de bubbel tot aan de rand (negatieve margin cancelt
+     precies de padding van .chat-bubble) — de ronding komt dan vanzelf van
+     de bubbel zelf (overflow:hidden hierboven), exact zoals bij WhatsApp,
+     i.p.v. een los, kleiner afgerond plaatje mét zichtbare rand eromheen. */
   .chat-media{
-    display:block; max-height:280px; border-radius:12px;
-    margin:-2px -6px 6px; width:calc(100% + 12px); object-fit:cover; background:var(--surface-2);
+    display:block; max-height:380px;
+    margin:-12px -16px 6px; width:calc(100% + 32px); object-fit:cover; background:var(--surface-2);
   }
   img.chat-media{ cursor:pointer; }
-  .chat-video-wrap{ position:relative; margin:-2px -6px 6px; width:calc(100% + 12px); cursor:pointer; }
+  .chat-video-wrap{ position:relative; margin:-12px -16px 6px; width:calc(100% + 32px); cursor:pointer; }
   .chat-video-wrap .chat-media{ margin:0; width:100%; }
   .chat-video-play{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    width:52px; height:52px; border-radius:50%; background:rgba(0,0,0,.55);
-    display:flex; align-items:center; justify-content:center; color:#fff; pointer-events:none;
+    width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,.92);
+    display:flex; align-items:center; justify-content:center; color:#1c1c1e; pointer-events:none;
+    box-shadow:0 2px 10px rgba(0,0,0,.28);
   }
-  .chat-video-play svg{ width:24px; height:24px; margin-left:3px; }
+  .chat-video-play svg{ width:26px; height:26px; margin-left:3px; }
   .chat-video-duration{
-    position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.6); color:#fff;
-    font-size:0.75rem; font-weight:700; padding:2px 7px; border-radius:6px; pointer-events:none; letter-spacing:.02em;
+    position:absolute; left:8px; bottom:8px; background:rgba(0,0,0,.6); color:#fff;
+    font-size:0.75rem; font-weight:700; padding:3px 8px 3px 6px; border-radius:20px; pointer-events:none; letter-spacing:.02em;
+    display:flex; align-items:center; gap:4px;
   }
+  .chat-video-duration svg{ width:12px; height:12px; }
   /* ---------- Foto volledig scherm (tik op een foto, net als video) ---------- */
   .media-lightbox{
     position:fixed; inset:0; z-index:400; background:rgba(0,0,0,.94);
@@ -4704,14 +4715,14 @@
   // vlak zien totdat je op play drukt. Even naar een piepklein moment in de
   // video seeken dwingt 'm om dat frame alvast te decoderen en te tonen als
   // miniatuur — zonder de hele video te downloaden. Meteen ook de duur
-  // uitlezen voor het badge rechtsonder.
+  // uitlezen voor het badge linksonder.
   function primeVideoPosters(root){
     root.querySelectorAll('.chat-video').forEach(video => {
       if (video.dataset.posterPrimed) return;
       video.dataset.posterPrimed = '1';
       const onMetadata = () => {
         try { video.currentTime = 0.01; } catch(e){}
-        const badge = video.parentElement.querySelector('.chat-video-duration');
+        const badge = video.parentElement.querySelector('.chat-video-duration-text');
         if (badge) badge.textContent = formatDuration(video.duration);
       };
       if (video.readyState >= 1) onMetadata();
@@ -4774,7 +4785,7 @@
     const media = !msg.media_url ? '' : (msg.media_type === 'video'
       ? '<div class="chat-video-wrap"><video src="' + escapeHtml(msg.media_url) + '" class="chat-media chat-video" playsinline preload="metadata"></video>' +
         '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span>' +
-        '<span class="chat-video-duration"></span></div>'
+        '<span class="chat-video-duration"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4Z"/></svg><span class="chat-video-duration-text"></span></span></div>'
       : '<img src="' + escapeHtml(msg.media_url) + '" class="chat-media" loading="lazy" alt="">');
     const ticks = own ? chatTicksHtml(msg.id) : '';
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
