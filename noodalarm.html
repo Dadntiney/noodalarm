@@ -5563,7 +5563,13 @@
   // hierboven: eerst .hidden weg + reflow forceren, dan pas .open erbij op
   // de volgende frame, zodat de overgang ook echt start i.p.v. meteen
   // van display:none naar zichtbaar te springen.
+  function resetLightboxDragStyles(){
+    els.mediaLightboxImg.style.transition = '';
+    els.mediaLightboxImg.style.transform = '';
+    els.mediaLightbox.style.backgroundColor = '';
+  }
   function openImageLightbox(src){
+    resetLightboxDragStyles();
     els.mediaLightboxImg.src = src;
     els.mediaLightbox.classList.remove('hidden');
     void els.mediaLightbox.offsetHeight;
@@ -5574,11 +5580,52 @@
     setTimeout(() => {
       els.mediaLightbox.classList.add('hidden');
       els.mediaLightboxImg.src = '';
+      resetLightboxDragStyles();
     }, 300);
   }
   els.mediaLightboxClose.addEventListener('click', closeImageLightbox);
   els.mediaLightbox.addEventListener('click', (ev) => {
     if (ev.target === els.mediaLightbox) closeImageLightbox();
+  });
+
+  // Net als bij video's native fullscreen-speler: een klein stukje omhoog
+  // (of omlaag) vegen op de foto zelf sluit 'm ook, niet alleen het
+  // kruisje. De foto volgt live de vinger; bij loslaten voorbij de drempel
+  // sluit 'ie, anders veert hij terug naar het midden.
+  const LIGHTBOX_SWIPE_DISMISS_PX = 90;
+  let lightboxDragStartY = null;
+  els.mediaLightboxImg.addEventListener('touchstart', (ev) => {
+    if (ev.touches.length !== 1) return;
+    lightboxDragStartY = ev.touches[0].clientY;
+    els.mediaLightboxImg.style.transition = 'none';
+  }, { passive: true });
+  els.mediaLightboxImg.addEventListener('touchmove', (ev) => {
+    if (lightboxDragStartY === null || ev.touches.length !== 1) return;
+    ev.preventDefault();
+    const dy = ev.touches[0].clientY - lightboxDragStartY;
+    const scale = Math.max(0.88, 1 - Math.abs(dy) / 1200);
+    els.mediaLightboxImg.style.transform = 'translateY(' + dy + 'px) scale(' + scale + ')';
+    const fade = Math.max(0, 1 - Math.abs(dy) / 300);
+    els.mediaLightbox.style.backgroundColor = 'rgba(0,0,0,' + (0.94 * fade).toFixed(2) + ')';
+  }, { passive: false });
+  els.mediaLightboxImg.addEventListener('touchend', (ev) => {
+    if (lightboxDragStartY === null) return;
+    const touch = ev.changedTouches && ev.changedTouches[0];
+    const dy = touch ? touch.clientY - lightboxDragStartY : 0;
+    lightboxDragStartY = null;
+    if (Math.abs(dy) > LIGHTBOX_SWIPE_DISMISS_PX){
+      closeImageLightbox();
+    } else {
+      els.mediaLightboxImg.style.transition = 'transform .2s ease';
+      els.mediaLightboxImg.style.transform = '';
+      els.mediaLightbox.style.backgroundColor = '';
+    }
+  });
+  els.mediaLightboxImg.addEventListener('touchcancel', () => {
+    lightboxDragStartY = null;
+    els.mediaLightboxImg.style.transition = 'transform .2s ease';
+    els.mediaLightboxImg.style.transform = '';
+    els.mediaLightbox.style.backgroundColor = '';
   });
 
   // Tikken op een video speelt hem direct fullscreen af, net als WhatsApp.
