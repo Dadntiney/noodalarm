@@ -640,7 +640,7 @@
     border:2px solid var(--bg);
   }
   .voice-mic-badge svg{ width:9px; height:9px; }
-  .chat-row.other.grouped .voice-mic-badge{ visibility:hidden; }
+  .chat-row.grouped .voice-mic-badge{ visibility:hidden; }
 
   /* ---------- Contacten / zoeken ---------- */
   .section-title{ font-size:0.90625rem; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
@@ -830,7 +830,7 @@
   }
   .chat-messages{
     flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:contain;
-    display:flex; flex-direction:column; gap:14px;
+    display:flex; flex-direction:column; gap:3px;
     padding:18px; -webkit-overflow-scrolling:touch;
     color:var(--text);
     background-color:var(--bg);
@@ -847,27 +847,36 @@
   }
   .chat-bubble{ touch-action:pan-y; }
   .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
-  .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
+  .chat-row{ display:flex; align-items:flex-start; gap:8px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
-  .chat-row .avatar{ margin-bottom:2px; }
-  /* Vervolgberichten van dezelfde afzender op rij tonen geen avatar/naam
-     meer (alleen het laatste bericht van zo'n reeks doet dat) — de ruimte
-     blijft wel gereserveerd zodat de tekstballonnen niet opschuiven. */
-  .chat-row.other.grouped .avatar{ visibility:hidden; }
-  .chat-row.other.grouped .who{ display:none; }
-  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:20px; font-size:1.0625rem; line-height:1.45; overflow:hidden; }
+  .chat-row.has-tail{ margin-top:10px; }
+  .chat-row.has-tail:first-child{ margin-top:0; }
+  .chat-row .avatar{ margin-top:2px; }
+  /* Vervolgberichten: geen avatar/naam (ruimte blijft gereserveerd). */
+  .chat-row.grouped .avatar-wrap{ visibility:hidden; }
+  .chat-row.grouped .who{ display:none; }
+  /* WhatsApp-achtige bubbel + staartje naar de avatar (alleen .has-tail). */
+  .chat-bubble{
+    position:relative;
+    max-width:78%;
+    padding:8px 12px 8px 14px;
+    border-radius:7.5px;
+    font-size:1.0625rem;
+    line-height:1.45;
+    overflow:visible;
+  }
   /* Net als bij WhatsApp: een bubbel met een foto/video mag flink breder
      zijn dan een gewone tekstbubbel — media moet groot en duidelijk ogen,
      niet ingeklemd in dezelfde smalle breedte als een kort berichtje. */
-  .chat-bubble:has(.chat-media){ max-width:90%; }
+  .chat-bubble:has(.chat-media),
+  .chat-bubble:has(.chat-video-wrap){ max-width:90%; }
   .chat-bubble.own{ background:var(--accent); color:#fff; }
-  .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); box-shadow:var(--shadow-card); }
+  .chat-bubble.other{ background:var(--surface); box-shadow:var(--shadow-card); }
   /* NORI-systeemberichten: warm & vriendelijk (zacht teal), geen rood —
      rood is voor alarm/gevaar en voelde hier te dreigend. Logo blijft
      het officiële NORI-beeldmerk in de avatar. */
   .chat-bubble.system{
-    background:linear-gradient(180deg, color-mix(in srgb, var(--nori-msg) 9%, var(--surface)), var(--surface));
-    border:1px solid color-mix(in srgb, var(--nori-msg) 22%, var(--border-soft));
+    background:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
     box-shadow:var(--shadow-card);
   }
   .chat-bubble.system .who{
@@ -896,6 +905,32 @@
     border:1.5px solid color-mix(in srgb, var(--nori-msg) 28%, var(--border-soft));
   }
   .avatar.nori-system-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .chat-row.other.has-tail .chat-bubble{ border-top-left-radius:0; }
+  .chat-row.own.has-tail .chat-bubble{ border-top-right-radius:0; }
+  .chat-row.has-tail .chat-bubble::before{
+    content:"";
+    position:absolute;
+    top:0;
+    width:8px;
+    height:13px;
+    pointer-events:none;
+    z-index:1;
+  }
+  .chat-row.other.has-tail .chat-bubble::before{
+    left:-8px;
+    background:var(--surface);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  }
+  .chat-row.other.has-tail .chat-bubble.system::before{
+    background:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
+  }
+  .chat-row.own.has-tail .chat-bubble::before{
+    right:-8px;
+    background:var(--accent);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
   .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:0.75rem; white-space:nowrap; display:flex; align-items:center; gap:3px; }
@@ -905,16 +940,20 @@
   .tick-icon.read{ color:#6fd8ff; }
   .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
   /* Foto/video vult de bubbel tot aan de rand (negatieve margin cancelt
-     precies de padding van .chat-bubble) — de ronding komt dan vanzelf van
-     de bubbel zelf (overflow:hidden hierboven), exact zoals bij WhatsApp,
-     i.p.v. een los, kleiner afgerond plaatje mét zichtbare rand eromheen. */
+     precies de padding van .chat-bubble). Ronding op de media zelf, zodat
+     overflow:visible op de bubbel het staartje niet afknipt. */
   .chat-media{
     display:block; max-height:380px;
-    margin:-12px -16px 6px; width:calc(100% + 32px); object-fit:cover; background:var(--surface-2);
+    margin:-8px -12px -8px -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
+    border-radius:7.5px 7.5px 0 0;
   }
+  .chat-row.other.has-tail .chat-media,
+  .chat-row.other.has-tail .chat-video-wrap{ border-top-left-radius:0; }
+  .chat-row.own.has-tail .chat-media,
+  .chat-row.own.has-tail .chat-video-wrap{ border-top-right-radius:0; }
   img.chat-media{ cursor:pointer; }
-  .chat-video-wrap{ position:relative; margin:-12px -16px 6px; width:calc(100% + 32px); cursor:pointer; }
-  .chat-video-wrap .chat-media{ margin:0; width:100%; }
+  .chat-video-wrap{ position:relative; margin:-8px -12px 6px -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px 7.5px 0 0; overflow:hidden; }
+  .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
   .chat-video-play{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
     width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,.92);
@@ -5355,12 +5394,9 @@
     if (span) span.innerHTML = ticksInnerHtml(messageId);
   }
 
-  // showMeta bepaalt of avatar+naam zichtbaar zijn — alleen bij het laatste
-  // bericht van een opeenvolgende reeks van dezelfde afzender (net als
-  // WhatsApp). Beide worden altijd wél gerenderd (niet weggelaten), zodat
-  // een reeks later puur met de .grouped-klasse (CSS) kan worden bijgesteld
-  // zonder de HTML opnieuw te hoeven opbouwen.
-  function chatBubbleHtml(msg, showMeta){
+  // isFirst: eerste bericht van een reeks van dezelfde afzender — toont
+  // avatar, naam én WhatsApp-achtig staartje. Vervolgberichten zijn .grouped.
+  function chatBubbleHtml(msg, isFirst){
     const own = msg.sender_id === currentSession.user.id;
     const isSystem = isNoriSystemSender(msg.sender_id);
     const time = new Date(msg.created_at).toLocaleTimeString(localeTag(), { hour:'2-digit', minute:'2-digit' });
@@ -5388,13 +5424,15 @@
       media +
       '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
-    if (own) return '<div class="chat-row own" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' + bubble + '</div>';
+    const rowClass = 'chat-row ' + (own ? 'own' : ('other' + (isSystem ? ' system' : ''))) +
+      (isFirst ? ' has-tail' : ' grouped');
+    if (own) return '<div class="' + rowClass + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' + bubble + '</div>';
     const isVoice = msg.media_type === 'audio';
     const avatarClass = isSystem ? 'avatar sm nori-system-avatar' : 'avatar sm';
     const avatarHtml = isSystem
       ? '<img src="' + escapeHtml(NORI_AVATAR_URL) + '" alt="" decoding="async">'
       : avatarInner(msg.senderAvatar);
-    return '<div class="chat-row other' + (isSystem ? ' system' : '') + (showMeta ? '' : ' grouped') + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
+    return '<div class="' + rowClass + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
       '<span class="avatar-wrap"><div class="' + avatarClass + '">' + avatarHtml + '</div>' + (isVoice ? VOICE_MIC_BADGE_HTML : '') + '</span>' +
       bubble +
       '</div>';
@@ -5509,15 +5547,15 @@
 
     els.chatMessages.innerHTML = list.length
       ? list.map((m, i) => {
-          const next = list[i + 1];
-          const showMeta = !next || next.sender_id !== m.sender_id;
+          const prev = list[i - 1];
+          const isFirst = !prev || prev.sender_id !== m.sender_id;
           const sender = resolveChatSender(m);
           return chatBubbleHtml({
             ...m,
             media_url: null,
             senderName: sender ? sender.full_name : 'Onbekend',
             senderAvatar: sender ? sender.avatar_url : null
-          }, showMeta);
+          }, isFirst);
         }).join('')
       : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
     scrollChatToBottom();
@@ -5965,10 +6003,10 @@
         const emptyHint = els.chatMessages.querySelector('.chat-empty-hint');
         if (emptyHint) emptyHint.remove();
         const prevLastRow = els.chatMessages.querySelector('.chat-row:last-child');
-        if (prevLastRow && !prevLastRow.classList.contains('own') && prevLastRow.getAttribute('data-sender-id') === msg.sender_id){
-          prevLastRow.classList.add('grouped');
-        }
-        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }, true));
+        const isFirst = !(prevLastRow && prevLastRow.getAttribute('data-sender-id') === msg.sender_id);
+        // Bij een vervolgbericht van dezelfde afzender: vorige houdt avatar/
+        // staartje (eerste van de reeks); nieuwe wordt .grouped zonder staart.
+        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }, isFirst));
         scrollChatToBottom();
         requestAnimationFrame(scrollChatToBottom);
         const lastMedia = els.chatMessages.querySelector('.chat-row:last-child [data-media-path]');
