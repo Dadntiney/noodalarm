@@ -53,10 +53,12 @@ Deno.serve(async (req) => {
       return json({ ok: true, posted: false, reason: 'empty_messages' });
     }
 
-    const body =
+    let body =
       bullets.length === 1
         ? `🆕 Update van NORI\n\n${bullets[0]}`
         : `🆕 Updates van NORI\n\n${bullets.map((b) => `• ${b}`).join('\n')}`;
+    // alarm_messages_body_check: 1..1000 tekens
+    if (body.length > 1000) body = body.slice(0, 1000);
 
     const { data: groups, error: groupsErr } = await sb
       .from('alarm_groups')
