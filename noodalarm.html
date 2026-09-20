@@ -286,7 +286,11 @@
   .tab-count{ margin-left:6px; opacity:.75; }
   .tab-count.hidden{ display:none; }
 
-  .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; animation:screen-in .22s cubic-bezier(.25,.8,.4,1); }
+  /* cubic-bezier(0.16,1,0.3,1) ("ease-out-expo") is de curve die het
+     dichtst bij het iOS/WhatsApp-gevoel komt: snel op gang, dan zacht
+     uitlopen zonder overshoot — merkbaar vloeiender dan een generieke
+     ease. */
+  .screen{ width:100%; display:flex; flex-direction:column; gap:24px; flex:1; animation:screen-in .28s cubic-bezier(0.16,1,0.3,1); }
   .screen.hidden{ display:none; }
   /* Contacten had losse inline margins BOVENOP deze flex-gap staan (dus
      dubbel uitgelijnde, wisselende sprongen tussen de blokken) én rekte
@@ -294,7 +298,12 @@
      gaf een rommelige, hologige indruk. Hier dus een eigen, strakkere
      ritme: vaste, kleinere gap, en niet geforceerd oprekken. */
   #screen-contacts{ flex:none; gap:18px; }
-  @keyframes screen-in{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes screen-in{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  /* Berichten is geen tab naast de andere, maar voelt aan als "inzoomen"
+     op één gesprek (heeft ook een eigen terugknop) — net als WhatsApp komt
+     dat scherm daarom vanaf rechts aanschuiven i.p.v. alleen op te lichten. */
+  @keyframes screen-in-slide{ from{ opacity:0; transform:translateX(32px); } to{ opacity:1; transform:translateX(0); } }
+  body.messages-open #screen-messages{ animation:screen-in-slide .3s cubic-bezier(0.16,1,0.3,1); }
   @media (prefers-reduced-motion:reduce){ .screen{ animation:none; } .slide-page{ transition:none; } }
 
   /* ---------- Tastbare tik-feedback (natuurlijker appgevoel) ---------- */
@@ -3575,9 +3584,16 @@
     // stille token-refresh terwijl iemand al in de app aan het werk is.
     if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') switchScreen('alarm');
 
-    const { data: profile } = await sb.from('profiles')
-      .select('first_name, last_name, full_name, username, avatar_url, phone_number, language')
-      .eq('id', currentSession.user.id).single();
+    // Profiel, groep-id, contacten en meldingen zijn onderling onafhankelijk
+    // (elk alleen gescopet op de ingelogde gebruiker) — tegelijk ophalen
+    // i.p.v. vier keer na elkaar scheelt meteen bij het opstarten van de
+    // app meerdere hele netwerk-rondjes.
+    const [{ data: profile }] = await Promise.all([
+      sb.from('profiles').select('first_name, last_name, full_name, username, avatar_url, phone_number, language').eq('id', currentSession.user.id).single(),
+      loadMyGroupId(),
+      refreshContacts(),
+      refreshNotifications()
+    ]);
     currentProfile = profile || { full_name: 'Onbekende gebruiker', username: '—' };
     renderProfile();
 
@@ -3591,14 +3607,14 @@
       renderLanguagePicker();
     }
 
-    await loadMyGroupId();
-    await refreshContacts();
-    await refreshNotifications();
     subscribeRealtime();
     subscribePresence();
     maybeShowIosInstallHint();
     maybeShowMedicalInfoHint();
-    await setupPush();
+    // Niet meer awaiten: dit kan wachten op een native toestemmingsdialoog
+    // van de browser, en de rest van het opstarten (deep links, onboarding,
+    // locatie) hoeft daar niet op te wachten.
+    setupPush();
     maybeOpenChatFromUrl();
     maybeHandleOmwFromUrl();
     maybeHandleInviteFromUrl();
@@ -4782,11 +4798,17 @@
   function chatBubbleHtml(msg, showMeta){
     const own = msg.sender_id === currentSession.user.id;
     const time = new Date(msg.created_at).toLocaleTimeString(localeTag(), { hour:'2-digit', minute:'2-digit' });
-    const media = !msg.media_url ? '' : (msg.media_type === 'video'
-      ? '<div class="chat-video-wrap"><video src="' + escapeHtml(msg.media_url) + '" class="chat-media chat-video" playsinline preload="metadata"></video>' +
+    // media_url mag ontbreken terwijl media_path er wél is — dan is de
+    // getekende URL nog niet opgehaald (zie openMessages: berichten
+    // renderen meteen met tekst, foto/video-URL's volgen op de achtergrond
+    // via data-media-path, zodat tekst nooit hoeft te wachten op media).
+    const srcAttr = msg.media_url ? ' src="' + escapeHtml(msg.media_url) + '"' : '';
+    const pathAttr = msg.media_path ? ' data-media-path="' + escapeHtml(msg.media_path) + '"' : '';
+    const media = !msg.media_path ? '' : (msg.media_type === 'video'
+      ? '<div class="chat-video-wrap"><video' + srcAttr + pathAttr + ' class="chat-media chat-video" playsinline preload="metadata"></video>' +
         '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span>' +
         '<span class="chat-video-duration"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4Z"/></svg><span class="chat-video-duration-text"></span></span></div>'
-      : '<img src="' + escapeHtml(msg.media_url) + '" class="chat-media" loading="lazy" alt="">');
+      : '<img' + srcAttr + pathAttr + ' class="chat-media" loading="lazy" alt="">');
     const ticks = own ? chatTicksHtml(msg.id) : '';
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
       (own ? '' : '<div class="who" style="color:' + chatNameColor(msg.sender_id) + ';">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
@@ -4820,6 +4842,11 @@
       : t('entry.noContacts');
   }
 
+  // Alle vier onafhankelijke query's tegelijk op de kabel i.p.v. na elkaar
+  // (was: leden+alarm, dan pas berichten, dan pas gelezen-vinkjes, dan pas
+  // media — vier hele netwerk-rondjes na elkaar) scheelt op een matige
+  // verbinding zomaar een paar honderd ms tot ruim een seconde bij het
+  // openen van Berichten, precies het moment waarop niemand wil wachten.
   async function openMessages(groupId){
     if (!groupId) return;
     currentChatGroupId = groupId;
@@ -4833,17 +4860,58 @@
     chatMessageById = {};
     chatReceiptsByMessageId = {};
 
-    const [{ data: members }, { data: alarmRow }] = await Promise.all([
+    const [{ data: members }, { data: alarmRow }, { data: messages }, { data: receiptRows }] = await Promise.all([
       sb.rpc('get_group_participants', { p_group_id: groupId }),
       sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
-        .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle()
+        .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle(),
+      sb.from('alarm_messages').select('*').eq('group_id', groupId).order('created_at', { ascending:true }).limit(200),
+      sb.from('message_receipts').select('message_id, user_id, delivered_at, read_at').eq('group_id', groupId)
     ]);
     chatParticipantById = {};
     (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at }; });
     renderChatHeader();
     handleActiveAlarmChanged(alarmRow);
 
-    await loadChatMessages(groupId);
+    const list = messages || [];
+    chatMessageById = {};
+    list.forEach(m => { chatMessageById[m.id] = m; });
+    chatReceiptsByMessageId = {};
+    (receiptRows || []).forEach(r => {
+      if (!chatReceiptsByMessageId[r.message_id]) chatReceiptsByMessageId[r.message_id] = {};
+      chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
+    });
+
+    // Meteen renderen met de tekst — een foto/video-URL vraagt nog een
+    // eigen rondje (getekende storage-URL) en volgt hierna op de
+    // achtergrond, zodat tekstberichten daar nooit op hoeven te wachten.
+    els.chatMessages.innerHTML = list.length
+      ? list.map((m, i) => {
+          const next = list[i + 1];
+          const showMeta = !next || next.sender_id !== m.sender_id;
+          return chatBubbleHtml({
+            ...m,
+            media_url: null,
+            senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
+            senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
+          }, showMeta);
+        }).join('')
+      : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
+    scrollChatToBottom();
+    requestAnimationFrame(scrollChatToBottom);
+    markIncomingMessagesSeen(list.filter(m => m.sender_id !== currentSession.user.id).map(m => m.id));
+
+    const mediaPaths = list.filter(m => m.media_path).map(m => m.media_path);
+    if (mediaPaths.length){
+      resolveMediaUrls(mediaPaths).then(urlByPath => {
+        els.chatMessages.querySelectorAll('[data-media-path]').forEach(el => {
+          el.addEventListener(el.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom);
+          const url = urlByPath[el.dataset.mediaPath];
+          if (url) el.src = url;
+        });
+        primeVideoPosters(els.chatMessages);
+      });
+    }
+
     subscribeChat(groupId);
   }
 
@@ -5219,44 +5287,6 @@
       markIncomingMessagesSeen(ids);
     }
   });
-
-  async function loadChatMessages(groupId){
-    const { data: messages } = await sb.from('alarm_messages').select('*')
-      .eq('group_id', groupId).order('created_at', { ascending:true }).limit(200);
-    const list = messages || [];
-    chatMessageById = {};
-    list.forEach(m => { chatMessageById[m.id] = m; });
-
-    const { data: receiptRows } = await sb.from('message_receipts')
-      .select('message_id, user_id, delivered_at, read_at').eq('group_id', groupId);
-    chatReceiptsByMessageId = {};
-    (receiptRows || []).forEach(r => {
-      if (!chatReceiptsByMessageId[r.message_id]) chatReceiptsByMessageId[r.message_id] = {};
-      chatReceiptsByMessageId[r.message_id][r.user_id] = { delivered_at: r.delivered_at, read_at: r.read_at };
-    });
-
-    const mediaUrlByPath = await resolveMediaUrls(list.filter(m => m.media_path).map(m => m.media_path));
-    els.chatMessages.innerHTML = list.length
-      ? list.map((m, i) => {
-          const next = list[i + 1];
-          const showMeta = !next || next.sender_id !== m.sender_id;
-          return chatBubbleHtml({
-            ...m,
-            media_url: m.media_path ? mediaUrlByPath[m.media_path] : null,
-            senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
-            senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
-          }, showMeta);
-        }).join('')
-      : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
-    scrollChatToBottom();
-    requestAnimationFrame(scrollChatToBottom);
-    els.chatMessages.querySelectorAll('.chat-media').forEach(el => {
-      el.addEventListener(el.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom);
-    });
-    primeVideoPosters(els.chatMessages);
-
-    markIncomingMessagesSeen(list.filter(m => m.sender_id !== currentSession.user.id).map(m => m.id));
-  }
 
   function subscribeChat(groupId){
     if (chatChannel){ sb.removeChannel(chatChannel); chatChannel = null; }
