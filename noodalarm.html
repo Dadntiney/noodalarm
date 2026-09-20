@@ -3156,6 +3156,10 @@
   const copyrightYearEl = document.getElementById('copyrightYear');
   if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
 
+  // Moet vóór applyTranslations() staan: renderCommunityUserCount() (function-
+  // declaration, gehoist) leest deze variabele; anders TDZ-crash bij start.
+  let communityUserCount = null;
+
   applyTranslations();
   renderLanguagePicker();
   if (els.languageNlButton) els.languageNlButton.addEventListener('click', () => setLanguage('nl'));
@@ -4269,7 +4273,7 @@
   // Warm zinnetje onderaan Contacten met het echte totaal aantal
   // NORI-gebruikers. Alleen een getal — geen namen. Bron: RPC
   // public_user_count (systeemaccount @nori telt niet mee).
-  let communityUserCount = null;
+  // communityUserCount is eerder gedeclareerd (vóór applyTranslations).
   function renderCommunityUserCount(){
     if (!els.contactsCommunityNote) return;
     if (communityUserCount == null || !isFinite(communityUserCount) || communityUserCount < 1){
