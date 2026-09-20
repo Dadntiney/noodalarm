@@ -2792,17 +2792,20 @@
   const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
   const VOICE_MIC_BADGE_HTML = '<span class="voice-mic-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg></span>';
   function avatarInner(url){
-    // loading=lazy + decoding=async: onbelangrijk voor de handjevol avatars
-    // die altijd al zichtbaar zijn, maar scheelt echt bij een lange
-    // contacten-/berichtenlijst — de browser hoeft dan niet meteen alle
-    // (nog onzichtbare) avatar-afbeeldingen tegelijk te downloaden/decoderen.
+    // GEEN loading="lazy" (bewust teruggedraaid): deze lijsten worden vaak
+    // gevuld terwijl hun scherm nog verborgen staat (display:none) — de
+    // browser kan dan niet bepalen dat de afbeelding eigenlijk al
+    // zichtbaar wordt zodra het scherm opent, en stelde het laden daardoor
+    // enorm lang uit (alle avatars leken kapot/traag). decoding="async"
+    // blijft wel staan: dat stelt alleen het decoderen (niet de download)
+    // buiten de hoofdthread uit en heeft dat probleem niet.
     // escapeHtml is hier geen extra voorzichtigheid: dit rendert ook de
     // avatar_url van ANDERE gebruikers (contacten, zoekresultaten, chat,
     // meldingen) — zonder escapen zou iemand die kolom buiten de app-UI om
     // (rechtstreeks via de Supabase REST API, met zijn eigen geldige RLS-
     // rechten op zijn eigen profiel) op een HTML-payload kunnen zetten die
     // dan bij iedereen die zijn avatar ziet ongefilterd wordt uitgevoerd.
-    return url ? '<img src="' + escapeHtml(url) + '" alt="" loading="lazy" decoding="async">' : PERSON_ICON;
+    return url ? '<img src="' + escapeHtml(url) + '" alt="" decoding="async">' : PERSON_ICON;
   }
   function timeAgo(iso){
     const diffMs = Date.now() - new Date(iso).getTime();
