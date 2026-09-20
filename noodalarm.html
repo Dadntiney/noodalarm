@@ -847,16 +847,17 @@
   }
   .chat-bubble{ touch-action:pan-y; }
   .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
-  /* Avatar onderaan naast de bubbel (zoals WhatsApp), niet bovenaan. */
-  .chat-row{ display:flex; align-items:flex-end; gap:8px; max-width:100%; }
+  /* Avatar onderaan naast de bubbel (zoals WhatsApp), niet bovenaan.
+     Gap ruim genoeg zodat het puntje niet tegen de avatar plakt. */
+  .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
   .chat-row.has-tail{ margin-top:10px; }
   .chat-row.has-tail:first-child{ margin-top:0; }
   /* Vervolgberichten: geen avatar/naam (ruimte blijft gereserveerd). */
   .chat-row.grouped .avatar-wrap{ visibility:hidden; }
   .chat-row.grouped .who{ display:none; }
-  /* WhatsApp-bubbel: staartje linksonder (inkomend) / rechtsonder (eigen),
-     naadloos aansluitend op de bubbel — alleen bij .has-tail. */
+  /* WhatsApp-bubbel: staartje linksonder (inkomend) / rechtsonder (eigen).
+     Officiële WA-SVG (scaleY -1) + vaste overlapstrook → geen naad. */
   .chat-bubble{
     position:relative;
     max-width:78%;
@@ -865,20 +866,27 @@
     font-size:1.0625rem;
     line-height:1.45;
     overflow:visible;
+    --bubble-bg:var(--surface);
+    background:var(--bubble-bg);
   }
   /* Net als bij WhatsApp: een bubbel met een foto/video mag flink breder
      zijn dan een gewone tekstbubbel — media moet groot en duidelijk ogen,
      niet ingeklemd in dezelfde smalle breedte als een kort berichtje. */
   .chat-bubble:has(.chat-media),
   .chat-bubble:has(.chat-video-wrap){ max-width:90%; }
-  .chat-bubble.own{ background:var(--accent); color:#fff; }
+  .chat-bubble.own{
+    --bubble-bg:var(--accent);
+    background:var(--bubble-bg);
+    color:#fff;
+  }
   /* Geen schaduw op chatbubbels: die breekt het naadloze WhatsApp-staartje. */
-  .chat-bubble.other{ background:var(--surface); box-shadow:none; }
+  .chat-bubble.other{ box-shadow:none; }
   /* NORI-systeemberichten: warm & vriendelijk (zacht teal), geen rood —
      rood is voor alarm/gevaar en voelde hier te dreigend. Logo blijft
      het officiële NORI-beeldmerk in de avatar. */
   .chat-bubble.system{
-    background:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
+    --bubble-bg:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
+    background:var(--bubble-bg);
     box-shadow:none;
   }
   .chat-bubble.system .who{
@@ -907,34 +915,28 @@
     border:1.5px solid color-mix(in srgb, var(--nori-msg) 28%, var(--border-soft));
   }
   .avatar.nori-system-avatar img{ width:100%; height:100%; object-fit:cover; }
-  /* Staartje zit linksonder / rechtsonder → die hoek van de bubbel vlak. */
+  /* Hoek onder het staartje vlak; de SVG vormt de curve. */
   .chat-row.other.has-tail .chat-bubble{ border-bottom-left-radius:0; }
   .chat-row.own.has-tail .chat-bubble{ border-bottom-right-radius:0; }
+  /* Eén mask: officiële WA-puntje (8px) + 2px overlapstrook in de bubbel.
+     Zo is er geen haarlijn tussen puntje en bubbel. */
   .chat-row.has-tail .chat-bubble::before{
     content:"";
     position:absolute;
     bottom:0;
-    width:8px;
+    width:10px;
     height:13px;
     pointer-events:none;
     z-index:1;
+    background:var(--bubble-bg);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cg transform='matrix(1 0 0 -1 0 13)'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/g%3E%3Crect x='7' y='0' width='3' height='13'/%3E%3C/svg%3E") no-repeat left bottom / 100% 100%;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cg transform='matrix(1 0 0 -1 0 13)'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/g%3E%3Crect x='7' y='0' width='3' height='13'/%3E%3C/svg%3E") no-repeat left bottom / 100% 100%;
   }
-  /* Verticaal gespiegelde WhatsApp-staart (puntje wijst naar avatar onderaan).
-     1px overlap in de bubbel voorkomt een haarlijntje/naad bij subpixels. */
-  .chat-row.other.has-tail .chat-bubble::before{
-    left:-7px;
-    background:var(--surface);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 13H0V1.807l6.467 8.625C7.526 11.844 6.958 13 5.188 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 13H0V1.807l6.467 8.625C7.526 11.844 6.958 13 5.188 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
-  }
-  .chat-row.other.has-tail .chat-bubble.system::before{
-    background:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
-  }
+  .chat-row.other.has-tail .chat-bubble::before{ left:-8px; }
   .chat-row.own.has-tail .chat-bubble::before{
-    right:-7px;
-    background:var(--accent);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 13H8V1.807L1.533 10.432C.474 11.844 1.042 13 2.812 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 13H8V1.807L1.533 10.432C.474 11.844 1.042 13 2.812 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    right:-8px;
+    transform:scaleX(-1);
+    transform-origin:center;
   }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
