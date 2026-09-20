@@ -1184,6 +1184,22 @@
 
   /* ---------- Medische info-kaart ---------- */
   .medical-info-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--amber-soft); margin-bottom:14px; overflow:hidden; }
+  /* Reddingskaart: dominant bij alarm voor helpers — meteen open, groot, rustig. */
+  .medical-info-card.rescue-card{
+    border:2px solid color-mix(in srgb, var(--amber) 55%, var(--border));
+    background:color-mix(in srgb, var(--amber-soft) 85%, var(--surface));
+    box-shadow:0 8px 28px rgba(0,0,0,.12);
+    margin-bottom:16px;
+  }
+  .medical-info-card.rescue-card .medical-info-toggle{ padding:16px 18px; font-size:1.0625rem; pointer-events:none; }
+  .medical-info-card.rescue-card .medical-info-chevron{ display:none; }
+  .medical-info-card.rescue-card .medical-info-body{ padding:4px 18px 18px; gap:10px; }
+  .medical-info-card.rescue-card .medical-info-row{ font-size:1rem; line-height:1.45; }
+  .medical-info-card.rescue-card .medical-info-actions{ padding:14px 18px 4px; }
+  .medical-info-card.rescue-card .rescue-card-kicker{
+    display:block; font-size:0.75rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--amber); margin:0 0 4px; opacity:.95;
+  }
   .medical-info-toggle{
     width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
     background:none; border:none; padding:14px 16px; cursor:pointer; color:var(--text); font-size:0.96875rem; font-weight:700; text-align:left;
@@ -1202,20 +1218,33 @@
   .medical-info-row-warn strong{ display:block; margin-bottom:2px; }
   .medical-info-actions{ display:flex; gap:10px; flex-wrap:wrap; padding:12px 16px; }
 
-  /* ---------- "Wie heeft gereageerd" + escalatie ---------- */
+  /* ---------- Hulpteam tijdens alarm ---------- */
   .ack-status-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--surface); padding:14px 16px; margin-bottom:14px; }
-  .ack-status-card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
-  .ack-status-card-title{ font-weight:700; font-size:0.90625rem; color:var(--text-muted); }
+  .ack-status-card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .ack-status-card-title{ font-weight:800; font-size:1rem; color:var(--text); }
+  .ack-status-card-hint{ width:100%; margin:-2px 0 10px; font-size:0.875rem; color:var(--text-muted); line-height:1.4; }
   .ack-end-button{
     background:none; border:1.5px solid var(--danger); color:var(--danger); font-weight:700;
     font-size:0.8125rem; padding:8px 12px; border-radius:999px; cursor:pointer; flex-shrink:0;
   }
   .ack-end-button:hover{ background:rgba(239,68,68,.1); }
-  .ack-status-list{ display:flex; flex-wrap:wrap; gap:8px; }
-  .ack-pill{ display:inline-flex; align-items:center; gap:6px; font-size:0.8125rem; font-weight:600; padding:6px 10px; border-radius:999px; background:var(--surface-2); color:var(--text-muted); }
-  .ack-pill.acked{ color:var(--green); }
-  .ack-dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
-  .ack-pill.acked .ack-dot{ background:var(--green); }
+  .ack-omw-button{
+    width:100%; margin:4px 0 12px; border:none; border-radius:12px; padding:14px 16px;
+    background:var(--green); color:#fff; font-weight:800; font-size:1rem; cursor:pointer;
+  }
+  .ack-omw-button:disabled{ opacity:.55; cursor:default; }
+  .ack-omw-button.done{ background:color-mix(in srgb, var(--green) 22%, var(--surface-2)); color:var(--green); }
+  .ack-status-list{ display:flex; flex-direction:column; gap:8px; }
+  .ack-pill{
+    display:flex; align-items:center; gap:10px; font-size:0.90625rem; font-weight:600;
+    padding:10px 12px; border-radius:12px; background:var(--surface-2); color:var(--text-muted);
+  }
+  .ack-pill.acked{ color:var(--text); }
+  .ack-pill.coming{ color:var(--green); background:color-mix(in srgb, var(--green) 14%, var(--surface-2)); }
+  .ack-dot{ width:9px; height:9px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
+  .ack-pill.acked .ack-dot{ background:var(--accent); }
+  .ack-pill.coming .ack-dot{ background:var(--green); }
+  .ack-pill-status{ margin-left:auto; font-size:0.8125rem; font-weight:700; color:inherit; opacity:.85; }
   .escalation-banner{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border-soft); }
   .escalation-text{ margin:0 0 10px; font-weight:700; color:var(--danger); font-size:0.9375rem; }
   .escalation-actions{ display:flex; flex-direction:column; gap:8px; }
@@ -1225,6 +1254,10 @@
   }
   .escalation-call-button.emergency{ background:var(--danger); }
   .escalation-call-button.contact{ background:var(--accent); }
+
+  /* Check-in uitleg op profiel */
+  .check-in-block{ display:flex; flex-direction:column; gap:8px; padding:4px 0 2px; }
+  .check-in-block .settings-item-hint{ margin:0; }
 
   /* ---------- Onboarding (uitleg) ---------- */
   .onboarding-skip{
@@ -2130,6 +2163,23 @@
 
       <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.</div>
 
+      <!-- Reddingskaart eerst: helpers zien meteen wat ze moeten weten. -->
+      <div id="medicalInfoCard" class="medical-info-card rescue-card hidden">
+        <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
+        <div class="medical-info-actions">
+          <button type="button" id="ehboInstructionsButton" class="small-btn">🩹 EHBO-instructies</button>
+          <a href="tel:112" id="call112Button" class="small-btn danger">📞 Bel 112</a>
+        </div>
+        <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
+          <span>
+            <span class="rescue-card-kicker" id="rescueCardKicker">Reddingskaart</span>
+            <span id="medicalInfoToggleLabel">Alles wat helpers nu moeten weten over <strong id="medicalInfoName">—</strong></span>
+          </span>
+          <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="medicalInfoBody" class="medical-info-body hidden"></div>
+      </div>
+
       <div id="locationCard" class="location-card hidden">
         <div class="location-head">
           <span class="location-title">📍 Locatie van <strong id="locationName">—</strong></span>
@@ -2147,17 +2197,21 @@
         <button type="button" id="endAlarmFromLocationButton" class="location-end-button hidden">Alarm beëindigen</button>
       </div>
 
-      <div id="medicalInfoCard" class="medical-info-card hidden">
-        <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
-        <div class="medical-info-actions">
-          <button type="button" id="ehboInstructionsButton" class="small-btn">🩹 EHBO-instructies</button>
-          <a href="tel:112" id="call112Button" class="small-btn danger">📞 Bel 112</a>
+      <div id="ackStatusCard" class="ack-status-card hidden">
+        <div class="ack-status-card-head">
+          <span class="ack-status-card-title" id="ackStatusCardTitle">Hulpteam</span>
+          <button type="button" id="endAlarmFromChatButton" class="ack-end-button hidden">Alarm beëindigen</button>
         </div>
-        <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
-          <span>🩺 Medische info van <strong id="medicalInfoName">—</strong></span>
-          <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div id="medicalInfoBody" class="medical-info-body hidden"></div>
+        <p class="ack-status-card-hint" id="ackStatusCardHint">Zie live wie het alarm heeft gezien en wie eraan komt.</p>
+        <button type="button" id="ackOmwButton" class="ack-omw-button hidden">Ik kom eraan</button>
+        <div id="ackStatusList" class="ack-status-list"></div>
+        <div id="escalationBanner" class="escalation-banner hidden">
+          <p class="escalation-text">⚠️ Nog niemand heeft gereageerd.</p>
+          <div class="escalation-actions">
+            <a href="tel:112" class="escalation-call-button emergency">Bel 112</a>
+            <div id="escalationContactButtons"></div>
+          </div>
+        </div>
       </div>
 
       <div id="ehboOverlay" class="overlay hidden">
@@ -2171,21 +2225,6 @@
           <div id="ehboOverlayDisclaimer" class="auth-message warn">⚠️ Dit zijn algemene, standaard EHBO-stappen — geen persoonlijk medisch advies. Bel bij twijfel altijd 112.</div>
           <ol id="ehboStepsList" class="ehbo-steps"></ol>
           <a href="tel:112" class="save-button" style="text-align:center; text-decoration:none;">📞 Bel 112</a>
-        </div>
-      </div>
-
-      <div id="ackStatusCard" class="ack-status-card hidden">
-        <div class="ack-status-card-head">
-          <span class="ack-status-card-title">Jouw actieve alarm</span>
-          <button type="button" id="endAlarmFromChatButton" class="ack-end-button">Alarm beëindigen</button>
-        </div>
-        <div id="ackStatusList" class="ack-status-list"></div>
-        <div id="escalationBanner" class="escalation-banner hidden">
-          <p class="escalation-text">⚠️ Nog niemand heeft gereageerd.</p>
-          <div class="escalation-actions">
-            <a href="tel:112" class="escalation-call-button emergency">Bel 112</a>
-            <div id="escalationContactButtons"></div>
-          </div>
         </div>
       </div>
 
@@ -2276,6 +2315,23 @@
             <span class="settings-item-body"><span class="settings-link-label">Instellingen</span></span>
             <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
           </button>
+        </div>
+      </div>
+
+      <div class="settings-group-label" id="checkInGroupLabel" style="margin-top:24px;">Extra zorg (optioneel)</div>
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-row" style="align-items:flex-start;">
+            <div class="settings-item-body check-in-block">
+              <div class="settings-item-title" id="checkInTitle">Af en toe vragen of je er nog bent</div>
+              <p class="settings-item-hint" id="checkInHint">Standaard staat dit uit. Zet je het aan, dan vraagt NORI zo nu en dan vriendelijk of alles goed gaat (bijvoorbeeld via een melding). Reageer je een tijdje niet, dan krijgen je noodcontacten een zachte tip — geen paniekalarm. Handig als je wilt dat mensen meekijken wanneer je de app maanden niet opent. Je kunt dit altijd weer uitzetten.</p>
+            </div>
+            <div class="settings-item-control" style="padding-top:4px;">
+              <button type="button" id="checkInToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Af en toe vragen of je er nog bent">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2576,7 +2632,7 @@
     { sel: '#entriesCard h3', nl: 'Noodcontacten', en: 'Emergency contacts' },
     { sel: '#openMessagesFromSentButton', m: 'l', nl: 'Open Berichten', en: 'Open Messages' },
     { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
-    { sel: '.ack-status-card-title', nl: 'Jouw actieve alarm', en: 'Your active alarm' },
+    { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
     { sel: '#endAlarmFromChatButton', nl: 'Alarm beëindigen', en: 'End alarm' },
     { sel: '#endAlarmFromLocationButton', nl: 'Alarm beëindigen', en: 'End alarm' },
     { sel: '.note', m: 'l', nl: ' NORI. Alle rechten voorbehouden.', en: ' NORI. All rights reserved.' },
@@ -2595,7 +2651,15 @@
     { sel: '#contactsFilterEmpty', nl: 'Niemand gevonden in je contacten.', en: 'No one found in your contacts.' },
     { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
     { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
-    { sel: '#medicalInfoToggle > span', m: 'f', nl: '🩺 Medische info van ', en: '🩺 Medical info from ' },
+    { sel: '#rescueCardKicker', nl: 'Reddingskaart', en: 'Rescue card' },
+    { sel: '#medicalInfoToggleLabel', m: 'f', nl: 'Alles wat helpers nu moeten weten over ', en: 'Everything helpers need to know about ' },
+    { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
+    { sel: '#ackStatusCardHint', nl: 'Zie live wie het alarm heeft gezien en wie eraan komt.', en: 'See live who has seen the alarm and who is on the way.' },
+    { sel: '#ackOmwButton', nl: 'Ik kom eraan', en: 'I\'m on my way' },
+    { sel: '#checkInGroupLabel', nl: 'Extra zorg (optioneel)', en: 'Extra care (optional)' },
+    { sel: '#checkInTitle', nl: 'Af en toe vragen of je er nog bent', en: 'Occasionally ask if you\'re still okay' },
+    { sel: '#checkInHint', nl: 'Standaard staat dit uit. Zet je het aan, dan vraagt NORI zo nu en dan vriendelijk of alles goed gaat (bijvoorbeeld via een melding). Reageer je een tijdje niet, dan krijgen je noodcontacten een zachte tip — geen paniekalarm. Handig als je wilt dat mensen meekijken wanneer je de app maanden niet opent. Je kunt dit altijd weer uitzetten.', en: 'This is off by default. If you turn it on, NORI will occasionally ask kindly if everything is okay (for example with a notification). If you don\'t reply for a while, your emergency contacts get a gentle tip — not a panic alarm. Useful if you want people looking out when you don\'t open the app for months. You can turn it off anytime.' },
+    { sel: '#checkInToggle', attr: 'aria-label', nl: 'Af en toe vragen of je er nog bent', en: 'Occasionally ask if you\'re still okay' },
     { sel: '#ehboInstructionsButton', nl: '🩹 EHBO-instructies', en: '🩹 First aid instructions' },
     { sel: '#call112Button', nl: '📞 Bel 112', en: '📞 Call 112' },
     { sel: '#ehboOverlayTitle', nl: 'EHBO-instructies', en: 'First aid instructions' },
@@ -2678,6 +2742,19 @@
       'location.accuracy': '±{n} m nauwkeurig',
       'location.you': 'jou',
       'ack.responded': '{name} heeft gereageerd',
+      'ack.coming': 'Komt eraan',
+      'ack.seen': 'Heeft gezien',
+      'ack.waiting': 'Nog niet',
+      'ack.omwDone': 'Je komt eraan — bedankt',
+      'ack.titleActivator': 'Jouw hulpteam',
+      'ack.titleHelper': 'Hulpteam',
+      'ack.hintActivator': 'Zie live wie jouw alarm heeft gezien en wie eraan komt.',
+      'ack.hintHelper': 'Zie live wie eraan komt. Tik op “Ik kom eraan” zodat iedereen het ziet.',
+      'checkIn.promptTitle': 'Alles goed?',
+      'checkIn.promptBody': 'NORI checkt even of je er nog bent. Tik op “Ja, ik ben ok” — dan weten je noodcontacten dat alles goed is.',
+      'checkIn.promptYes': 'Ja, ik ben ok',
+      'checkIn.promptLater': 'Later',
+      'checkIn.saved': 'Fijn, genoteerd.',
       'ack.call': 'Bel {name}',
       'medical.resusYes': '✅ {name} mag gereanimeerd worden',
       'medical.resusNo': '⛔ {name} wil NIET gereanimeerd worden',
@@ -2810,6 +2887,19 @@
       'location.accuracy': '±{n} m accurate',
       'location.you': 'you',
       'ack.responded': '{name} has responded',
+      'ack.coming': 'On the way',
+      'ack.seen': 'Has seen it',
+      'ack.waiting': 'Not yet',
+      'ack.omwDone': 'You\'re on the way — thank you',
+      'ack.titleActivator': 'Your help team',
+      'ack.titleHelper': 'Help team',
+      'ack.hintActivator': 'See live who has seen your alarm and who is on the way.',
+      'ack.hintHelper': 'See live who is on the way. Tap “I\'m on my way” so everyone can see.',
+      'checkIn.promptTitle': 'Everything okay?',
+      'checkIn.promptBody': 'NORI is checking whether you\'re still okay. Tap “Yes, I\'m okay” — then your emergency contacts know all is well.',
+      'checkIn.promptYes': 'Yes, I\'m okay',
+      'checkIn.promptLater': 'Later',
+      'checkIn.saved': 'Noted — glad to hear it.',
       'ack.call': 'Call {name}',
       'medical.resusYes': '✅ {name} may be resuscitated',
       'medical.resusNo': '⛔ {name} does NOT want to be resuscitated',
@@ -3096,10 +3186,14 @@
     ehboCloseButton: document.getElementById('ehboCloseButton'),
     ehboStepsList: document.getElementById('ehboStepsList'),
     ackStatusCard: document.getElementById('ackStatusCard'),
+    ackStatusCardTitle: document.getElementById('ackStatusCardTitle'),
+    ackStatusCardHint: document.getElementById('ackStatusCardHint'),
+    ackOmwButton: document.getElementById('ackOmwButton'),
     ackStatusList: document.getElementById('ackStatusList'),
     endAlarmFromChatButton: document.getElementById('endAlarmFromChatButton'),
     escalationBanner: document.getElementById('escalationBanner'),
     escalationContactButtons: document.getElementById('escalationContactButtons'),
+    checkInToggle: document.getElementById('checkInToggle'),
 
     brandHomeButton: document.getElementById('brandHomeButton'),
     discreetToast: document.getElementById('discreetToast'),
@@ -3653,6 +3747,49 @@
   });
   renderLocationToggle();
 
+  /* -------- Check-in (optioneel, standaard uit) -------- */
+  const CHECK_IN_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000; // ~1 maand
+  function isCheckInEnabled(){
+    return !!(currentProfile && currentProfile.check_in_enabled);
+  }
+  function renderCheckInToggle(){
+    if (!els.checkInToggle) return;
+    const on = isCheckInEnabled();
+    els.checkInToggle.classList.toggle('on', on);
+    els.checkInToggle.setAttribute('aria-checked', String(on));
+  }
+  if (els.checkInToggle){
+    els.checkInToggle.addEventListener('click', async () => {
+      if (!currentSession) return;
+      const next = !isCheckInEnabled();
+      els.checkInToggle.disabled = true;
+      const patch = { check_in_enabled: next };
+      if (next && !currentProfile.check_in_at) patch.check_in_at = new Date().toISOString();
+      const { error } = await sb.from('profiles').update(patch).eq('id', currentSession.user.id);
+      els.checkInToggle.disabled = false;
+      if (error){
+        window.alert(error.message);
+        return;
+      }
+      currentProfile = { ...currentProfile, ...patch };
+      renderCheckInToggle();
+    });
+  }
+  async function confirmCheckInOk(){
+    if (!currentSession) return;
+    const now = new Date().toISOString();
+    await sb.from('profiles').update({ check_in_at: now }).eq('id', currentSession.user.id);
+    currentProfile = { ...currentProfile, check_in_at: now };
+    window.alert(t('checkIn.saved'));
+  }
+  function maybePromptCheckIn(){
+    if (!isCheckInEnabled()) return;
+    const last = currentProfile && currentProfile.check_in_at ? new Date(currentProfile.check_in_at).getTime() : 0;
+    if (last && (Date.now() - last) < CHECK_IN_INTERVAL_MS) return;
+    const yes = window.confirm(t('checkIn.promptBody'));
+    if (yes) confirmCheckInOk();
+  }
+
   /* =========================================================================
      Wachtwoord tonen/verbergen
      ========================================================================= */
@@ -3931,13 +4068,15 @@
     // i.p.v. vier keer na elkaar scheelt meteen bij het opstarten van de
     // app meerdere hele netwerk-rondjes.
     const [{ data: profile }] = await Promise.all([
-      sb.from('profiles').select('first_name, last_name, full_name, username, avatar_url, phone_number, language').eq('id', currentSession.user.id).single(),
+      sb.from('profiles').select('first_name, last_name, full_name, username, avatar_url, phone_number, language, check_in_enabled, check_in_at').eq('id', currentSession.user.id).single(),
       loadMyGroupId(),
       refreshContacts(),
       refreshNotifications()
     ]);
     currentProfile = profile || { full_name: 'Onbekende gebruiker', username: '—' };
     renderProfile();
+    renderCheckInToggle();
+    maybePromptCheckIn();
 
     // De taal die op het account staat is leidend zodra je bent ingelogd
     // (werkt zo ook mee op een ander toestel) — vóór het inloggen viel de
@@ -4005,7 +4144,8 @@
     if (!alarmId || !currentSession) return;
     const { data: alarmRow } = await sb.from('alarms').select('group_id').eq('id', alarmId).single();
     if (!alarmRow || !alarmRow.group_id) return;
-    await sb.from('notifications').update({ is_read: true })
+    const now = new Date().toISOString();
+    await sb.from('notifications').update({ is_read: true, omw_at: now })
       .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmId);
     const name = currentProfile ? currentProfile.full_name : t('conversation.someone');
     // Altijd in de EIGEN kring posten — de activator ziet 't via de
@@ -4014,6 +4154,7 @@
     if (myGroupId){
       await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
     }
+    if (ackWatcherAlarmId === alarmId) pollAckStatus(alarmId, ackWatcherCreatedAt);
     openMessages();
   }
   function maybeHandleOmwFromUrl(){
@@ -5569,8 +5710,15 @@
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
     renderLocationCard(alarmRow);
     renderMedicalInfoCard(alarmRow);
-    if (alarmRow && alarmRow.status === 'active' && !alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id){
-      startAckWatcher(alarmRow.id, alarmRow.created_at);
+    if (alarmRow && alarmRow.status === 'active' && !alarmRow.test_mode){
+      const isActivator = alarmRow.triggered_by === currentSession.user.id;
+      startAckWatcher(alarmRow.id, alarmRow.created_at, isActivator);
+      // Helper die het alarm-scherm opent: markeer als gezien (niet als “kom eraan”).
+      if (!isActivator){
+        sb.from('notifications').update({ is_read: true })
+          .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmRow.id)
+          .is('omw_at', null);
+      }
     } else {
       stopAckWatcher();
     }
@@ -5771,10 +5919,22 @@
     els.medicalInfoBody.innerHTML = rows.join('');
     els.medicalInfoCard.classList.remove('hidden');
   }
-  els.medicalInfoToggle.addEventListener('click', () => {
+  // Reddingskaart blijft tijdens alarm open (geen inklappen).
+  els.medicalInfoToggle.addEventListener('click', (ev) => {
+    if (els.medicalInfoCard.classList.contains('rescue-card') && els.medicalInfoCard.classList.contains('open')){
+      ev.preventDefault();
+      return;
+    }
     const open = els.medicalInfoCard.classList.toggle('open');
     els.medicalInfoBody.classList.toggle('hidden', !open);
   });
+
+  if (els.ackOmwButton){
+    els.ackOmwButton.addEventListener('click', () => {
+      if (!ackWatcherAlarmId || els.ackOmwButton.disabled) return;
+      handleOmw(ackWatcherAlarmId);
+    });
+  }
 
   // EHBO-instructies: algemene, standaard eerstehulpstappen — bewust geen
   // gepersonaliseerd medisch advies (dat zou buiten onze verantwoordelijkheid
@@ -5795,42 +5955,84 @@
     els.ehboCloseButton.addEventListener('click', () => els.ehboOverlay.classList.add('hidden'));
   }
 
-  /* -------- "Wie heeft gereageerd" + escalatie bij geen reactie -------- */
+  /* -------- Hulpteam live: wie heeft gezien / komt eraan -------- */
   const ESCALATION_TIMEOUT_MS = 2 * 60 * 1000;
   let ackWatcherTimer = null;
   let ackWatcherAlarmId = null;
+  let ackWatcherCreatedAt = null;
+  let ackWatcherIsActivator = false;
   let escalationTriggered = false;
 
   function stopAckWatcher(){
     if (ackWatcherTimer){ clearInterval(ackWatcherTimer); ackWatcherTimer = null; }
     ackWatcherAlarmId = null;
+    ackWatcherCreatedAt = null;
+    ackWatcherIsActivator = false;
     escalationTriggered = false;
     els.ackStatusCard.classList.add('hidden');
     els.escalationBanner.classList.add('hidden');
+    if (els.ackOmwButton) els.ackOmwButton.classList.add('hidden');
   }
 
   async function pollAckStatus(alarmId, createdAt){
-    const others = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
-    if (!others.length){ els.ackStatusCard.classList.add('hidden'); return; }
+    const me = currentSession.user.id;
+    const others = Object.keys(chatParticipantById).filter(id => id !== me && !isNoriSystemSender(id));
+    if (!others.length && ackWatcherIsActivator){ els.ackStatusCard.classList.add('hidden'); return; }
 
     const { data } = await sb.rpc('get_alarm_acknowledgments', { p_alarm_id: alarmId });
-    const ackByUser = {};
-    (data || []).forEach(r => { ackByUser[r.user_id] = r.is_read; });
+    const byUser = {};
+    (data || []).forEach(r => { byUser[r.user_id] = { is_read: !!r.is_read, omw_at: r.omw_at || null }; });
 
-    els.ackStatusList.innerHTML = others.map(id => {
-      const acked = !!ackByUser[id];
-      const name = chatParticipantById[id] ? chatParticipantById[id].full_name : 'Onbekend';
-      return '<span class="ack-pill' + (acked ? ' acked' : '') + '"><span class="ack-dot"></span>' + escapeHtml(acked ? t('ack.responded', { name }) : name) + '</span>';
+    const teamIds = ackWatcherIsActivator
+      ? others
+      : others; // helpers zien ook de rest van het team
+
+    els.ackStatusList.innerHTML = teamIds.map(id => {
+      const row = byUser[id] || {};
+      const coming = !!row.omw_at;
+      const seen = !!row.is_read;
+      const name = chatParticipantById[id] ? chatParticipantById[id].full_name : t('conversation.unknown');
+      const cls = coming ? ' coming' : (seen ? ' acked' : '');
+      const status = coming ? t('ack.coming') : (seen ? t('ack.seen') : t('ack.waiting'));
+      return '<div class="ack-pill' + cls + '"><span class="ack-dot"></span><span>' + escapeHtml(name) + '</span><span class="ack-pill-status">' + escapeHtml(status) + '</span></div>';
     }).join('');
+
+    // Titel / hint afhankelijk van rol
+    if (els.ackStatusCardTitle){
+      els.ackStatusCardTitle.textContent = ackWatcherIsActivator ? t('ack.titleActivator') : t('ack.titleHelper');
+    }
+    if (els.ackStatusCardHint){
+      els.ackStatusCardHint.textContent = ackWatcherIsActivator ? t('ack.hintActivator') : t('ack.hintHelper');
+    }
+
+    // Helper: knop “Ik kom eraan”
+    if (els.ackOmwButton){
+      const mine = byUser[me] || {};
+      const iAmHelper = !ackWatcherIsActivator;
+      els.ackOmwButton.classList.toggle('hidden', !iAmHelper);
+      if (iAmHelper){
+        const done = !!mine.omw_at;
+        els.ackOmwButton.disabled = done;
+        els.ackOmwButton.classList.toggle('done', done);
+        els.ackOmwButton.textContent = done ? t('ack.omwDone') : (currentLang === 'en' ? 'I\'m on my way' : 'Ik kom eraan');
+      }
+    }
+
+    els.endAlarmFromChatButton.classList.toggle('hidden', !ackWatcherIsActivator);
     els.ackStatusCard.classList.remove('hidden');
 
-    const anyAcked = others.some(id => ackByUser[id]);
-    const elapsed = Date.now() - new Date(createdAt).getTime();
-    if (!anyAcked && elapsed >= ESCALATION_TIMEOUT_MS){
-      showEscalationBanner(others);
-      if (!escalationTriggered){
-        escalationTriggered = true;
-        resendAlert(alarmId);
+    if (ackWatcherIsActivator){
+      const anyComing = others.some(id => byUser[id] && byUser[id].omw_at);
+      const anySeen = others.some(id => byUser[id] && byUser[id].is_read);
+      const elapsed = Date.now() - new Date(createdAt).getTime();
+      if (!anyComing && !anySeen && elapsed >= ESCALATION_TIMEOUT_MS){
+        showEscalationBanner(others);
+        if (!escalationTriggered){
+          escalationTriggered = true;
+          resendAlert(alarmId);
+        }
+      } else {
+        els.escalationBanner.classList.add('hidden');
       }
     } else {
       els.escalationBanner.classList.add('hidden');
@@ -5857,13 +6059,15 @@
     } catch (err){ /* stille poging — de belknoppen blijven hoe dan ook zichtbaar */ }
   }
 
-  function startAckWatcher(alarmId, createdAt){
-    if (ackWatcherAlarmId === alarmId) return;
+  function startAckWatcher(alarmId, createdAt, isActivator){
+    if (ackWatcherAlarmId === alarmId && ackWatcherIsActivator === !!isActivator) return;
     stopAckWatcher();
     ackWatcherAlarmId = alarmId;
+    ackWatcherCreatedAt = createdAt;
+    ackWatcherIsActivator = !!isActivator;
     escalationTriggered = false;
     pollAckStatus(alarmId, createdAt);
-    ackWatcherTimer = setInterval(() => pollAckStatus(alarmId, createdAt), 10000);
+    ackWatcherTimer = setInterval(() => pollAckStatus(alarmId, createdAt), 8000);
   }
 
   // Nominatim (OpenStreetMap) — gratis, geen API-sleutel nodig. Zet
