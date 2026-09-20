@@ -4367,7 +4367,13 @@
   async function refreshContacts(){
     const { data } = await sb.rpc('my_contacts');
     // NORI is een systeem-afzender, nooit een gewoon contact in de lijst.
-    myContactsData = (data || []).filter(c => !isNoriSystemSender(c.contact_id) && c.username !== 'nori');
+    // Alfabetisch op naam (NL), zodat je snel vindt wie je zoekt.
+    myContactsData = (data || [])
+      .filter(c => !isNoriSystemSender(c.contact_id) && c.username !== 'nori')
+      .sort((a, b) => {
+        const byName = (a.full_name || '').localeCompare(b.full_name || '', 'nl', { sensitivity: 'base' });
+        return byName || (a.username || '').localeCompare(b.username || '', 'nl', { sensitivity: 'base' });
+      });
     els.tabContactsCount.textContent = myContactsData.length > 0 ? '(' + myContactsData.length + ')' : '';
     els.tabContactsCount.classList.toggle('hidden', myContactsData.length === 0);
     const showFilter = myContactsData.length > CONTACTS_FILTER_MIN;
