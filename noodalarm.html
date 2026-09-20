@@ -3949,7 +3949,7 @@
      ========================================================================= */
   async function refreshNotifications(){
     const { data } = await sb.from('notifications')
-      .select('*, connection:related_connection_id(status, requester:requester_id(avatar_url))')
+      .select('*, connection:related_connection_id(status, requester:requester_id(avatar_url), target:target_id(avatar_url))')
       .order('created_at', { ascending:false }).limit(30);
     const items = data || [];
     const unread = items.filter(n => !n.is_read).length;
@@ -3963,9 +3963,14 @@
     els.notifEmpty.classList.toggle('hidden', items.length > 0);
     els.notifClearButton.classList.toggle('hidden', items.length === 0);
     els.notifList.innerHTML = items.map(n => {
-      const icon = n.type === 'connection_request' && n.connection && n.connection.requester
-        ? '<span class="avatar sm">' + avatarInner(n.connection.requester.avatar_url) + '</span>'
-        : (n.type === 'alarm' ? '🚨' : (n.type === 'connection_accepted' ? '✅' : (n.type === 'connection_rejected' ? '🙅' : '👋')));
+      // Bij een contactverzoek ben jij de ontvanger, dus toont het avatar van
+      // de aanvrager; bij een acceptatie/weigering ben jij juist de
+      // aanvrager, dus toont het avatar van degene die heeft gereageerd.
+      const isConnectionNotif = n.type === 'connection_request' || n.type === 'connection_accepted' || n.type === 'connection_rejected';
+      const connectionAvatarUrl = n.connection && (n.type === 'connection_request' ? n.connection.requester?.avatar_url : n.connection.target?.avatar_url);
+      const icon = isConnectionNotif && n.connection
+        ? '<span class="avatar sm">' + avatarInner(connectionAvatarUrl) + '</span>'
+        : (n.type === 'alarm' ? '🚨' : '👋');
       let actions = '';
       if (n.type === 'connection_request' && n.related_connection_id){
         const status = n.connection ? n.connection.status : 'pending';
