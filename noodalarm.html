@@ -4956,6 +4956,8 @@
   let currentChatGroupId = null; // blijft myGroupId zolang Berichten open is (compose-doel)
   let memberGroupIds = [];
   let chatOpenGen = 0;
+  let chatMemberSinceByGroup = {};
+  let chatVisibleContactIds = new Set();
   let editingMessageId = null;
   let activeMenuBubble = null;
 
@@ -4966,6 +4968,17 @@
   function unsubscribeChat(){
     chatChannels.forEach(ch => { try { sb.removeChannel(ch); } catch (e){ /* ignore */ } });
     chatChannels = [];
+  }
+
+  // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
+  // Danny geen berichten van Kees die toevallig in Jans kring staan.
+  function shouldShowChatMessage(msg){
+    if (!msg || !currentSession) return false;
+    if (msg.sender_id === currentSession.user.id) return true;
+    if (!chatVisibleContactIds.has(msg.sender_id)) return false;
+    const since = chatMemberSinceByGroup[msg.group_id];
+    if (since && new Date(msg.created_at) < new Date(since)) return false;
+    return true;
   }
 
   const CHAT_NAME_COLOR_COUNT = 6;
@@ -5248,8 +5261,10 @@
     els.chatHeaderSub.textContent = t('chat.headerSub');
   }
 
-  // Samengevoegde tijdlijn: berichten uit alle groepen waar jij lid van bent.
-  // Versturen (elders) gaat altijd naar myGroupId.
+  // Samengevoegde tijdlijn: berichten van jou + je contacten, uit alle
+  // groepen waar jij lid van bent. Versturen gaat altijd naar myGroupId.
+  // Geen lek: berichten van iemand die JIJ niet als contact hebt (bijv.
+  // Kees in Jans kring) blijven hier onzichtbaar.
   async function openMessages(){
     const gen = ++chatOpenGen;
     if (!myGroupId) await loadMyGroupId();
@@ -5265,17 +5280,21 @@
     chatMessageById = {};
     chatReceiptsByMessageId = {};
 
+    // Contactenlijst is de bron van "wie hoort bij MIJN kring" — ook voor
+    // het filteren van de samengevoegde tijdlijn.
+    await refreshContacts();
+    if (gen !== chatOpenGen) return;
+    chatVisibleContactIds = new Set((myContactsData || []).map(c => c.contact_id));
+
     const { data: memberships } = await sb.from('alarm_group_members')
       .select('group_id, added_at')
       .eq('user_id', currentSession.user.id);
     if (gen !== chatOpenGen) return;
     memberGroupIds = (memberships || []).map(m => m.group_id).filter(Boolean);
     if (myGroupId && memberGroupIds.indexOf(myGroupId) === -1) memberGroupIds.push(myGroupId);
-    // Per groep: vanaf wanneer jij lid werd — oudere berichten hoor je niet
-    // te zien (nieuwe contacten starten schoon).
-    const memberSinceByGroup = {};
+    chatMemberSinceByGroup = {};
     (memberships || []).forEach(m => {
-      if (m.group_id) memberSinceByGroup[m.group_id] = m.added_at || null;
+      if (m.group_id) chatMemberSinceByGroup[m.group_id] = m.added_at || null;
     });
 
     if (!memberGroupIds.length){
@@ -5287,9 +5306,12 @@
       return;
     }
 
-    const participantPromises = memberGroupIds.map(gid => sb.rpc('get_group_participants', { p_group_id: gid }));
-    const [participantResults, { data: alarmRow }, { data: messages }, { data: receiptRows }] = await Promise.all([
-      Promise.all(participantPromises),
+    // Deelnemers voor facepile + vinkjes = jouw eigen kring (niet iedereen
+    // uit andermans groepen, anders verschijnt Kees in jouw facepile).
+    const [{ data: myMembers }, { data: alarmRow }, { data: messages }, { data: receiptRows }] = await Promise.all([
+      myGroupId
+        ? sb.rpc('get_group_participants', { p_group_id: myGroupId })
+        : Promise.resolve({ data: [] }),
       sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
         .in('group_id', memberGroupIds).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle(),
       sb.from('alarm_messages').select('*').in('group_id', memberGroupIds).order('created_at', { ascending:true }).limit(300),
@@ -5298,19 +5320,26 @@
     if (gen !== chatOpenGen) return;
 
     chatParticipantById = {};
-    participantResults.forEach(res => {
-      (res.data || []).forEach(m => {
-        chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at };
-      });
+    (myMembers || []).forEach(m => {
+      chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at };
+    });
+    // Contacten die we uit hun eigen groep-berichten tonen, moeten ook een
+    // naam/avatar hebben — ook als get_group_participants ze (nog) niet gaf.
+    (myContactsData || []).forEach(c => {
+      if (!chatParticipantById[c.contact_id]){
+        chatParticipantById[c.contact_id] = { full_name: c.full_name, avatar_url: c.avatar_url, phone_number: c.phone_number || null, added_at: null };
+      }
     });
     renderChatHeader();
-    handleActiveAlarmChanged(alarmRow);
 
-    const list = (messages || []).filter(m => {
-      const since = memberSinceByGroup[m.group_id];
-      if (!since) return true; // eigen groep zonder lid-rij, of onbekend — toon
-      return new Date(m.created_at) >= new Date(since);
-    });
+    // Locatiekaart alleen voor alarm van jezelf of een bevestigd contact.
+    let visibleAlarm = alarmRow;
+    if (visibleAlarm && visibleAlarm.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visibleAlarm.triggered_by)){
+      visibleAlarm = null;
+    }
+    handleActiveAlarmChanged(visibleAlarm);
+
+    const list = (messages || []).filter(shouldShowChatMessage);
     chatMessageById = {};
     list.forEach(m => { chatMessageById[m.id] = m; });
     chatReceiptsByMessageId = {};
@@ -5759,6 +5788,7 @@
     function onMessageInsert(payload){
       const msg = payload.new;
       if (!msg || chatMessageById[msg.id]) return;
+      if (!shouldShowChatMessage(msg)) return;
       (async () => {
         chatMessageById[msg.id] = msg;
         let participant = chatParticipantById[msg.sender_id];
@@ -5838,17 +5868,25 @@
     async function onAlarmChange(payload){
       const row = payload.new;
       if (row && row.status === 'active'){
+        // Geen locatiekaart voor iemand die jij niet als contact hebt.
+        if (row.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(row.triggered_by)){
+          return;
+        }
         handleActiveAlarmChanged(row);
         return;
       }
       // Alarm beëindigd: kijk of er elders in jouw kringen nog een actief
-      // alarm loopt voordat je de kaarten weghaalt.
+      // alarm loopt van jou of een contact voordat je de kaarten weghaalt.
       if (!memberGroupIds.length){ handleActiveAlarmChanged(null); return; }
       const { data } = await sb.from('alarms')
         .select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
         .in('group_id', memberGroupIds).eq('status', 'active')
         .order('created_at', { ascending:false }).limit(1).maybeSingle();
-      handleActiveAlarmChanged(data || null);
+      let visible = data || null;
+      if (visible && visible.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visible.triggered_by)){
+        visible = null;
+      }
+      handleActiveAlarmChanged(visible);
     }
 
     ids.forEach(groupId => {
