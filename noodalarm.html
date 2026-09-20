@@ -1545,6 +1545,11 @@
             <div class="field-hint" id="medicalBirthDateHint">Belangrijk voor de juiste medicatiedosering als je zelf niet kunt spreken.</div>
           </div>
           <div class="field">
+            <label for="medicalWeight">Gewicht (kg)</label>
+            <input type="number" id="medicalWeight" inputmode="decimal" min="0" max="300" step="0.1" placeholder="Bijv. 72">
+            <div class="field-hint" id="medicalWeightHint">Ook belangrijk voor de juiste medicatiedosering.</div>
+          </div>
+          <div class="field">
             <label for="medicalAllergies">Allergieën</label>
             <input type="text" id="medicalAllergies" placeholder="Bijv. penicilline">
             <div class="field-hint" id="medicalAllergiesHint">Iets waar je ziek van wordt, zoals een medicijn of eten.</div>
@@ -2320,6 +2325,9 @@
     { sel: '#advanceDirectiveHint', nl: 'Helemaal jouw keuze — alleen tekst, geen documenten nodig.', en: 'Entirely your choice — text only, no documents needed.' },
     { sel: 'label[for="medicalBirthDate"]', nl: 'Geboortedatum', en: 'Date of birth' },
     { sel: '#medicalBirthDateHint', nl: 'Belangrijk voor de juiste medicatiedosering als je zelf niet kunt spreken.', en: 'Important for correct medication dosing if you can\'t speak for yourself.' },
+    { sel: 'label[for="medicalWeight"]', nl: 'Gewicht (kg)', en: 'Weight (kg)' },
+    { sel: '#medicalWeight', attr: 'placeholder', nl: 'Bijv. 72', en: 'E.g. 72' },
+    { sel: '#medicalWeightHint', nl: 'Ook belangrijk voor de juiste medicatiedosering.', en: 'Also important for correct medication dosing.' },
     { sel: 'label[for="medicalAllergies"]', nl: 'Allergieën', en: 'Allergies' },
     { sel: '#medicalAllergies', attr: 'placeholder', nl: 'Bijv. penicilline', en: 'E.g. penicillin' },
     { sel: '#medicalAllergiesHint', nl: 'Iets waar je ziek van wordt, zoals een medicijn of eten.', en: 'Something that makes you ill, like a medicine or a food.' },
@@ -2556,6 +2564,7 @@
       'medical.advanceDirective': 'Speciale wensen:',
       'medical.birthDate': 'Geboren:',
       'medical.yearsOld': '{n} jaar',
+      'medical.weight': 'Gewicht:',
       'medical.pacemaker': '⚠️ Heeft een pacemaker/ICD',
       'medical.pregnant': '⚠️ Is zwanger',
       'medical.allergies': 'Allergieën:',
@@ -2679,6 +2688,7 @@
       'medical.advanceDirective': 'Special wishes:',
       'medical.birthDate': 'Born:',
       'medical.yearsOld': '{n} years old',
+      'medical.weight': 'Weight:',
       'medical.pacemaker': '⚠️ Has a pacemaker/ICD',
       'medical.pregnant': '⚠️ Is pregnant',
       'medical.allergies': 'Allergies:',
@@ -3035,6 +3045,7 @@
     medicalAdvanceDirective: document.getElementById('medicalAdvanceDirective'),
     mobilitySegmented: document.getElementById('mobilitySegmented'),
     medicalBirthDate: document.getElementById('medicalBirthDate'),
+    medicalWeight: document.getElementById('medicalWeight'),
     medicalAllergies: document.getElementById('medicalAllergies'),
     medicalMedications: document.getElementById('medicalMedications'),
     medicalConditions: document.getElementById('medicalConditions'),
@@ -4412,6 +4423,7 @@
     setMobilitySelection(data?.mobility || null);
     els.medicalAdvanceDirective.value = data?.advance_directive || '';
     els.medicalBirthDate.value = data?.birth_date || '';
+    els.medicalWeight.value = data?.weight_kg ?? '';
     els.medicalAllergies.value = data?.allergies || '';
     els.medicalMedications.value = data?.medications || '';
     els.medicalConditions.value = data?.conditions || '';
@@ -4441,6 +4453,7 @@
       mobility: getMobilitySelection(),
       advance_directive: els.medicalAdvanceDirective.value.trim() || null,
       birth_date: els.medicalBirthDate.value || null,
+      weight_kg: els.medicalWeight.value !== '' ? Number(els.medicalWeight.value) : null,
       allergies: els.medicalAllergies.value.trim() || null,
       medications: els.medicalMedications.value.trim() || null,
       conditions: els.medicalConditions.value.trim() || null,
@@ -5436,7 +5449,7 @@
     const hasResus = info && typeof info.resuscitate === 'boolean';
     const hasAny = (info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
       || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital
-      || info.birth_date || info.pacemaker_icd || info.pregnant))
+      || info.birth_date || info.weight_kg || info.pacemaker_icd || info.pregnant))
       || (practical && practical.spare_key_location);
     els.medicalInfoToggle.classList.toggle('hidden', !hasAny);
     if (!hasAny){
@@ -5486,6 +5499,7 @@
       const ageLabel = medicalAgeLabel(medical.birth_date);
       rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.birthDate')) + '</strong> ' + escapeHtml(dateLabel + (ageLabel ? ' (' + ageLabel + ')' : '')) + '</div>');
     }
+    if (medical.weight_kg) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.weight')) + '</strong> ' + escapeHtml(medical.weight_kg + ' kg') + '</div>');
     if (mobilityLabel) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.mobility')) + '</strong> ' + escapeHtml(mobilityLabel) + '</div>');
     if (medical.contact1_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact1')) + '</strong> ' + escapeHtml(contact1) + '</div>');
     if (medical.contact2_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact2')) + '</strong> ' + escapeHtml(contact2) + '</div>');
@@ -6425,11 +6439,11 @@
       return;
     }
     const { data } = await sb.from('medical_info')
-      .select('allergies, medications, conditions, doctor_name, doctor_phone, notes, mobility, advance_directive, contact1_name, contact2_name, hospital, birth_date, pacemaker_icd, pregnant')
+      .select('allergies, medications, conditions, doctor_name, doctor_phone, notes, mobility, advance_directive, contact1_name, contact2_name, hospital, birth_date, weight_kg, pacemaker_icd, pregnant')
       .eq('user_id', currentSession.user.id).maybeSingle();
     const hasAny = data && (data.allergies || data.medications || data.conditions || data.doctor_name || data.doctor_phone || data.notes
       || data.mobility || data.advance_directive || data.contact1_name || data.contact2_name || data.hospital
-      || data.birth_date || data.pacemaker_icd || data.pregnant);
+      || data.birth_date || data.weight_kg || data.pacemaker_icd || data.pregnant);
     els.medicalInfoHint.classList.toggle('hidden', !!hasAny);
   }
   if (els.medicalInfoHintButton){
