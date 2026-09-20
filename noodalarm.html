@@ -5087,7 +5087,8 @@
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
   // NORI is een uitzondering: vast systeem-afzender, zichtbaar in je eigen
   // kring-groep (niet via andermans groepen, anders zie je dezelfde update
-  // meerdere keren).
+  // meerdere keren). Welkomstbericht bij signup komt uit de DB-trigger
+  // create_personal_alarm_group — nooit opnieuw aanmaken in de frontend.
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
     if (isNoriSystemSender(msg.sender_id)){
