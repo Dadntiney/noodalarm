@@ -847,15 +847,16 @@
   }
   .chat-bubble{ touch-action:pan-y; }
   .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
-  .chat-row{ display:flex; align-items:flex-start; gap:8px; max-width:100%; }
+  /* Avatar onderaan naast de bubbel (zoals WhatsApp), niet bovenaan. */
+  .chat-row{ display:flex; align-items:flex-end; gap:8px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
   .chat-row.has-tail{ margin-top:10px; }
   .chat-row.has-tail:first-child{ margin-top:0; }
-  .chat-row .avatar{ margin-top:2px; }
   /* Vervolgberichten: geen avatar/naam (ruimte blijft gereserveerd). */
   .chat-row.grouped .avatar-wrap{ visibility:hidden; }
   .chat-row.grouped .who{ display:none; }
-  /* WhatsApp-achtige bubbel + staartje naar de avatar (alleen .has-tail). */
+  /* WhatsApp-bubbel: staartje linksonder (inkomend) / rechtsonder (eigen),
+     naadloos aansluitend op de bubbel — alleen bij .has-tail. */
   .chat-bubble{
     position:relative;
     max-width:78%;
@@ -905,22 +906,24 @@
     border:1.5px solid color-mix(in srgb, var(--nori-msg) 28%, var(--border-soft));
   }
   .avatar.nori-system-avatar img{ width:100%; height:100%; object-fit:cover; }
-  .chat-row.other.has-tail .chat-bubble{ border-top-left-radius:0; }
-  .chat-row.own.has-tail .chat-bubble{ border-top-right-radius:0; }
+  /* Staartje zit linksonder / rechtsonder → die hoek van de bubbel vlak. */
+  .chat-row.other.has-tail .chat-bubble{ border-bottom-left-radius:0; }
+  .chat-row.own.has-tail .chat-bubble{ border-bottom-right-radius:0; }
   .chat-row.has-tail .chat-bubble::before{
     content:"";
     position:absolute;
-    top:0;
+    bottom:0;
     width:8px;
     height:13px;
     pointer-events:none;
     z-index:1;
   }
+  /* Verticaal gespiegelde WhatsApp-staart (puntje wijst naar avatar onderaan). */
   .chat-row.other.has-tail .chat-bubble::before{
     left:-8px;
     background:var(--surface);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 13H0V1.807l6.467 8.625C7.526 11.844 6.958 13 5.188 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 13H0V1.807l6.467 8.625C7.526 11.844 6.958 13 5.188 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
   }
   .chat-row.other.has-tail .chat-bubble.system::before{
     background:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
@@ -928,8 +931,8 @@
   .chat-row.own.has-tail .chat-bubble::before{
     right:-8px;
     background:var(--accent);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 0H8v11.193L1.533 2.568C.474 1.156 1.042 0 2.812 0z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 13H8V1.807L1.533 10.432C.474 11.844 1.042 13 2.812 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 13H8V1.807L1.533 10.432C.474 11.844 1.042 13 2.812 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
   }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
@@ -947,10 +950,7 @@
     margin:-8px -12px -8px -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
     border-radius:7.5px 7.5px 0 0;
   }
-  .chat-row.other.has-tail .chat-media,
-  .chat-row.other.has-tail .chat-video-wrap{ border-top-left-radius:0; }
-  .chat-row.own.has-tail .chat-media,
-  .chat-row.own.has-tail .chat-video-wrap{ border-top-right-radius:0; }
+  /* Staart zit onderaan: media bovenaan houdt gewone afronding. */
   img.chat-media{ cursor:pointer; }
   .chat-video-wrap{ position:relative; margin:-8px -12px 6px -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px 7.5px 0 0; overflow:hidden; }
   .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
@@ -6041,13 +6041,16 @@
       delete chatReceiptsByMessageId[id];
       const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + id + '"]');
       if (row){
-        const prevSib = row.previousElementSibling;
+        const nextSib = row.nextElementSibling;
+        const senderId = row.getAttribute('data-sender-id');
+        const wasFirst = row.classList.contains('has-tail');
         row.remove();
-        if (prevSib && prevSib.classList.contains('chat-row') && !prevSib.classList.contains('own')){
-          const nextOfPrev = prevSib.nextElementSibling;
-          const stillGrouped = nextOfPrev && nextOfPrev.classList.contains('chat-row') &&
-            nextOfPrev.getAttribute('data-sender-id') === prevSib.getAttribute('data-sender-id');
-          prevSib.classList.toggle('grouped', !!stillGrouped);
+        // Als het eerste bericht van een reeks weg is, erft het volgende
+        // bericht van dezelfde afzender avatar + staartje.
+        if (wasFirst && nextSib && nextSib.classList.contains('chat-row') &&
+            nextSib.getAttribute('data-sender-id') === senderId){
+          nextSib.classList.remove('grouped');
+          nextSib.classList.add('has-tail');
         }
       }
       if (!els.chatMessages.querySelector('.chat-row')){
