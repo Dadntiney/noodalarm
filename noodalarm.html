@@ -1467,6 +1467,8 @@
         <button type="submit" id="profileSaveButton" class="save-button">Wijzigingen opslaan</button>
       </form>
       <div id="profileMessage" class="auth-message hidden"></div>
+
+      <button type="button" id="deleteAccountButton" class="danger-button" style="margin-top:24px;">Account verwijderen</button>
     </div>
   </div>
 
@@ -1658,7 +1660,7 @@
       <p class="privacy-text" id="privacyBasisText">Voor gezondheidsgegevens vragen we uitdrukkelijke toestemming, die je apart geeft bij het invullen van je medische informatie. Voor je overige gegevens is de grondslag de uitvoering van de afspraak die je met het gebruik van NORI aangaat, of ons gerechtvaardigd belang om de app te laten werken.</p>
 
       <div class="settings-group-label" id="privacyRetentionGroupLabel" style="margin-top:26px;">Bewaartermijn</div>
-      <p class="privacy-text" id="privacyRetentionText">Zolang je een account hebt. Verwijder je je account, dan wordt alles direct en definitief verwijderd (Profiel → Account verwijderen).</p>
+      <p class="privacy-text" id="privacyRetentionText">Zolang je een account hebt. Verwijder je je account, dan wordt alles direct en definitief verwijderd (Profiel → Account → Account verwijderen).</p>
 
       <div class="settings-group-label" id="privacyStorageGroupLabel" style="margin-top:26px;">Waar het wordt opgeslagen</div>
       <p class="privacy-text" id="privacyStorageText">Bij Supabase, onze technische hostingpartij. Zij verwerken gegevens namens ons en mogen deze niet voor eigen doeleinden gebruiken.</p>
@@ -2148,8 +2150,6 @@
           <button type="button" id="profileLogoutButton" class="settings-item-signout">Uitloggen</button>
         </div>
       </div>
-
-      <button type="button" id="deleteAccountButton" class="danger-button" style="margin-top:24px;">Account verwijderen</button>
     </section>
 
   </section>
@@ -2336,7 +2336,7 @@
     { sel: '#privacyBasisGroupLabel', nl: 'Rechtsgrond', en: 'Legal basis' },
     { sel: '#privacyBasisText', nl: 'Voor gezondheidsgegevens vragen we uitdrukkelijke toestemming, die je apart geeft bij het invullen van je medische informatie. Voor je overige gegevens is de grondslag de uitvoering van de afspraak die je met het gebruik van NORI aangaat, of ons gerechtvaardigd belang om de app te laten werken.', en: 'For health information we ask for explicit consent, which you give separately when filling in your medical information. For your other data, the basis is performance of the arrangement you enter into by using NORI, or our legitimate interest in making the app work.' },
     { sel: '#privacyRetentionGroupLabel', nl: 'Bewaartermijn', en: 'Retention period' },
-    { sel: '#privacyRetentionText', nl: 'Zolang je een account hebt. Verwijder je je account, dan wordt alles direct en definitief verwijderd (Profiel → Account verwijderen).', en: 'For as long as you have an account. If you delete your account, everything is removed immediately and permanently (Profile → Delete account).' },
+    { sel: '#privacyRetentionText', nl: 'Zolang je een account hebt. Verwijder je je account, dan wordt alles direct en definitief verwijderd (Profiel → Account → Account verwijderen).', en: 'For as long as you have an account. If you delete your account, everything is removed immediately and permanently (Profile → Account → Delete account).' },
     { sel: '#privacyStorageGroupLabel', nl: 'Waar het wordt opgeslagen', en: 'Where it is stored' },
     { sel: '#privacyStorageText', nl: 'Bij Supabase, onze technische hostingpartij. Zij verwerken gegevens namens ons en mogen deze niet voor eigen doeleinden gebruiken.', en: 'At Supabase, our technical hosting partner. They process data on our behalf and may not use it for their own purposes.' },
     { sel: '#privacyRightsGroupLabel', nl: 'Jouw rechten', en: 'Your rights' },
