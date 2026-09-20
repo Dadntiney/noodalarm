@@ -2731,7 +2731,7 @@
       'contacts.add': '+ Toevoegen',
       'contacts.sentInvite': 'Uitnodiging verzonden',
       'contacts.connected': 'Verbonden',
-      'contacts.communityCount': 'Inmiddels maken al {n} mensen met plezier en in alle veiligheid gebruik van NORI.',
+      'contacts.communityNote': 'Met NORI blijf je verbonden met de mensen die belangrijk voor je zijn. Samen ben je er voor elkaar, wanneer dat nodig is.',
       'contacts.noriNotAddable': 'NORI is geen gewoon contact en kan niet worden toegevoegd.',
       'contacts.noriNotRemovable': 'NORI is een vast systeemcontact en kan niet worden verwijderd.',
       'errorPrefix.save': 'Opslaan mislukt: {msg}',
@@ -2863,7 +2863,7 @@
       'contacts.add': '+ Add',
       'contacts.sentInvite': 'Invite sent',
       'contacts.connected': 'Connected',
-      'contacts.communityCount': 'Already {n} people are using NORI safely and with joy.',
+      'contacts.communityNote': 'With NORI you stay connected to the people who matter to you. Together you\'re there for each other, when it\'s needed.',
       'contacts.noriNotAddable': 'NORI is not a regular contact and cannot be added.',
       'contacts.noriNotRemovable': 'NORI is a fixed system contact and cannot be removed.',
       'errorPrefix.save': 'Saving failed: {msg}',
@@ -3261,10 +3261,6 @@
 
   const copyrightYearEl = document.getElementById('copyrightYear');
   if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
-
-  // Moet vóór applyTranslations() staan: renderCommunityUserCount() (function-
-  // declaration, gehoist) leest deze variabele; anders TDZ-crash bij start.
-  let communityUserCount = null;
 
   applyTranslations();
   renderLanguagePicker();
@@ -4382,30 +4378,11 @@
     return myContactsData;
   }
 
-  // Warm zinnetje onderaan Contacten met het echte totaal aantal
-  // NORI-gebruikers. Alleen een getal — geen namen. Bron: RPC
-  // public_user_count (systeemaccount @nori telt niet mee).
-  // communityUserCount is eerder gedeclareerd (vóór applyTranslations).
+  // Warm zinnetje onderaan Contacten (vaste tekst).
   function renderCommunityUserCount(){
     if (!els.contactsCommunityNote) return;
-    if (communityUserCount == null || !isFinite(communityUserCount) || communityUserCount < 1){
-      els.contactsCommunityNote.classList.add('hidden');
-      els.contactsCommunityNote.textContent = '';
-      return;
-    }
-    const formatted = escapeHtml(Number(communityUserCount).toLocaleString(localeTag()));
-    els.contactsCommunityNote.innerHTML = t('contacts.communityCount', { n: '<strong>' + formatted + '</strong>' });
+    els.contactsCommunityNote.textContent = t('contacts.communityNote');
     els.contactsCommunityNote.classList.remove('hidden');
-  }
-  async function refreshCommunityUserCount(){
-    if (!els.contactsCommunityNote) return;
-    let count = null;
-    try {
-      const { data, error } = await sb.rpc('public_user_count');
-      if (!error && data != null && data !== '') count = Number(data);
-    } catch (err){ /* RPC kan nog ontbreken vóór migratie */ }
-    communityUserCount = (count != null && isFinite(count)) ? count : null;
-    renderCommunityUserCount();
   }
 
   async function removeContact(btn){
@@ -4526,7 +4503,7 @@
       if (els.addContactPanel) els.addContactPanel.classList.add('hidden');
       refreshContacts();
       refreshSentRequests();
-      refreshCommunityUserCount();
+      renderCommunityUserCount();
     }
   }
 
