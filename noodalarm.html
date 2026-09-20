@@ -3883,11 +3883,11 @@
     await sb.from('notifications').update({ is_read: true })
       .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmId);
     const name = currentProfile ? currentProfile.full_name : t('conversation.someone');
-    // Altijd in de EIGEN kring posten — de activator ziet 't via de
-    // samengevoegde tijdlijn (die is lid van jouw groep).
-    if (!myGroupId) await loadMyGroupId();
-    if (myGroupId){
-      await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
+    // In de groep van het alarm posten (meestal de activator), zodat het
+    // in diens groepschat verschijnt — niet in jouw eigen aparte groep.
+    const targetGroupId = alarmRow.group_id;
+    if (targetGroupId){
+      await sb.from('alarm_messages').insert({ group_id: targetGroupId, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
     }
     openMessages();
   }
@@ -4327,10 +4327,8 @@
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
-  // Berichten = altijd één scherm: jouw contactenkring. Versturen gaat
-  // altijd naar jouw eigen groep; berichten van contacten (die zij in
-  // HUN groep plaatsten) verschijnen in dezelfde tijdlijn omdat jij
-  // lid bent van hun groep. Geen gesprekkenlijst, geen 1-op-1.
+  // Berichten = één groepschat met je contacten. Geen privéchats,
+  // geen gesprekkenlijst, geen ontvanger kiezen.
   els.tabMessages.addEventListener('click', () => openMessages());
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
   els.chatBackButton.addEventListener('click', () => switchScreen('alarm'));
@@ -4946,18 +4944,24 @@
   }
 
   /* =========================================================================
-     BERICHTEN — één groepsgesprek met je bevestigde noodcontacten.
-     Versturen gaat altijd naar jouw eigen kring. Berichten die een contact
-     in ZIJN/HAAR kring plaatst, zie je hier ook (samengevoegde tijdlijn),
-     omdat jij lid bent van die groep — zonder dat diens andere contacten
-     jouw berichten zien. Geen gesprekkenlijst, geen 1-op-1.
+     BERICHTEN — één groepschat met je contactengroep.
+
+     Model: CONTACTEN = GROEPSLEDEN van jouw alarm_group. Geen privéchats,
+     geen gesprekkenlijst, geen ontvanger kiezen.
+
+     - Versturen: altijd naar jouw eigen groep (myGroupId). RLS laat
+       client-side alleen inserts in de eigen groep toe.
+     - Lezen: alle groepen waar jij lid van bent (jouw groep + groepen van
+       mensen die jou als contact hebben). Binnen zo'n groep ziet ieder
+       lid dezelfde berichten — contacten-van-contacten worden níet
+       automatisch lid, dus die lekken niet jouw groep in.
      ========================================================================= */
   let chatChannels = [];
-  let currentChatGroupId = null; // blijft myGroupId zolang Berichten open is (compose-doel)
+  let currentChatGroupId = null; // myGroupId zolang Berichten open is (compose)
   let memberGroupIds = [];
-  let chatOpenGen = 0;
   let chatMemberSinceByGroup = {};
-  let chatVisibleContactIds = new Set();
+  let chatHeaderMemberIds = new Set(); // facepile = leden van JOUW groep
+  let chatOpenGen = 0;
   let editingMessageId = null;
   let activeMenuBubble = null;
 
@@ -4970,12 +4974,9 @@
     chatChannels = [];
   }
 
-  // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
-  // Danny geen berichten van Kees die toevallig in Jans kring staan.
-  function shouldShowChatMessage(msg){
-    if (!msg || !currentSession) return false;
-    if (msg.sender_id === currentSession.user.id) return true;
-    if (!chatVisibleContactIds.has(msg.sender_id)) return false;
+  // Nieuw lid ziet geen berichten van vóór toetreding tot díé groep.
+  function isMessageVisibleForMembership(msg){
+    if (!msg) return false;
     const since = chatMemberSinceByGroup[msg.group_id];
     if (since && new Date(msg.created_at) < new Date(since)) return false;
     return true;
@@ -5253,18 +5254,19 @@
       (extra > 0 ? '<span class="avatar more">+' + extra + '</span>' : '');
   }
   function renderChatHeader(){
-    const others = Object.keys(chatParticipantById)
+    const others = [...chatHeaderMemberIds]
       .filter(id => id !== currentSession.user.id)
-      .map(id => chatParticipantById[id]);
+      .map(id => chatParticipantById[id])
+      .filter(Boolean);
     els.chatHeaderAvatar.innerHTML = chatHeaderFacepileHtml(others);
     els.chatHeaderTitle.textContent = t('chat.headerTitle');
     els.chatHeaderSub.textContent = t('chat.headerSub');
   }
 
-  // Samengevoegde tijdlijn: berichten van jou + je contacten, uit alle
-  // groepen waar jij lid van bent. Versturen gaat altijd naar myGroupId.
-  // Geen lek: berichten van iemand die JIJ niet als contact hebt (bijv.
-  // Kees in Jans kring) blijven hier onzichtbaar.
+  // Eén Berichten-scherm: chronologische tijdlijn van jouw contactengroep.
+  // Versturen → myGroupId. Lezen → alle groepen waar je lid van bent
+  // (zodat berichten die een contact in diens groep plaatst hier ook
+  // aankomen). Geen gesprekkenlijst, geen 1-op-1.
   async function openMessages(){
     const gen = ++chatOpenGen;
     if (!myGroupId) await loadMyGroupId();
@@ -5279,26 +5281,23 @@
     els.ackStatusCard.classList.add('hidden');
     chatMessageById = {};
     chatReceiptsByMessageId = {};
-
-    // Contactenlijst is de bron van "wie hoort bij MIJN kring" — ook voor
-    // het filteren van de samengevoegde tijdlijn.
-    await refreshContacts();
-    if (gen !== chatOpenGen) return;
-    chatVisibleContactIds = new Set((myContactsData || []).map(c => c.contact_id));
+    chatParticipantById = {};
+    chatHeaderMemberIds = new Set();
+    chatMemberSinceByGroup = {};
+    memberGroupIds = [];
 
     const { data: memberships } = await sb.from('alarm_group_members')
       .select('group_id, added_at')
       .eq('user_id', currentSession.user.id);
     if (gen !== chatOpenGen) return;
+
     memberGroupIds = (memberships || []).map(m => m.group_id).filter(Boolean);
     if (myGroupId && memberGroupIds.indexOf(myGroupId) === -1) memberGroupIds.push(myGroupId);
-    chatMemberSinceByGroup = {};
     (memberships || []).forEach(m => {
       if (m.group_id) chatMemberSinceByGroup[m.group_id] = m.added_at || null;
     });
 
     if (!memberGroupIds.length){
-      chatParticipantById = {};
       renderChatHeader();
       handleActiveAlarmChanged(null);
       els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
@@ -5306,8 +5305,6 @@
       return;
     }
 
-    // Deelnemers voor facepile + vinkjes = jouw eigen kring (niet iedereen
-    // uit andermans groepen, anders verschijnt Kees in jouw facepile).
     const [{ data: myMembers }, { data: alarmRow }, { data: messages }, { data: receiptRows }] = await Promise.all([
       myGroupId
         ? sb.rpc('get_group_participants', { p_group_id: myGroupId })
@@ -5319,27 +5316,25 @@
     ]);
     if (gen !== chatOpenGen) return;
 
-    chatParticipantById = {};
     (myMembers || []).forEach(m => {
       chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at };
-    });
-    // Contacten die we uit hun eigen groep-berichten tonen, moeten ook een
-    // naam/avatar hebben — ook als get_group_participants ze (nog) niet gaf.
-    (myContactsData || []).forEach(c => {
-      if (!chatParticipantById[c.contact_id]){
-        chatParticipantById[c.contact_id] = { full_name: c.full_name, avatar_url: c.avatar_url, phone_number: c.phone_number || null, added_at: null };
-      }
+      chatHeaderMemberIds.add(m.user_id);
     });
     renderChatHeader();
+    handleActiveAlarmChanged(alarmRow);
 
-    // Locatiekaart alleen voor alarm van jezelf of een bevestigd contact.
-    let visibleAlarm = alarmRow;
-    if (visibleAlarm && visibleAlarm.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visibleAlarm.triggered_by)){
-      visibleAlarm = null;
+    const list = (messages || []).filter(isMessageVisibleForMembership);
+    // Namen/avatars voor afzenders die niet in jouw facepile zitten
+    // (bijv. medeleden van een groep waar jij lid van bent).
+    const missingSenderIds = [...new Set(list.map(m => m.sender_id).filter(id => !chatParticipantById[id]))];
+    if (missingSenderIds.length){
+      const { data: profiles } = await sb.from('profiles').select('id, full_name, avatar_url, phone_number').in('id', missingSenderIds);
+      if (gen !== chatOpenGen) return;
+      (profiles || []).forEach(p => {
+        chatParticipantById[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url, phone_number: p.phone_number };
+      });
     }
-    handleActiveAlarmChanged(visibleAlarm);
 
-    const list = (messages || []).filter(shouldShowChatMessage);
     chatMessageById = {};
     list.forEach(m => { chatMessageById[m.id] = m; });
     chatReceiptsByMessageId = {};
@@ -5382,14 +5377,11 @@
     subscribeChat(memberGroupIds);
   }
 
-  // Alarmmeldingen openen gewoon het ene Berichten-scherm (samengevoegd).
   async function openChatByAlarm(alarmId){
     if (!alarmId) return;
     openMessages();
   }
 
-  // Locatie / medische info / escalatie hangen van een actief alarm af —
-  // compose is altijd aan (versturen = eigen kring).
   function handleActiveAlarmChanged(alarmRow){
     els.chatForm.classList.remove('hidden');
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
@@ -5788,7 +5780,7 @@
     function onMessageInsert(payload){
       const msg = payload.new;
       if (!msg || chatMessageById[msg.id]) return;
-      if (!shouldShowChatMessage(msg)) return;
+      if (!isMessageVisibleForMembership(msg)) return;
       (async () => {
         chatMessageById[msg.id] = msg;
         let participant = chatParticipantById[msg.sender_id];
@@ -5796,6 +5788,7 @@
           const { data: p } = await sb.from('profiles').select('full_name, avatar_url, phone_number').eq('id', msg.sender_id).single();
           participant = p ? { full_name: p.full_name, avatar_url: p.avatar_url, phone_number: p.phone_number } : { full_name: 'Onbekend', avatar_url: null, phone_number: null };
           chatParticipantById[msg.sender_id] = participant;
+          // Facepile blijft jouw contactengroep — geen auto-toevoeging.
         }
         let mediaUrl = null;
         if (msg.media_path){
@@ -5868,25 +5861,15 @@
     async function onAlarmChange(payload){
       const row = payload.new;
       if (row && row.status === 'active'){
-        // Geen locatiekaart voor iemand die jij niet als contact hebt.
-        if (row.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(row.triggered_by)){
-          return;
-        }
         handleActiveAlarmChanged(row);
         return;
       }
-      // Alarm beëindigd: kijk of er elders in jouw kringen nog een actief
-      // alarm loopt van jou of een contact voordat je de kaarten weghaalt.
       if (!memberGroupIds.length){ handleActiveAlarmChanged(null); return; }
       const { data } = await sb.from('alarms')
         .select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
         .in('group_id', memberGroupIds).eq('status', 'active')
         .order('created_at', { ascending:false }).limit(1).maybeSingle();
-      let visible = data || null;
-      if (visible && visible.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visible.triggered_by)){
-        visible = null;
-      }
-      handleActiveAlarmChanged(visible);
+      handleActiveAlarmChanged(data || null);
     }
 
     ids.forEach(groupId => {
@@ -6213,7 +6196,7 @@
     }
     els.chatInput.value = '';
     updateChatSendVoiceToggle();
-    await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body });
+    await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body: body });
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
   });
