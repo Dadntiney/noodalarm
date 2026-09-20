@@ -864,8 +864,7 @@
   }
   .chat-bubble{ touch-action:pan-y; }
   .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
-  /* Avatar onderaan naast de bubbel (zoals WhatsApp), niet bovenaan.
-     Gap ruim genoeg zodat het puntje niet tegen de avatar plakt. */
+  /* Avatar onderaan naast de bubbel; geen praatballon-puntje. */
   .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
   .chat-row.has-tail{ margin-top:10px; }
@@ -873,8 +872,6 @@
   /* Vervolgberichten: geen avatar/naam (ruimte blijft gereserveerd). */
   .chat-row.grouped .avatar-wrap{ visibility:hidden; }
   .chat-row.grouped .who{ display:none; }
-  /* WhatsApp-bubbel: staartje linksonder (inkomend) / rechtsonder (eigen).
-     Officiële WA-SVG (scaleY -1) + vaste overlapstrook → geen naad. */
   .chat-bubble{
     position:relative;
     max-width:78%;
@@ -896,7 +893,6 @@
     background:var(--bubble-bg);
     color:#fff;
   }
-  /* Geen schaduw op chatbubbels: die breekt het naadloze WhatsApp-staartje. */
   .chat-bubble.other{ box-shadow:none; }
   /* NORI-systeemberichten: warm & vriendelijk (zacht teal), geen rood —
      rood is voor alarm/gevaar en voelde hier te dreigend. Logo blijft
@@ -932,29 +928,6 @@
     border:1.5px solid color-mix(in srgb, var(--nori-msg) 28%, var(--border-soft));
   }
   .avatar.nori-system-avatar img{ width:100%; height:100%; object-fit:cover; }
-  /* Hoek onder het staartje vlak; de SVG vormt de curve. */
-  .chat-row.other.has-tail .chat-bubble{ border-bottom-left-radius:0; }
-  .chat-row.own.has-tail .chat-bubble{ border-bottom-right-radius:0; }
-  /* Eén mask: officiële WA-puntje (8px) + 2px overlapstrook in de bubbel.
-     Zo is er geen haarlijn tussen puntje en bubbel. */
-  .chat-row.has-tail .chat-bubble::before{
-    content:"";
-    position:absolute;
-    bottom:0;
-    width:10px;
-    height:13px;
-    pointer-events:none;
-    z-index:1;
-    background:var(--bubble-bg);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cg transform='matrix(1 0 0 -1 0 13)'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/g%3E%3Crect x='7' y='0' width='3' height='13'/%3E%3C/svg%3E") no-repeat left bottom / 100% 100%;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 13'%3E%3Cg transform='matrix(1 0 0 -1 0 13)'%3E%3Cpath d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/g%3E%3Crect x='7' y='0' width='3' height='13'/%3E%3C/svg%3E") no-repeat left bottom / 100% 100%;
-  }
-  .chat-row.other.has-tail .chat-bubble::before{ left:-8px; }
-  .chat-row.own.has-tail .chat-bubble::before{
-    right:-8px;
-    transform:scaleX(-1);
-    transform-origin:center;
-  }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
   .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:0.75rem; white-space:nowrap; display:flex; align-items:center; gap:3px; }
@@ -964,14 +937,12 @@
   .tick-icon.read{ color:#6fd8ff; }
   .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
   /* Foto/video vult de bubbel tot aan de rand (negatieve margin cancelt
-     precies de padding van .chat-bubble). Ronding op de media zelf, zodat
-     overflow:visible op de bubbel het staartje niet afknipt. */
+     precies de padding van .chat-bubble). */
   .chat-media{
     display:block; max-height:380px;
     margin:-8px -12px -8px -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
     border-radius:7.5px 7.5px 0 0;
   }
-  /* Staart zit onderaan: media bovenaan houdt gewone afronding. */
   img.chat-media{ cursor:pointer; }
   .chat-video-wrap{ position:relative; margin:-8px -12px 6px -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px 7.5px 0 0; overflow:hidden; }
   .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
