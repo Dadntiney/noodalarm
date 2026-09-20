@@ -18,6 +18,9 @@ over app-updates. Daarom bestaat er een automatisch mechanisme:
   vriendelijk bericht en post dat in Danny's groepschat (alleen als er
   ook echt iets nieuws is — geen bericht op stille dagen). Zet daarna
   `announced_at` op die rijen.
+- Bron van de edge function staat in `supabase/functions/post-update-digest/`.
+  Secrets: `DIGEST_GROUP_ID`, `DIGEST_SENDER_ID` (+ service role). Het
+  bericht **moet** een niet-lege `body` hebben (`alarm_messages_body_check`).
 
 **Actiepunt voor mij (Claude), bij elke sessie waarin ik een
 gebruikers-zichtbare verbetering aan NORI uitlever**: voeg er zelf een
