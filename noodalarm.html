@@ -5599,6 +5599,37 @@
   });
 
   const CHAT_MEDIA_MAX_BYTES = 25 * 1024 * 1024;
+  // Een onbewerkte telefoonfoto is al snel een paar MB — in een
+  // noodsituatie moet iedereen 'm meteen kunnen zien, ook op een slechte
+  // verbinding. Daarom vóór het versturen altijd eerst verkleinen naar
+  // maximaal 1600px (ruim genoeg om details te herkennen) en comprimeren
+  // als JPEG, puur via canvas — geen zware library nodig, dus de app zelf
+  // blijft ook licht en snel. Als bijkomend voordeel: een HEIC-foto
+  // (standaard op iPhone) die bij sommige ontvangers niet zou tonen, wordt
+  // zo altijd een gewone, overal weergeefbare JPEG.
+  const CHAT_IMAGE_MAX_DIMENSION = 1600;
+  const CHAT_IMAGE_QUALITY = 0.82;
+  async function compressImageForChat(file){
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, CHAT_IMAGE_MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+      const w = Math.round(bitmap.width * scale);
+      const h = Math.round(bitmap.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+      if (bitmap.close) bitmap.close();
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', CHAT_IMAGE_QUALITY));
+      // Nooit een groter bestand versturen dan het origineel (kan in
+      // zeldzame gevallen gebeuren bij een al zeer compacte bron).
+      return (blob && blob.size < file.size) ? blob : file;
+    } catch (err) {
+      // Verkleinen is een optimalisatie, geen vereiste — bij een fout (bv.
+      // een browser die dit bestandstype niet kan decoderen) gewoon het
+      // origineel versturen, nooit het versturen zelf blokkeren.
+      return file;
+    }
+  }
   els.chatAttachButton.addEventListener('click', () => els.chatMediaInput.click());
   els.chatMediaInput.addEventListener('change', async () => {
     const file = els.chatMediaInput.files && els.chatMediaInput.files[0];
@@ -5614,9 +5645,13 @@
       return;
     }
     els.chatAttachButton.disabled = true;
-    const ext = (file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg')).toLowerCase().replace(/[^a-z0-9]/g, '') || (isVideo ? 'mp4' : 'jpg');
+    const uploadFile = isVideo ? file : await compressImageForChat(file);
+    const contentType = isVideo ? file.type : 'image/jpeg';
+    const ext = isVideo
+      ? ((file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4')
+      : 'jpg';
     const path = currentChatGroupId + '/' + crypto.randomUUID() + '.' + ext;
-    const { error: upErr } = await sb.storage.from('chat-media').upload(path, file, { contentType: file.type });
+    const { error: upErr } = await sb.storage.from('chat-media').upload(path, uploadFile, { contentType });
     if (upErr){
       els.chatAttachButton.disabled = false;
       window.alert(t('alert.uploadFailed', { msg: upErr.message }));
