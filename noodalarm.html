@@ -4581,9 +4581,9 @@
   // ontgrendelde context te moeten starten op het moment dat het al
   // menens is. Dit voorkomt een bekende iOS/Safari-eigenaardigheid waarbij
   // een tweede, later aangemaakte AudioContext soms stil blijft.
-  function playCountdownBeep(urgent){
+  function playCountdownBeep(urgent, ctx){
     try {
-      const ctx = getSirenAudioCtx();
+      ctx = ctx || getSirenAudioCtx();
       const fire = () => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -4608,9 +4608,9 @@
   // zodat het onmiskenbaar voelt als "het is nu echt verstuurd" in plaats
   // van nog een tel. Speelt synchroon met het aftellen, dus zonder te
   // wachten op het netwerkverzoek erna.
-  function playFiredTone(){
+  function playFiredTone(ctx){
     try {
-      const ctx = getSirenAudioCtx();
+      ctx = ctx || getSirenAudioCtx();
       const fire = () => {
         [ [523.25, 0], [392.00, 0.09] ].forEach(([freq, delay]) => {
           const osc = ctx.createOscillator();
@@ -4643,14 +4643,35 @@
     els.alarmButton.style.setProperty('--urgency', '0');
   }
 
+  // Elke aftelling krijgt een eigen, GLASHELDER VERSE AudioContext, synchroon
+  // aangemaakt in deze tik-handler zelf, i.p.v. te vertrouwen op de gedeelde
+  // sirenAudioCtx (die kan intussen allang weer stilletjes "suspended" zijn
+  // door iOS — vandaar dat het geluid steeds weer verdween, hoe vaak we ook
+  // probeerden 'm te resumen). Een AudioContext die je synchroon binnen een
+  // echte tik-/klikhandler aanmaakt start in zowel Safari als Chrome altijd
+  // meteen als "running" — geen resume(), geen giswerk, geen afhankelijkheid
+  // van eerdere staat. Dit is de enige manier om dit ECHT elke keer te
+  // garanderen.
+  let countdownAudioCtx = null;
+  function closeCountdownAudioCtx(){
+    if (countdownAudioCtx){
+      try { countdownAudioCtx.close(); } catch (err) { /* al dicht of nooit geopend */ }
+      countdownAudioCtx = null;
+    }
+  }
+
   let pendingTestMode = false;
   function startCountdown(testMode){
     if (countdownActive || els.alarmButton.disabled) return;
-    // Zo dicht mogelijk bij de eigenlijke tik ontgrendelen (i.p.v. pas
-    // straks in playCountdownBeep, dat via requestAnimationFrame pas een
-    // frame later loopt) — geeft de browser de beste kans om dit nog als
-    // een directe gebruikersactie te herkennen.
-    getSirenAudioCtx();
+    // De context van een eventuele vorige (allang afgelopen of geannuleerde)
+    // aftelling opruimen voordat we een nieuwe aanmaken — anders lekt er
+    // per druk op de knop een AudioContext.
+    closeCountdownAudioCtx();
+    try {
+      countdownAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (err){
+      countdownAudioCtx = null; // dan valt playCountdownBeep terug op de gedeelde context
+    }
     pendingTestMode = !!testMode;
     countdownActive = true;
     countdownStartedAt = performance.now();
@@ -4677,15 +4698,21 @@
       els.alarmButtonLabel.textContent = String(secondsLeft);
       if (secondsLeft !== lastBeepSecond){
         lastBeepSecond = secondsLeft;
-        playCountdownBeep(secondsLeft <= 1);
+        playCountdownBeep(secondsLeft <= 1, countdownAudioCtx);
         if (navigator.vibrate) navigator.vibrate(15);
       }
       if (fraction >= 1){
         countdownActive = false;
-        playFiredTone();
+        playFiredTone(countdownAudioCtx);
         if (navigator.vibrate) navigator.vibrate([25,40,25,40,120]);
         resetAlarmButton();
         activateAlarm(pendingTestMode);
+        // playFiredTone plant zijn tweede toon nog 90ms in de toekomst —
+        // pas ná die hele klank dichtdoen, anders wordt 'm halverwege
+        // afgekapt.
+        const ctxToClose = countdownAudioCtx;
+        countdownAudioCtx = null;
+        setTimeout(() => { try { ctxToClose && ctxToClose.close(); } catch (err) {} }, 400);
         return;
       }
       countdownRafId = requestAnimationFrame(tick);
@@ -4698,6 +4725,7 @@
     pendingLocation = null;
     if (countdownRafId) cancelAnimationFrame(countdownRafId);
     resetAlarmButton();
+    closeCountdownAudioCtx();
   }
 
   els.alarmButton.addEventListener('click', () => {
