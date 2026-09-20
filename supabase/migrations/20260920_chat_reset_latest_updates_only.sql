@@ -1,5 +1,8 @@
 -- Eenmalig: alle groepschats leegmaken en per groep alleen de laatste
--- NORI-update(s) als bericht bericht zetten. Body max 1000 (alarm_messages_body_check).
+-- NORI-update(s) als bericht zetten. Body max 1000 (alarm_messages_body_check).
+--
+-- BELANGRIJK: raakt ALLEEN message_receipts + alarm_messages.
+-- NOOIT public.connections of public.alarm_group_members wissen hier.
 
 delete from public.message_receipts;
 delete from public.alarm_messages;
