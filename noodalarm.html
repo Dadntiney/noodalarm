@@ -715,6 +715,16 @@
   .form-actions .save-button{ flex:1; }
 
   footer.note{ text-align:center; color:var(--text-muted); font-size:0.84375rem; padding-top:20px; line-height:1.5; }
+  /* Op Alarm: copyright onderaan het scherm, los van de knop — zo hoort
+     de zin niet bij de actie en oogt het scherm rustiger. */
+  #screen-alarm{ gap:0; }
+  #screen-alarm > footer.note{
+    margin-top:auto;
+    padding-top:32px;
+    padding-bottom:4px;
+    color:var(--text-faint);
+    font-size:0.8125rem;
+  }
 
   .link-button{
     background:none; border:none; color:var(--text-muted); font-size:0.90625rem; font-weight:600;
