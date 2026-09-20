@@ -318,17 +318,25 @@
      gaf een rommelige, hologige indruk. Hier dus een eigen, strakkere
      ritme: vaste, kleinere gap, en niet geforceerd oprekken. */
   #screen-contacts{ flex:none; gap:18px; }
-  .contacts-community-note{
-    margin-top:8px;
-    padding:14px 18px max(10px, env(safe-area-inset-bottom));
+  /* Gedeelde stijl voor platte uitlegteksten (Contacten-footer + Alarm-hint). */
+  .plain-copy{
     text-align:center;
     color:var(--text-muted);
     font-size:0.9375rem;
     line-height:1.5;
     font-weight:500;
+    margin:0;
+  }
+  .contacts-community-note{
+    margin-top:8px;
+    padding:14px 18px max(10px, env(safe-area-inset-bottom));
   }
   .contacts-community-note.hidden{ display:none; }
   .contacts-community-note strong{ color:var(--text); font-weight:750; }
+  .intro{
+    max-width:300px;
+    padding:0 18px;
+  }
   /* #addContactPanel (zoekveld + QR-kaart + zoekresultaten) had geen eigen
      ritme — de afstand tussen het zoekveld en "Zoekresultaten" kwam toevallig
      uit een kleinere, impliciete waarde i.p.v. dezelfde 18px als de rest van
@@ -368,7 +376,6 @@
   .view{ width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; gap:24px; }
   .view.hidden{ display:none; }
 
-  .intro{ color:var(--text-muted); font-size:1.0625rem; line-height:1.55; max-width:320px; margin:0; }
   .hint{ color:var(--text-muted); font-size:1rem; line-height:1.4; margin:0; }
 
   /* ---------- Auth screen ---------- */
@@ -1987,8 +1994,6 @@
 
         <!-- IDLE -->
         <div id="view-idle" class="view">
-          <p class="intro">Druk op de knop om je contacten te waarschuwen.</p>
-
           <div class="alarm-button-wrap">
             <svg class="hold-ring" viewBox="0 0 240 240">
               <circle class="bg" cx="120" cy="120" r="112"/>
@@ -2000,6 +2005,8 @@
               <span class="sublabel hidden" id="alarmButtonSublabel">tik om te annuleren</span>
             </button>
           </div>
+
+          <p class="intro plain-copy">Druk op de knop om je contacten te waarschuwen.</p>
 
           <button type="button" id="cancelAlarmButton" class="cancel-button hidden">Annuleren</button>
 
@@ -2116,7 +2123,7 @@
         </div>
       </div>
 
-      <p id="contactsCommunityNote" class="contacts-community-note hidden" aria-live="polite"></p>
+      <p id="contactsCommunityNote" class="contacts-community-note plain-copy hidden" aria-live="polite"></p>
 
     </section>
 
