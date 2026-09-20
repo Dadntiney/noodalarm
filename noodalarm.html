@@ -833,12 +833,27 @@
     display:flex; align-items:center; gap:4px;
   }
   .chat-video-duration svg{ width:12px; height:12px; }
-  /* ---------- Foto volledig scherm (tik op een foto, net als video) ---------- */
+  /* ---------- Foto volledig scherm (tik op een foto, net als video) ----------
+     Video's eigen "openen" is de native fullscreen-animatie van het
+     besturingssysteem (webkitEnterFullscreen/requestFullscreen) — die
+     kunnen we voor een gewone <img> niet betrouwbaar hergebruiken (daar
+     ondersteunt vooral iOS Safari dat niet), dus hier zelf eenzelfde
+     vloeiend gevoel nagebouwd: de achtergrond faded in en de foto komt
+     vanuit een klein beetje ingezoomd tot volledige grootte, met dezelfde
+     ease-out-curve als de rest van de app. */
   .media-lightbox{
-    position:fixed; inset:0; z-index:400; background:rgba(0,0,0,.94);
+    position:fixed; inset:0; z-index:400; background:rgba(0,0,0,0);
     display:flex; align-items:center; justify-content:center; padding:20px;
+    opacity:0; pointer-events:none;
+    transition:opacity .28s cubic-bezier(0.16,1,0.3,1), background-color .28s cubic-bezier(0.16,1,0.3,1);
   }
-  .media-lightbox img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .media-lightbox.open{ opacity:1; pointer-events:auto; background:rgba(0,0,0,.94); }
+  .media-lightbox img{
+    max-width:100%; max-height:100%; object-fit:contain;
+    transform:scale(.88); transition:transform .28s cubic-bezier(0.16,1,0.3,1);
+  }
+  .media-lightbox.open img{ transform:scale(1); }
+  @media (prefers-reduced-motion:reduce){ .media-lightbox, .media-lightbox img{ transition:none; } }
   .media-lightbox-close{
     position:absolute; top:max(16px, env(safe-area-inset-top)); right:16px; z-index:1;
     width:44px; height:44px; border-radius:50%; border:none; background:rgba(255,255,255,.12); color:#fff;
@@ -4837,10 +4852,25 @@
         pauseIcon.classList.toggle('hidden', !playing);
       };
       audio.addEventListener('loadedmetadata', () => {
-        if (isFinite(audio.duration)) timeLabel.textContent = formatDuration(audio.duration);
+        if (isFinite(audio.duration)){
+          timeLabel.textContent = formatDuration(audio.duration);
+          return;
+        }
+        // Bekende eigenaardigheid van door MediaRecorder opgenomen webm-
+        // bestanden: de duur staat niet in de header, dus meldt audio.duration
+        // zich als Infinity totdat je eenmaal helemaal doorspoelt. Dit forceert
+        // dat éénmalig, waarna zowel de duur als de voortgangsbalk (die anders
+        // altijd door Infinity deelt en op 0% blijft hangen) gewoon werken.
+        const forceDuration = () => {
+          audio.removeEventListener('timeupdate', forceDuration);
+          audio.currentTime = 0;
+          if (isFinite(audio.duration)) timeLabel.textContent = formatDuration(audio.duration);
+        };
+        audio.addEventListener('timeupdate', forceDuration);
+        audio.currentTime = 1e101;
       });
       audio.addEventListener('timeupdate', () => {
-        if (audio.duration){
+        if (isFinite(audio.duration) && audio.duration > 0){
           progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
           timeLabel.textContent = formatDuration(audio.currentTime);
         }
@@ -5524,14 +5554,22 @@
   // — maar via een eigen overlay i.p.v. de native Fullscreen API: die
   // ondersteunt op iOS Safari alleen <video> betrouwbaar (webkitEnterFullscreen
   // is video-only), voor een <img> zou requestFullscreen() daar vaak gewoon
-  // niets doen.
+  // niets doen. Zelfde open/dicht-patroon als openSlidePage/closeSlidePage
+  // hierboven: eerst .hidden weg + reflow forceren, dan pas .open erbij op
+  // de volgende frame, zodat de overgang ook echt start i.p.v. meteen
+  // van display:none naar zichtbaar te springen.
   function openImageLightbox(src){
     els.mediaLightboxImg.src = src;
     els.mediaLightbox.classList.remove('hidden');
+    void els.mediaLightbox.offsetHeight;
+    requestAnimationFrame(() => els.mediaLightbox.classList.add('open'));
   }
   function closeImageLightbox(){
-    els.mediaLightbox.classList.add('hidden');
-    els.mediaLightboxImg.src = '';
+    els.mediaLightbox.classList.remove('open');
+    setTimeout(() => {
+      els.mediaLightbox.classList.add('hidden');
+      els.mediaLightboxImg.src = '';
+    }, 300);
   }
   els.mediaLightboxClose.addEventListener('click', closeImageLightbox);
   els.mediaLightbox.addEventListener('click', (ev) => {
@@ -5636,7 +5674,8 @@
     if (!bubble || ev.touches.length !== 1){ bubbleTouch = null; return; }
     const video = ev.target.closest('.chat-video');
     const image = ev.target.closest('img.chat-media');
-    bubbleTouch = { bubble, video, image, startTime: Date.now(), moved: false };
+    const voicePlay = ev.target.closest('.voice-msg-play');
+    bubbleTouch = { bubble, video, image, voicePlay, startTime: Date.now(), moved: false };
     longPressStartXY = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
     longPressTimer = setTimeout(() => {
       longPressTimer = null;
@@ -5669,10 +5708,16 @@
     if (touch) ev.preventDefault();
     // Alleen een echte, korte tik (niet verschoven, geen lang-indrukken,
     // geen menu geopend) op een video telt als "afspelen", op een foto als
-    // "schermvullend tonen".
+    // "schermvullend tonen", op de afspeelknop van een spraakbericht als
+    // "starten/pauzeren". Zonder dit expliciet af te handelen bleef er op
+    // touch-apparaten niets gebeuren: de synthetische 'click' hierboven
+    // wordt voor elke tik in een bubbel onderdrukt (preventDefault), dus
+    // de eigen click-listener op de afspeelknop (zie primeVoiceMessages)
+    // kwam op een telefoon nooit aan.
     if (touch && !touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
       if (touch.video) playVideoFullscreen(touch.video);
       else if (touch.image) openImageLightbox(touch.image.src);
+      else if (touch.voicePlay) touch.voicePlay.click();
     }
   }, { passive: false });
   els.chatMessages.addEventListener('touchcancel', () => { cancelLongPress(); bubbleTouch = null; });
