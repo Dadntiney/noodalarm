@@ -1726,6 +1726,23 @@
     </div>
   </div>
 
+  <!-- =========================== GESPREKKEN =========================== -->
+  <div id="conversationsOverlay" class="slide-page hidden">
+    <div class="slide-page-header">
+      <button type="button" id="conversationsCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
+        <span class="profile-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        Terug
+      </button>
+    </div>
+    <div class="slide-page-content">
+      <h1 class="slide-page-title" id="conversationsTitle">Gesprekken</h1>
+      <div id="conversationsEmpty" class="empty-state hidden">Nog geen gesprekken.</div>
+      <ul id="conversationsList" class="people-list"></ul>
+    </div>
+  </div>
+
   <!-- =========================== FOTO VOLLEDIG SCHERM =========================== -->
   <div id="mediaLightbox" class="media-lightbox hidden">
     <button type="button" id="mediaLightboxClose" class="media-lightbox-close" aria-label="Sluiten">
@@ -2429,6 +2446,10 @@
     { sel: '#extraInfoOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
+    { sel: '#conversationsCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
+    { sel: '#conversationsCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
+    { sel: '#conversationsTitle', nl: 'Gesprekken', en: 'Conversations' },
+    { sel: '#conversationsEmpty', nl: 'Nog geen gesprekken.', en: 'No conversations yet.' },
     { sel: '#brandHomeButton', attr: 'aria-label', nl: 'Naar Alarm', en: 'Go to Alarm' },
     { sel: '.intro', nl: 'Druk op de knop om je contacten te waarschuwen.', en: 'Press the button to alert your contacts.' },
     { sel: '#alarmButton', attr: 'aria-label', nl: 'Druk voor alarm', en: 'Press for alarm' },
@@ -2606,6 +2627,8 @@
       'notif.rejected': 'Geweigerd',
       'notif.accept': 'Accepteren',
       'notif.reject': 'Weigeren',
+      'conversations.own': 'Jouw kring',
+      'conversations.ownHint': 'Berichten met iedereen die aan jou gekoppeld is',
       'notif.openMessages': 'Open Berichten',
       'install.installed': 'Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
       'install.notInstalled': 'Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
@@ -2731,6 +2754,8 @@
       'notif.rejected': 'Declined',
       'notif.accept': 'Accept',
       'notif.reject': 'Decline',
+      'conversations.own': 'Your circle',
+      'conversations.ownHint': 'Messages with everyone connected to you',
       'notif.openMessages': 'Open Messages',
       'install.installed': 'Installed — you\'ll receive emergency alerts as expected.',
       'install.notInstalled': 'Not installed yet — without this you could miss an emergency alert.',
@@ -2908,6 +2933,11 @@
     notifClearButton: document.getElementById('notifClearButton'),
     notifEmpty: document.getElementById('notifEmpty'),
     notifList: document.getElementById('notifList'),
+
+    conversationsOverlay: document.getElementById('conversationsOverlay'),
+    conversationsCloseButton: document.getElementById('conversationsCloseButton'),
+    conversationsEmpty: document.getElementById('conversationsEmpty'),
+    conversationsList: document.getElementById('conversationsList'),
 
     chatHeader: document.getElementById('chatHeader'),
     chatBackButton: document.getElementById('chatBackButton'),
@@ -4320,7 +4350,51 @@
   els.brandHomeButton.addEventListener('click', () => switchScreen('alarm'));
   els.tabAlarm.addEventListener('click', () => switchScreen('alarm'));
   els.tabContacts.addEventListener('click', () => switchScreen('contacts'));
-  els.tabMessages.addEventListener('click', () => openMessages(myGroupId));
+  // "Berichten" opende altijd jouw EIGEN groep — maar een bevestigd contact
+  // heeft (naast jouw groep) ook zijn/haar eigen groep waar jij weer lid van
+  // bent. Twee losse groepen voor dezelfde twee mensen: berichten die je
+  // contact in HAAR groep stuurt kwamen hier dus nooit aan, en omgekeerd.
+  // Bij precies 1 groep (nog geen bevestigde contacten) is er niets te
+  // kiezen en openen we zoals voorheen meteen die ene groep.
+  async function openBerichtenTab(){
+    const { data } = await sb.from('alarm_group_members')
+      .select('group_id, group:group_id(owner_id, owner:owner_id(full_name, avatar_url))')
+      .eq('user_id', currentSession.user.id);
+    const rows = (data || []).filter(r => r.group);
+    if (rows.length <= 1){
+      openMessages(myGroupId);
+      return;
+    }
+    renderConversations(rows);
+    openSlidePage(els.conversationsOverlay);
+  }
+  function renderConversations(rows){
+    const sorted = rows.slice().sort((a, b) => {
+      const aOwn = a.group.owner_id === currentSession.user.id;
+      const bOwn = b.group.owner_id === currentSession.user.id;
+      if (aOwn !== bOwn) return aOwn ? -1 : 1;
+      return (a.group.owner.full_name || '').localeCompare(b.group.owner.full_name || '');
+    });
+    els.conversationsEmpty.classList.toggle('hidden', sorted.length > 0);
+    els.conversationsList.innerHTML = sorted.map(conversationCardHtml).join('');
+    els.conversationsList.querySelectorAll('.person-card[data-group-id]').forEach(li => {
+      li.addEventListener('click', () => openMessages(li.dataset.groupId));
+    });
+  }
+  function conversationCardHtml(row){
+    const isOwn = row.group.owner_id === currentSession.user.id;
+    const name = isOwn ? t('conversations.own') : (row.group.owner.full_name || t('conversation.unknown'));
+    const hint = isOwn ? t('conversations.ownHint') : '';
+    return '<li class="person-card" data-group-id="' + row.group_id + '" style="cursor:pointer;">' +
+      '<div class="avatar">' + avatarInner(isOwn ? null : row.group.owner.avatar_url) + '</div>' +
+      '<div class="person-info">' +
+        '<div class="name">' + escapeHtml(name) + '</div>' +
+        (hint ? '<div class="handle">' + escapeHtml(hint) + '</div>' : '') +
+      '</div>' +
+      '</li>';
+  }
+  els.tabMessages.addEventListener('click', openBerichtenTab);
+  els.conversationsCloseButton.addEventListener('click', () => closeSlidePage(els.conversationsOverlay));
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
   els.chatBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
@@ -5227,6 +5301,7 @@
     currentChatGroupId = groupId;
     cancelEditingMessage();
     closeSlidePage(els.notifOverlay);
+    closeSlidePage(els.conversationsOverlay);
     switchScreen('messages');
     els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.loading')) + '</p>';
     els.locationCard.classList.add('hidden');
