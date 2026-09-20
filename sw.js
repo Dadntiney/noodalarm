@@ -1,14 +1,48 @@
-// NORI service worker: shows the emergency push notification and
-// focuses/opens the app when the person taps it. No caching/offline logic —
-// this app always needs a live connection to Supabase, so there is
-// deliberately no fetch handler here.
+// NORI service worker: shows the emergency push notification, focuses/opens
+// the app when the person taps it, and caches the (static) app shell for an
+// instant repeat-open. Actual data (Supabase) is never cached here — those
+// requests go to a different origin, which the fetch handler below leaves
+// completely untouched, so the app still always talks to a live Supabase
+// connection for anything that matters (alarms, messages, contacts, ...).
+// In an emergency, every second before the ALARM button is even tappable
+// counts, so the (unchanging) HTML/CSS/JS/icons load from disk instantly
+// instead of waiting on a network round-trip — while a fresh copy is always
+// fetched in the background too (stale-while-revalidate), so the very next
+// open already has whatever changed.
+const SHELL_CACHE = 'nori-shell-v1';
+const SHELL_ASSETS = ['./', './noodalarm.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
-self.addEventListener('install', () => {
-  self.skipWaiting();
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(SHELL_CACHE)
+      .then((cache) => cache.addAll(SHELL_ASSETS))
+      .catch(() => {}) // een enkel mislukt asset (bv. offline install) mag de rest niet blokkeren
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL_CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  // Nooit Supabase (of enige andere cross-origin) request aanraken — alleen
+  // onze eigen statische bestanden lopen via deze cache.
+  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      const fresh = fetch(req).then((resp) => {
+        if (resp && resp.ok) caches.open(SHELL_CACHE).then((cache) => cache.put(req, resp.clone()));
+        return resp;
+      }).catch(() => cached);
+      return cached || fresh;
+    })
+  );
 });
 
 self.addEventListener('push', (event) => {

@@ -34,9 +34,23 @@
 <link rel="apple-touch-icon" href="icon-192.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://vdohfnmhzbttqmsinoln.supabase.co">
+<!-- Lettertype en Leaflet-kaartstijl zijn nooit nodig voor de allereerste
+     tekening (ALARM-knop staat er al met een systeemlettertype, de kaart
+     verschijnt pas tijdens een actief alarm) — preload+swap laat ze op de
+     achtergrond laden zonder de eerste render te blokkeren, i.p.v. een
+     gewone <link rel="stylesheet"> die dat wél doet. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+</noscript>
+<!-- defer i.p.v. blokkerend: Leaflet is pas nodig zodra de locatiekaart bij
+     een actief alarm getoond wordt, ruim na het laden van de pagina — zie
+     renderLeafletMap() verderop, die zelf wacht tot window.L bestaat. -->
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   /* ---------- Tekstgrootte (Instellingen) — schaalt alles wat in rem staat ---------- */
@@ -2775,7 +2789,17 @@
   const PERSON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
   const VOICE_MIC_BADGE_HTML = '<span class="voice-mic-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg></span>';
   function avatarInner(url){
-    return url ? '<img src="' + url + '" alt="">' : PERSON_ICON;
+    // loading=lazy + decoding=async: onbelangrijk voor de handjevol avatars
+    // die altijd al zichtbaar zijn, maar scheelt echt bij een lange
+    // contacten-/berichtenlijst — de browser hoeft dan niet meteen alle
+    // (nog onzichtbare) avatar-afbeeldingen tegelijk te downloaden/decoderen.
+    // escapeHtml is hier geen extra voorzichtigheid: dit rendert ook de
+    // avatar_url van ANDERE gebruikers (contacten, zoekresultaten, chat,
+    // meldingen) — zonder escapen zou iemand die kolom buiten de app-UI om
+    // (rechtstreeks via de Supabase REST API, met zijn eigen geldige RLS-
+    // rechten op zijn eigen profiel) op een HTML-payload kunnen zetten die
+    // dan bij iedereen die zijn avatar ziet ongefilterd wordt uitgevoerd.
+    return url ? '<img src="' + escapeHtml(url) + '" alt="" loading="lazy" decoding="async">' : PERSON_ICON;
   }
   function timeAgo(iso){
     const diffMs = Date.now() - new Date(iso).getTime();
@@ -5181,6 +5205,13 @@
       sb.from('alarm_messages').select('*').eq('group_id', groupId).order('created_at', { ascending:true }).limit(200),
       sb.from('message_receipts').select('message_id, user_id, delivered_at, read_at').eq('group_id', groupId)
     ]);
+    // Als iemand tussen twee gesprekken heen en weer tikt kan een trager
+    // netwerkantwoord van een OUDERE openMessages()-aanroep hier pas na een
+    // nieuwere aankomen — zonder deze guard zou dat het net geopende, juiste
+    // gesprek alsnog overschrijven met het verkeerde (berichten, medische
+    // info, locatie van de vorige activator). currentChatGroupId staat
+    // inmiddels al op de nieuwste aanroep (bovenaan deze functie gezet).
+    if (groupId !== currentChatGroupId) return;
     chatParticipantById = {};
     (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at }; });
     renderChatHeader();
@@ -5217,6 +5248,7 @@
     const mediaPaths = list.filter(m => m.media_path).map(m => m.media_path);
     if (mediaPaths.length){
       resolveMediaUrls(mediaPaths).then(urlByPath => {
+        if (groupId !== currentChatGroupId) return; // zie guard hierboven
         els.chatMessages.querySelectorAll('[data-media-path]').forEach(el => {
           const loadEvent = (el.tagName === 'VIDEO' || el.tagName === 'AUDIO') ? 'loadedmetadata' : 'load';
           el.addEventListener(loadEvent, scrollChatToBottom);
@@ -5262,16 +5294,22 @@
   // OpenStreetMap-tegelserver ophaalt, dezelfde stabiele infrastructuur die
   // ook al achter Nominatim (het adres hierboven) zit. "Open in Maps"
   // blijft daarnaast altijd de betrouwbare uitwijk.
-  if (window.L){
-    delete L.Icon.Default.prototype._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-      iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon.png',
-      shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png'
-    });
-  }
+  // Leaflet zelf laadt nu defer (zie <head>), dus window.L staat hier bij
+  // het opstarten van de pagina nog niet vast klaar — deze eenmalige
+  // icoon-configuratie verhuist daarom naar hier (idempotent: mergeOptions
+  // mag gerust vaker aangeroepen worden) i.p.v. top-level bij het parsen.
+  let leafletIconsConfigured = false;
   function renderLeafletMap(state, containerEl, lat, lng){
     if (!window.L || !containerEl) return;
+    if (!leafletIconsConfigured){
+      leafletIconsConfigured = true;
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png'
+      });
+    }
     if (!state.map){
       state.map = L.map(containerEl).setView([lat, lng], 16);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -5369,11 +5407,17 @@
       els.medicalInfoCard.classList.add('hidden');
       return;
     }
+    // Zelfde reden als de guard in openMessages(): als iemand tijdens deze
+    // await naar een ander gesprek wisselt, mag de medische info van DEZE
+    // (oudere) activator niet alsnog over het nieuwe gesprek heen geplakt
+    // worden.
+    const groupIdAtStart = currentChatGroupId;
     els.medicalInfoCard.classList.remove('hidden');
     const [{ data }, { data: practicalData }] = await Promise.all([
       sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id }),
       sb.rpc('get_activator_practical_info', { p_alarm_id: alarmRow.id })
     ]);
+    if (currentChatGroupId !== groupIdAtStart) return;
     const info = data && data[0];
     const practical = practicalData && practicalData[0];
     const hasResus = info && typeof info.resuscitate === 'boolean';
