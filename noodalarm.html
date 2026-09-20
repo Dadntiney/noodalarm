@@ -27,7 +27,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>NORI — persoonlijk noodnetwerk</title>
-<meta name="description" content="Persoonlijk noodalarm-netwerk: waarschuw je bevestigde noodcontacten via een melding in de app en e-mail.">
+<meta name="description" content="Persoonlijk noodalarm-netwerk: waarschuw je bevestigde noodcontacten via een melding in de app.">
 <meta name="theme-color" id="themeColorMeta" content="#f0f2f5">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png?v=2">
@@ -1228,7 +1228,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
         <h2 class="onboarding-title">Stap 3: Druk op ALARM bij nood</h2>
-        <p class="onboarding-text">Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding: in de app en per e-mail, mét jouw locatie op dat moment.</p>
+        <p class="onboarding-text">Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding in de app, mét jouw locatie op dat moment.</p>
       </div>
 
       <div class="onboarding-dots">
@@ -2099,7 +2099,7 @@
       </div>
 
       <div id="chatMessages" class="chat-messages"></div>
-      <div id="chatReadOnlyNotice" class="empty-state hidden" style="margin:0 14px 14px;">Je kunt hier alleen meelezen — een bericht sturen kan alleen naar je eigen kring, bij "Berichten".</div>
+      <div id="chatReadOnlyNotice" class="empty-state hidden" style="margin:0 14px 14px;">Je kunt hier alleen meelezen. Een bericht sturen kan in jouw eigen kring, of hier zodra er een actief alarm loopt.</div>
       <form id="chatForm" class="chat-form">
         <div id="chatEditBanner" class="chat-edit-banner hidden">
           <div class="chat-edit-banner-text">
@@ -2276,7 +2276,7 @@
     { sel: '#onboardingStep3 .onboarding-title', nl: 'Stap 2: Die persoon bevestigt', en: 'Step 2: That person confirms' },
     { sel: '#onboardingStep3 .onboarding-text', m: 'h', nl: 'Diegene krijgt een melding (🔔) en drukt op <strong>Accepteren</strong>. Daarna staan jullie in elkaars lijst.', en: 'They get a notification (🔔) and press <strong>Accept</strong>. After that you\'re both in each other\'s list.' },
     { sel: '#onboardingStep4 .onboarding-title', nl: 'Stap 3: Druk op ALARM bij nood', en: 'Step 3: Press ALARM in an emergency' },
-    { sel: '#onboardingStep4 .onboarding-text', m: 'h', nl: 'Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding: in de app en per e-mail, mét jouw locatie op dat moment.', en: 'You then have <strong>3 seconds</strong> to cancel. After that your contacts get an instant alert: in the app and by email, with your location at that moment.' },
+    { sel: '#onboardingStep4 .onboarding-text', m: 'h', nl: 'Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding in de app, mét jouw locatie op dat moment.', en: 'You then have <strong>3 seconds</strong> to cancel. After that your contacts get an instant alert in the app, with your location at that moment.' },
     { sel: '#deleteAccountOverlay .overlay-title', nl: 'Account verwijderen', en: 'Delete account' },
     { sel: '#deleteAccountOverlay .onboarding-text', m: 'h', nl: 'Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.', en: 'This <strong>permanently</strong> deletes your account, profile, contacts and all notifications. This cannot be undone.' },
     { sel: '#deleteAccountCancelButton', nl: 'Annuleren', en: 'Cancel' },
@@ -2505,7 +2505,7 @@
     { sel: '#chatCameraButton', attr: 'aria-label', nl: 'Foto maken', en: 'Take photo' },
     { sel: '#chatInput', attr: 'placeholder', nl: 'Typ een bericht…', en: 'Type a message…' },
     { sel: '#chatSendButton', attr: 'aria-label', nl: 'Versturen', en: 'Send' },
-    { sel: '#chatReadOnlyNotice', nl: 'Je kunt hier alleen meelezen — een bericht sturen kan alleen naar je eigen kring, bij "Berichten".', en: 'You can only read along here — you can only send a message to your own circle, under "Messages".' },
+    { sel: '#chatReadOnlyNotice', nl: 'Je kunt hier alleen meelezen. Een bericht sturen kan in jouw eigen kring, of hier zodra er een actief alarm loopt.', en: 'You can only read along here. You can send a message in your own circle, or here once an alarm is active.' },
     { sel: '#chatVoiceButton', attr: 'aria-label', nl: 'Spraakbericht opnemen', en: 'Record voice message' },
     { sel: '#chatRecordingCancel', attr: 'aria-label', nl: 'Opname annuleren', en: 'Cancel recording' },
     { sel: '#chatRecordingSend', attr: 'aria-label', nl: 'Spraakbericht versturen', en: 'Send voice message' },
@@ -2572,7 +2572,7 @@
       'entry.notified': 'Pushmelding verstuurd',
       'entry.inApp': 'Geen push, wel in app',
       'entry.noContacts': 'Geen noodcontacten gekoppeld',
-      'entry.testNote': '🧪 Dit was een oefening — je noodcontacten hebben hier niets van gemerkt (geen melding, geen e-mail).',
+      'entry.testNote': '🧪 Dit was een oefening — je noodcontacten hebben hier niets van gemerkt (geen melding).',
       'time.now': 'zojuist',
       'time.minAgo': '{n} min geleden',
       'time.hourAgo': '{n} uur geleden',
@@ -2616,6 +2616,7 @@
       'conversation.someone': 'Iemand',
       'chat.onMyWay': '✅ {name} komt eraan!',
       'chat.headerTitle': 'Noodkring',
+      'chat.headerTitleOther': 'Kring van {name}',
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
       'location.fetchingAddress': 'Adres ophalen…',
@@ -2631,6 +2632,7 @@
       'notif.reject': 'Weigeren',
       'conversations.own': 'Jouw kring',
       'conversations.ownHint': 'Berichten met iedereen die aan jou gekoppeld is',
+      'conversations.readOnlyHint': 'Alleen meelezen — typen kan in jouw eigen kring',
       'notif.openMessages': 'Open Berichten',
       'install.installed': 'Geïnstalleerd — je ontvangt noodmeldingen zoals het hoort.',
       'install.notInstalled': 'Nog niet geïnstalleerd — zonder dit kun je een noodmelding missen.',
@@ -2699,7 +2701,7 @@
       'entry.notified': 'Push notification sent',
       'entry.inApp': 'No push, but in app',
       'entry.noContacts': 'No emergency contacts linked',
-      'entry.testNote': '🧪 This was a practice run — your emergency contacts didn\'t notice anything (no notification, no email).',
+      'entry.testNote': '🧪 This was a practice run — your emergency contacts didn\'t notice anything (no notification).',
       'time.now': 'just now',
       'time.minAgo': '{n} min ago',
       'time.hourAgo': '{n} hr ago',
@@ -2743,6 +2745,7 @@
       'conversation.someone': 'Someone',
       'chat.onMyWay': '✅ {name} is on their way!',
       'chat.headerTitle': 'Emergency circle',
+      'chat.headerTitleOther': '{name}\'s circle',
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
       'location.fetchingAddress': 'Fetching address…',
@@ -2758,6 +2761,7 @@
       'notif.reject': 'Decline',
       'conversations.own': 'Your circle',
       'conversations.ownHint': 'Messages with everyone connected to you',
+      'conversations.readOnlyHint': 'Read only — you can type in your own circle',
       'notif.openMessages': 'Open Messages',
       'install.installed': 'Installed — you\'ll receive emergency alerts as expected.',
       'install.notInstalled': 'Not installed yet — without this you could miss an emergency alert.',
@@ -3915,6 +3919,8 @@
       .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmId);
     const name = currentProfile ? currentProfile.full_name : t('conversation.someone');
     await sb.from('alarm_messages').insert({ group_id: alarmRow.group_id, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
+    chatReturnToConversations = false;
+    currentChatPeerName = null;
     openMessages(alarmRow.group_id);
   }
   function maybeHandleOmwFromUrl(){
@@ -4359,12 +4365,18 @@
   // contact in HAAR groep stuurt kwamen hier dus nooit aan, en omgekeerd.
   // Bij precies 1 groep (nog geen bevestigde contacten) is er niets te
   // kiezen en openen we zoals voorheen meteen die ene groep.
+  // chatReturnToConversations: als je via de gesprekkenlijst een kring
+  // opende, brengt de terug-knop je daar weer heen i.p.v. naar Alarm.
+  let chatReturnToConversations = false;
+  let currentChatPeerName = null;
   async function openBerichtenTab(){
     const { data } = await sb.from('alarm_group_members')
       .select('group_id, group:group_id(owner_id, owner:owner_id(full_name, avatar_url))')
       .eq('user_id', currentSession.user.id);
     const rows = (data || []).filter(r => r.group);
     if (rows.length <= 1){
+      chatReturnToConversations = false;
+      currentChatPeerName = null;
       openMessages(myGroupId);
       return;
     }
@@ -4381,14 +4393,19 @@
     els.conversationsEmpty.classList.toggle('hidden', sorted.length > 0);
     els.conversationsList.innerHTML = sorted.map(conversationCardHtml).join('');
     els.conversationsList.querySelectorAll('.person-card[data-group-id]').forEach(li => {
-      li.addEventListener('click', () => openMessages(li.dataset.groupId));
+      li.addEventListener('click', () => {
+        chatReturnToConversations = true;
+        currentChatPeerName = li.dataset.peerName || null;
+        openMessages(li.dataset.groupId);
+      });
     });
   }
   function conversationCardHtml(row){
     const isOwn = row.group.owner_id === currentSession.user.id;
     const name = isOwn ? t('conversations.own') : (row.group.owner.full_name || t('conversation.unknown'));
-    const hint = isOwn ? t('conversations.ownHint') : '';
-    return '<li class="person-card" data-group-id="' + row.group_id + '" style="cursor:pointer;">' +
+    const hint = isOwn ? t('conversations.ownHint') : t('conversations.readOnlyHint');
+    const peerName = isOwn ? '' : (row.group.owner.full_name || '');
+    return '<li class="person-card" data-group-id="' + row.group_id + '" data-peer-name="' + escapeHtml(peerName) + '" style="cursor:pointer;">' +
       '<div class="avatar">' + avatarInner(isOwn ? null : row.group.owner.avatar_url) + '</div>' +
       '<div class="person-info">' +
         '<div class="name">' + escapeHtml(name) + '</div>' +
@@ -4399,7 +4416,12 @@
   els.tabMessages.addEventListener('click', openBerichtenTab);
   els.conversationsCloseButton.addEventListener('click', () => closeSlidePage(els.conversationsOverlay));
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
-  els.chatBackButton.addEventListener('click', () => switchScreen('alarm'));
+  els.chatBackButton.addEventListener('click', () => {
+    const returnToConvos = chatReturnToConversations;
+    chatReturnToConversations = false;
+    switchScreen('alarm');
+    if (returnToConvos) openBerichtenTab();
+  });
   function switchScreen(name){
     if (name !== 'messages' && chatChannel){
       sb.removeChannel(chatChannel);
@@ -4829,7 +4851,11 @@
     await endMyActiveAlarm();
   });
   if (els.openMessagesFromSentButton){
-    els.openMessagesFromSentButton.addEventListener('click', () => openMessages(myGroupId));
+    els.openMessagesFromSentButton.addEventListener('click', () => {
+      chatReturnToConversations = false;
+      currentChatPeerName = null;
+      openMessages(myGroupId);
+    });
   }
   // Zelfde actie, maar dan direct vanuit het berichtenscherm — zonder dit
   // blijft een alarm dat je hier ooit activeerde voor altijd "actief" staan
@@ -5301,7 +5327,10 @@
       .filter(id => id !== currentSession.user.id)
       .map(id => chatParticipantById[id]);
     els.chatHeaderAvatar.innerHTML = chatHeaderFacepileHtml(others);
-    els.chatHeaderTitle.textContent = t('chat.headerTitle');
+    const isOwn = currentChatGroupId === myGroupId;
+    els.chatHeaderTitle.textContent = isOwn
+      ? t('chat.headerTitle')
+      : t('chat.headerTitleOther', { name: currentChatPeerName || t('conversation.unknown') });
     els.chatHeaderSub.textContent = others.length
       ? others.map(p => p.full_name).join(', ')
       : t('entry.noContacts');
@@ -5326,12 +5355,17 @@
     chatMessageById = {};
     chatReceiptsByMessageId = {};
 
-    const [{ data: members }, { data: alarmRow }, { data: messages }, { data: receiptRows }] = await Promise.all([
+    const [{ data: members }, { data: alarmRow }, { data: messages }, { data: receiptRows }, groupOwnerRes] = await Promise.all([
       sb.rpc('get_group_participants', { p_group_id: groupId }),
       sb.from('alarms').select('id, lat, lng, location_accuracy, location_updated_at, triggered_by, status, created_at, test_mode')
         .eq('group_id', groupId).eq('status', 'active').order('created_at', { ascending:false }).limit(1).maybeSingle(),
       sb.from('alarm_messages').select('*').eq('group_id', groupId).order('created_at', { ascending:true }).limit(200),
-      sb.from('message_receipts').select('message_id, user_id, delivered_at, read_at').eq('group_id', groupId)
+      sb.from('message_receipts').select('message_id, user_id, delivered_at, read_at').eq('group_id', groupId),
+      // Alleen nodig voor andermans kring (header "Kring van …"); bij eigen
+      // kring slaan we de query over.
+      groupId === myGroupId || currentChatPeerName
+        ? Promise.resolve({ data: null })
+        : sb.from('alarm_groups').select('owner:owner_id(full_name)').eq('id', groupId).maybeSingle()
     ]);
     // Als iemand tussen twee gesprekken heen en weer tikt kan een trager
     // netwerkantwoord van een OUDERE openMessages()-aanroep hier pas na een
@@ -5340,6 +5374,9 @@
     // info, locatie van de vorige activator). currentChatGroupId staat
     // inmiddels al op de nieuwste aanroep (bovenaan deze functie gezet).
     if (groupId !== currentChatGroupId) return;
+    if (groupId !== myGroupId && !currentChatPeerName && groupOwnerRes && groupOwnerRes.data && groupOwnerRes.data.owner){
+      currentChatPeerName = groupOwnerRes.data.owner.full_name || null;
+    }
     chatParticipantById = {};
     (members || []).forEach(m => { chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at }; });
     renderChatHeader();
@@ -5395,6 +5432,8 @@
   // en open die als doorlopend gesprek.
   async function openChatByAlarm(alarmId){
     if (!alarmId) return;
+    chatReturnToConversations = false;
+    currentChatPeerName = null;
     const { data: alarmRow } = await sb.from('alarms').select('group_id').eq('id', alarmId).single();
     if (alarmRow && alarmRow.group_id) openMessages(alarmRow.group_id);
   }
@@ -5899,7 +5938,10 @@
         refreshTicks(r.message_id);
       })
       .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'alarms',
+        // INSERT én UPDATE: een nieuw alarm in andermans kring moet meteen
+        // de typebalk ontgrendelen (en locatie/medische info tonen), niet
+        // pas bij een latere UPDATE van diezelfde rij.
+        event: '*', schema: 'public', table: 'alarms',
         filter: 'group_id=eq.' + groupId
       }, (payload) => {
         const row = payload.new;
