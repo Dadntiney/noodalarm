@@ -5364,7 +5364,7 @@
   }
 
   // isFirst: eerste bericht van een reeks van dezelfde afzender — toont
-  // avatar, naam én WhatsApp-achtig staartje. Vervolgberichten zijn .grouped.
+  // avatar en naam. Vervolgberichten zijn .grouped.
   function chatBubbleHtml(msg, isFirst){
     const own = msg.sender_id === currentSession.user.id;
     const isSystem = isNoriSystemSender(msg.sender_id);
