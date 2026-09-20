@@ -19,6 +19,12 @@ NORI (`profiles.username = 'nori'`, `is_system = true`, id
 Nooit een normale `connections`-rij voor NORI aanmaken (bidirectionele
 membership-trigger maakt een rommel van de kringen).
 
+### Welkomstbericht bij nieuwe aanmelding
+`create_personal_alarm_group` plaatst **één** bericht van NORI in de nieuwe
+kring (`profiles.welcome_sent_at` + unique index). Exacte tekst staat in
+`public.nori_welcome_message_body()`. Nooit vanuit de frontend opnieuw
+aanmaken bij login/refresh/nieuwe contacten.
+
 ## Dagelijkse update-melding (belangrijk, blijf dit doen)
 
 Danny wil geen omkijken hebben naar het informeren van zijn noodcontacten
