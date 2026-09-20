@@ -3365,6 +3365,16 @@
     locationTestOpenButton: document.getElementById('locationTestOpenButton')
   };
 
+  let lastSentWasTest = false;
+  function refreshOpenMessagesFromSentLabel(){
+    if (!els.openMessagesFromSentButton) return;
+    const label = lastSentWasTest ? t('sent.openPreview') : t('sent.openMessages');
+    const icon = els.openMessagesFromSentButton.querySelector('svg');
+    els.openMessagesFromSentButton.textContent = '';
+    if (icon) els.openMessagesFromSentButton.appendChild(icon);
+    els.openMessagesFromSentButton.appendChild(document.createTextNode(' ' + label));
+  }
+
   const copyrightYearEl = document.getElementById('copyrightYear');
   if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
 
@@ -5132,16 +5142,6 @@
   function switchView(target){
     [els.viewIdle, els.viewSent].forEach(v => v.classList.add('hidden'));
     target.classList.remove('hidden');
-  }
-
-  let lastSentWasTest = false;
-  function refreshOpenMessagesFromSentLabel(){
-    if (!els.openMessagesFromSentButton) return;
-    const label = lastSentWasTest ? t('sent.openPreview') : t('sent.openMessages');
-    const icon = els.openMessagesFromSentButton.querySelector('svg');
-    els.openMessagesFromSentButton.textContent = '';
-    if (icon) els.openMessagesFromSentButton.appendChild(icon);
-    els.openMessagesFromSentButton.appendChild(document.createTextNode(' ' + label));
   }
 
   async function activateAlarm(testMode, silent){
