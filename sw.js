@@ -1,14 +1,19 @@
 // NORI service worker: shows the emergency push notification, focuses/opens
-// the app when the person taps it, and caches the (static) app shell for an
-// instant repeat-open. Actual data (Supabase) is never cached here — those
+// the app when the person taps it, and caches the (static) app shell as an
+// OFFLINE FALLBACK. Actual data (Supabase) is never cached here — those
 // requests go to a different origin, which the fetch handler below leaves
 // completely untouched, so the app still always talks to a live Supabase
 // connection for anything that matters (alarms, messages, contacts, ...).
-// In an emergency, every second before the ALARM button is even tappable
-// counts, so the (unchanging) HTML/CSS/JS/icons load from disk instantly
-// instead of waiting on a network round-trip — while a fresh copy is always
-// fetched in the background too (stale-while-revalidate), so the very next
-// open already has whatever changed.
+// Network-first, not cache-first: every open tries a fresh fetch first
+// (normally just as fast as before, since it's a small single file on a
+// working connection) and only falls back to the cached copy when that
+// fetch fails — e.g. genuinely offline or on a very bad connection. A
+// cache-first / stale-while-revalidate strategy was tried here first, but
+// that meant a freshly shipped fix only ever showed up on someone's SECOND
+// open after a deploy (the first open still served the old cached shell)
+// — confusing during active development, and in an emergency app "shows
+// the version that was actually just fixed" matters more than shaving a
+// few ms off an already-fast load on a normal connection.
 const SHELL_CACHE = 'nori-shell-v1';
 const SHELL_ASSETS = ['./', './noodalarm.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
@@ -35,13 +40,10 @@ self.addEventListener('fetch', (event) => {
   // onze eigen statische bestanden lopen via deze cache.
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const fresh = fetch(req).then((resp) => {
-        if (resp && resp.ok) caches.open(SHELL_CACHE).then((cache) => cache.put(req, resp.clone()));
-        return resp;
-      }).catch(() => cached);
-      return cached || fresh;
-    })
+    fetch(req).then((resp) => {
+      if (resp && resp.ok) caches.open(SHELL_CACHE).then((cache) => cache.put(req, resp.clone()));
+      return resp;
+    }).catch(() => caches.match(req))
   );
 });
 
