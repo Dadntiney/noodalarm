@@ -2658,6 +2658,8 @@
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
       'chat.systemBadge': 'Update',
+      'chat.systemBadgeUpdate': 'Update',
+      'chat.systemBadgeWelcome': 'Welkom',
       'location.fetchingAddress': 'Adres ophalen…',
       'locationTest.busy': 'Bezig met opzoeken…',
       'locationTest.success': 'Gelukt! Nauwkeurig tot op ±{n} meter.',
@@ -2788,6 +2790,8 @@
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
       'chat.systemBadge': 'Update',
+      'chat.systemBadgeUpdate': 'Update',
+      'chat.systemBadgeWelcome': 'Welcome',
       'location.fetchingAddress': 'Fetching address…',
       'locationTest.busy': 'Looking it up…',
       'locationTest.success': 'It works! Accurate to within ±{n} metres.',
@@ -5087,8 +5091,9 @@
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
   // NORI is een uitzondering: vast systeem-afzender, zichtbaar in je eigen
   // kring-groep (niet via andermans groepen, anders zie je dezelfde update
-  // meerdere keren). Welkomstbericht bij signup komt uit de DB-trigger
-  // create_personal_alarm_group — nooit opnieuw aanmaken in de frontend.
+  // meerdere keren). Welkomstbericht komt uit de DB bij het eerste
+  // geaccepteerde contact (send_nori_welcome_if_first_contact) — nooit
+  // opnieuw aanmaken in de frontend.
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
     if (isNoriSystemSender(msg.sender_id)){
@@ -5104,6 +5109,13 @@
   function resolveChatSender(msg){
     if (isNoriSystemSender(msg.sender_id)) return noriSystemParticipant();
     return chatParticipantById[msg.sender_id] || null;
+  }
+
+  function isNoriWelcomeMessage(msg){
+    return !!(msg && typeof msg.body === 'string' && msg.body.indexOf('👋 Welkom bij NORI!') === 0);
+  }
+  function noriSystemBadgeLabel(msg){
+    return isNoriWelcomeMessage(msg) ? t('chat.systemBadgeWelcome') : t('chat.systemBadgeUpdate');
   }
 
   const CHAT_NAME_COLOR_COUNT = 6;
@@ -5360,7 +5372,7 @@
       : '<img' + srcAttr + pathAttr + ' class="chat-media" loading="lazy" alt="">');
     const ticks = own ? chatTicksHtml(msg.id) : '';
     const whoLabel = isSystem
-      ? (escapeHtml(NORI_DISPLAY_NAME) + ' <span class="chat-system-badge">' + escapeHtml(t('chat.systemBadge')) + '</span>')
+      ? (escapeHtml(NORI_DISPLAY_NAME) + ' <span class="chat-system-badge">' + escapeHtml(noriSystemBadgeLabel(msg)) + '</span>')
       : escapeHtml(msg.senderName || 'Onbekend');
     const whoStyle = isSystem ? '' : ' style="color:' + chatNameColor(msg.sender_id) + ';"';
     const bubbleClass = 'chat-bubble ' + (own ? 'own' : (isSystem ? 'other system' : 'other'));

@@ -19,11 +19,12 @@ NORI (`profiles.username = 'nori'`, `is_system = true`, id
 Nooit een normale `connections`-rij voor NORI aanmaken (bidirectionele
 membership-trigger maakt een rommel van de kringen).
 
-### Welkomstbericht bij nieuwe aanmelding
-`create_personal_alarm_group` plaatst **één** bericht van NORI in de nieuwe
-kring (`profiles.welcome_sent_at` + unique index). Exacte tekst staat in
-`public.nori_welcome_message_body()`. Nooit vanuit de frontend opnieuw
-aanmaken bij login/refresh/nieuwe contacten.
+### Welkomstbericht bij eerste contact
+`handle_connection_accepted` → `send_nori_welcome_if_first_contact`:
+plaats **één** bericht van NORI in de kring van wie net hun **eerste**
+contact accepteert/krijgt (`profiles.welcome_sent_at` + unique index).
+Tekst: `public.nori_welcome_message_body()`. Badge in de UI: **Welkom**
+(updates blijven **Update**). Nooit vanuit de frontend opnieuw aanmaken.
 
 ## Dagelijkse update-melding (belangrijk, blijf dit doen)
 
