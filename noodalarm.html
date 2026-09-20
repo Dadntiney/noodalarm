@@ -161,10 +161,13 @@
   body.messages-open{ height:100vh; height:100dvh; overflow:hidden; }
   body.messages-open .app{ height:100vh; height:100dvh; overflow:hidden; }
   body.messages-open #screen-app{ overflow:hidden; }
-  /* Zelfde reden als hierboven, maar dan aan de bovenkant: de vaste
-     header stond op de gewone (zwarte) paginakleur, wat nu tegen de
-     grijze achtergrond als een harde balk oogde. */
-  body.messages-open .app-header{ background:var(--surface); }
+  /* Bewust GEEN grijze header hier — de header stond hier ooit op --surface
+     om tegen een grijze paginaondergrond te matchen, maar die grijze
+     ondergrond bestaat niet meer (zie hierboven). Zonder deze regel zou de
+     header nu als enige element nog grijs zijn, wat tegen de echt zwarte/
+     witte statusbalk (theme-color) en paginakleur precies als een hard
+     balkje bovenaan opvalt — de header blijft dus gewoon --bg, net als de
+     rest van het scherm. */
   /* Op het berichtenscherm vervangen we de gewone header (merk/bel/profiel
      + tabs) door een compacte WhatsApp-achtige gespreksheader (terug +
      avatar + naam + leden) — zie #chatHeader hieronder. Andere schermen
