@@ -918,9 +918,10 @@
     pointer-events:none;
     z-index:1;
   }
-  /* Verticaal gespiegelde WhatsApp-staart (puntje wijst naar avatar onderaan). */
+  /* Verticaal gespiegelde WhatsApp-staart (puntje wijst naar avatar onderaan).
+     1px overlap in de bubbel voorkomt een haarlijntje/naad bij subpixels. */
   .chat-row.other.has-tail .chat-bubble::before{
-    left:-8px;
+    left:-7px;
     background:var(--surface);
     -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 13H0V1.807l6.467 8.625C7.526 11.844 6.958 13 5.188 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
     mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M5.188 13H0V1.807l6.467 8.625C7.526 11.844 6.958 13 5.188 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
@@ -929,7 +930,7 @@
     background:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
   }
   .chat-row.own.has-tail .chat-bubble::before{
-    right:-8px;
+    right:-7px;
     background:var(--accent);
     -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 13H8V1.807L1.533 10.432C.474 11.844 1.042 13 2.812 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
     mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M2.812 13H8V1.807L1.533 10.432C.474 11.844 1.042 13 2.812 13z'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
