@@ -1471,6 +1471,21 @@
         </div>
 
         <div class="settings-item">
+          <div class="settings-item-row" style="align-items:flex-start;">
+            <span class="settings-item-icon icon-green" style="margin-top:2px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <div class="settings-item-body check-in-block">
+              <div class="settings-item-title" id="checkInTitle">Af en toe vragen of je er nog bent</div>
+              <p class="settings-item-hint" id="checkInHint">Standaard staat dit uit. Zet je het aan, dan vraagt NORI zo nu en dan vriendelijk of alles goed gaat (bijvoorbeeld via een melding). Reageer je een tijdje niet, dan krijgen je noodcontacten een zachte tip — geen paniekalarm. Handig als je wilt dat mensen meekijken wanneer je de app maanden niet opent. Je kunt dit altijd weer uitzetten.</p>
+            </div>
+            <button type="button" id="checkInToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Af en toe vragen of je er nog bent" style="margin-top:4px;">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-item">
           <div class="settings-item-row">
             <span class="settings-item-icon icon-green">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
@@ -2318,23 +2333,6 @@
         </div>
       </div>
 
-      <div class="settings-group-label" id="checkInGroupLabel" style="margin-top:24px;">Extra zorg (optioneel)</div>
-      <div class="settings-group">
-        <div class="settings-item">
-          <div class="settings-item-row" style="align-items:flex-start;">
-            <div class="settings-item-body check-in-block">
-              <div class="settings-item-title" id="checkInTitle">Af en toe vragen of je er nog bent</div>
-              <p class="settings-item-hint" id="checkInHint">Standaard staat dit uit. Zet je het aan, dan vraagt NORI zo nu en dan vriendelijk of alles goed gaat (bijvoorbeeld via een melding). Reageer je een tijdje niet, dan krijgen je noodcontacten een zachte tip — geen paniekalarm. Handig als je wilt dat mensen meekijken wanneer je de app maanden niet opent. Je kunt dit altijd weer uitzetten.</p>
-            </div>
-            <div class="settings-item-control" style="padding-top:4px;">
-              <button type="button" id="checkInToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Af en toe vragen of je er nog bent">
-                <span class="toggle-knob"></span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="settings-group" style="margin-top:24px;">
         <div class="settings-item">
           <button type="button" id="profileLogoutButton" class="settings-item-signout">Uitloggen</button>
@@ -2656,7 +2654,6 @@
     { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
     { sel: '#ackStatusCardHint', nl: 'Zie live wie het alarm heeft gezien en wie eraan komt.', en: 'See live who has seen the alarm and who is on the way.' },
     { sel: '#ackOmwButton', nl: 'Ik kom eraan', en: 'I\'m on my way' },
-    { sel: '#checkInGroupLabel', nl: 'Extra zorg (optioneel)', en: 'Extra care (optional)' },
     { sel: '#checkInTitle', nl: 'Af en toe vragen of je er nog bent', en: 'Occasionally ask if you\'re still okay' },
     { sel: '#checkInHint', nl: 'Standaard staat dit uit. Zet je het aan, dan vraagt NORI zo nu en dan vriendelijk of alles goed gaat (bijvoorbeeld via een melding). Reageer je een tijdje niet, dan krijgen je noodcontacten een zachte tip — geen paniekalarm. Handig als je wilt dat mensen meekijken wanneer je de app maanden niet opent. Je kunt dit altijd weer uitzetten.', en: 'This is off by default. If you turn it on, NORI will occasionally ask kindly if everything is okay (for example with a notification). If you don\'t reply for a while, your emergency contacts get a gentle tip — not a panic alarm. Useful if you want people looking out when you don\'t open the app for months. You can turn it off anytime.' },
     { sel: '#checkInToggle', attr: 'aria-label', nl: 'Af en toe vragen of je er nog bent', en: 'Occasionally ask if you\'re still okay' },
