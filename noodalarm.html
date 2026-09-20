@@ -1518,7 +1518,7 @@
             </span>
             <div class="settings-item-body">
               <div class="settings-item-title" id="testAlarmSectionTitle">Oefenen met een testalarm</div>
-              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop zonder dat je noodcontacten er iets van merken — zo weet je precies hoe het voelt en werkt.</p>
+              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet alles wat er gebeurt (locatie, hulpteam, reddingskaart), je noodcontacten merken er niets van.</p>
             </div>
           </div>
           <div class="settings-item-control">
@@ -2176,7 +2176,7 @@
     <!-- =========================== BERICHTEN SCHERM =========================== -->
     <section id="screen-messages" class="screen hidden" style="gap:0;">
 
-      <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.</div>
+      <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — jij oefent alleen; je noodcontacten merken hier niets van.</div>
 
       <!-- Reddingskaart eerst: helpers zien meteen wat ze moeten weten. -->
       <div id="medicalInfoCard" class="medical-info-card rescue-card hidden">
@@ -2447,7 +2447,7 @@
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
     { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
     { sel: '#testAlarmSectionTitle', nl: 'Oefenen met een testalarm', en: 'Practice with a test alarm' },
-    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop zonder dat je noodcontacten er iets van merken — zo weet je precies hoe het voelt en werkt.', en: 'Practice pressing the alarm button without your emergency contacts noticing anything — so you know exactly how it feels and works.' },
+    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet alles wat er gebeurt (locatie, hulpteam, reddingskaart), je noodcontacten merken er niets van.', en: 'Practice pressing the alarm button exactly like a real emergency — you see everything that happens (location, help team, rescue card), your emergency contacts notice nothing.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
@@ -2628,7 +2628,7 @@
     { sel: '#sentByLabel', nl: 'Geactiveerd door', en: 'Activated by' },
     { sel: '#sentAtLabel', nl: 'Tijdstip', en: 'Time' },
     { sel: '#entriesCard h3', nl: 'Noodcontacten', en: 'Emergency contacts' },
-    { sel: '#openMessagesFromSentButton', m: 'l', nl: 'Open Berichten', en: 'Open Messages' },
+    { sel: '#openMessagesFromSentButton', m: 'l', nl: ' Open Berichten', en: ' Open Messages' },
     { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
     { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
     { sel: '#endAlarmFromChatButton', nl: 'Alarm beëindigen', en: 'End alarm' },
@@ -2647,7 +2647,7 @@
     { sel: '#contactsSection .section-title', nl: 'Mijn contacten', en: 'My contacts' },
     { sel: '#contactsEmpty', nl: 'Nog geen contacten. Klik hieronder op "Contact toevoegen" om te beginnen.', en: 'No contacts yet. Click "Add contact" below to get started.' },
     { sel: '#contactsFilterEmpty', nl: 'Niemand gevonden in je contacten.', en: 'No one found in your contacts.' },
-    { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
+    { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — jij oefent alleen; je noodcontacten merken hier niets van.', en: '🧪 <strong>This is a TEST alarm</strong> — practice for you only; your emergency contacts notice nothing.' },
     { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
     { sel: '#rescueCardKicker', nl: 'Reddingskaart', en: 'Rescue card' },
     { sel: '#medicalInfoToggleLabel', m: 'f', nl: 'Alles wat helpers nu moeten weten over ', en: 'Everything helpers need to know about ' },
@@ -2724,12 +2724,17 @@
       'alert.micUnsupported': 'Je toestel of browser ondersteunt geen spraakberichten.',
       'common.busy': 'Bezig…',
       'status.sendFailed': 'VERSTUREN MISLUKT',
-      'status.testSent': '🧪 TESTALARM VOLTOOID',
+      'status.testSent': '🧪 OEFENING GESTART',
       'status.alarmSent': 'NOODALARM VERZONDEN',
       'entry.notified': 'Pushmelding verstuurd',
       'entry.inApp': 'Geen push, wel in app',
+      'entry.wouldNotify': 'Zou melding krijgen',
       'entry.noContacts': 'Geen noodcontacten gekoppeld',
-      'entry.testNote': '🧪 Dit was een oefening — je noodcontacten hebben hier niets van gemerkt (geen melding).',
+      'entry.testNote': '🧪 Oefening — niemand heeft een melding gekregen. Hieronder zie je hoe het eruitziet bij een echt alarm.',
+      'sent.openPreview': 'Bekijk wat er gebeurt',
+      'sent.openMessages': 'Open Berichten',
+      'ack.hintTest': 'Bij een echt alarm zie je hier live wie reageert. Nu oefen je alleen — niemand is gewaarschuwd.',
+      'medical.previewHint': 'Zo ziet jouw reddingskaart eruit voor wie je helpt.',
       'time.now': 'zojuist',
       'time.minAgo': '{n} min geleden',
       'time.hourAgo': '{n} uur geleden',
@@ -2869,12 +2874,17 @@
       'alert.micUnsupported': 'Your device or browser doesn\'t support voice messages.',
       'common.busy': 'Working…',
       'status.sendFailed': 'SENDING FAILED',
-      'status.testSent': '🧪 TEST ALARM COMPLETE',
+      'status.testSent': '🧪 PRACTICE STARTED',
       'status.alarmSent': 'EMERGENCY ALARM SENT',
       'entry.notified': 'Push notification sent',
       'entry.inApp': 'No push, but in app',
+      'entry.wouldNotify': 'Would be notified',
       'entry.noContacts': 'No emergency contacts linked',
-      'entry.testNote': '🧪 This was a practice run — your emergency contacts didn\'t notice anything (no notification).',
+      'entry.testNote': '🧪 Practice — nobody received a notification. Below is how a real alarm looks.',
+      'sent.openPreview': 'See what happens',
+      'sent.openMessages': 'Open Messages',
+      'ack.hintTest': 'In a real alarm you see live who responds here. This is practice only — nobody was alerted.',
+      'medical.previewHint': 'This is how your rescue card looks to the people helping you.',
       'time.now': 'just now',
       'time.minAgo': '{n} min ago',
       'time.hourAgo': '{n} hr ago',
@@ -2999,6 +3009,7 @@
   function applyTranslations(){
     applyStaticTranslations();
     renderCommunityUserCount();
+    refreshOpenMessagesFromSentLabel();
   }
   function setLanguage(lang){
     currentLang = lang === 'en' ? 'en' : 'nl';
@@ -5049,6 +5060,8 @@
       await endMyActiveAlarm();
       els.ackStatusCard.classList.add('hidden');
       els.locationCard.classList.add('hidden');
+      els.medicalInfoCard.classList.add('hidden');
+      els.testModeBanner.classList.add('hidden');
       els.endAlarmFromChatButton.disabled = false;
     });
   }
@@ -5121,6 +5134,16 @@
     target.classList.remove('hidden');
   }
 
+  let lastSentWasTest = false;
+  function refreshOpenMessagesFromSentLabel(){
+    if (!els.openMessagesFromSentButton) return;
+    const label = lastSentWasTest ? t('sent.openPreview') : t('sent.openMessages');
+    const icon = els.openMessagesFromSentButton.querySelector('svg');
+    els.openMessagesFromSentButton.textContent = '';
+    if (icon) els.openMessagesFromSentButton.appendChild(icon);
+    els.openMessagesFromSentButton.appendChild(document.createTextNode(' ' + label));
+  }
+
   async function activateAlarm(testMode, silent){
     els.alarmButton.disabled = true;
     if (!silent && navigator.vibrate) navigator.vibrate([80,40,80]);
@@ -5185,12 +5208,21 @@
     }
 
     // Oefenmodus stuurt bewust geen push/in-app-melding naar wie dan
-    // ook (zie send-alert) — de "notified"-namen die de server teruggeeft
-    // gelden dus NIET als echte afleverstatus hier, alleen bij een echt
-    // alarm. Anders zou dit scherm bij een test ten onrechte "Pushmelding
-    // verstuurd" laten zien terwijl niemand iets heeft gekregen.
+    // ook (zie send-alert). Het verzonden-scherm bootst wél 1-op-1 de
+    // echte ervaring na (zelfde contactenlijst), met statussen die
+    // eerlijk zeggen "zou melding krijgen" i.p.v. te doen alsof er
+    // echt iets is verstuurd.
     if (testMode){
-      els.entriesList.innerHTML = '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.testNote')) + '</span></li>';
+      const note = '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.testNote')) + '</span></li>';
+      const rows = contacts.length
+        ? contacts.map(c => '<li>' +
+            '<span class="entry-name">' + escapeHtml(c.full_name) + '</span>' +
+            '<span class="entry-status st-amber">' +
+              '<span class="dot dot-amber"></span>' +
+              escapeHtml(t('entry.wouldNotify')) +
+            '</span></li>').join('')
+        : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
+      els.entriesList.innerHTML = note + rows;
     } else {
       const notifiedSet = new Set(result.notified || []);
       els.entriesList.innerHTML = contacts.length
@@ -5204,6 +5236,11 @@
               '</span></li>';
           }).join('')
         : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
+    }
+
+    if (els.openMessagesFromSentButton){
+      lastSentWasTest = !!testMode;
+      refreshOpenMessagesFromSentLabel();
     }
 
     // Eerst de bevestiging laten zien dat het alarm daadwerkelijk is
@@ -5644,8 +5681,14 @@
     renderChatHeader();
 
     // Locatiekaart alleen voor alarm van jezelf of een bevestigd contact.
+    // Oefenalarms (test_mode) zijn strikt privé voor de activator — ook
+    // als een contact toevallig Berichten open heeft, mag die er niets
+    // van zien (geen melding, geen kaart, geen hulpteam).
     let visibleAlarm = alarmRow;
     if (visibleAlarm && visibleAlarm.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visibleAlarm.triggered_by)){
+      visibleAlarm = null;
+    }
+    if (visibleAlarm && visibleAlarm.test_mode && visibleAlarm.triggered_by !== currentSession.user.id){
       visibleAlarm = null;
     }
     handleActiveAlarmChanged(visibleAlarm);
@@ -5707,11 +5750,20 @@
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
     renderLocationCard(alarmRow);
     renderMedicalInfoCard(alarmRow);
-    if (alarmRow && alarmRow.status === 'active' && !alarmRow.test_mode){
+    if (alarmRow && alarmRow.status === 'active'){
       const isActivator = alarmRow.triggered_by === currentSession.user.id;
-      startAckWatcher(alarmRow.id, alarmRow.created_at, isActivator);
+      const isTest = !!alarmRow.test_mode;
+      // Oefenalarm: alleen de activator mag de 1-op-1 preview zien
+      // (hulpteam + reddingskaart). Helpers/contacten krijgen hier nooit
+      // een watcher — zij zijn niet gewaarschuwd.
+      if (isTest && !isActivator){
+        stopAckWatcher();
+        return;
+      }
+      startAckWatcher(alarmRow.id, alarmRow.created_at, isActivator, isTest);
       // Helper die het alarm-scherm opent: markeer als gezien (niet als “kom eraan”).
-      if (!isActivator){
+      // Bij oefenalarm bestaan er geen alarm-notificaties — dus overslaan.
+      if (!isActivator && !isTest){
         sb.from('notifications').update({ is_read: true })
           .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmRow.id)
           .is('omw_at', null);
@@ -5769,7 +5821,7 @@
       lastAddressCoords = null;
       return;
     }
-    const { lat, lng, location_accuracy, location_updated_at, triggered_by, test_mode } = alarmRow;
+    const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
     const isOwn = triggered_by === currentSession.user.id;
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
@@ -5781,11 +5833,9 @@
     // zoekopdracht van te maken.
     els.locationOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
-    // Bij een oefenalarm (test_mode) verschijnt het "wie heeft gereageerd"-
-    // kaartje nooit, dus is dit de enige plek in Berichten om zo'n oefening
-    // zelf af te sluiten — bij een écht alarm staat die knop al op de
-    // ack-status-kaart, dus dan niet nog een keer hier tonen.
-    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.toggle('hidden', !(isOwn && test_mode));
+    // Eind-knop zit op de hulpteam-kaart (ook bij oefenalarm); hier dus niet
+    // dubbel tonen.
+    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.add('hidden');
     els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
     renderLocationMeta(location_updated_at);
 
@@ -5835,8 +5885,16 @@
   // ook als diegene geen medische info heeft ingevuld, want dan zijn dit
   // juist de twee dingen die een reagerend contact nog wél direct kan doen.
   // De uitklapbare medische details tonen we alleen als er iets is ingevuld.
+  // Uitzondering: bij een oefenalarm mag de activator de reddingskaart wél
+  // zien — precies zoals helpers die zouden zien bij een echt alarm.
   async function renderMedicalInfoCard(alarmRow){
-    if (!alarmRow || alarmRow.triggered_by === currentSession.user.id){
+    if (!alarmRow){
+      els.medicalInfoCard.classList.add('hidden');
+      return;
+    }
+    const isOwn = alarmRow.triggered_by === currentSession.user.id;
+    const isTestPreview = isOwn && !!alarmRow.test_mode;
+    if (isOwn && !isTestPreview){
       els.medicalInfoCard.classList.add('hidden');
       return;
     }
@@ -5846,13 +5904,27 @@
     // worden.
     const genAtStart = chatOpenGen;
     els.medicalInfoCard.classList.remove('hidden');
-    const [{ data }, { data: practicalData }] = await Promise.all([
-      sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id }),
-      sb.rpc('get_activator_practical_info', { p_alarm_id: alarmRow.id })
-    ]);
+    let info = null;
+    let practical = null;
+    if (isTestPreview){
+      // Eigen data rechtstreeks: de helper-RPC's zijn bedoeld voor anderen
+      // tijdens een écht alarm; voor de oefen-preview lezen we gewoon de
+      // eigen rijen (die mag je altijd zien).
+      const [{ data: med }, { data: prac }] = await Promise.all([
+        sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle(),
+        sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle()
+      ]);
+      info = med || null;
+      practical = prac || null;
+    } else {
+      const [{ data }, { data: practicalData }] = await Promise.all([
+        sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id }),
+        sb.rpc('get_activator_practical_info', { p_alarm_id: alarmRow.id })
+      ]);
+      info = data && data[0];
+      practical = practicalData && practicalData[0];
+    }
     if (genAtStart !== chatOpenGen) return;
-    const info = data && data[0];
-    const practical = practicalData && practicalData[0];
     const hasResus = info && typeof info.resuscitate === 'boolean';
     const hasAny = (info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
       || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital
@@ -5864,6 +5936,9 @@
       els.medicalInfoCard.classList.remove('open');
       els.medicalInfoBody.innerHTML = '';
       els.medicalResusBanner.classList.add('hidden');
+      // Bij oefen-preview zonder medische info: EHBO/112-knoppen blijven
+      // zichtbaar zodat je wél ziet wat helpers altijd onder handbereik hebben.
+      if (isTestPreview) els.medicalInfoCard.classList.remove('hidden');
       return;
     }
     // Voor een ambulanceteam dat binnenkomt terwijl jij CPR doet, is elke
@@ -5872,7 +5947,9 @@
     els.medicalInfoCard.classList.add('open');
     els.medicalInfoBody.classList.remove('hidden');
     const activator = chatParticipantById[alarmRow.triggered_by];
-    const activatorName = activator ? activator.full_name : t('conversation.unknown');
+    const activatorName = isTestPreview
+      ? (currentProfile ? currentProfile.full_name : t('location.you'))
+      : (activator ? activator.full_name : t('conversation.unknown'));
     els.medicalInfoName.textContent = activatorName;
     if (hasResus){
       els.medicalResusBanner.textContent = info.resuscitate
@@ -5887,6 +5964,9 @@
     const contact1 = [medical.contact1_name, medical.contact1_relation].filter(Boolean).join(' — ') + (medical.contact1_phone ? ' · ' + medical.contact1_phone : '');
     const contact2 = [medical.contact2_name, medical.contact2_relation].filter(Boolean).join(' — ') + (medical.contact2_phone ? ' · ' + medical.contact2_phone : '');
     const rows = [];
+    if (isTestPreview){
+      rows.push('<div class="medical-info-row" style="color:var(--text-faint);"><em>' + escapeHtml(t('medical.previewHint')) + '</em></div>');
+    }
     // Sleutel buitenshuis staat bewust los van medische info (andere tabel,
     // eigen knop op het profiel) maar hoort hier wel bovenaan: vaak is
     // "hoe kom ik binnen" letterlijk de eerste stap voor wie ter plekke komt.
@@ -5958,6 +6038,7 @@
   let ackWatcherAlarmId = null;
   let ackWatcherCreatedAt = null;
   let ackWatcherIsActivator = false;
+  let ackWatcherIsTest = false;
   let escalationTriggered = false;
 
   function stopAckWatcher(){
@@ -5965,6 +6046,7 @@
     ackWatcherAlarmId = null;
     ackWatcherCreatedAt = null;
     ackWatcherIsActivator = false;
+    ackWatcherIsTest = false;
     escalationTriggered = false;
     els.ackStatusCard.classList.add('hidden');
     els.escalationBanner.classList.add('hidden');
@@ -5994,15 +6076,17 @@
       return '<div class="ack-pill' + cls + '"><span class="ack-dot"></span><span>' + escapeHtml(name) + '</span><span class="ack-pill-status">' + escapeHtml(status) + '</span></div>';
     }).join('');
 
-    // Titel / hint afhankelijk van rol
+    // Titel / hint afhankelijk van rol (en oefenmodus)
     if (els.ackStatusCardTitle){
       els.ackStatusCardTitle.textContent = ackWatcherIsActivator ? t('ack.titleActivator') : t('ack.titleHelper');
     }
     if (els.ackStatusCardHint){
-      els.ackStatusCardHint.textContent = ackWatcherIsActivator ? t('ack.hintActivator') : t('ack.hintHelper');
+      els.ackStatusCardHint.textContent = ackWatcherIsTest
+        ? t('ack.hintTest')
+        : (ackWatcherIsActivator ? t('ack.hintActivator') : t('ack.hintHelper'));
     }
 
-    // Helper: knop “Ik kom eraan”
+    // Helper: knop “Ik kom eraan” — niet tijdens oefen-preview (jij bent activator)
     if (els.ackOmwButton){
       const mine = byUser[me] || {};
       const iAmHelper = !ackWatcherIsActivator;
@@ -6023,8 +6107,11 @@
       const anySeen = others.some(id => byUser[id] && byUser[id].is_read);
       const elapsed = Date.now() - new Date(createdAt).getTime();
       if (!anyComing && !anySeen && elapsed >= ESCALATION_TIMEOUT_MS){
+        // Escalatie-UI tonen mag ook bij oefenen (zo zie je wat er zou
+        // gebeuren), maar NOOIT opnieuw een alert versturen — dat zou
+        // contacten alsnog wakker maken.
         showEscalationBanner(others);
-        if (!escalationTriggered){
+        if (!escalationTriggered && !ackWatcherIsTest){
           escalationTriggered = true;
           resendAlert(alarmId);
         }
@@ -6056,12 +6143,13 @@
     } catch (err){ /* stille poging — de belknoppen blijven hoe dan ook zichtbaar */ }
   }
 
-  function startAckWatcher(alarmId, createdAt, isActivator){
-    if (ackWatcherAlarmId === alarmId && ackWatcherIsActivator === !!isActivator) return;
+  function startAckWatcher(alarmId, createdAt, isActivator, isTest){
+    if (ackWatcherAlarmId === alarmId && ackWatcherIsActivator === !!isActivator && ackWatcherIsTest === !!isTest) return;
     stopAckWatcher();
     ackWatcherAlarmId = alarmId;
     ackWatcherCreatedAt = createdAt;
     ackWatcherIsActivator = !!isActivator;
+    ackWatcherIsTest = !!isTest;
     escalationTriggered = false;
     pollAckStatus(alarmId, createdAt);
     ackWatcherTimer = setInterval(() => pollAckStatus(alarmId, createdAt), 8000);
@@ -6250,6 +6338,10 @@
         if (row.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(row.triggered_by)){
           return;
         }
+        // Oefenalarm: alleen de activator mag het zien.
+        if (row.test_mode && row.triggered_by !== currentSession.user.id){
+          return;
+        }
         handleActiveAlarmChanged(row);
         return;
       }
@@ -6262,6 +6354,9 @@
         .order('created_at', { ascending:false }).limit(1).maybeSingle();
       let visible = data || null;
       if (visible && visible.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visible.triggered_by)){
+        visible = null;
+      }
+      if (visible && visible.test_mode && visible.triggered_by !== currentSession.user.id){
         visible = null;
       }
       handleActiveAlarmChanged(visible);
