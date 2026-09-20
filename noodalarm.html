@@ -859,6 +859,36 @@
   .chat-bubble:has(.chat-media){ max-width:90%; }
   .chat-bubble.own{ background:var(--accent); color:#fff; }
   .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); box-shadow:var(--shadow-card); }
+  .chat-bubble.system{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--red) 6%, var(--surface)), var(--surface));
+    border:1px solid color-mix(in srgb, var(--red) 28%, var(--border-soft));
+    box-shadow:var(--shadow-card);
+  }
+  .chat-bubble.system .who{
+    color:var(--red);
+    opacity:1;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .chat-system-badge{
+    display:inline-flex;
+    align-items:center;
+    font-size:0.6875rem;
+    font-weight:800;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--red);
+    background:color-mix(in srgb, var(--red) 12%, transparent);
+    border-radius:999px;
+    padding:2px 7px;
+  }
+  .avatar.nori-system-avatar{
+    background:radial-gradient(circle at 32% 24%, var(--red-bright), var(--red) 60%, var(--red-dark) 100%);
+    color:#fff;
+    overflow:hidden;
+  }
+  .avatar.nori-system-avatar img{ width:100%; height:100%; object-fit:cover; }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
   .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:0.75rem; white-space:nowrap; display:flex; align-items:center; gap:3px; }
@@ -2217,6 +2247,24 @@
   const VAPID_PUBLIC_KEY = 'BKaq76q5i2lyKB7XqW9sP-J5CDDv3VxCRgyJvsmGQwYjOcgNdmd2zsbbpKUMiptIFSfDBnpeMAYcn1gTs4uDn8g';
   const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
 
+  // Vast systeemprofiel NORI — geen gewoon contact. Verborgen in Contacten,
+  // wel zichtbaar als afzender van systeemberichten/updates in Berichten.
+  const NORI_SYSTEM_USER_ID = '961b3add-ad24-4e56-8c43-461676800cb2';
+  const NORI_DISPLAY_NAME = 'NORI';
+  const NORI_AVATAR_URL = 'icon-192.png';
+  function isNoriSystemSender(userId){
+    return !!userId && userId === NORI_SYSTEM_USER_ID;
+  }
+  function noriSystemParticipant(){
+    return {
+      full_name: NORI_DISPLAY_NAME,
+      avatar_url: NORI_AVATAR_URL,
+      phone_number: null,
+      added_at: null,
+      is_system: true
+    };
+  }
+
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   /* =========================================================================
@@ -2609,6 +2657,7 @@
       'chat.headerSub': 'Je berichten met je contacten',
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
+      'chat.systemBadge': 'Update',
       'location.fetchingAddress': 'Adres ophalen…',
       'locationTest.busy': 'Bezig met opzoeken…',
       'locationTest.success': 'Gelukt! Nauwkeurig tot op ±{n} meter.',
@@ -2633,6 +2682,8 @@
       'contacts.sentInvite': 'Uitnodiging verzonden',
       'contacts.connected': 'Verbonden',
       'contacts.communityCount': 'Inmiddels maken al {n} mensen met plezier en in alle veiligheid gebruik van NORI.',
+      'contacts.noriNotAddable': 'NORI is geen gewoon contact en kan niet worden toegevoegd.',
+      'contacts.noriNotRemovable': 'NORI is een vast systeemcontact en kan niet worden verwijderd.',
       'errorPrefix.save': 'Opslaan mislukt: {msg}',
       'success.saved': 'Wijzigingen opgeslagen.',
       'success.medicalSaved': 'Medische info opgeslagen.',
@@ -2736,6 +2787,7 @@
       'chat.headerSub': 'Your messages with your contacts',
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
+      'chat.systemBadge': 'Update',
       'location.fetchingAddress': 'Fetching address…',
       'locationTest.busy': 'Looking it up…',
       'locationTest.success': 'It works! Accurate to within ±{n} metres.',
@@ -2760,6 +2812,8 @@
       'contacts.sentInvite': 'Invite sent',
       'contacts.connected': 'Connected',
       'contacts.communityCount': 'Already {n} people are using NORI safely and with joy.',
+      'contacts.noriNotAddable': 'NORI is not a regular contact and cannot be added.',
+      'contacts.noriNotRemovable': 'NORI is a fixed system contact and cannot be removed.',
       'errorPrefix.save': 'Saving failed: {msg}',
       'success.saved': 'Changes saved.',
       'success.medicalSaved': 'Medical info saved.',
@@ -4098,6 +4152,7 @@
 
   async function handleInvite(inviterId){
     if (inviterId === currentSession.user.id) return;
+    if (isNoriSystemSender(inviterId)) return;
     const { data } = await sb.rpc('get_invite_profile', { p_user_id: inviterId });
     const profile = data && data[0];
     if (!profile) return;
@@ -4176,6 +4231,10 @@
   els.searchInput.addEventListener('input', runSearch);
 
   async function sendInvite(btn){
+    if (isNoriSystemSender(btn.dataset.id)){
+      window.alert(t('alert.inviteFailed', { msg: t('contacts.noriNotAddable') }));
+      return;
+    }
     btn.disabled = true;
     btn.textContent = t('common.busy');
     const { error } = await sb.rpc('send_connection_request', { p_target_id: btn.dataset.id });
@@ -4257,7 +4316,8 @@
   const CONTACTS_FILTER_MIN = 10;
   async function refreshContacts(){
     const { data } = await sb.rpc('my_contacts');
-    myContactsData = data || [];
+    // NORI is een systeem-afzender, nooit een gewoon contact in de lijst.
+    myContactsData = (data || []).filter(c => !isNoriSystemSender(c.contact_id) && c.username !== 'nori');
     els.tabContactsCount.textContent = myContactsData.length > 0 ? '(' + myContactsData.length + ')' : '';
     els.tabContactsCount.classList.toggle('hidden', myContactsData.length === 0);
     const showFilter = myContactsData.length > CONTACTS_FILTER_MIN;
@@ -4297,6 +4357,11 @@
   }
 
   async function removeContact(btn){
+    const contact = (myContactsData || []).find(c => String(c.connection_id) === String(btn.dataset.id));
+    if (contact && (isNoriSystemSender(contact.contact_id) || contact.username === 'nori')){
+      window.alert(t('contacts.noriNotRemovable'));
+      return;
+    }
     if (!window.confirm(t('confirm.removeContact'))) return;
     btn.disabled = true;
     const { error } = await sb.from('connections').update({ status: 'removed' }).eq('id', btn.dataset.id);
@@ -5020,13 +5085,24 @@
 
   // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
+  // NORI is een uitzondering: vast systeem-afzender, zichtbaar in je eigen
+  // kring-groep (niet via andermans groepen, anders zie je dezelfde update
+  // meerdere keren).
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
+    if (isNoriSystemSender(msg.sender_id)){
+      return !!myGroupId && msg.group_id === myGroupId;
+    }
     if (msg.sender_id === currentSession.user.id) return true;
     if (!chatVisibleContactIds.has(msg.sender_id)) return false;
     const since = chatMemberSinceByGroup[msg.group_id];
     if (since && new Date(msg.created_at) < new Date(since)) return false;
     return true;
+  }
+
+  function resolveChatSender(msg){
+    if (isNoriSystemSender(msg.sender_id)) return noriSystemParticipant();
+    return chatParticipantById[msg.sender_id] || null;
   }
 
   const CHAT_NAME_COLOR_COUNT = 6;
@@ -5221,8 +5297,11 @@
     // kunnen het ooit gelezen hebben (nieuwere leden zien oudere berichten
     // sowieso niet) — anders bleven vinkjes voor oude berichten voor altijd
     // op "verzonden" staan zodra er later iemand bij kwam.
+    // NORI (systeem) telt niet mee voor vinkjes.
     const others = Object.keys(chatParticipantById).filter(id => {
       if (id === currentSession.user.id) return false;
+      if (isNoriSystemSender(id)) return false;
+      if (chatParticipantById[id] && chatParticipantById[id].is_system) return false;
       if (!msg) return true;
       const addedAt = chatParticipantById[id].added_at;
       // Onbekende added_at (zeldzame race bij een net-live binnengekomen
@@ -5263,6 +5342,7 @@
   // zonder de HTML opnieuw te hoeven opbouwen.
   function chatBubbleHtml(msg, showMeta){
     const own = msg.sender_id === currentSession.user.id;
+    const isSystem = isNoriSystemSender(msg.sender_id);
     const time = new Date(msg.created_at).toLocaleTimeString(localeTag(), { hour:'2-digit', minute:'2-digit' });
     // media_url mag ontbreken terwijl media_path er wél is — dan is de
     // getekende URL nog niet opgehaald (zie openMessages: berichten
@@ -5278,15 +5358,24 @@
       ? voiceMsgHtml(msg, srcAttr, pathAttr)
       : '<img' + srcAttr + pathAttr + ' class="chat-media" loading="lazy" alt="">');
     const ticks = own ? chatTicksHtml(msg.id) : '';
-    const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
-      (own ? '' : '<div class="who" style="color:' + chatNameColor(msg.sender_id) + ';">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
+    const whoLabel = isSystem
+      ? (escapeHtml(NORI_DISPLAY_NAME) + ' <span class="chat-system-badge">' + escapeHtml(t('chat.systemBadge')) + '</span>')
+      : escapeHtml(msg.senderName || 'Onbekend');
+    const whoStyle = isSystem ? '' : ' style="color:' + chatNameColor(msg.sender_id) + ';"';
+    const bubbleClass = 'chat-bubble ' + (own ? 'own' : (isSystem ? 'other system' : 'other'));
+    const bubble = '<div class="' + bubbleClass + '">' +
+      (own ? '' : '<div class="who"' + whoStyle + '>' + whoLabel + '</div>') +
       media +
       '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
     if (own) return '<div class="chat-row own" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' + bubble + '</div>';
     const isVoice = msg.media_type === 'audio';
-    return '<div class="chat-row other' + (showMeta ? '' : ' grouped') + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
-      '<span class="avatar-wrap"><div class="avatar sm">' + avatarInner(msg.senderAvatar) + '</div>' + (isVoice ? VOICE_MIC_BADGE_HTML : '') + '</span>' +
+    const avatarClass = isSystem ? 'avatar sm nori-system-avatar' : 'avatar sm';
+    const avatarHtml = isSystem
+      ? '<img src="' + escapeHtml(NORI_AVATAR_URL) + '" alt="" decoding="async">'
+      : avatarInner(msg.senderAvatar);
+    return '<div class="chat-row other' + (isSystem ? ' system' : '') + (showMeta ? '' : ' grouped') + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
+      '<span class="avatar-wrap"><div class="' + avatarClass + '">' + avatarHtml + '</div>' + (isVoice ? VOICE_MIC_BADGE_HTML : '') + '</span>' +
       bubble +
       '</div>';
   }
@@ -5302,7 +5391,7 @@
   }
   function renderChatHeader(){
     const others = Object.keys(chatParticipantById)
-      .filter(id => id !== currentSession.user.id)
+      .filter(id => id !== currentSession.user.id && !isNoriSystemSender(id) && !(chatParticipantById[id] && chatParticipantById[id].is_system))
       .map(id => chatParticipantById[id]);
     els.chatHeaderAvatar.innerHTML = chatHeaderFacepileHtml(others);
     els.chatHeaderTitle.textContent = t('chat.headerTitle');
@@ -5369,11 +5458,13 @@
 
     chatParticipantById = {};
     (myMembers || []).forEach(m => {
+      if (isNoriSystemSender(m.user_id)) return;
       chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at };
     });
     // Contacten die we uit hun eigen groep-berichten tonen, moeten ook een
     // naam/avatar hebben — ook als get_group_participants ze (nog) niet gaf.
     (myContactsData || []).forEach(c => {
+      if (isNoriSystemSender(c.contact_id)) return;
       if (!chatParticipantById[c.contact_id]){
         chatParticipantById[c.contact_id] = { full_name: c.full_name, avatar_url: c.avatar_url, phone_number: c.phone_number || null, added_at: null };
       }
@@ -5400,11 +5491,12 @@
       ? list.map((m, i) => {
           const next = list[i + 1];
           const showMeta = !next || next.sender_id !== m.sender_id;
+          const sender = resolveChatSender(m);
           return chatBubbleHtml({
             ...m,
             media_url: null,
-            senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
-            senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
+            senderName: sender ? sender.full_name : 'Onbekend',
+            senderAvatar: sender ? sender.avatar_url : null
           }, showMeta);
         }).join('')
       : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
@@ -5839,11 +5931,11 @@
       if (!shouldShowChatMessage(msg)) return;
       (async () => {
         chatMessageById[msg.id] = msg;
-        let participant = chatParticipantById[msg.sender_id];
+        let participant = resolveChatSender(msg);
         if (!participant){
           const { data: p } = await sb.from('profiles').select('full_name, avatar_url, phone_number').eq('id', msg.sender_id).single();
           participant = p ? { full_name: p.full_name, avatar_url: p.avatar_url, phone_number: p.phone_number } : { full_name: 'Onbekend', avatar_url: null, phone_number: null };
-          chatParticipantById[msg.sender_id] = participant;
+          if (!isNoriSystemSender(msg.sender_id)) chatParticipantById[msg.sender_id] = participant;
         }
         let mediaUrl = null;
         if (msg.media_path){
