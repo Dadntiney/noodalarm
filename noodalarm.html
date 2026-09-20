@@ -946,25 +946,35 @@
   .tick-icon{ color:rgba(255,255,255,.75); }
   .tick-icon.read{ color:#6fd8ff; }
   .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
-  /* Foto/video vult de bubbel tot aan de rand (negatieve margin cancelt
-     de padding van .chat-bubble). Onderkant bewust 0: daar komt een
-     compacte tijdbalk, geen dikke blauwe strook. */
+  /* Foto/video vult de bubbel tot aan de rand. Zonder bijschrift: tijd
+     over de media (geen aparte blauwe balk). Met bijschrift: media tot
+     aan de tekst, compacte footer. */
   .chat-media{
     display:block; max-height:380px;
-    margin:-8px -12px 0 -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
-    border-radius:7.5px 7.5px 0 0;
+    margin:-8px -12px -8px -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
+    border-radius:7.5px;
   }
   img.chat-media{ cursor:pointer; }
-  .chat-video-wrap{ position:relative; margin:-8px -12px 0 -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px 7.5px 0 0; overflow:hidden; }
-  /* Strakke tijdbalk onder foto/video (~20px i.p.v. opgeblazen line-height). */
-  .chat-bubble:has(> img.chat-media),
-  .chat-bubble:has(> .chat-video-wrap){ padding-bottom:4px; }
+  .chat-video-wrap{ position:relative; margin:-8px -12px -8px -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px; overflow:hidden; }
+  .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
+  /* Foto/video mét bijschrift: media alleen bovenaan afronden, tekst eronder. */
+  .chat-bubble:has(.text:not(.media-caption-empty)) > img.chat-media,
+  .chat-bubble:has(.text:not(.media-caption-empty)) > .chat-video-wrap{
+    margin-bottom:6px; border-radius:7.5px 7.5px 0 0;
+  }
+  /* Zonder bijschrift: tijd+vinkjes over de foto, rechtsonder. */
+  .chat-bubble:has(> .text.media-caption-empty){ padding-bottom:8px; }
   .chat-bubble .text.media-caption-empty{
+    position:absolute; right:10px; bottom:7px; left:auto;
+    margin:0; padding:0; line-height:1; min-height:0;
     display:flex; justify-content:flex-end; align-items:center;
-    line-height:1; min-height:0; margin-top:3px;
+    z-index:1;
+    text-shadow:0 1px 2px rgba(0,0,0,.45);
   }
   .chat-bubble .text.media-caption-empty .when{ float:none; margin:0; }
-  .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
+  .chat-bubble .text.media-caption-empty .when-time{ opacity:.95; color:#fff; }
+  .chat-bubble.own .text.media-caption-empty .tick-icon{ color:rgba(255,255,255,.92); }
+  .chat-bubble.own .text.media-caption-empty .tick-icon.read{ color:#6fd8ff; filter:drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
   .chat-video-play{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
     width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,.92);
