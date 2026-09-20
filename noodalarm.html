@@ -947,14 +947,23 @@
   .tick-icon.read{ color:#6fd8ff; }
   .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
   /* Foto/video vult de bubbel tot aan de rand (negatieve margin cancelt
-     precies de padding van .chat-bubble). */
+     de padding van .chat-bubble). Onderkant bewust 0: daar komt een
+     compacte tijdbalk, geen dikke blauwe strook. */
   .chat-media{
     display:block; max-height:380px;
-    margin:-8px -12px -8px -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
+    margin:-8px -12px 0 -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
     border-radius:7.5px 7.5px 0 0;
   }
   img.chat-media{ cursor:pointer; }
-  .chat-video-wrap{ position:relative; margin:-8px -12px 6px -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px 7.5px 0 0; overflow:hidden; }
+  .chat-video-wrap{ position:relative; margin:-8px -12px 0 -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px 7.5px 0 0; overflow:hidden; }
+  /* Strakke tijdbalk onder foto/video (~20px i.p.v. opgeblazen line-height). */
+  .chat-bubble:has(> img.chat-media),
+  .chat-bubble:has(> .chat-video-wrap){ padding-bottom:4px; }
+  .chat-bubble .text.media-caption-empty{
+    display:flex; justify-content:flex-end; align-items:center;
+    line-height:1; min-height:0; margin-top:3px;
+  }
+  .chat-bubble .text.media-caption-empty .when{ float:none; margin:0; }
   .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
   .chat-video-play{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -5367,10 +5376,13 @@
       : escapeHtml(msg.senderName || 'Onbekend');
     const whoStyle = isSystem ? '' : ' style="color:' + chatNameColor(msg.sender_id) + ';"';
     const bubbleClass = 'chat-bubble ' + (own ? 'own' : (isSystem ? 'other system' : 'other'));
+    // Foto/video zonder bijschrift: compacte tijdbalk i.p.v. opgeblazen .text-regel.
+    const mediaCaptionEmpty = !!(msg.media_path && msg.media_type !== 'audio' && !msg.body);
+    const textClass = 'text' + (mediaCaptionEmpty ? ' media-caption-empty' : '');
     const bubble = '<div class="' + bubbleClass + '">' +
       (own ? '' : '<div class="who"' + whoStyle + '>' + whoLabel + '</div>') +
       media +
-      '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
+      '<div class="' + textClass + '">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
     const rowClass = 'chat-row ' + (own ? 'own' : ('other' + (isSystem ? ' system' : ''))) +
       (isFirst ? ' has-tail' : ' grouped');
