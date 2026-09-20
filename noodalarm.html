@@ -725,6 +725,15 @@
   /* Op Alarm: copyright onderaan het scherm, los van de knop — zo hoort
      de zin niet bij de actie en oogt het scherm rustiger. */
   #screen-alarm{ gap:0; }
+  /* Ruimte boven de knop zodat de rode gloed niet tegen de tabs
+     “afgeknipt” oogt; iets meer lucht tussen knop en uitlegtekst. */
+  #screen-alarm > .stage{
+    width:100%;
+    padding-top:32px;
+  }
+  #view-idle{
+    gap:36px;
+  }
   #screen-alarm > footer.note{
     margin-top:auto;
     padding-top:32px;
