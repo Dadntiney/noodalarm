@@ -2099,6 +2099,7 @@
       </div>
 
       <div id="chatMessages" class="chat-messages"></div>
+      <div id="chatReadOnlyNotice" class="empty-state hidden" style="margin:0 14px 14px;">Je kunt hier alleen meelezen — een bericht sturen kan alleen naar je eigen kring, bij "Berichten".</div>
       <form id="chatForm" class="chat-form">
         <div id="chatEditBanner" class="chat-edit-banner hidden">
           <div class="chat-edit-banner-text">
@@ -2504,6 +2505,7 @@
     { sel: '#chatCameraButton', attr: 'aria-label', nl: 'Foto maken', en: 'Take photo' },
     { sel: '#chatInput', attr: 'placeholder', nl: 'Typ een bericht…', en: 'Type a message…' },
     { sel: '#chatSendButton', attr: 'aria-label', nl: 'Versturen', en: 'Send' },
+    { sel: '#chatReadOnlyNotice', nl: 'Je kunt hier alleen meelezen — een bericht sturen kan alleen naar je eigen kring, bij "Berichten".', en: 'You can only read along here — you can only send a message to your own circle, under "Messages".' },
     { sel: '#chatVoiceButton', attr: 'aria-label', nl: 'Spraakbericht opnemen', en: 'Record voice message' },
     { sel: '#chatRecordingCancel', attr: 'aria-label', nl: 'Opname annuleren', en: 'Cancel recording' },
     { sel: '#chatRecordingSend', attr: 'aria-label', nl: 'Spraakbericht versturen', en: 'Send voice message' },
@@ -2945,6 +2947,7 @@
     chatHeaderTitle: document.getElementById('chatHeaderTitle'),
     chatHeaderSub: document.getElementById('chatHeaderSub'),
     chatMessages: document.getElementById('chatMessages'),
+    chatReadOnlyNotice: document.getElementById('chatReadOnlyNotice'),
     chatForm: document.getElementById('chatForm'),
     chatMediaInput: document.getElementById('chatMediaInput'),
     chatCameraInput: document.getElementById('chatCameraInput'),
@@ -4695,6 +4698,7 @@
   // piepje niet wacht tot het vorige is uitgespeeld.
   function playCountdownAudioEl(el){
     try {
+      el.muted = false;
       el.currentTime = 0;
       el.play().catch(() => {});
     } catch (err){ /* geluid is decoratief — het aftellen zelf mag hier nooit van afhangen */ }
@@ -4720,11 +4724,23 @@
   function unlockCountdownAudioElements(){
     [els.countdownBeepNormal, els.countdownBeepUrgent, els.countdownFiredTone].forEach((el) => {
       if (!el || el.dataset.unlocked) return;
+      // 'pending' zodat een tweede tik vlak erna dit niet nog eens start
+      // terwijl de eerste ontgrendeling nog bezig is.
+      el.dataset.unlocked = 'pending';
+      // Muted afspelen: play() en pause() gebeuren niet op exact hetzelfde
+      // moment, dus zonder mute hoorde je bij de eerste tik ergens anders
+      // in de app (een willekeurige knop, niet de ALARM-knop) toch een kort
+      // flitsje van de piep — precies het "willekeurige geluid"-probleem.
+      el.muted = true;
+      const finish = () => {
+        el.pause();
+        el.currentTime = 0;
+        el.muted = false;
+        el.dataset.unlocked = '1';
+      };
       const p = el.play();
-      el.pause();
-      el.currentTime = 0;
-      if (p && p.then) p.then(() => { el.dataset.unlocked = '1'; }).catch(() => {});
-      else el.dataset.unlocked = '1';
+      if (p && p.then) p.then(finish).catch(finish);
+      else finish();
     });
   }
   document.addEventListener('touchstart', unlockCountdownAudioElements, { passive: true });
@@ -5387,7 +5403,18 @@
   // (locatie, medische info, "wie heeft gereageerd") wordt bijgewerkt —
   // zowel bij het openen van Berichten als bij elke realtime-update van
   // de alarms-rij.
+  // Zelfde regel als de database-policy (alarm_messages_insert): een bericht
+  // typen mag altijd in je eigen kring, en in andermans kring alleen zolang
+  // daar een actief alarm loopt (voor "Ik kom eraan" en coördinatie tijdens
+  // een noodgeval) — buiten een noodgeval kun je in andermans kring alleen
+  // meelezen, niet versturen.
+  function updateChatComposeAccess(alarmRow){
+    const canCompose = currentChatGroupId === myGroupId || !!(alarmRow && alarmRow.status === 'active');
+    els.chatForm.classList.toggle('hidden', !canCompose);
+    els.chatReadOnlyNotice.classList.toggle('hidden', canCompose);
+  }
   function handleActiveAlarmChanged(alarmRow){
+    updateChatComposeAccess(alarmRow);
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
     renderLocationCard(alarmRow);
     renderMedicalInfoCard(alarmRow);
