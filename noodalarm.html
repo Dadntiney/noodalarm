@@ -872,13 +872,14 @@
   .chat-bubble:has(.chat-media),
   .chat-bubble:has(.chat-video-wrap){ max-width:90%; }
   .chat-bubble.own{ background:var(--accent); color:#fff; }
-  .chat-bubble.other{ background:var(--surface); box-shadow:var(--shadow-card); }
+  /* Geen schaduw op chatbubbels: die breekt het naadloze WhatsApp-staartje. */
+  .chat-bubble.other{ background:var(--surface); box-shadow:none; }
   /* NORI-systeemberichten: warm & vriendelijk (zacht teal), geen rood —
      rood is voor alarm/gevaar en voelde hier te dreigend. Logo blijft
      het officiële NORI-beeldmerk in de avatar. */
   .chat-bubble.system{
     background:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
-    box-shadow:var(--shadow-card);
+    box-shadow:none;
   }
   .chat-bubble.system .who{
     color:var(--nori-msg);
