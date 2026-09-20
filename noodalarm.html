@@ -903,8 +903,13 @@
   .chat-bubble-menu-info-row-time{ color:var(--text-muted); font-size:0.8125rem; margin-top:1px; }
   .chat-bubble-menu-info-empty{ color:var(--text-muted); font-size:0.875rem; padding:10px 8px 4px; text-align:center; }
   .chat-form input{
-    flex:1; background:var(--surface-2); border:1.5px solid var(--border); border-radius:23px;
-    padding:11px 18px; font-size:1.0625rem; color:var(--text); min-height:46px;
+    /* min-width:0 is nodig: een <input> heeft standaard een eigen
+       intrinsieke minimumbreedte die groter kan zijn dan de ruimte die
+       flex:1 hem hier toebedeelt (nu er 4 knoppen naast het veld staan) —
+       zonder dit overschreed de rij de schermbreedte en viel de
+       microfoonknop van het scherm af. */
+    flex:1; min-width:0; background:var(--surface-2); border:1.5px solid var(--border); border-radius:23px;
+    padding:11px 16px; font-size:1.0625rem; color:var(--text); min-height:46px;
   }
   .chat-form input:focus{ outline:2.5px solid var(--accent); outline-offset:1px; }
   .chat-form input::placeholder{ color:var(--text-faint); }
@@ -923,6 +928,39 @@
   .chat-attach-button svg{ width:20px; height:20px; }
   .chat-attach-button:hover{ color:var(--text); background:var(--surface-2); }
   .chat-attach-button:disabled{ opacity:.5; cursor:not-allowed; }
+  .chat-voice-button{ background:var(--green); }
+  .chat-voice-button:hover{ background:var(--green); filter:brightness(.92); }
+  .chat-voice-button:disabled{ opacity:.5; cursor:not-allowed; }
+  /* ---------- Spraakbericht opnemen — vervangt de normale rij tijdens het opnemen ---------- */
+  .chat-recording-row{ display:flex; align-items:center; gap:10px; }
+  .chat-recording-cancel{
+    width:42px; height:42px; min-height:42px; border-radius:50%; flex-shrink:0;
+    background:none; border:none; color:var(--danger); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .chat-recording-cancel svg{ width:20px; height:20px; }
+  .chat-recording-cancel:hover{ background:var(--surface-2); }
+  @keyframes recording-dot-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
+  .chat-recording-dot{
+    width:10px; height:10px; border-radius:50%; background:var(--danger); flex-shrink:0;
+    animation:recording-dot-pulse 1.1s ease-in-out infinite;
+  }
+  .chat-recording-time{ font-weight:700; font-variant-numeric:tabular-nums; }
+  .chat-recording-hint{ flex:1; color:var(--text-muted); font-size:0.9375rem; }
+  /* ---------- Spraakbericht-bubbel (afspelen) ---------- */
+  .voice-msg{ display:flex; align-items:center; gap:10px; min-width:180px; padding:2px 0; }
+  .voice-msg-play{
+    width:38px; height:38px; min-height:38px; border-radius:50%; flex-shrink:0; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chat-bubble.own .voice-msg-play{ background:rgba(255,255,255,.22); color:#fff; }
+  .chat-bubble.other .voice-msg-play{ background:var(--accent); color:#fff; }
+  .voice-msg-play svg{ width:16px; height:16px; margin-left:2px; }
+  .voice-msg-play .voice-msg-pause-icon{ margin-left:0; }
+  /* color-mix i.p.v. opacity: opacity zou via de stacking context ook de
+     kind-voortgangsbalk mee laten vervagen, dat willen we niet. */
+  .voice-msg-track{ flex:1; height:3px; border-radius:2px; background:color-mix(in srgb, currentColor 28%, transparent); position:relative; }
+  .voice-msg-progress{ position:absolute; inset:0; width:0%; border-radius:2px; background:currentColor; }
+  .voice-msg-time{ font-size:0.8125rem; font-variant-numeric:tabular-nums; opacity:.8; flex-shrink:0; }
   .location-card{
     flex-shrink:0; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
     box-shadow:var(--shadow-card); padding:16px; margin:14px 0 0;
@@ -1955,13 +1993,31 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
         </div>
-        <div class="chat-form-row">
+        <div class="chat-form-row" id="chatFormRow">
           <input type="file" id="chatMediaInput" accept="image/*,video/*" style="display:none;">
+          <input type="file" id="chatCameraInput" accept="image/*" capture="environment" style="display:none;">
           <button type="button" id="chatAttachButton" class="chat-attach-button" aria-label="Foto of video versturen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
           </button>
-          <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000" required>
-          <button type="submit" id="chatSendButton" class="chat-send-button" aria-label="Versturen">
+          <input type="text" id="chatInput" placeholder="Typ een bericht…" autocomplete="off" maxlength="1000">
+          <button type="button" id="chatCameraButton" class="chat-attach-button" aria-label="Foto maken">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </button>
+          <button type="submit" id="chatSendButton" class="chat-send-button hidden" aria-label="Versturen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          </button>
+          <button type="button" id="chatVoiceButton" class="chat-send-button chat-voice-button" aria-label="Spraakbericht opnemen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
+          </button>
+        </div>
+        <div class="chat-recording-row hidden" id="chatRecordingRow">
+          <button type="button" id="chatRecordingCancel" class="chat-recording-cancel" aria-label="Opname annuleren">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+          </button>
+          <span class="chat-recording-dot"></span>
+          <span class="chat-recording-time" id="chatRecordingTime">0:00</span>
+          <span class="chat-recording-hint" id="chatRecordingHint">Opname…</span>
+          <button type="button" id="chatRecordingSend" class="chat-send-button" aria-label="Spraakbericht versturen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </button>
         </div>
@@ -2320,8 +2376,13 @@
     { sel: '.chat-edit-banner-text strong', nl: 'Bericht bewerken', en: 'Editing message' },
     { sel: '#chatEditCancelButton', attr: 'aria-label', nl: 'Bewerken annuleren', en: 'Cancel editing' },
     { sel: '#chatAttachButton', attr: 'aria-label', nl: 'Foto of video versturen', en: 'Send photo or video' },
+    { sel: '#chatCameraButton', attr: 'aria-label', nl: 'Foto maken', en: 'Take photo' },
     { sel: '#chatInput', attr: 'placeholder', nl: 'Typ een bericht…', en: 'Type a message…' },
     { sel: '#chatSendButton', attr: 'aria-label', nl: 'Versturen', en: 'Send' },
+    { sel: '#chatVoiceButton', attr: 'aria-label', nl: 'Spraakbericht opnemen', en: 'Record voice message' },
+    { sel: '#chatRecordingCancel', attr: 'aria-label', nl: 'Opname annuleren', en: 'Cancel recording' },
+    { sel: '#chatRecordingSend', attr: 'aria-label', nl: 'Spraakbericht versturen', en: 'Send voice message' },
+    { sel: '#chatRecordingHint', nl: 'Opname…', en: 'Recording…' },
     { sel: '#editAvatarButton', attr: 'aria-label', nl: 'Foto wijzigen', en: 'Change photo' },
     { sel: '#openAccountButton .settings-link-label', nl: 'Account', en: 'Account' },
     { sel: '#openMedicalButton .settings-link-label', nl: 'Medische informatie', en: 'Medical information' },
@@ -2374,6 +2435,8 @@
       'alert.mediaTypeInvalid': 'Alleen foto\'s en video\'s kunnen worden verstuurd.',
       'alert.mediaTooLarge': 'Dit bestand is te groot (max 25 MB).',
       'alert.uploadFailed': 'Versturen mislukt: {msg}',
+      'alert.micDenied': 'Geen toegang tot de microfoon. Zet dit aan bij de instellingen van je toestel of browser en probeer het opnieuw.',
+      'alert.micUnsupported': 'Je toestel of browser ondersteunt geen spraakberichten.',
       'common.busy': 'Bezig…',
       'status.sendFailed': 'VERSTUREN MISLUKT',
       'status.testSent': '🧪 TESTALARM VOLTOOID',
@@ -2490,6 +2553,8 @@
       'alert.mediaTypeInvalid': 'Only photos and videos can be sent.',
       'alert.mediaTooLarge': 'This file is too large (max 25 MB).',
       'alert.uploadFailed': 'Sending failed: {msg}',
+      'alert.micDenied': 'No access to the microphone. Turn this on in your device or browser settings and try again.',
+      'alert.micUnsupported': 'Your device or browser doesn\'t support voice messages.',
       'common.busy': 'Working…',
       'status.sendFailed': 'SENDING FAILED',
       'status.testSent': '🧪 TEST ALARM COMPLETE',
@@ -2720,9 +2785,17 @@
     chatMessages: document.getElementById('chatMessages'),
     chatForm: document.getElementById('chatForm'),
     chatMediaInput: document.getElementById('chatMediaInput'),
+    chatCameraInput: document.getElementById('chatCameraInput'),
     chatAttachButton: document.getElementById('chatAttachButton'),
+    chatCameraButton: document.getElementById('chatCameraButton'),
     chatInput: document.getElementById('chatInput'),
     chatSendButton: document.getElementById('chatSendButton'),
+    chatVoiceButton: document.getElementById('chatVoiceButton'),
+    chatFormRow: document.getElementById('chatFormRow'),
+    chatRecordingRow: document.getElementById('chatRecordingRow'),
+    chatRecordingCancel: document.getElementById('chatRecordingCancel'),
+    chatRecordingSend: document.getElementById('chatRecordingSend'),
+    chatRecordingTime: document.getElementById('chatRecordingTime'),
     chatEditBanner: document.getElementById('chatEditBanner'),
     chatEditBannerText: document.getElementById('chatEditBannerText'),
     chatEditCancelButton: document.getElementById('chatEditCancelButton'),
@@ -4746,6 +4819,49 @@
     });
   }
 
+  // Koppelt afspelen/voortgang/duur aan elk spraakbericht. Media-events
+  // (loadedmetadata, timeupdate, ended) bubbelen niet, dus dit moet per
+  // element — net als primeVideoPosters hierboven.
+  function primeVoiceMessages(root){
+    root.querySelectorAll('.voice-msg').forEach(wrap => {
+      if (wrap.dataset.voicePrimed) return;
+      wrap.dataset.voicePrimed = '1';
+      const audio = wrap.querySelector('.voice-msg-audio');
+      const playBtn = wrap.querySelector('.voice-msg-play');
+      const progress = wrap.querySelector('.voice-msg-progress');
+      const timeLabel = wrap.querySelector('.voice-msg-time');
+      const playIcon = wrap.querySelector('.voice-msg-play-icon');
+      const pauseIcon = wrap.querySelector('.voice-msg-pause-icon');
+      const showPlaying = (playing) => {
+        playIcon.classList.toggle('hidden', playing);
+        pauseIcon.classList.toggle('hidden', !playing);
+      };
+      audio.addEventListener('loadedmetadata', () => {
+        if (isFinite(audio.duration)) timeLabel.textContent = formatDuration(audio.duration);
+      });
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration){
+          progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
+          timeLabel.textContent = formatDuration(audio.currentTime);
+        }
+      });
+      audio.addEventListener('play', () => showPlaying(true));
+      audio.addEventListener('pause', () => showPlaying(false));
+      audio.addEventListener('ended', () => {
+        showPlaying(false);
+        progress.style.width = '0%';
+        if (isFinite(audio.duration)) timeLabel.textContent = formatDuration(audio.duration);
+      });
+      playBtn.addEventListener('click', () => {
+        // Net als WhatsApp: start je een ander spraakbericht, dan stopt het
+        // vorige — nooit twee tegelijk door elkaar.
+        root.querySelectorAll('.voice-msg-audio').forEach(a => { if (a !== audio && !a.paused) a.pause(); });
+        if (audio.paused) audio.play().catch(() => {});
+        else audio.pause();
+      });
+    });
+  }
+
   // Vinkjes: 1 grijs = verstuurd, 2 grijs = bij iedereen afgeleverd, 2 blauw
   // = door iedereen gelezen. Berekend uit chatReceiptsByMessageId t.o.v. alle
   // groepsleden behalve mezelf.
@@ -4808,6 +4924,16 @@
       ? '<div class="chat-video-wrap"><video' + srcAttr + pathAttr + ' class="chat-media chat-video" playsinline preload="metadata"></video>' +
         '<span class="chat-video-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg></span>' +
         '<span class="chat-video-duration"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4Z"/></svg><span class="chat-video-duration-text"></span></span></div>'
+      : msg.media_type === 'audio'
+      ? '<div class="voice-msg">' +
+          '<audio class="voice-msg-audio"' + srcAttr + pathAttr + ' preload="metadata"></audio>' +
+          '<button type="button" class="voice-msg-play" aria-label="Afspelen">' +
+            '<svg class="voice-msg-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>' +
+            '<svg class="voice-msg-pause-icon hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>' +
+          '</button>' +
+          '<div class="voice-msg-track"><div class="voice-msg-progress"></div></div>' +
+          '<span class="voice-msg-time">0:00</span>' +
+        '</div>'
       : '<img' + srcAttr + pathAttr + ' class="chat-media" loading="lazy" alt="">');
     const ticks = own ? chatTicksHtml(msg.id) : '';
     const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
@@ -4904,11 +5030,13 @@
     if (mediaPaths.length){
       resolveMediaUrls(mediaPaths).then(urlByPath => {
         els.chatMessages.querySelectorAll('[data-media-path]').forEach(el => {
-          el.addEventListener(el.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom);
+          const loadEvent = (el.tagName === 'VIDEO' || el.tagName === 'AUDIO') ? 'loadedmetadata' : 'load';
+          el.addEventListener(loadEvent, scrollChatToBottom);
           const url = urlByPath[el.dataset.mediaPath];
           if (url) el.src = url;
         });
         primeVideoPosters(els.chatMessages);
+        primeVoiceMessages(els.chatMessages);
       });
     }
 
@@ -5321,9 +5449,13 @@
         els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }, true));
         scrollChatToBottom();
         requestAnimationFrame(scrollChatToBottom);
-        const lastMedia = els.chatMessages.querySelector('.chat-row:last-child .chat-media');
-        if (lastMedia) lastMedia.addEventListener(lastMedia.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', scrollChatToBottom, { once: true });
+        const lastMedia = els.chatMessages.querySelector('.chat-row:last-child [data-media-path]');
+        if (lastMedia){
+          const loadEvent = (lastMedia.tagName === 'VIDEO' || lastMedia.tagName === 'AUDIO') ? 'loadedmetadata' : 'load';
+          lastMedia.addEventListener(loadEvent, scrollChatToBottom, { once: true });
+        }
         primeVideoPosters(els.chatMessages);
+        primeVoiceMessages(els.chatMessages);
         if (msg.sender_id !== currentSession.user.id) markIncomingMessagesSeen([msg.id]);
       })
       .on('postgres_changes', {
@@ -5593,11 +5725,13 @@
     els.chatInput.value = msg.body || '';
     els.chatInput.focus();
     showEditBanner(msg.body || '');
+    updateChatSendVoiceToggle();
   }
   function cancelEditingMessage(){
     editingMessageId = null;
     els.chatInput.value = '';
     els.chatEditBanner.classList.add('hidden');
+    updateChatSendVoiceToggle();
   }
   els.chatEditCancelButton.addEventListener('click', cancelEditingMessage);
 
@@ -5634,10 +5768,20 @@
       return;
     }
     els.chatInput.value = '';
+    updateChatSendVoiceToggle();
     await sb.from('alarm_messages').insert({ group_id: currentChatGroupId, sender_id: currentSession.user.id, body });
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
   });
+
+  // Microfoon i.p.v. verstuur-knop zolang er niets getypt is — net als bij
+  // WhatsApp/iMessage.
+  function updateChatSendVoiceToggle(){
+    const hasText = els.chatInput.value.trim().length > 0;
+    els.chatSendButton.classList.toggle('hidden', !hasText);
+    els.chatVoiceButton.classList.toggle('hidden', hasText);
+  }
+  els.chatInput.addEventListener('input', updateChatSendVoiceToggle);
 
   const CHAT_MEDIA_MAX_BYTES = 25 * 1024 * 1024;
   // Een onbewerkte telefoonfoto is al snel een paar MB — in een
@@ -5671,10 +5815,10 @@
       return file;
     }
   }
-  els.chatAttachButton.addEventListener('click', () => els.chatMediaInput.click());
-  els.chatMediaInput.addEventListener('change', async () => {
-    const file = els.chatMediaInput.files && els.chatMediaInput.files[0];
-    els.chatMediaInput.value = '';
+  // Gedeeld door de galerij-picker (#chatMediaInput) én de directe-camera-
+  // knop (#chatCameraInput) — dezelfde verkleining/upload/verstuur-logica,
+  // alleen de knop die tijdens het versturen disabled wordt verschilt.
+  async function handleChatMediaFile(file, triggerButton){
     if (!file || !currentChatGroupId) return;
     const isVideo = file.type.startsWith('video/');
     if (!isVideo && !file.type.startsWith('image/')){
@@ -5685,7 +5829,7 @@
       window.alert(t('alert.mediaTooLarge'));
       return;
     }
-    els.chatAttachButton.disabled = true;
+    triggerButton.disabled = true;
     const uploadFile = isVideo ? file : await compressImageForChat(file);
     const contentType = isVideo ? file.type : 'image/jpeg';
     const ext = isVideo
@@ -5694,7 +5838,7 @@
     const path = currentChatGroupId + '/' + crypto.randomUUID() + '.' + ext;
     const { error: upErr } = await sb.storage.from('chat-media').upload(path, uploadFile, { contentType });
     if (upErr){
-      els.chatAttachButton.disabled = false;
+      triggerButton.disabled = false;
       window.alert(t('alert.uploadFailed', { msg: upErr.message }));
       return;
     }
@@ -5702,10 +5846,146 @@
       group_id: currentChatGroupId, sender_id: currentSession.user.id, body: null,
       media_path: path, media_type: isVideo ? 'video' : 'image'
     });
-    els.chatAttachButton.disabled = false;
+    triggerButton.disabled = false;
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
+  }
+  els.chatAttachButton.addEventListener('click', () => els.chatMediaInput.click());
+  els.chatMediaInput.addEventListener('change', () => {
+    const file = els.chatMediaInput.files && els.chatMediaInput.files[0];
+    els.chatMediaInput.value = '';
+    handleChatMediaFile(file, els.chatAttachButton);
   });
+  els.chatCameraButton.addEventListener('click', () => els.chatCameraInput.click());
+  els.chatCameraInput.addEventListener('change', () => {
+    const file = els.chatCameraInput.files && els.chatCameraInput.files[0];
+    els.chatCameraInput.value = '';
+    handleChatMediaFile(file, els.chatCameraButton);
+  });
+
+  /* ---------------- Spraakberichten ---------------- */
+  // Tik-om-te-starten/tik-om-te-versturen i.p.v. ingedrukt-houden (zoals
+  // WhatsApp): een houd-gebaar dat per ongeluk loslaat annuleert of stuurt
+  // een halve opname — met tikken kan dat niet gebeuren, belangrijk juist
+  // in een noodsituatie met trillende handen.
+  const CHAT_VOICE_MAX_MS = 3 * 60 * 1000;
+  let voiceRecorder = null;
+  let voiceChunks = [];
+  let voiceStream = null;
+  let voiceStartedAt = 0;
+  let voiceTimerId = null;
+  let voiceCanceled = false;
+
+  function formatRecordingClock(ms){
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function stopVoiceStream(){
+    if (voiceTimerId){ clearInterval(voiceTimerId); voiceTimerId = null; }
+    if (voiceStream){ voiceStream.getTracks().forEach(tr => tr.stop()); voiceStream = null; }
+    els.chatRecordingRow.classList.add('hidden');
+    els.chatFormRow.classList.remove('hidden');
+    voiceRecorder = null;
+  }
+
+  async function startVoiceRecording(){
+    if (!currentChatGroupId || voiceRecorder) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+      window.alert(t('alert.micUnsupported'));
+      return;
+    }
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err){
+      window.alert(t('alert.micDenied'));
+      return;
+    }
+    voiceStream = stream;
+    voiceChunks = [];
+    voiceCanceled = false;
+    const preferredType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']
+      .find(type => window.MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type));
+    try {
+      voiceRecorder = preferredType ? new MediaRecorder(stream, { mimeType: preferredType }) : new MediaRecorder(stream);
+    } catch (err){
+      stream.getTracks().forEach(tr => tr.stop());
+      voiceStream = null;
+      window.alert(t('alert.micUnsupported'));
+      return;
+    }
+    voiceRecorder.addEventListener('dataavailable', (ev) => { if (ev.data && ev.data.size > 0) voiceChunks.push(ev.data); });
+    voiceRecorder.addEventListener('stop', onVoiceRecordingStopped);
+    voiceRecorder.start();
+    voiceStartedAt = Date.now();
+    els.chatFormRow.classList.add('hidden');
+    els.chatRecordingRow.classList.remove('hidden');
+    els.chatRecordingTime.textContent = '0:00';
+    voiceTimerId = setInterval(() => {
+      const elapsed = Date.now() - voiceStartedAt;
+      els.chatRecordingTime.textContent = formatRecordingClock(elapsed);
+      // Voorkomt een oneindig doorlopende opname (en dus een enorm
+      // bestand) als iemand vergeet te stoppen — stuurt gewoon af op de
+      // grens, net zoals andere apps een spraakbericht begrenzen.
+      if (elapsed >= CHAT_VOICE_MAX_MS) sendVoiceRecording();
+    }, 200);
+    if (navigator.vibrate) navigator.vibrate(15);
+  }
+
+  function cancelVoiceRecording(){
+    if (!voiceRecorder) return;
+    voiceCanceled = true;
+    if (voiceRecorder.state !== 'inactive') voiceRecorder.stop();
+    else stopVoiceStream();
+  }
+
+  function sendVoiceRecording(){
+    if (!voiceRecorder || voiceRecorder.state === 'inactive') return;
+    voiceCanceled = false;
+    voiceRecorder.stop();
+  }
+
+  function extFromAudioMimeType(mimeType){
+    if (mimeType.includes('mp4')) return 'm4a';
+    if (mimeType.includes('ogg')) return 'ogg';
+    return 'webm';
+  }
+
+  async function onVoiceRecordingStopped(){
+    const chunks = voiceChunks;
+    const mimeType = (voiceRecorder && voiceRecorder.mimeType) || 'audio/webm';
+    const canceled = voiceCanceled;
+    stopVoiceStream();
+    // Een supersnelle tik (per ongeluk) levert vrijwel niets op — dan
+    // stilletjes niets versturen i.p.v. een kapot bestandje.
+    if (canceled || !chunks.length || !currentChatGroupId) return;
+    const blob = new Blob(chunks, { type: mimeType });
+    if (blob.size < 500) return;
+    els.chatVoiceButton.disabled = true;
+    const contentType = mimeType.split(';')[0];
+    const ext = extFromAudioMimeType(mimeType);
+    const path = currentChatGroupId + '/' + crypto.randomUUID() + '.' + ext;
+    const { error: upErr } = await sb.storage.from('chat-media').upload(path, blob, { contentType });
+    if (upErr){
+      els.chatVoiceButton.disabled = false;
+      window.alert(t('alert.uploadFailed', { msg: upErr.message }));
+      return;
+    }
+    await sb.from('alarm_messages').insert({
+      group_id: currentChatGroupId, sender_id: currentSession.user.id, body: null,
+      media_path: path, media_type: 'audio'
+    });
+    els.chatVoiceButton.disabled = false;
+    scrollChatToBottom();
+    requestAnimationFrame(scrollChatToBottom);
+  }
+
+  els.chatVoiceButton.addEventListener('click', startVoiceRecording);
+  els.chatRecordingCancel.addEventListener('click', cancelVoiceRecording);
+  els.chatRecordingSend.addEventListener('click', sendVoiceRecording);
 
   /* =========================================================================
      WEB PUSH
