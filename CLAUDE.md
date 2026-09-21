@@ -29,6 +29,15 @@ Tekst: `public.nori_welcome_message_body()`. Badge in de UI: **Welkom**
 (updates blijven **Update**). Nooit vanuit de frontend opnieuw aanmaken
 bij login/refresh/nieuwe contacten.
 
+### Uitlegvideo in de welkomstchat
+Direct na het welkomstbericht plaatst dezelfde trigger ook **één**
+uitlegvideo-bericht (`public.nori_intro_video_message_body()`, marker
+`nori-intro-video:v1`, kolom `profiles.welcome_video_sent_at`, unique
+index per groep). Frontend rendert `media/nori-uitleg.mp4` met poster +
+Nederlandse captions (`preload="none"`, **geen autoplay**). Bestaande
+accounts krijgen het bericht via de migratie-backfill — nooit opnieuw bij
+login/refresh. Badge: **Uitleg**.
+
 ## Dagelijkse update-melding (belangrijk, blijf dit doen)
 
 Danny wil geen omkijken hebben naar het informeren van zijn noodcontacten

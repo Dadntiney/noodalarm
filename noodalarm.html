@@ -923,7 +923,34 @@
      zijn dan een gewone tekstbubbel — media moet groot en duidelijk ogen,
      niet ingeklemd in dezelfde smalle breedte als een kort berichtje. */
   .chat-bubble:has(.chat-media),
-  .chat-bubble:has(.chat-video-wrap){ max-width:90%; }
+  .chat-bubble:has(.chat-video-wrap),
+  .chat-bubble:has(.nori-intro-video-wrap){ max-width:90%; }
+  /* NORI-uitlegvideo: groot, rustig, native controls. Geen autoplay. */
+  .nori-intro-video-wrap{
+    position:relative;
+    margin:8px 0 10px;
+    border-radius:12px;
+    overflow:hidden;
+    background:#0f172a;
+    aspect-ratio:9 / 16;
+    max-height:min(62vh, 520px);
+    width:100%;
+  }
+  .nori-intro-video-wrap video.nori-intro-video{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#0f172a;
+  }
+  .nori-intro-lead{
+    margin:0 0 4px;
+    font-size:1.0625rem;
+    line-height:1.45;
+  }
+  @media (min-width:720px){
+    .nori-intro-video-wrap{ max-height:min(70vh, 640px); }
+  }
   .chat-bubble.own{
     --bubble-bg:var(--accent);
     background:var(--bubble-bg);
@@ -2522,6 +2549,15 @@
   const NORI_SYSTEM_USER_ID = '961b3add-ad24-4e56-8c43-461676800cb2';
   const NORI_DISPLAY_NAME = 'NORI';
   const NORI_AVATAR_URL = 'icon-192.png';
+  // Statische uitlegvideo (niet via chat-media storage). Root-paden zodat
+  // het werkt vanaf / én /noodalarm.html. Versie = content-id in DB.
+  const NORI_INTRO_VIDEO = {
+    version: 'v1',
+    marker: 'nori-intro-video:v1',
+    src: '/media/nori-uitleg.mp4',
+    poster: '/media/nori-uitleg-poster.jpg',
+    captions: '/media/nori-uitleg.nl.vtt'
+  };
   function isNoriSystemSender(userId){
     return !!userId && userId === NORI_SYSTEM_USER_ID;
   }
@@ -2961,7 +2997,10 @@
       'chat.systemBadge': 'Update',
       'chat.systemBadgeUpdate': 'Update',
       'chat.systemBadgeWelcome': 'Welkom',
+      'chat.systemBadgeIntro': 'Uitleg',
       'chat.systemBadgeAlarm': 'Alarm',
+      'nori.introVideoAria': 'Uitlegvideo: hoe NORI werkt. Tik op afspelen.',
+      'nori.introVideoLead': 'Bekijk deze korte video en ontdek hoe NORI werkt.',
       'nori.openMaps': '📍 Open locatie',
       'nori.openRescue': '🩺 Open reddingskaart',
       'nori.omw': '✅ Ik kom eraan',
@@ -3120,7 +3159,10 @@
       'chat.systemBadge': 'Update',
       'chat.systemBadgeUpdate': 'Update',
       'chat.systemBadgeWelcome': 'Welcome',
+      'chat.systemBadgeIntro': 'Guide',
       'chat.systemBadgeAlarm': 'Alarm',
+      'nori.introVideoAria': 'Explainer video: how NORI works. Tap play.',
+      'nori.introVideoLead': 'Watch this short video and see how NORI works.',
       'nori.openMaps': '📍 Open location',
       'nori.openRescue': '🩺 Open rescue card',
       'nori.omw': '✅ I\'m on my way',
@@ -4282,6 +4324,9 @@
     renderCheckInToggle();
     maybePromptCheckIn();
 
+    // Eenmalig uitlegvideo-bericht in de welkomstchat (idempotente RPC).
+    ensureNoriIntroVideoMessage();
+
     // De taal die op het account staat is leidend zodra je bent ingelogd
     // (werkt zo ook mee op een ander toestel) — vóór het inloggen viel de
     // app terug op de taal van dit toestel.
@@ -4834,6 +4879,7 @@
   els.chatBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
     if (name !== 'messages'){
+      pauseNoriIntroVideos();
       unsubscribeChat();
       currentChatGroupId = null;
       memberGroupIds = [];
@@ -5491,6 +5537,7 @@
       if (!myGroupId || msg.group_id !== myGroupId) return false;
       if (isNoriUpdateMessage(msg)) return false;
       if (isNoriWelcomeMessage(msg)) return true;
+      if (isNoriIntroVideoMessage(msg)) return true;
       if (isNoriAlarmRescueMessage(msg)){
         return !!(msg.alarm_id && activeAlarmContext.id && msg.alarm_id === activeAlarmContext.id);
       }
@@ -5514,17 +5561,22 @@
     return msg.body.indexOf('👋 Welkom bij NORI!') === 0
       || msg.body.indexOf('Welkom bij NORI!') === 0;
   }
+  function isNoriIntroVideoMessage(msg){
+    if (!msg || typeof msg.body !== 'string') return false;
+    return msg.body.indexOf(NORI_INTRO_VIDEO.marker) !== -1;
+  }
   function isNoriAlarmRescueMessage(msg){
     return !!(msg && msg.alarm_id && isNoriSystemSender(msg.sender_id));
   }
   function isNoriUpdateMessage(msg){
     if (!msg || !isNoriSystemSender(msg.sender_id)) return false;
-    if (isNoriAlarmRescueMessage(msg) || isNoriWelcomeMessage(msg)) return false;
+    if (isNoriAlarmRescueMessage(msg) || isNoriWelcomeMessage(msg) || isNoriIntroVideoMessage(msg)) return false;
     const body = String(msg.body || '');
     return /^(🆕\s*)?Updates? van NORI\b/.test(body);
   }
   function noriSystemBadgeLabel(msg){
     if (isNoriWelcomeMessage(msg)) return t('chat.systemBadgeWelcome');
+    if (isNoriIntroVideoMessage(msg)) return t('chat.systemBadgeIntro');
     if (isNoriAlarmRescueMessage(msg)) return t('chat.systemBadgeAlarm');
     return t('chat.systemBadgeUpdate');
   }
@@ -5579,7 +5631,84 @@
   function chatMessageBodyHtml(msg){
     if (!msg || !msg.body) return '';
     if (isNoriAlarmRescueMessage(msg)) return renderNoriAlarmBody(msg);
+    if (isNoriIntroVideoMessage(msg)){
+      // Alleen de zichtbare lead-tekst; de video zelf staat als media-blok
+      // buiten .text (zie chatBubbleHtml) zodat overflow:hidden 'm niet knipt.
+      const text = String(msg.body)
+        .replace(NORI_INTRO_VIDEO.marker, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+      if (!text) return escapeHtml(t('nori.introVideoLead'));
+      return '<p class="nori-intro-lead">' + escapeHtml(text).replace(/\n/g, '<br>') + '</p>';
+    }
+    if (isNoriWelcomeMessage(msg) && !chatHasIntroVideoMessage()){
+      // Fallback-lead onder het welkom zolang er nog geen apart
+      // uitlegbericht in de DB staat.
+      return linkifyHtml(msg.body) +
+        '<p class="nori-intro-lead">' + escapeHtml(t('nori.introVideoLead')) + '</p>';
+    }
     return linkifyHtml(msg.body);
+  }
+
+  function chatHasIntroVideoMessage(){
+    return Object.keys(chatMessageById).some(id => isNoriIntroVideoMessage(chatMessageById[id]));
+  }
+
+  function shouldShowNoriIntroVideo(msg){
+    if (isNoriIntroVideoMessage(msg)) return true;
+    // Fallback: toon video onder welkomstbericht tot de migratie/RPC
+    // een apart bericht heeft geplaatst (voorkomt lege chat zonder video).
+    return isNoriWelcomeMessage(msg) && !chatHasIntroVideoMessage();
+  }
+
+  function noriIntroVideoPlayerHtml(){
+    // preload="none": geen download/geluid tot de gebruiker op Play drukt.
+    return '<div class="nori-intro-video-wrap">' +
+      '<video class="nori-intro-video" playsinline controls preload="none"' +
+      ' poster="' + escapeHtml(NORI_INTRO_VIDEO.poster) + '"' +
+      ' controlslist="nodownload"' +
+      ' aria-label="' + escapeHtml(t('nori.introVideoAria')) + '">' +
+      '<source src="' + escapeHtml(NORI_INTRO_VIDEO.src) + '" type="video/mp4">' +
+      '<track kind="captions" srclang="nl" label="Nederlands" src="' +
+        escapeHtml(NORI_INTRO_VIDEO.captions) + '" default>' +
+      '</video></div>';
+  }
+
+  function pauseNoriIntroVideos(){
+    document.querySelectorAll('video.nori-intro-video').forEach(video => {
+      try {
+        if (!video.paused) video.pause();
+      } catch (e) { /* ignore */ }
+    });
+  }
+
+  // Plaatst het uitlegvideo-bericht hoogstens één keer (DB unique index +
+  // profiles.welcome_video_sent_at + localStorage). Faalt stil als de
+  // migratie nog niet is toegepast.
+  let ensureIntroVideoInFlight = null;
+  async function ensureNoriIntroVideoMessage(){
+    if (!currentSession || !currentSession.user) return false;
+    const uid = currentSession.user.id;
+    const key = 'nori-intro-video-ensured-' + NORI_INTRO_VIDEO.version + '-' + uid;
+    if (localStorage.getItem(key) === '1') return false;
+    if (ensureIntroVideoInFlight) return ensureIntroVideoInFlight;
+    ensureIntroVideoInFlight = (async () => {
+      try {
+        const { error } = await sb.rpc('ensure_my_nori_intro_video');
+        if (error){
+          console.warn('ensure_my_nori_intro_video', error.message || error);
+          return false;
+        }
+        localStorage.setItem(key, '1');
+        return true;
+      } catch (e){
+        console.warn('ensure_my_nori_intro_video', e);
+        return false;
+      } finally {
+        ensureIntroVideoInFlight = null;
+      }
+    })();
+    return ensureIntroVideoInFlight;
   }
 
   const CHAT_NAME_COLOR_COUNT = 6;
@@ -5940,6 +6069,8 @@
       : msg.media_type === 'audio'
       ? voiceMsgHtml(msg, srcAttr, pathAttr)
       : '<img' + srcAttr + pathAttr + ' class="chat-media" loading="lazy" alt="">');
+    // Uitlegvideo buiten .text zetten (overflow:hidden knipt anders de player).
+    const introVideo = shouldShowNoriIntroVideo(msg) ? noriIntroVideoPlayerHtml() : '';
     const ticks = own ? chatTicksHtml(msg.id) : '';
     const whoLabel = isSystem
       ? (escapeHtml(NORI_DISPLAY_NAME) + ' <span class="chat-system-badge">' + escapeHtml(noriSystemBadgeLabel(msg)) + '</span>')
@@ -5952,6 +6083,7 @@
     const bubble = '<div class="' + bubbleClass + '">' +
       (own ? '' : '<div class="who"' + whoStyle + '>' + whoLabel + '</div>') +
       media +
+      introVideo +
       '<div class="' + textClass + '">' + chatMessageBodyHtml(msg) + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
     const rowClass = 'chat-row ' + (own ? 'own' : ('other' + (isSystem ? ' system' : ''))) +
@@ -5993,6 +6125,9 @@
   async function openMessages(){
     const gen = ++chatOpenGen;
     if (!myGroupId) await loadMyGroupId();
+    // Zorg dat het uitlegvideo-bericht er is vóór we de tijdlijn laden.
+    await ensureNoriIntroVideoMessage();
+    if (gen !== chatOpenGen) return;
     currentChatGroupId = myGroupId;
     cancelEditingMessage();
     closeSlidePage(els.notifOverlay);
@@ -6881,6 +7016,8 @@
   // vuurt 'click' hier nooit, want touchstart hieronder roept al
   // preventDefault aan zodra een druk op een bubbel begint.
   els.chatMessages.addEventListener('click', (ev) => {
+    // Uitlegvideo: native controls — niet fullscreen forceren / geen JS-play.
+    if (ev.target.closest('.nori-intro-video')) return;
     const video = ev.target.closest('.chat-video');
     if (video) { playVideoFullscreen(video); return; }
     const img = ev.target.closest('img.chat-media');
@@ -6960,13 +7097,14 @@
   els.chatMessages.addEventListener('touchstart', (ev) => {
     const bubble = ev.target.closest('.chat-bubble');
     if (!bubble || ev.touches.length !== 1){ bubbleTouch = null; return; }
-    const video = ev.target.closest('.chat-video');
+    const introVideo = ev.target.closest('.nori-intro-video');
+    const video = introVideo ? null : ev.target.closest('.chat-video');
     const image = ev.target.closest('img.chat-media');
     const voicePlay = ev.target.closest('.voice-msg-play');
     const noriAction = ev.target.closest('.nori-alarm-action');
-    bubbleTouch = { bubble, video, image, voicePlay, noriAction, startTime: Date.now(), moved: false };
-    // NORI-actieknoppen: geen long-press-menu, alleen korte tik.
-    if (noriAction){
+    bubbleTouch = { bubble, video, image, voicePlay, noriAction, introVideo, startTime: Date.now(), moved: false };
+    // NORI-actieknoppen / uitlegvideo: geen long-press-menu, native bediening.
+    if (noriAction || introVideo){
       longPressStartXY = null;
       return;
     }
@@ -6996,6 +7134,8 @@
     cancelLongPress();
     const touch = bubbleTouch;
     bubbleTouch = null;
+    // Uitlegvideo: laat native controls het afhandelen (geen preventDefault).
+    if (touch && touch.introVideo) return;
     // Zelf afgehandeld i.p.v. via de synthetische 'click' (die op mobiel
     // hierdoor onderdrukt wordt) — zo blijft precies dezelfde tik nooit
     // dubbel afgevuurd worden.
