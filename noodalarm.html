@@ -1172,7 +1172,7 @@
   .voice-msg-time{ font-size:0.75rem; font-variant-numeric:tabular-nums; opacity:.75; }
   .location-card{
     flex-shrink:0; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
-    box-shadow:var(--shadow-card); padding:16px; margin:14px 0 0;
+    box-shadow:var(--shadow-card); padding:14px; margin:0 0 10px;
   }
   .location-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:0.96875rem; }
   .location-title strong{ font-weight:800; }
@@ -1180,7 +1180,7 @@
   .location-address{ color:var(--text-muted); font-size:0.90625rem; margin:0 0 10px; }
   .location-map-wrap{
     position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--border-soft);
-    height:170px; background:var(--surface-2);
+    height:140px; background:var(--surface-2);
   }
   .location-map-frame{
     display:block; width:100%; height:100%; border:none;
@@ -1639,7 +1639,7 @@
             </span>
             <div class="settings-item-body">
               <div class="settings-item-title" id="testAlarmSectionTitle">Oefenen met een testalarm</div>
-              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet het NORI-bericht met knoppen naar locatie en reddingskaart, plus jouw hulpteam. Je noodcontacten merken er niets van.</p>
+              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet locatie en chat. Je noodcontacten merken er niets van.</p>
             </div>
           </div>
           <div class="settings-item-control">
@@ -2315,23 +2315,8 @@
 
       <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — jij oefent alleen; je noodcontacten merken hier niets van.</div>
 
-      <!-- Reddingskaart eerst: helpers zien meteen wat ze moeten weten. -->
-      <div id="medicalInfoCard" class="medical-info-card rescue-card hidden">
-        <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
-        <div class="medical-info-actions">
-          <button type="button" id="ehboInstructionsButton" class="small-btn">🩹 EHBO-instructies</button>
-          <a href="tel:112" id="call112Button" class="small-btn danger">📞 Bel 112</a>
-        </div>
-        <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
-          <span>
-            <span class="rescue-card-kicker" id="rescueCardKicker">Reddingskaart</span>
-            <span id="medicalInfoToggleLabel">Alles wat helpers nu moeten weten over <strong id="medicalInfoName">—</strong></span>
-          </span>
-          <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div id="medicalInfoBody" class="medical-info-body hidden"></div>
-      </div>
-
+      <!-- Locatie bovenaan bij actief alarm; daaronder de chat zodat je kunt typen.
+           Alarm beëindigen zit op de locatiekaart. -->
       <div id="locationCard" class="location-card hidden">
         <div class="location-head">
           <span class="location-title">📍 Locatie van <strong id="locationName">—</strong></span>
@@ -2349,6 +2334,26 @@
         <button type="button" id="endAlarmFromLocationButton" class="location-end-button hidden">Alarm beëindigen</button>
       </div>
 
+      <!-- Reddingskaart (helpers): blijft beschikbaar via NORI-bericht/overlay;
+           deze inline-kaart blijft verborgen tijdens actief alarm. -->
+      <div id="medicalInfoCard" class="medical-info-card rescue-card hidden">
+        <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
+        <div class="medical-info-actions">
+          <button type="button" id="ehboInstructionsButton" class="small-btn">🩹 EHBO-instructies</button>
+          <a href="tel:112" id="call112Button" class="small-btn danger">📞 Bel 112</a>
+        </div>
+        <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
+          <span>
+            <span class="rescue-card-kicker" id="rescueCardKicker">Reddingskaart</span>
+            <span id="medicalInfoToggleLabel">Alles wat helpers nu moeten weten over <strong id="medicalInfoName">—</strong></span>
+          </span>
+          <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="medicalInfoBody" class="medical-info-body hidden"></div>
+      </div>
+
+      <!-- Hulpteam-kaart: niet meer zichtbaar (blokkeerde typen). DOM blijft
+           voor escalatie-logica op de achtergrond. -->
       <div id="ackStatusCard" class="ack-status-card hidden">
         <div class="ack-status-card-head">
           <span class="ack-status-card-title" id="ackStatusCardTitle">Hulpteam</span>
@@ -2603,7 +2608,7 @@
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
     { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
     { sel: '#testAlarmSectionTitle', nl: 'Oefenen met een testalarm', en: 'Practice with a test alarm' },
-    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet het NORI-bericht met knoppen naar locatie en reddingskaart, plus jouw hulpteam. Je noodcontacten merken er niets van.', en: 'Practice pressing the alarm button exactly like a real emergency — you see the NORI message with buttons to location and rescue card, plus your help team. Your emergency contacts notice nothing.' },
+    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet locatie en chat. Je noodcontacten merken er niets van.', en: 'Practice pressing the alarm button exactly like a real emergency — you see location and chat. Your emergency contacts notice nothing.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
@@ -6162,7 +6167,8 @@
 
   // Live locatiekaart bovenaan voor iedereen bij een actief alarm.
   // Reddingskaart blijft via de knop in het NORI-bericht (overlay).
-  // Helpers: geen hulpteam-kaart. Activator ziet wél hulpteam.
+  // Geen hulpteam-kaart meer: die vulde het scherm en blokkeerde typen.
+  // Activator beëindigt het alarm via de knop op de locatiekaart.
   function handleActiveAlarmChanged(alarmRow){
     els.chatForm.classList.remove('hidden');
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id));
@@ -6177,13 +6183,13 @@
         testMode: isTest,
         omwDone: false
       };
-      // Oefenalarm: alleen de activator mag de 1-op-1 preview zien
-      // (hulpteam). Helpers/contacten krijgen hier nooit een watcher.
+      // Oefenalarm: alleen de activator mag de preview zien.
+      // Helpers/contacten krijgen hier nooit een watcher.
       if (isTest && !isActivator){
         stopAckWatcher();
         return;
       }
-      // Helpers bij écht alarm: geen hulpteam-kaart — alleen NORI-bericht.
+      // Helpers bij écht alarm: geen statuskaart — alleen NORI-bericht.
       if (!isActivator && !isTest){
         stopAckWatcher();
         sb.from('notifications').update({ is_read: true })
@@ -6201,6 +6207,8 @@
           });
         return;
       }
+      // Activator: watcher alleen voor escalatie op de achtergrond
+      // (geen hulpteam-UI meer in Berichten).
       startAckWatcher(alarmRow.id, alarmRow.created_at, isActivator, isTest);
     } else {
       activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
@@ -6299,8 +6307,10 @@
     lastAccuracyText = location_accuracy ? t('location.accuracy', { n: Math.round(location_accuracy) }) : '';
     els.locationOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
-    // Eind-knop zit op de hulpteam-kaart; hier niet dubbel tonen.
-    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.add('hidden');
+    // Alarm beëindigen hoort bij de locatiekaart (hulpteam-kaart is weg).
+    if (els.endAlarmFromLocationButton){
+      els.endAlarmFromLocationButton.classList.toggle('hidden', !isOwn);
+    }
     els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
     renderLocationMeta(location_updated_at);
 
@@ -6503,74 +6513,33 @@
   async function pollAckStatus(alarmId, createdAt){
     const me = currentSession.user.id;
     const others = Object.keys(chatParticipantById).filter(id => id !== me && !isNoriSystemSender(id));
-    if (!others.length && ackWatcherIsActivator){ els.ackStatusCard.classList.add('hidden'); return; }
+    // Hulpteam-kaart tonen we niet meer (blokkeerde typen). Wel blijven
+    // we op de achtergrond kijken voor escalatie bij een echt alarm.
+    els.ackStatusCard.classList.add('hidden');
+    els.escalationBanner.classList.add('hidden');
+    if (els.ackOmwButton) els.ackOmwButton.classList.add('hidden');
+    if (els.endAlarmFromChatButton) els.endAlarmFromChatButton.classList.add('hidden');
+    if (!others.length || !ackWatcherIsActivator) return;
 
     const { data } = await sb.rpc('get_alarm_acknowledgments', { p_alarm_id: alarmId });
     const byUser = {};
     (data || []).forEach(r => { byUser[r.user_id] = { is_read: !!r.is_read, omw_at: r.omw_at || null }; });
 
-    const teamIds = ackWatcherIsActivator
-      ? others
-      : others; // helpers zien ook de rest van het team
-
-    els.ackStatusList.innerHTML = teamIds.map(id => {
-      const row = byUser[id] || {};
-      const coming = !!row.omw_at;
-      const seen = !!row.is_read;
-      const name = chatParticipantById[id] ? chatParticipantById[id].full_name : t('conversation.unknown');
-      const cls = coming ? ' coming' : (seen ? ' acked' : '');
-      const status = coming ? t('ack.coming') : (seen ? t('ack.seen') : t('ack.waiting'));
-      return '<div class="ack-pill' + cls + '"><span class="ack-dot"></span><span>' + escapeHtml(name) + '</span><span class="ack-pill-status">' + escapeHtml(status) + '</span></div>';
-    }).join('');
-
-    // Titel / hint afhankelijk van rol (en oefenmodus)
-    if (els.ackStatusCardTitle){
-      els.ackStatusCardTitle.textContent = ackWatcherIsActivator ? t('ack.titleActivator') : t('ack.titleHelper');
-    }
-    if (els.ackStatusCardHint){
-      els.ackStatusCardHint.textContent = ackWatcherIsTest
-        ? t('ack.hintTest')
-        : (ackWatcherIsActivator ? t('ack.hintActivator') : t('ack.hintHelper'));
-    }
-
-    // Helper: knop “Ik kom eraan” — niet tijdens oefen-preview (jij bent activator)
-    if (els.ackOmwButton){
-      const mine = byUser[me] || {};
-      const iAmHelper = !ackWatcherIsActivator;
-      els.ackOmwButton.classList.toggle('hidden', !iAmHelper);
-      if (iAmHelper){
-        const done = !!mine.omw_at;
-        els.ackOmwButton.disabled = done;
-        els.ackOmwButton.classList.toggle('done', done);
-        els.ackOmwButton.textContent = done ? t('ack.omwDone') : (currentLang === 'en' ? 'I\'m on my way' : 'Ik kom eraan');
+    const anyComing = others.some(id => byUser[id] && byUser[id].omw_at);
+    const anySeen = others.some(id => byUser[id] && byUser[id].is_read);
+    const elapsed = Date.now() - new Date(createdAt).getTime();
+    if (!anyComing && !anySeen && elapsed >= ESCALATION_TIMEOUT_MS){
+      // NOOIT opnieuw alerten bij oefenen — dat zou contacten wakker maken.
+      if (!escalationTriggered && !ackWatcherIsTest){
+        escalationTriggered = true;
+        resendAlert(alarmId);
       }
-    }
-
-    els.endAlarmFromChatButton.classList.toggle('hidden', !ackWatcherIsActivator);
-    els.ackStatusCard.classList.remove('hidden');
-
-    if (ackWatcherIsActivator){
-      const anyComing = others.some(id => byUser[id] && byUser[id].omw_at);
-      const anySeen = others.some(id => byUser[id] && byUser[id].is_read);
-      const elapsed = Date.now() - new Date(createdAt).getTime();
-      if (!anyComing && !anySeen && elapsed >= ESCALATION_TIMEOUT_MS){
-        // Escalatie-UI tonen mag ook bij oefenen (zo zie je wat er zou
-        // gebeuren), maar NOOIT opnieuw een alert versturen — dat zou
-        // contacten alsnog wakker maken.
-        showEscalationBanner(others);
-        if (!escalationTriggered && !ackWatcherIsTest){
-          escalationTriggered = true;
-          resendAlert(alarmId);
-        }
-      } else {
-        els.escalationBanner.classList.add('hidden');
-      }
-    } else {
-      els.escalationBanner.classList.add('hidden');
     }
   }
 
   function showEscalationBanner(otherIds){
+    // Bewaard voor eventuele toekomstige UI; hulpteam-kaart is weg.
+    if (!els.escalationBanner || !els.escalationContactButtons) return;
     els.escalationContactButtons.innerHTML = otherIds
       .map(id => chatParticipantById[id])
       .filter(p => p && p.phone_number)
