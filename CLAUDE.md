@@ -7,13 +7,16 @@ NORI (`profiles.username = 'nori'`, `is_system = true`, id
 
 - Verschijnt niet in Contacten, zoeken, uitnodigen of facepile.
 - Kan niet worden toegevoegd of verwijderd.
-- Is wél de vaste afzender van update-berichten in Berichten (officieel
-  logo + badge “Update”).
-- Digests gaan via `public.run_update_digest()` naar elke gebruikers-
-  `alarm_group` (niet naar NORI’s eigen groep). Cron job
-  `nori-daily-update-digest` roept die Postgres-functie aan.
+- Is wél de vaste afzender van welkomst- en alarmberichten in Berichten.
+- **Update-berichten in de chat staan voorlopig uit** (`run_update_digest`
+  markeert `release_notes` wel als aangekondigd, maar post niets meer in
+  de chat). Welkomstbericht blijft. Heractiveren = digest weer laten
+  inserten in `alarm_messages`.
+- Digests gaan via `public.run_update_digest()` (cron
+  `nori-daily-update-digest`). Frontend toont NORI-updates sowieso niet
+  zolang de filter in `shouldShowChatMessage` actief is.
 - Frontend toont NORI-berichten alleen uit de eigen groep van de
-  gebruiker (`myGroupId`), zodat dezelfde update niet N keer
+  gebruiker (`myGroupId`), zodat dezelfde melding niet N keer
   verschijnt via andermans groepen.
 
 Nooit een normale `connections`-rij voor NORI aanmaken (bidirectionele
@@ -39,9 +42,9 @@ over app-updates. Daarom bestaat er een automatisch mechanisme:
   relevant zijn (bugfixes zonder zichtbaar effect, beveiligingsfixes,
   performance-interne dingen). Alleen wat een gewone gebruiker echt merkt.
 - Cron `nori-daily-update-digest` (08:00 UTC) roept
-  `select public.run_update_digest();` aan. Die bundelt rijen met
-  `announced_at is null` tot één vriendelijk bericht van afzender NORI
-  in elke gebruikerskring (alleen als er echt iets nieuws is).
+  `select public.run_update_digest();` aan. **Chat-posting staat voorlopig
+  uit**; openstaande notes worden alleen gemarkeerd met `announced_at`.
+  Welkomstbericht blijft gewoon werken.
 - Edge function `post-update-digest` is legacy/fallback; bron in
   `supabase/functions/post-update-digest/`. Het bericht **moet** een
   niet-lege `body` hebben (`alarm_messages_body_check`, max 1000).

@@ -5414,13 +5414,14 @@
 
   // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
-  // NORI (welkom/updates/alarm-redding) alleen in je eigen kring-groep —
-  // alarm-redding wordt bij een echt alarm ook in elke contact-groep
-  // geplaatst, zodat helpers het daar lezen zonder grote kaarten.
+  // NORI: welkomst + alarm-redding wel tonen; dagelijkse updates voorlopig
+  // niet in de chat (welkom mag blijven).
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
     if (isNoriSystemSender(msg.sender_id)){
-      return !!myGroupId && msg.group_id === myGroupId;
+      if (!myGroupId || msg.group_id !== myGroupId) return false;
+      if (isNoriUpdateMessage(msg)) return false;
+      return isNoriWelcomeMessage(msg) || isNoriAlarmRescueMessage(msg);
     }
     if (msg.sender_id === currentSession.user.id) return true;
     if (!chatVisibleContactIds.has(msg.sender_id)) return false;
@@ -5439,6 +5440,11 @@
   }
   function isNoriAlarmRescueMessage(msg){
     return !!(msg && msg.alarm_id && isNoriSystemSender(msg.sender_id));
+  }
+  function isNoriUpdateMessage(msg){
+    if (!msg || !isNoriSystemSender(msg.sender_id)) return false;
+    if (isNoriWelcomeMessage(msg) || isNoriAlarmRescueMessage(msg)) return false;
+    return true;
   }
   function noriSystemBadgeLabel(msg){
     if (isNoriWelcomeMessage(msg)) return t('chat.systemBadgeWelcome');
