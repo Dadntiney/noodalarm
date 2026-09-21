@@ -3215,6 +3215,8 @@
       'chat.systemBadgeWelcome': 'Welkom',
       'chat.systemBadgeIntro': 'Uitleg',
       'nori.introVideoLead': 'Bekijk deze korte video en ontdek hoe NORI werkt.',
+      'nori.introVideoAria': 'Uitlegvideo: hoe NORI werkt. Tik om te openen.',
+      'nori.introVideoOpen': 'Tik om de uitlegvideo te openen',
       'chat.systemBadgeAlarm': 'Alarm',
       'nori.openMaps': 'Open locatie',
       'nori.openRescue': 'Wat moet ik doen?',
@@ -3387,6 +3389,8 @@
       'chat.systemBadgeWelcome': 'Welcome',
       'chat.systemBadgeIntro': 'Guide',
       'nori.introVideoLead': 'Watch this short video and see how NORI works.',
+      'nori.introVideoAria': 'Explainer video: how NORI works. Tap to open.',
+      'nori.introVideoOpen': 'Tap to open the explainer video',
       'chat.systemBadgeAlarm': 'Alarm',
       'nori.openMaps': 'Open location',
       'nori.openRescue': 'What should I do?',
@@ -5974,182 +5978,177 @@
   }
 
   function isNoriIntroVideoMessage(msg){
-    if (!msg || typeof msg.body !== 'string') return false;
-    return msg.body.indexOf(NORI_INTRO_VIDEO.marker) !== -1;
-  }
+      if (!msg || typeof msg.body !== 'string') return false;
+      return msg.body.indexOf(NORI_INTRO_VIDEO.marker) !== -1;
+    }
 
   function chatHasIntroVideoMessage(){
-    return Object.keys(chatMessageById).some(id => isNoriIntroVideoMessage(chatMessageById[id]));
-  }
-
-  // Voor bestaande accounts zonder DB-migratie: toon de uitlegvideo als
-  // normaal NORI-systeembericht in de tijdlijn (lokaal, eenmalig per render).
-  // Zodra de migratie/RPC het echte bericht plaatst, verdwijnt dit automatisch.
-  const LOCAL_NORI_INTRO_VIDEO_ID = 'local-nori-intro-video-v1';
-  function withLocalNoriIntroVideoMessage(list){
-    if (!Array.isArray(list) || !myGroupId || !currentSession) return list || [];
-    if (list.some(isNoriIntroVideoMessage)) return list;
-    const synthetic = {
-      id: LOCAL_NORI_INTRO_VIDEO_ID,
-      group_id: myGroupId,
-      sender_id: NORI_SYSTEM_USER_ID,
-      body: t('nori.introVideoLead') + '\n\n' + NORI_INTRO_VIDEO.marker,
-      created_at: new Date().toISOString(),
-      media_path: null,
-      media_type: null,
-      alarm_id: null,
-      _localOnly: true
-    };
-    const welcomeIdx = list.findIndex(isNoriWelcomeMessage);
-    if (welcomeIdx >= 0){
-      synthetic.created_at = list[welcomeIdx].created_at || synthetic.created_at;
-      const out = list.slice();
-      out.splice(welcomeIdx + 1, 0, synthetic);
-      return out;
+      return Object.keys(chatMessageById).some(id => isNoriIntroVideoMessage(chatMessageById[id]));
     }
-    if (list.length) synthetic.created_at = list[0].created_at || synthetic.created_at;
-    return [synthetic].concat(list);
-  }
+
+  const LOCAL_NORI_INTRO_VIDEO_ID = 'local-nori-intro-video-v1';
+
+  function withLocalNoriIntroVideoMessage(list){
+      if (!Array.isArray(list) || !myGroupId || !currentSession) return list || [];
+      if (list.some(isNoriIntroVideoMessage)) return list;
+      const synthetic = {
+        id: LOCAL_NORI_INTRO_VIDEO_ID,
+        group_id: myGroupId,
+        sender_id: NORI_SYSTEM_USER_ID,
+        body: t('nori.introVideoLead') + '\n\n' + NORI_INTRO_VIDEO.marker,
+        created_at: new Date().toISOString(),
+        media_path: null,
+        media_type: null,
+        alarm_id: null,
+        _localOnly: true
+      };
+      const welcomeIdx = list.findIndex(isNoriWelcomeMessage);
+      if (welcomeIdx >= 0){
+        synthetic.created_at = list[welcomeIdx].created_at || synthetic.created_at;
+        const out = list.slice();
+        out.splice(welcomeIdx + 1, 0, synthetic);
+        return out;
+      }
+      if (list.length) synthetic.created_at = list[0].created_at || synthetic.created_at;
+      return [synthetic].concat(list);
+    }
 
   function shouldShowNoriIntroVideo(msg){
-    if (isNoriIntroVideoMessage(msg)) return true;
-    // Fallback: toon video onder welkomstbericht tot de migratie/RPC
-    // een apart bericht heeft geplaatst (voorkomt lege chat zonder video).
-    return isNoriWelcomeMessage(msg) && !chatHasIntroVideoMessage();
-  }
+      if (isNoriIntroVideoMessage(msg)) return true;
+      // Fallback: toon video onder welkomstbericht tot de migratie/RPC
+      // een apart bericht heeft geplaatst (voorkomt lege chat zonder video).
+      return isNoriWelcomeMessage(msg) && !chatHasIntroVideoMessage();
+    }
 
   function noriIntroVideoPlayerHtml(){
-    // Alleen een stille poster-preview in de chat — geen <video> (geen
-    // audio-risico). Tik opent de lightbox waar pas geluid speelt.
-    return '<div class="nori-intro-video-wrap" role="button" tabindex="0"' +
-      ' data-nori-intro-open="1"' +
-      ' aria-label="' + escapeHtml(t('nori.introVideoAria')) + '">' +
-      '<img class="nori-intro-poster" src="' + escapeHtml(NORI_INTRO_VIDEO.poster) +
-      '" alt="" loading="lazy" decoding="async">' +
-      '<span class="nori-intro-play-btn" aria-hidden="true">' +
-      '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>' +
-      '</span></div>';
-  }
+      // Alleen een stille poster-preview in de chat — geen <video> (geen
+      // audio-risico). Tik opent de lightbox waar pas geluid speelt.
+      return '<div class="nori-intro-video-wrap" role="button" tabindex="0"' +
+        ' data-nori-intro-open="1"' +
+        ' aria-label="' + escapeHtml(t('nori.introVideoAria')) + '">' +
+        '<img class="nori-intro-poster" src="' + escapeHtml(NORI_INTRO_VIDEO.poster) +
+        '" alt="" loading="lazy" decoding="async">' +
+        '<span class="nori-intro-play-btn" aria-hidden="true">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>' +
+        '</span></div>';
+    }
 
   function pauseNoriIntroVideos(){
-    closeNoriIntroLightbox();
-  }
+      closeNoriIntroLightbox();
+    }
 
   function enterNoriIntroNativeFullscreen(video){
-    try {
-      // iPhone/iPad: native portrait fullscreen van het <video>-element.
-      if (typeof video.webkitEnterFullscreen === 'function'){
-        video.webkitEnterFullscreen();
-        return;
-      }
-      if (video.requestFullscreen){
-        video.requestFullscreen().catch(() => {});
-        return;
-      }
-      const root = els.noriIntroLightbox;
-      if (root && root.requestFullscreen){
-        root.requestFullscreen().catch(() => {});
-      }
-    } catch (e) { /* fallback = CSS fullscreen lightbox */ }
-  }
+      try {
+        // iPhone/iPad: native portrait fullscreen van het <video>-element.
+        if (typeof video.webkitEnterFullscreen === 'function'){
+          video.webkitEnterFullscreen();
+          return;
+        }
+        if (video.requestFullscreen){
+          video.requestFullscreen().catch(() => {});
+          return;
+        }
+        const root = els.noriIntroLightbox;
+        if (root && root.requestFullscreen){
+          root.requestFullscreen().catch(() => {});
+        }
+      } catch (e) { /* fallback = CSS fullscreen lightbox */ }
+    }
 
   function openNoriIntroLightbox(){
-    if (!els.noriIntroLightbox || !els.noriIntroLightboxVideo) return;
-    const video = els.noriIntroLightboxVideo;
-    // Source pas zetten bij openen (lazy) — chat-open laadt geen video.
-    if (!video.getAttribute('src') || video.getAttribute('src') !== NORI_INTRO_VIDEO.src){
-      video.src = NORI_INTRO_VIDEO.src;
-      // Captions-track eenmalig toevoegen / vernieuwen
-      const oldTrack = video.querySelector('track');
-      if (oldTrack) oldTrack.remove();
-      const track = document.createElement('track');
-      track.kind = 'captions';
-      track.srclang = 'nl';
-      track.label = 'Nederlands';
-      track.src = NORI_INTRO_VIDEO.captions;
-      track.default = true;
-      video.appendChild(track);
-    }
-    // Audio altijd aan: geen mute van autoplay-beleid na user-gesture.
-    try {
-      video.defaultMuted = false;
-      video.muted = false;
-      video.volume = 1;
-      video.setAttribute('playsinline', '');
-      video.setAttribute('webkit-playsinline', '');
-    } catch (e) { /* ignore */ }
-    els.noriIntroLightbox.classList.remove('hidden');
-    void els.noriIntroLightbox.offsetHeight;
-    requestAnimationFrame(() => els.noriIntroLightbox.classList.add('open'));
-    // Play + native fullscreen in dezelfde user-gesture-keten.
-    const start = () => {
-      const playing = video.play();
-      const goFs = () => enterNoriIntroNativeFullscreen(video);
-      if (playing && typeof playing.then === 'function'){
-        playing.then(goFs).catch(() => { goFs(); });
-      } else {
-        goFs();
+      if (!els.noriIntroLightbox || !els.noriIntroLightboxVideo) return;
+      const video = els.noriIntroLightboxVideo;
+      // Source pas zetten bij openen (lazy) — chat-open laadt geen video.
+      if (!video.getAttribute('src') || video.getAttribute('src') !== NORI_INTRO_VIDEO.src){
+        video.src = NORI_INTRO_VIDEO.src;
+        // Captions-track eenmalig toevoegen / vernieuwen
+        const oldTrack = video.querySelector('track');
+        if (oldTrack) oldTrack.remove();
+        const track = document.createElement('track');
+        track.kind = 'captions';
+        track.srclang = 'nl';
+        track.label = 'Nederlands';
+        track.src = NORI_INTRO_VIDEO.captions;
+        track.default = true;
+        video.appendChild(track);
       }
-    };
-    if (video.readyState >= 2) start();
-    else video.addEventListener('loadeddata', start, { once: true });
-  }
+      // Audio altijd aan: geen mute van autoplay-beleid na user-gesture.
+      try {
+        video.defaultMuted = false;
+        video.muted = false;
+        video.volume = 1;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+      } catch (e) { /* ignore */ }
+      els.noriIntroLightbox.classList.remove('hidden');
+      void els.noriIntroLightbox.offsetHeight;
+      requestAnimationFrame(() => els.noriIntroLightbox.classList.add('open'));
+      // Play + native fullscreen in dezelfde user-gesture-keten.
+      const start = () => {
+        const playing = video.play();
+        const goFs = () => enterNoriIntroNativeFullscreen(video);
+        if (playing && typeof playing.then === 'function'){
+          playing.then(goFs).catch(() => { goFs(); });
+        } else {
+          goFs();
+        }
+      };
+      if (video.readyState >= 2) start();
+      else video.addEventListener('loadeddata', start, { once: true });
+    }
 
   let noriIntroClosing = false;
-  function closeNoriIntroLightbox(){
-    if (!els.noriIntroLightbox || !els.noriIntroLightboxVideo) return;
-    if (noriIntroClosing) return;
-    noriIntroClosing = true;
-    const video = els.noriIntroLightboxVideo;
-    try { video.pause(); } catch (e) { /* ignore */ }
-    // Verlaat eventuele native fullscreen zodat we terug zijn bij de preview.
-    try {
-      if (document.fullscreenElement){
-        document.exitFullscreen().catch(() => {});
-      }
-      if (video.webkitDisplayingFullscreen && typeof video.webkitExitFullscreen === 'function'){
-        video.webkitExitFullscreen();
-      }
-    } catch (e) { /* ignore */ }
-    els.noriIntroLightbox.classList.remove('open');
-    setTimeout(() => {
-      if (!els.noriIntroLightbox.classList.contains('open')){
-        els.noriIntroLightbox.classList.add('hidden');
-        // Bron behouden voor sneller heropenen, maar tijd resetten.
-        try { video.currentTime = 0; } catch (e) { /* ignore */ }
-      }
-      noriIntroClosing = false;
-    }, 280);
-  }
 
-  // Plaatst het uitlegvideo-bericht hoogstens één keer (DB unique index +
-  // profiles.welcome_video_sent_at + localStorage). Faalt stil als de
-  // migratie nog niet is toegepast.
-  let ensureIntroVideoInFlight = null;
-  async function ensureNoriIntroVideoMessage(){
-    if (!currentSession || !currentSession.user) return false;
-    const uid = currentSession.user.id;
-    const key = 'nori-intro-video-ensured-' + NORI_INTRO_VIDEO.version + '-' + uid;
-    if (localStorage.getItem(key) === '1') return false;
-    if (ensureIntroVideoInFlight) return ensureIntroVideoInFlight;
-    ensureIntroVideoInFlight = (async () => {
+  function closeNoriIntroLightbox(){
+      if (!els.noriIntroLightbox || !els.noriIntroLightboxVideo) return;
+      if (noriIntroClosing) return;
+      noriIntroClosing = true;
+      const video = els.noriIntroLightboxVideo;
+      try { video.pause(); } catch (e) { /* ignore */ }
+      // Verlaat eventuele native fullscreen zodat we terug zijn bij de preview.
       try {
-        const { error } = await sb.rpc('ensure_my_nori_intro_video');
-        if (error){
-          console.warn('ensure_my_nori_intro_video', error.message || error);
-          return false;
+        if (document.fullscreenElement){
+          document.exitFullscreen().catch(() => {});
         }
-        localStorage.setItem(key, '1');
-        return true;
-      } catch (e){
-        console.warn('ensure_my_nori_intro_video', e);
-        return false;
-      } finally {
-        ensureIntroVideoInFlight = null;
-      }
-    })();
-    return ensureIntroVideoInFlight;
-  }
+        if (video.webkitDisplayingFullscreen && typeof video.webkitExitFullscreen === 'function'){
+          video.webkitExitFullscreen();
+        }
+      } catch (e) { /* ignore */ }
+      els.noriIntroLightbox.classList.remove('open');
+      setTimeout(() => {
+        if (!els.noriIntroLightbox.classList.contains('open')){
+          els.noriIntroLightbox.classList.add('hidden');
+          // Bron behouden voor sneller heropenen, maar tijd resetten.
+          try { video.currentTime = 0; } catch (e) { /* ignore */ }
+        }
+        noriIntroClosing = false;
+      }, 280);
+    }
+
+  async function ensureNoriIntroVideoMessage(){
+      if (!currentSession || !currentSession.user) return false;
+      const uid = currentSession.user.id;
+      const key = 'nori-intro-video-ensured-' + NORI_INTRO_VIDEO.version + '-' + uid;
+      if (localStorage.getItem(key) === '1') return false;
+      if (ensureIntroVideoInFlight) return ensureIntroVideoInFlight;
+      ensureIntroVideoInFlight = (async () => {
+        try {
+          const { error } = await sb.rpc('ensure_my_nori_intro_video');
+          if (error){
+            console.warn('ensure_my_nori_intro_video', error.message || error);
+            return false;
+          }
+          localStorage.setItem(key, '1');
+          return true;
+        } catch (e){
+          console.warn('ensure_my_nori_intro_video', e);
+          return false;
+        } finally {
+          ensureIntroVideoInFlight = null;
+        }
+      })();
+      return ensureIntroVideoInFlight;
+    }
 
   function isNoriAlarmRescueMessage(msg){
     return !!(msg && msg.alarm_id && isNoriSystemSender(msg.sender_id));
@@ -6220,7 +6219,7 @@
     html += '</div>';
     return html;
   }
-    function chatMessageBodyHtml(msg){
+  function chatMessageBodyHtml(msg){
     if (!msg || !msg.body) return '';
     if (isNoriAlarmRescueMessage(msg)) return renderNoriAlarmBody(msg);
     if (isNoriIntroVideoMessage(msg)){
@@ -6722,7 +6721,6 @@
   async function openMessages(){
     const gen = ++chatOpenGen;
     if (!myGroupId) await loadMyGroupId();
-    // Zorg dat het uitlegvideo-bericht er is vóór we de tijdlijn laden.
     await ensureNoriIntroVideoMessage();
     if (gen !== chatOpenGen) return;
     currentChatGroupId = myGroupId;
