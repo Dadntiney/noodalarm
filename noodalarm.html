@@ -5390,9 +5390,8 @@
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;
       startLiveLocationSharing(result.alarmId);
-      // NORI plaatst een compact bericht met knoppen naar locatie +
-      // reddingskaart. Oefenalarm: alleen in jouw eigen kring (contacten
-      // merken niets). Echt alarm: ook in de kring van elk noodcontact.
+      // Echt alarm: NORI-bericht alleen bij noodcontacten (locatie +
+      // reddingskaart). Oefenalarm: alleen in jouw eigen kring.
       postNoriAlarmRescueMessage(result.alarmId);
     }
   }
@@ -6004,9 +6003,46 @@
     if (visibleAlarm && visibleAlarm.test_mode && visibleAlarm.triggered_by !== currentSession.user.id){
       visibleAlarm = null;
     }
-    handleActiveAlarmChanged(visibleAlarm);
 
     const list = (messages || []).filter(shouldShowChatMessage);
+
+    // NORI-bericht landt in de EIGEN groep van een helper — die is niet
+    // altijd lid van de activator-groep, dus alarmRow kan leeg zijn.
+    // Context dan via het alarm_id in het NORI-bericht ophalen.
+    if (!visibleAlarm){
+      const noriAlarmIds = [];
+      for (let i = list.length - 1; i >= 0; i--){
+        if (isNoriAlarmRescueMessage(list[i]) && list[i].alarm_id && noriAlarmIds.indexOf(list[i].alarm_id) === -1){
+          noriAlarmIds.push(list[i].alarm_id);
+        }
+        if (noriAlarmIds.length >= 5) break;
+      }
+      for (const aid of noriAlarmIds){
+        const { data: ctx } = await sb.rpc('get_alarm_helper_context', { p_alarm_id: aid });
+        if (gen !== chatOpenGen) return;
+        if (ctx && ctx.status === 'active' && !ctx.is_activator && !ctx.test_mode){
+          visibleAlarm = {
+            id: ctx.id,
+            triggered_by: ctx.triggered_by,
+            status: ctx.status,
+            test_mode: ctx.test_mode,
+            lat: ctx.lat,
+            lng: ctx.lng,
+            location_accuracy: ctx.location_accuracy,
+            location_updated_at: ctx.location_updated_at,
+            created_at: ctx.created_at,
+            _omwDone: !!ctx.omw_done
+          };
+          break;
+        }
+      }
+    }
+
+    handleActiveAlarmChanged(visibleAlarm);
+    if (visibleAlarm && visibleAlarm._omwDone){
+      activeAlarmContext.omwDone = true;
+    }
+
     chatMessageById = {};
     list.forEach(m => { chatMessageById[m.id] = m; });
     chatReceiptsByMessageId = {};
@@ -6028,6 +6064,7 @@
           }, isFirst);
         }).join('')
       : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
+    if (activeAlarmContext.omwDone) refreshNoriOmwButtons();
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
     markIncomingMessagesSeen(list.filter(m => m.sender_id !== currentSession.user.id).map(m => m.id));
