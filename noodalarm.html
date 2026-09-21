@@ -6125,6 +6125,7 @@
       }, 280);
     }
 
+  let ensureIntroVideoInFlight = null;
   async function ensureNoriIntroVideoMessage(){
       if (!currentSession || !currentSession.user) return false;
       const uid = currentSession.user.id;
