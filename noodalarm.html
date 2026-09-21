@@ -765,8 +765,10 @@
   .slide-page.open{ transform:translateX(0); }
   /* Terug-knop hield geen rekening met de veilige zone bovenaan (notch/
      Dynamic Island) — een vaste 14px kon daardoor pal tegen de rand
-     aanzitten. Zelfde patroon als .app-header hieronder. */
-  .slide-page-header{ display:flex; align-items:center; padding:max(14px, env(safe-area-inset-top)) 12px 0 8px; flex-shrink:0; }
+     aanzitten. Zelfde patroon als .app-header hieronder.
+     Extra ruimte onder het ronde terug-icoon, zodat de pagina-inhoud
+     (ook bij scrollen) er niet tegenaan zit. */
+  .slide-page-header{ display:flex; align-items:center; padding:max(14px, env(safe-area-inset-top)) 12px 16px 8px; flex-shrink:0; }
   .slide-page-content{ flex:1; overflow-y:auto; overscroll-behavior:contain; padding:4px 20px 40px; }
   .slide-page-title{ font-size:1.75rem; font-weight:800; margin:10px 0 22px; }
 
