@@ -6306,7 +6306,7 @@
     if (activeAlarmContext.omwDone) refreshNoriOmwButtons();
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
-    markIncomingMessagesSeen(list.filter(m => m.sender_id !== currentSession.user.id).map(m => m.id));
+    markIncomingMessagesSeen(list.filter(m => m.sender_id !== currentSession.user.id && !m._localOnly).map(m => m.id));
 
     const mediaPaths = list.filter(m => m.media_path).map(m => m.media_path);
     if (mediaPaths.length){
@@ -6836,6 +6836,12 @@
       if (!msg || chatMessageById[msg.id]) return;
       if (!shouldShowChatMessage(msg)) return;
       (async () => {
+        // Echt DB-uitlegbericht: verwijder lokale fallback zodat die niet dubbel staat.
+        if (isNoriIntroVideoMessage(msg) && chatMessageById[LOCAL_NORI_INTRO_VIDEO_ID]){
+          delete chatMessageById[LOCAL_NORI_INTRO_VIDEO_ID];
+          const localRow = els.chatMessages.querySelector('.chat-row[data-message-id="' + LOCAL_NORI_INTRO_VIDEO_ID + '"]');
+          if (localRow) localRow.remove();
+        }
         chatMessageById[msg.id] = msg;
         let participant = resolveChatSender(msg);
         if (!participant){
