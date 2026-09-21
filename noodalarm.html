@@ -2222,10 +2222,6 @@
             </div>
           </div>
 
-          <button type="button" id="openMessagesFromSentButton" class="save-button" style="display:flex; align-items:center; justify-content:center; gap:8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Open Berichten
-          </button>
           <button id="endAlarmButton" class="end-button">Terug naar start</button>
         </div>
 
@@ -2772,7 +2768,6 @@
     { sel: '#sentRescueHint', nl: 'Laat dit scherm zien aan de dokter of ambulance.', en: 'Show this screen to the doctor or ambulance crew.' },
     { sel: '#sentEhboButton', nl: '🩹 EHBO-instructies', en: '🩹 First aid instructions' },
     { sel: '#sentCall112Button', nl: '📞 Bel 112', en: '📞 Call 112' },
-    { sel: '#openMessagesFromSentButton', m: 'l', nl: ' Open Berichten', en: ' Open Messages' },
     { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
     { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
     { sel: '#endAlarmFromChatButton', nl: 'Alarm beëindigen', en: 'End alarm' },
@@ -2875,8 +2870,6 @@
       'entry.wouldNotify': 'Zou melding krijgen',
       'entry.noContacts': 'Geen noodcontacten gekoppeld',
       'entry.testNote': '🧪 Oefening — niemand heeft een melding gekregen. Hieronder zie je hoe het eruitziet bij een echt alarm.',
-      'sent.openPreview': 'Bekijk wat er gebeurt',
-      'sent.openMessages': 'Open Berichten',
       'sent.rescueTitle': 'Voor de ambulance — over <strong>{name}</strong>',
       'sent.rescueEmpty': 'Nog geen medische info ingevuld. Vul dit in via Profiel → Medische informatie, zodat de ambulance dit meteen kan lezen.',
       'ack.hintTest': 'Bij een echt alarm zie je hier live wie reageert. Nu oefen je alleen — niemand is gewaarschuwd.',
@@ -3036,8 +3029,6 @@
       'entry.wouldNotify': 'Would be notified',
       'entry.noContacts': 'No emergency contacts linked',
       'entry.testNote': '🧪 Practice — nobody received a notification. Below is how a real alarm looks.',
-      'sent.openPreview': 'See what happens',
-      'sent.openMessages': 'Open Messages',
       'sent.rescueTitle': 'For the ambulance — about <strong>{name}</strong>',
       'sent.rescueEmpty': 'No medical info filled in yet. Add it via Profile → Medical information so ambulance crews can read it right away.',
       'ack.hintTest': 'In a real alarm you see live who responds here. This is practice only — nobody was alerted.',
@@ -3175,7 +3166,6 @@
   function applyTranslations(){
     applyStaticTranslations();
     renderCommunityUserCount();
-    refreshOpenMessagesFromSentLabel();
   }
   function setLanguage(lang){
     currentLang = lang === 'en' ? 'en' : 'nl';
@@ -3419,7 +3409,6 @@
     sentBy: document.getElementById('sentBy'),
     sentAt: document.getElementById('sentAt'),
     entriesList: document.getElementById('entriesList'),
-    openMessagesFromSentButton: document.getElementById('openMessagesFromSentButton'),
     endAlarmButton: document.getElementById('endAlarmButton'),
     sentRescueCard: document.getElementById('sentRescueCard'),
     sentRescueResusBanner: document.getElementById('sentRescueResusBanner'),
@@ -3546,16 +3535,6 @@
     locationTestMapImg: document.getElementById('locationTestMapImg'),
     locationTestOpenButton: document.getElementById('locationTestOpenButton')
   };
-
-  let lastSentWasTest = false;
-  function refreshOpenMessagesFromSentLabel(){
-    if (!els.openMessagesFromSentButton) return;
-    const label = lastSentWasTest ? t('sent.openPreview') : t('sent.openMessages');
-    const icon = els.openMessagesFromSentButton.querySelector('svg');
-    els.openMessagesFromSentButton.textContent = '';
-    if (icon) els.openMessagesFromSentButton.appendChild(icon);
-    els.openMessagesFromSentButton.appendChild(document.createTextNode(' ' + label));
-  }
 
   const copyrightYearEl = document.getElementById('copyrightYear');
   if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
@@ -5244,9 +5223,6 @@
     switchView(els.viewIdle);
     await endMyActiveAlarm();
   });
-  if (els.openMessagesFromSentButton){
-    els.openMessagesFromSentButton.addEventListener('click', () => openMessages());
-  }
   // Zelfde actie, maar dan direct vanuit het berichtenscherm — zonder dit
   // blijft een alarm dat je hier ooit activeerde voor altijd "actief" staan
   // (met de locatiekaart en escalatiemelding erbovenop) als je nooit meer
@@ -5434,15 +5410,9 @@
         : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
     }
 
-    if (els.openMessagesFromSentButton){
-      lastSentWasTest = !!testMode;
-      refreshOpenMessagesFromSentLabel();
-    }
-
     // Eerst de bevestiging laten zien dat het alarm daadwerkelijk is
-    // verzonden (en aan wie) — pas als iemand zelf op "Open Berichten"
-    // drukt, gaan we naar de chat/locatie/wie-heeft-gereageerd. Niet
-    // automatisch wegnavigeren: net na het drukken op ALARM wil je eerst
+    // verzonden (en aan wie). Berichten blijven via de tab bereikbaar —
+    // niet automatisch wegnavigeren: net na het drukken op ALARM wil je eerst
     // die geruststelling zien, niet meteen in een ander scherm belanden.
     switchView(els.viewSent);
     // Reddingskaart meteen open: ambulance/dokter kan dit op deze telefoon
