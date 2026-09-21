@@ -5194,10 +5194,12 @@
     els.endAlarmFromChatButton.addEventListener('click', async () => {
       els.endAlarmFromChatButton.disabled = true;
       await endMyActiveAlarm();
+      activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
       els.ackStatusCard.classList.add('hidden');
       els.locationCard.classList.add('hidden');
       els.medicalInfoCard.classList.add('hidden');
       els.testModeBanner.classList.add('hidden');
+      removeInactiveNoriAlarmRows();
       els.endAlarmFromChatButton.disabled = false;
     });
   }
@@ -5425,14 +5427,18 @@
 
   // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
-  // NORI: welkomst + alarm-redding wel tonen; dagelijkse updates voorlopig
-  // niet in de chat (welkom mag blijven).
+  // NORI: welkom blijft; alarm-redding alleen zolang dat alarm ACTIEF is;
+  // dagelijkse updates voorlopig niet.
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
     if (isNoriSystemSender(msg.sender_id)){
       if (!myGroupId || msg.group_id !== myGroupId) return false;
       if (isNoriUpdateMessage(msg)) return false;
-      return isNoriWelcomeMessage(msg) || isNoriAlarmRescueMessage(msg);
+      if (isNoriWelcomeMessage(msg)) return true;
+      if (isNoriAlarmRescueMessage(msg)){
+        return !!(msg.alarm_id && activeAlarmContext.id && msg.alarm_id === activeAlarmContext.id);
+      }
+      return false;
     }
     if (msg.sender_id === currentSession.user.id) return true;
     if (!chatVisibleContactIds.has(msg.sender_id)) return false;
@@ -6004,16 +6010,18 @@
       visibleAlarm = null;
     }
 
-    const list = (messages || []).filter(shouldShowChatMessage);
+    const rawMessages = messages || [];
 
     // NORI-bericht landt in de EIGEN groep van een helper — die is niet
     // altijd lid van de activator-groep, dus alarmRow kan leeg zijn.
-    // Context dan via het alarm_id in het NORI-bericht ophalen.
+    // Context dan via het alarm_id in het NORI-bericht ophalen (vóór
+    // filteren: inactieve NORI-alarms verdwijnen daarna uit de lijst).
     if (!visibleAlarm){
       const noriAlarmIds = [];
-      for (let i = list.length - 1; i >= 0; i--){
-        if (isNoriAlarmRescueMessage(list[i]) && list[i].alarm_id && noriAlarmIds.indexOf(list[i].alarm_id) === -1){
-          noriAlarmIds.push(list[i].alarm_id);
+      for (let i = rawMessages.length - 1; i >= 0; i--){
+        const m = rawMessages[i];
+        if (isNoriAlarmRescueMessage(m) && m.group_id === myGroupId && m.alarm_id && noriAlarmIds.indexOf(m.alarm_id) === -1){
+          noriAlarmIds.push(m.alarm_id);
         }
         if (noriAlarmIds.length >= 5) break;
       }
@@ -6038,11 +6046,14 @@
       }
     }
 
+    // Eerst context zetten, daarna filteren — NORI-alarmberichten zijn
+    // alleen zichtbaar zolang dát alarm actief is.
     handleActiveAlarmChanged(visibleAlarm);
     if (visibleAlarm && visibleAlarm._omwDone){
       activeAlarmContext.omwDone = true;
     }
 
+    const list = rawMessages.filter(shouldShowChatMessage);
     chatMessageById = {};
     list.forEach(m => { chatMessageById[m.id] = m; });
     chatReceiptsByMessageId = {};
@@ -6139,6 +6150,7 @@
     } else {
       activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
       stopAckWatcher();
+      removeInactiveNoriAlarmRows();
     }
   }
 
@@ -6152,6 +6164,24 @@
       btn.classList.toggle('done', done);
       btn.textContent = done ? t('nori.omwDone') : t('nori.omw');
     });
+  }
+
+  // NORI-alarmbubbels horen alleen bij een actief alarm — haal ze weg
+  // zodra het alarm stopt (DB-trigger ruimt ze ook op; dit is de UI-kant).
+  function removeInactiveNoriAlarmRows(){
+    if (!els.chatMessages) return;
+    const activeId = activeAlarmContext.id;
+    els.chatMessages.querySelectorAll('.chat-row').forEach(row => {
+      const mid = row.getAttribute('data-message-id');
+      const msg = chatMessageById[mid];
+      if (!msg || !isNoriAlarmRescueMessage(msg)) return;
+      if (activeId && msg.alarm_id === activeId) return;
+      delete chatMessageById[mid];
+      row.remove();
+    });
+    if (!els.chatMessages.querySelector('.chat-row') && !els.chatMessages.querySelector('.chat-empty-hint')){
+      els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
+    }
   }
 
   // Een losse "staticmap"-plaatjesdienst van een derde partij bleek
