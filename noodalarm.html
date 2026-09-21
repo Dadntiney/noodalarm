@@ -1289,6 +1289,8 @@
   }
   .nori-alarm-action.maps{ background:var(--accent); color:#fff; }
   .nori-alarm-action.rescue{ background:var(--surface-2); color:var(--text); border:1.5px solid var(--border); }
+  .nori-alarm-action.omw{ background:var(--green); color:#fff; }
+  .nori-alarm-action.omw.done{ background:color-mix(in srgb, var(--green) 22%, var(--surface-2)); color:var(--green); cursor:default; }
   .nori-alarm-lead{ margin:0; line-height:1.45; white-space:pre-wrap; }
   .rescue-overlay-card{ max-width:440px; }
   .rescue-overlay-body{ display:flex; flex-direction:column; gap:10px; margin-top:4px; }
@@ -2883,6 +2885,8 @@
       'chat.systemBadgeAlarm': 'Alarm',
       'nori.openMaps': '📍 Open locatie',
       'nori.openRescue': '🩺 Open reddingskaart',
+      'nori.omw': '✅ Ik kom eraan',
+      'nori.omwDone': 'Je komt eraan — bedankt',
       'nori.rescueOverlayTitle': 'Reddingskaart',
       'nori.rescueOverlayAbout': 'Alles wat helpers nu moeten weten over {name}',
       'nori.rescueEmpty': 'Nog geen medische info ingevuld.',
@@ -3042,6 +3046,8 @@
       'chat.systemBadgeAlarm': 'Alarm',
       'nori.openMaps': '📍 Open location',
       'nori.openRescue': '🩺 Open rescue card',
+      'nori.omw': '✅ I\'m on my way',
+      'nori.omwDone': 'You\'re on the way — thank you',
       'nori.rescueOverlayTitle': 'Rescue card',
       'nori.rescueOverlayAbout': 'Everything helpers need to know now about {name}',
       'nori.rescueEmpty': 'No medical info filled in yet.',
@@ -4287,6 +4293,10 @@
     if (myGroupId){
       await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
     }
+    if (activeAlarmContext.id === alarmId){
+      activeAlarmContext.omwDone = true;
+      refreshNoriOmwButtons();
+    }
     if (ackWatcherAlarmId === alarmId) pollAckStatus(alarmId, ackWatcherCreatedAt);
     openMessages();
   }
@@ -5402,6 +5412,8 @@
   let chatVisibleContactIds = new Set();
   let editingMessageId = null;
   let activeMenuBubble = null;
+  // Actief alarm voor NORI-knoppen (helpers: locatie/redding/OMW zonder hulpteam-kaart).
+  let activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
 
   let chatParticipantById = {};
   let chatMessageById = {};
@@ -5493,6 +5505,20 @@
     if (parsed.rescueId || alarmId){
       html += '<button type="button" class="nori-alarm-action rescue" data-nori-rescue="' +
         escapeHtml(parsed.rescueId || alarmId) + '">' + escapeHtml(t('nori.openRescue')) + '</button>';
+    }
+    // Helpers: “Ik kom eraan” op het NORI-bericht zelf (geen aparte
+    // hulpteam-kaart boven de chat).
+    const showOmw = !!(alarmId
+      && activeAlarmContext.id === alarmId
+      && activeAlarmContext.triggeredBy
+      && activeAlarmContext.triggeredBy !== currentSession.user.id
+      && !activeAlarmContext.testMode);
+    if (showOmw){
+      const done = !!activeAlarmContext.omwDone;
+      html += '<button type="button" class="nori-alarm-action omw' + (done ? ' done' : '') + '"' +
+        (done ? ' disabled' : '') +
+        ' data-nori-omw="' + escapeHtml(alarmId) + '">' +
+        escapeHtml(done ? t('nori.omwDone') : t('nori.omw')) + '</button>';
     }
     html += '</div>';
     return html;
@@ -6030,38 +6056,65 @@
     openMessages();
   }
 
-  // Locatie / medische info / escalatie hangen van een actief alarm af —
-  // compose is altijd aan (versturen = eigen kring).
-  // Locatiekaart en reddingskaart staan NIET meer boven Berichten (ook
-  // niet voor de activator): alles zit in het compacte NORI-bericht met
-  // knoppen. Hulpteam + testbanner blijven wel zichtbaar.
+  // Locatiekaart en reddingskaart staan NIET boven Berichten.
+  // Helpers zien alleen het compacte NORI-bericht (locatie + reddingskaart
+  // + Ik kom eraan) — geen hulpteam-kaart. Activator ziet wél hulpteam.
   function handleActiveAlarmChanged(alarmRow){
     els.chatForm.classList.remove('hidden');
-    els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
+    els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id));
     // Altijd verbergen — helpers én activator lezen via NORI-knoppen.
     els.locationCard.classList.add('hidden');
     els.medicalInfoCard.classList.add('hidden');
     if (alarmRow && alarmRow.status === 'active'){
       const isActivator = alarmRow.triggered_by === currentSession.user.id;
       const isTest = !!alarmRow.test_mode;
+      activeAlarmContext = {
+        id: alarmRow.id,
+        triggeredBy: alarmRow.triggered_by,
+        testMode: isTest,
+        omwDone: false
+      };
       // Oefenalarm: alleen de activator mag de 1-op-1 preview zien
-      // (hulpteam). Helpers/contacten krijgen hier nooit een watcher —
-      // zij zijn niet gewaarschuwd.
+      // (hulpteam). Helpers/contacten krijgen hier nooit een watcher.
       if (isTest && !isActivator){
         stopAckWatcher();
         return;
       }
-      startAckWatcher(alarmRow.id, alarmRow.created_at, isActivator, isTest);
-      // Helper die het alarm-scherm opent: markeer als gezien (niet als “kom eraan”).
-      // Bij oefenalarm bestaan er geen alarm-notificaties — dus overslaan.
+      // Helpers bij écht alarm: geen hulpteam-kaart — alleen NORI-bericht.
       if (!isActivator && !isTest){
+        stopAckWatcher();
         sb.from('notifications').update({ is_read: true })
           .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmRow.id)
           .is('omw_at', null);
+        // Of deze helper al “Ik kom eraan” heeft getikt (voor knop-state).
+        sb.from('notifications').select('omw_at')
+          .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmRow.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (activeAlarmContext.id === alarmRow.id){
+              activeAlarmContext.omwDone = !!(data && data.omw_at);
+              refreshNoriOmwButtons();
+            }
+          });
+        return;
       }
+      startAckWatcher(alarmRow.id, alarmRow.created_at, isActivator, isTest);
     } else {
+      activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
       stopAckWatcher();
     }
+  }
+
+  function refreshNoriOmwButtons(){
+    if (!els.chatMessages) return;
+    els.chatMessages.querySelectorAll('.nori-alarm-action.omw').forEach(btn => {
+      const id = btn.getAttribute('data-nori-omw');
+      if (!id || id !== activeAlarmContext.id) return;
+      const done = !!activeAlarmContext.omwDone;
+      btn.disabled = done;
+      btn.classList.toggle('done', done);
+      btn.textContent = done ? t('nori.omwDone') : t('nori.omw');
+    });
   }
 
   // Een losse "staticmap"-plaatjesdienst van een derde partij bleek
@@ -6253,6 +6306,13 @@
   // Knoppen in compacte NORI-alarmberichten (event delegation).
   if (els.chatMessages){
     els.chatMessages.addEventListener('click', async (ev) => {
+      const omwBtn = ev.target.closest('[data-nori-omw]');
+      if (omwBtn){
+        ev.preventDefault();
+        if (omwBtn.disabled) return;
+        handleOmw(omwBtn.getAttribute('data-nori-omw'));
+        return;
+      }
       const rescueBtn = ev.target.closest('[data-nori-rescue]');
       if (rescueBtn){
         ev.preventDefault();

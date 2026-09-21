@@ -81,27 +81,30 @@ begin
     return null;
   end if;
 
-  insert into public.alarm_messages (group_id, sender_id, body, alarm_id)
-  values (a.group_id, v_nori, v_body, p_alarm_id)
-  returning id into v_first;
-
-  -- Echt alarm: ook naar elk noodcontact. Oefenalarm: alleen activator.
-  if not coalesce(a.test_mode, false) then
-    for r in
-      select g.id as group_id
-      from public.connections c
-      join public.alarm_groups g on g.owner_id = case
-        when c.requester_id = a.triggered_by then c.target_id
-        else c.requester_id
-      end
-      where c.status = 'accepted'
-        and (c.requester_id = a.triggered_by or c.target_id = a.triggered_by)
-        and g.id is distinct from a.group_id
-    loop
-      insert into public.alarm_messages (group_id, sender_id, body, alarm_id)
-      values (r.group_id, v_nori, v_body, p_alarm_id);
-    end loop;
+  if coalesce(a.test_mode, false) then
+    -- Oefenen: alleen activator ziet het bericht (1-op-1 preview).
+    insert into public.alarm_messages (group_id, sender_id, body, alarm_id)
+    values (a.group_id, v_nori, v_body, p_alarm_id)
+    returning id into v_first;
+    return v_first;
   end if;
+
+  -- Echt alarm: alleen naar elk noodcontact — niet naar de activator.
+  for r in
+    select g.id as group_id
+    from public.connections c
+    join public.alarm_groups g on g.owner_id = case
+      when c.requester_id = a.triggered_by then c.target_id
+      else c.requester_id
+    end
+    where c.status = 'accepted'
+      and (c.requester_id = a.triggered_by or c.target_id = a.triggered_by)
+      and g.id is distinct from a.group_id
+  loop
+    insert into public.alarm_messages (group_id, sender_id, body, alarm_id)
+    values (r.group_id, v_nori, v_body, p_alarm_id)
+    returning id into v_first;
+  end loop;
 
   return v_first;
 end;
