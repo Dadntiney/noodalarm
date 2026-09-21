@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NORI uitlegvideo — preview</title>
+  <style>
+    :root { --nori-msg:#0f766e; --surface:#fff; --bg:#f0f2f5; --text:#111827; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:420px; margin:24px auto; padding:0 12px 40px; }
+    .bubble {
+      background: color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
+      border-radius:12px; padding:12px 14px; max-width:100%;
+    }
+    .who { color:var(--nori-msg); font-weight:700; margin-bottom:8px; display:flex; gap:6px; align-items:center; }
+    .badge { font-size:12px; font-weight:700; background: color-mix(in srgb, var(--nori-msg) 18%, transparent); padding:2px 8px; border-radius:999px; }
+    .nori-intro-lead { margin:0 0 10px; line-height:1.45; }
+    .nori-intro-video-wrap {
+      position:relative; border-radius:12px; overflow:hidden; background:#0f172a;
+      aspect-ratio:9/16; max-height:min(62vh, 520px);
+    }
+    .nori-intro-video-wrap video { display:block; width:100%; height:100%; object-fit:contain; background:#0f172a; }
+    h1 { font-size:1.1rem; }
+    p.note { color:#6b7280; font-size:0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Preview: NORI-uitleg in chatbubbel</h1>
+    <p class="note">Geen autoplay. Tik zelf op afspelen. Captions: Nederlands.</p>
+    <div class="bubble">
+      <div class="who">NORI <span class="badge">Uitleg</span></div>
+      <p class="nori-intro-lead">Bekijk deze korte video en ontdek hoe NORI werkt.</p>
+      <div class="nori-intro-video-wrap">
+        <video class="nori-intro-video" playsinline controls preload="none"
+          poster="nori-uitleg-poster.jpg" controlslist="nodownload"
+          aria-label="Uitlegvideo: hoe NORI werkt. Tik op afspelen.">
+          <source src="nori-uitleg.mp4" type="video/mp4">
+          <track kind="captions" srclang="nl" label="Nederlands" src="nori-uitleg.nl.vtt" default>
+        </video>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
