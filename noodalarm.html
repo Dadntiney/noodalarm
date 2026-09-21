@@ -5436,15 +5436,19 @@
   }
 
   function isNoriWelcomeMessage(msg){
-    return !!(msg && typeof msg.body === 'string' && msg.body.indexOf('👋 Welkom bij NORI!') === 0);
+    if (!msg || typeof msg.body !== 'string') return false;
+    // Oudere welkomsten staan zonder 👋-emoji in de DB.
+    return msg.body.indexOf('👋 Welkom bij NORI!') === 0
+      || msg.body.indexOf('Welkom bij NORI!') === 0;
   }
   function isNoriAlarmRescueMessage(msg){
     return !!(msg && msg.alarm_id && isNoriSystemSender(msg.sender_id));
   }
   function isNoriUpdateMessage(msg){
     if (!msg || !isNoriSystemSender(msg.sender_id)) return false;
-    if (isNoriWelcomeMessage(msg) || isNoriAlarmRescueMessage(msg)) return false;
-    return true;
+    if (isNoriAlarmRescueMessage(msg) || isNoriWelcomeMessage(msg)) return false;
+    const body = String(msg.body || '');
+    return /^(🆕\s*)?Updates? van NORI\b/.test(body);
   }
   function noriSystemBadgeLabel(msg){
     if (isNoriWelcomeMessage(msg)) return t('chat.systemBadgeWelcome');
