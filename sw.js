@@ -14,7 +14,7 @@
 // — confusing during active development, and in an emergency app "shows
 // the version that was actually just fixed" matters more than shaving a
 // few ms off an already-fast load on a normal connection.
-const SHELL_CACHE = 'nori-shell-v3-uitleg-16x9';
+const SHELL_CACHE = 'nori-shell-v4-uitleg-lightbox';
 const SHELL_ASSETS = ['./', './noodalarm.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {

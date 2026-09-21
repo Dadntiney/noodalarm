@@ -925,31 +925,74 @@
   .chat-bubble:has(.chat-media),
   .chat-bubble:has(.chat-video-wrap),
   .chat-bubble:has(.nori-intro-video-wrap){ max-width:90%; }
-  /* NORI-uitlegvideo: full-bleed 16:9 zoals WhatsApp-chatvideo’s. Geen autoplay. */
+  /* NORI-uitlegvideo: compacte 16:9-preview in de bubbel.
+     Geen negatieve top-margin — anders valt de video over “NORI / Uitleg”.
+     Full-bleed links/rechts; klik opent de lightbox (geen inline-play). */
   .nori-intro-video-wrap{
     position:relative;
-    margin:-8px -12px -8px -14px;
+    margin:8px -12px 0 -14px;
     width:calc(100% + 26px);
-    border-radius:7.5px;
+    border-radius:10px;
     overflow:hidden;
-    background:transparent;
+    background:var(--surface-2);
     aspect-ratio:16 / 9;
-    max-height:min(56vh, 420px);
+    max-height:min(32vh, 240px);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
   }
-  .nori-intro-video-wrap video.nori-intro-video{
+  .nori-intro-video-wrap .nori-intro-poster{
     display:block;
     width:100%;
     height:100%;
     object-fit:cover;
-    background:transparent;
+    background:var(--surface-2);
+    pointer-events:none;
   }
+  .nori-intro-play-btn{
+    position:absolute; left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    width:56px; height:56px; border-radius:50%;
+    background:color-mix(in srgb, var(--nori-msg) 92%, #000);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 18px rgba(0,0,0,.28);
+    pointer-events:none;
+  }
+  .nori-intro-play-btn svg{ width:26px; height:26px; margin-left:3px; }
   .nori-intro-lead{
     margin:0 0 4px;
     font-size:1.0625rem;
     line-height:1.45;
   }
   @media (min-width:720px){
-    .nori-intro-video-wrap{ max-height:min(50vh, 480px); }
+    .nori-intro-video-wrap{ max-height:min(28vh, 280px); }
+  }
+  /* Lightbox: grote 16:9-weergave, alleen audio wanneer hier afgespeeld. */
+  .nori-intro-lightbox{
+    position:fixed; inset:0; z-index:420; background:rgba(0,0,0,0);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    padding-top:max(16px, env(safe-area-inset-top));
+    padding-bottom:max(16px, env(safe-area-inset-bottom));
+    opacity:0; pointer-events:none;
+    transition:opacity .28s cubic-bezier(0.16,1,0.3,1), background-color .28s cubic-bezier(0.16,1,0.3,1);
+  }
+  .nori-intro-lightbox.open{ opacity:1; pointer-events:auto; background:rgba(0,0,0,.94); }
+  .nori-intro-lightbox-frame{
+    width:min(960px, 100%);
+    aspect-ratio:16 / 9;
+    max-height:min(80vh, 100%);
+    border-radius:14px;
+    overflow:hidden;
+    background:#000;
+    transform:scale(.94);
+    transition:transform .28s cubic-bezier(0.16,1,0.3,1);
+  }
+  .nori-intro-lightbox.open .nori-intro-lightbox-frame{ transform:scale(1); }
+  .nori-intro-lightbox-frame video{
+    display:block; width:100%; height:100%; object-fit:contain; background:#000;
+  }
+  @media (prefers-reduced-motion:reduce){
+    .nori-intro-lightbox, .nori-intro-lightbox-frame{ transition:none; }
   }
   .chat-bubble.own{
     --bubble-bg:var(--accent);
@@ -2037,6 +2080,16 @@
     <img id="mediaLightboxImg" alt="">
   </div>
 
+  <!-- NORI-uitlegvideo: grote weergave (apart van chat-preview) -->
+  <div id="noriIntroLightbox" class="nori-intro-lightbox hidden" role="dialog" aria-modal="true" aria-label="NORI uitlegvideo">
+    <button type="button" id="noriIntroLightboxClose" class="media-lightbox-close" aria-label="Sluiten">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <div class="nori-intro-lightbox-frame">
+      <video id="noriIntroLightboxVideo" playsinline controls preload="metadata" controlslist="nodownload"></video>
+    </div>
+  </div>
+
   <!-- =========================== BERICHT-MENU (lang indrukken) =========================== -->
   <div id="discreetToast" class="discreet-toast">✓</div>
 
@@ -3000,8 +3053,9 @@
       'chat.systemBadgeWelcome': 'Welkom',
       'chat.systemBadgeIntro': 'Uitleg',
       'chat.systemBadgeAlarm': 'Alarm',
-      'nori.introVideoAria': 'Uitlegvideo: hoe NORI werkt. Tik op afspelen.',
+      'nori.introVideoAria': 'Uitlegvideo: hoe NORI werkt. Tik om te openen.',
       'nori.introVideoLead': 'Bekijk deze korte video en ontdek hoe NORI werkt.',
+      'nori.introVideoOpen': 'Tik om de uitlegvideo te openen',
       'nori.openMaps': '📍 Open locatie',
       'nori.openRescue': '🩺 Open reddingskaart',
       'nori.omw': '✅ Ik kom eraan',
@@ -3162,8 +3216,9 @@
       'chat.systemBadgeWelcome': 'Welcome',
       'chat.systemBadgeIntro': 'Guide',
       'chat.systemBadgeAlarm': 'Alarm',
-      'nori.introVideoAria': 'Explainer video: how NORI works. Tap play.',
+      'nori.introVideoAria': 'Explainer video: how NORI works. Tap to open.',
       'nori.introVideoLead': 'Watch this short video and see how NORI works.',
+      'nori.introVideoOpen': 'Tap to open the explainer video',
       'nori.openMaps': '📍 Open location',
       'nori.openRescue': '🩺 Open rescue card',
       'nori.omw': '✅ I\'m on my way',
@@ -3392,6 +3447,9 @@
     mediaLightbox: document.getElementById('mediaLightbox'),
     mediaLightboxImg: document.getElementById('mediaLightboxImg'),
     mediaLightboxClose: document.getElementById('mediaLightboxClose'),
+    noriIntroLightbox: document.getElementById('noriIntroLightbox'),
+    noriIntroLightboxVideo: document.getElementById('noriIntroLightboxVideo'),
+    noriIntroLightboxClose: document.getElementById('noriIntroLightboxClose'),
     chatBubbleMenuActions: document.getElementById('chatBubbleMenuActions'),
     chatBubbleMenuInfoPanel: document.getElementById('chatBubbleMenuInfoPanel'),
     chatMenuInfo: document.getElementById('chatMenuInfo'),
@@ -5695,24 +5753,60 @@
   }
 
   function noriIntroVideoPlayerHtml(){
-    // preload="none": geen download/geluid tot de gebruiker op Play drukt.
-    return '<div class="nori-intro-video-wrap">' +
-      '<video class="nori-intro-video" playsinline controls preload="none"' +
-      ' poster="' + escapeHtml(NORI_INTRO_VIDEO.poster) + '"' +
-      ' controlslist="nodownload"' +
+    // Alleen een stille poster-preview in de chat — geen <video> (geen
+    // audio-risico). Tik opent de lightbox waar pas geluid speelt.
+    return '<div class="nori-intro-video-wrap" role="button" tabindex="0"' +
+      ' data-nori-intro-open="1"' +
       ' aria-label="' + escapeHtml(t('nori.introVideoAria')) + '">' +
-      '<source src="' + escapeHtml(NORI_INTRO_VIDEO.src) + '" type="video/mp4">' +
-      '<track kind="captions" srclang="nl" label="Nederlands" src="' +
-        escapeHtml(NORI_INTRO_VIDEO.captions) + '" default>' +
-      '</video></div>';
+      '<img class="nori-intro-poster" src="' + escapeHtml(NORI_INTRO_VIDEO.poster) +
+      '" alt="" loading="lazy" decoding="async">' +
+      '<span class="nori-intro-play-btn" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg>' +
+      '</span></div>';
   }
 
   function pauseNoriIntroVideos(){
-    document.querySelectorAll('video.nori-intro-video').forEach(video => {
-      try {
-        if (!video.paused) video.pause();
-      } catch (e) { /* ignore */ }
-    });
+    closeNoriIntroLightbox();
+  }
+
+  function openNoriIntroLightbox(){
+    if (!els.noriIntroLightbox || !els.noriIntroLightboxVideo) return;
+    const video = els.noriIntroLightboxVideo;
+    // Source pas zetten bij openen (lazy) — chat-open laadt geen video.
+    if (!video.getAttribute('src')){
+      video.src = NORI_INTRO_VIDEO.src;
+      // Captions-track eenmalig toevoegen
+      if (!video.querySelector('track')){
+        const track = document.createElement('track');
+        track.kind = 'captions';
+        track.srclang = 'nl';
+        track.label = 'Nederlands';
+        track.src = NORI_INTRO_VIDEO.captions;
+        track.default = true;
+        video.appendChild(track);
+      }
+    }
+    els.noriIntroLightbox.classList.remove('hidden');
+    void els.noriIntroLightbox.offsetHeight;
+    requestAnimationFrame(() => els.noriIntroLightbox.classList.add('open'));
+    // Play pas na user-gesture (deze open-call komt uit een klik/tik).
+    const play = () => { video.play().catch(() => {}); };
+    if (video.readyState >= 2) play();
+    else video.addEventListener('loadeddata', play, { once: true });
+  }
+
+  function closeNoriIntroLightbox(){
+    if (!els.noriIntroLightbox || !els.noriIntroLightboxVideo) return;
+    const video = els.noriIntroLightboxVideo;
+    try { video.pause(); } catch (e) { /* ignore */ }
+    els.noriIntroLightbox.classList.remove('open');
+    setTimeout(() => {
+      if (!els.noriIntroLightbox.classList.contains('open')){
+        els.noriIntroLightbox.classList.add('hidden');
+        // Bron behouden voor sneller heropenen, maar tijd resetten.
+        try { video.currentTime = 0; } catch (e) { /* ignore */ }
+      }
+    }, 280);
   }
 
   // Plaatst het uitlegvideo-bericht hoogstens één keer (DB unique index +
@@ -7055,12 +7149,34 @@
   // vuurt 'click' hier nooit, want touchstart hieronder roept al
   // preventDefault aan zodra een druk op een bubbel begint.
   els.chatMessages.addEventListener('click', (ev) => {
-    // Uitlegvideo: native controls — niet fullscreen forceren / geen JS-play.
-    if (ev.target.closest('.nori-intro-video')) return;
+    const introOpen = ev.target.closest('[data-nori-intro-open]');
+    if (introOpen) { openNoriIntroLightbox(); return; }
     const video = ev.target.closest('.chat-video');
     if (video) { playVideoFullscreen(video); return; }
     const img = ev.target.closest('img.chat-media');
     if (img) openImageLightbox(img.src);
+  });
+  if (els.noriIntroLightboxClose){
+    els.noriIntroLightboxClose.addEventListener('click', closeNoriIntroLightbox);
+  }
+  if (els.noriIntroLightbox){
+    els.noriIntroLightbox.addEventListener('click', (ev) => {
+      if (ev.target === els.noriIntroLightbox) closeNoriIntroLightbox();
+    });
+  }
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && els.noriIntroLightbox && !els.noriIntroLightbox.classList.contains('hidden')){
+      closeNoriIntroLightbox();
+    }
+  });
+  // Keyboard: Enter/Space op de preview-tegel.
+  els.chatMessages.addEventListener('keydown', (ev) => {
+    const introOpen = ev.target.closest('[data-nori-intro-open]');
+    if (!introOpen) return;
+    if (ev.key === 'Enter' || ev.key === ' '){
+      ev.preventDefault();
+      openNoriIntroLightbox();
+    }
   });
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement){
@@ -7136,14 +7252,14 @@
   els.chatMessages.addEventListener('touchstart', (ev) => {
     const bubble = ev.target.closest('.chat-bubble');
     if (!bubble || ev.touches.length !== 1){ bubbleTouch = null; return; }
-    const introVideo = ev.target.closest('.nori-intro-video');
-    const video = introVideo ? null : ev.target.closest('.chat-video');
+    const introOpen = ev.target.closest('[data-nori-intro-open]');
+    const video = introOpen ? null : ev.target.closest('.chat-video');
     const image = ev.target.closest('img.chat-media');
     const voicePlay = ev.target.closest('.voice-msg-play');
     const noriAction = ev.target.closest('.nori-alarm-action');
-    bubbleTouch = { bubble, video, image, voicePlay, noriAction, introVideo, startTime: Date.now(), moved: false };
-    // NORI-actieknoppen / uitlegvideo: geen long-press-menu, native bediening.
-    if (noriAction || introVideo){
+    bubbleTouch = { bubble, video, image, voicePlay, noriAction, introOpen, startTime: Date.now(), moved: false };
+    // NORI-actieknoppen / uitlegpreview: geen long-press-menu.
+    if (noriAction || introOpen){
       longPressStartXY = null;
       return;
     }
@@ -7173,8 +7289,15 @@
     cancelLongPress();
     const touch = bubbleTouch;
     bubbleTouch = null;
-    // Uitlegvideo: laat native controls het afhandelen (geen preventDefault).
-    if (touch && touch.introVideo) return;
+    // Uitlegpreview: open lightbox (geen preventDefault op de tegel zelf
+    // zou click kunnen missen — we handelen 'm hier af).
+    if (touch && touch.introOpen){
+      if (!touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
+        ev.preventDefault();
+        openNoriIntroLightbox();
+      }
+      return;
+    }
     // Zelf afgehandeld i.p.v. via de synthetische 'click' (die op mobiel
     // hierdoor onderdrukt wordt) — zo blijft precies dezelfde tik nooit
     // dubbel afgevuurd worden.
