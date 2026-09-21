@@ -1003,6 +1003,14 @@
     object-position:center center;
     background:#000;
   }
+  /* Sluitknop altijd boven de video (niet door controls geblokkeerd). */
+  .nori-intro-lightbox > .media-lightbox-close{
+    position:fixed;
+    top:max(12px, env(safe-area-inset-top));
+    right:12px;
+    z-index:430;
+    background:rgba(0,0,0,.55);
+  }
   @media (prefers-reduced-motion:reduce){
     .nori-intro-lightbox, .nori-intro-lightbox-frame{ transition:none; }
   }
