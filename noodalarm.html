@@ -601,9 +601,20 @@
   .status-badge.test{ background:var(--amber); box-shadow:0 10px 24px rgba(242,169,59,.35); }
   .status-badge.warn{ background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); box-shadow:none; }
   .test-mode-banner{
-    background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); border-radius:var(--radius-md);
-    padding:12px 16px; font-weight:700; font-size:0.9375rem; text-align:center; margin-bottom:14px;
+    flex-shrink:0;
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-md);
+    box-shadow:var(--shadow-card);
+    padding:14px 16px;
+    font-weight:600;
+    font-size:0.96875rem;
+    text-align:left;
+    margin:12px 18px 0;
+    line-height:1.45;
   }
+  .test-mode-banner strong{ font-weight:800; }
   .status-badge svg{ width:19px; height:19px; }
 
   .info-row{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; font-size:1rem; }
@@ -1222,42 +1233,67 @@
   .medical-info-row-warn strong{ display:block; margin-bottom:2px; }
   .medical-info-actions{ display:flex; gap:10px; flex-wrap:wrap; padding:12px 16px; }
 
-  /* ---------- Hulpteam tijdens alarm ---------- */
-  .ack-status-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--surface); padding:14px 16px; margin-bottom:14px; }
-  .ack-status-card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
-  .ack-status-card-title{ font-weight:800; font-size:1rem; color:var(--text); }
-  .ack-status-card-hint{ width:100%; margin:-2px 0 10px; font-size:0.875rem; color:var(--text-muted); line-height:1.4; }
+  /* ---------- Hulpteam tijdens alarm (strak, zelfde kaartstijl als rest) ---------- */
+  .ack-status-card{
+    flex-shrink:0;
+    border-radius:var(--radius-md);
+    border:1px solid var(--border-soft);
+    background:var(--surface);
+    box-shadow:var(--shadow-card);
+    padding:16px 18px;
+    margin:12px 18px 0;
+  }
+  .ack-status-card-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; flex-wrap:wrap; }
+  .ack-status-card-title{ font-weight:800; font-size:1.0625rem; color:var(--text); }
+  .ack-status-card-hint{ width:100%; margin:0 0 12px; font-size:0.9375rem; color:var(--text-muted); line-height:1.45; }
   .ack-end-button{
-    background:none; border:1.5px solid var(--danger); color:var(--danger); font-weight:700;
-    font-size:0.8125rem; padding:8px 12px; border-radius:999px; cursor:pointer; flex-shrink:0;
+    background:var(--surface-2); border:1.5px solid var(--danger); color:var(--danger); font-weight:700;
+    font-size:0.875rem; padding:10px 14px; border-radius:12px; cursor:pointer; flex-shrink:0; min-height:44px;
   }
   .ack-end-button:hover{ background:rgba(239,68,68,.1); }
   .ack-omw-button{
-    width:100%; margin:4px 0 12px; border:none; border-radius:12px; padding:14px 16px;
-    background:var(--green); color:#fff; font-weight:800; font-size:1rem; cursor:pointer;
+    width:100%; margin:0 0 12px; border:none; border-radius:12px; padding:14px 16px; min-height:52px;
+    background:var(--green); color:#fff; font-weight:800; font-size:1.0625rem; cursor:pointer;
   }
   .ack-omw-button:disabled{ opacity:.55; cursor:default; }
   .ack-omw-button.done{ background:color-mix(in srgb, var(--green) 22%, var(--surface-2)); color:var(--green); }
   .ack-status-list{ display:flex; flex-direction:column; gap:8px; }
   .ack-pill{
-    display:flex; align-items:center; gap:10px; font-size:0.90625rem; font-weight:600;
-    padding:10px 12px; border-radius:12px; background:var(--surface-2); color:var(--text-muted);
+    display:flex; align-items:center; gap:12px; font-size:1rem; font-weight:600;
+    padding:12px 14px; border-radius:12px; background:var(--surface-2); color:var(--text-muted);
   }
   .ack-pill.acked{ color:var(--text); }
   .ack-pill.coming{ color:var(--green); background:color-mix(in srgb, var(--green) 14%, var(--surface-2)); }
-  .ack-dot{ width:9px; height:9px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
+  .ack-dot{ width:10px; height:10px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
   .ack-pill.acked .ack-dot{ background:var(--accent); }
   .ack-pill.coming .ack-dot{ background:var(--green); }
-  .ack-pill-status{ margin-left:auto; font-size:0.8125rem; font-weight:700; color:inherit; opacity:.85; }
+  .ack-pill-status{ margin-left:auto; font-size:0.875rem; font-weight:700; color:inherit; opacity:.9; }
   .escalation-banner{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border-soft); }
-  .escalation-text{ margin:0 0 10px; font-weight:700; color:var(--danger); font-size:0.9375rem; }
+  .escalation-text{ margin:0 0 10px; font-weight:700; color:var(--danger); font-size:0.96875rem; }
   .escalation-actions{ display:flex; flex-direction:column; gap:8px; }
   .escalation-call-button{
     display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; font-weight:700;
-    padding:12px; border-radius:12px; font-size:0.96875rem; color:#fff;
+    padding:14px; border-radius:12px; font-size:1rem; color:#fff; min-height:48px;
   }
   .escalation-call-button.emergency{ background:var(--danger); }
   .escalation-call-button.contact{ background:var(--accent); }
+
+  /* Compacte actieknoppen in NORI-alarmbericht */
+  .chat-bubble:has(.nori-alarm-actions){ max-width:92%; }
+  .nori-alarm-actions{ display:flex; flex-direction:column; gap:10px; margin:12px 0 4px; }
+  .nori-alarm-action{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; min-height:48px; padding:12px 14px; border-radius:12px;
+    font-weight:800; font-size:1rem; text-decoration:none; border:none; cursor:pointer;
+    text-align:center; box-sizing:border-box; font-family:inherit;
+  }
+  .nori-alarm-action.maps{ background:var(--accent); color:#fff; }
+  .nori-alarm-action.rescue{ background:var(--surface-2); color:var(--text); border:1.5px solid var(--border); }
+  .nori-alarm-lead{ margin:0; line-height:1.45; white-space:pre-wrap; }
+  .rescue-overlay-card{ max-width:440px; }
+  .rescue-overlay-body{ display:flex; flex-direction:column; gap:10px; margin-top:4px; }
+  .rescue-overlay-actions{ display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 4px; }
+  .rescue-overlay-actions .small-btn{ flex:1; min-width:140px; justify-content:center; }
 
   /* Check-in uitleg op profiel */
   .check-in-block{ display:flex; flex-direction:column; gap:8px; padding:4px 0 2px; }
@@ -1522,7 +1558,7 @@
             </span>
             <div class="settings-item-body">
               <div class="settings-item-title" id="testAlarmSectionTitle">Oefenen met een testalarm</div>
-              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet alles wat er gebeurt (locatie, hulpteam, reddingskaart), je noodcontacten merken er niets van.</p>
+              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet het NORI-bericht met knoppen naar locatie en reddingskaart, plus jouw hulpteam. Je noodcontacten merken er niets van.</p>
             </div>
           </div>
           <div class="settings-item-control">
@@ -2265,6 +2301,25 @@
         </div>
       </div>
 
+      <div id="rescueOverlay" class="overlay hidden">
+        <div class="overlay-card rescue-overlay-card">
+          <div class="overlay-header">
+            <h2 class="overlay-title" id="rescueOverlayTitle">Reddingskaart</h2>
+            <button type="button" id="rescueOverlayCloseButton" class="overlay-close" aria-label="Sluiten">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+          <div id="rescueOverlayResusBanner" class="medical-resus-banner hidden"></div>
+          <div class="rescue-overlay-actions">
+            <button type="button" id="rescueOverlayEhboButton" class="small-btn">🩹 EHBO-instructies</button>
+            <a href="tel:112" class="small-btn danger">📞 Bel 112</a>
+          </div>
+          <p class="rescue-card-kicker" id="rescueOverlayKicker">Reddingskaart</p>
+          <p id="rescueOverlaySubtitle" style="margin:0 0 8px; font-weight:700; font-size:1.0625rem;"></p>
+          <div id="rescueOverlayBody" class="rescue-overlay-body"></div>
+        </div>
+      </div>
+
       <div id="chatMessages" class="chat-messages"></div>
       <form id="chatForm" class="chat-form">
         <div id="chatEditBanner" class="chat-edit-banner hidden">
@@ -2469,7 +2524,7 @@
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
     { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
     { sel: '#testAlarmSectionTitle', nl: 'Oefenen met een testalarm', en: 'Practice with a test alarm' },
-    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet alles wat er gebeurt (locatie, hulpteam, reddingskaart), je noodcontacten merken er niets van.', en: 'Practice pressing the alarm button exactly like a real emergency — you see everything that happens (location, help team, rescue card), your emergency contacts notice nothing.' },
+    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet het NORI-bericht met knoppen naar locatie en reddingskaart, plus jouw hulpteam. Je noodcontacten merken er niets van.', en: 'Practice pressing the alarm button exactly like a real emergency — you see the NORI message with buttons to location and rescue card, plus your help team. Your emergency contacts notice nothing.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
@@ -2826,6 +2881,12 @@
       'chat.systemBadgeUpdate': 'Update',
       'chat.systemBadgeWelcome': 'Welkom',
       'chat.systemBadgeAlarm': 'Alarm',
+      'nori.openMaps': '📍 Open locatie',
+      'nori.openRescue': '🩺 Open reddingskaart',
+      'nori.rescueOverlayTitle': 'Reddingskaart',
+      'nori.rescueOverlayAbout': 'Alles wat helpers nu moeten weten over {name}',
+      'nori.rescueEmpty': 'Nog geen medische info ingevuld.',
+      'nori.rescueLoadError': 'Reddingskaart kon niet worden geladen.',
       'location.fetchingAddress': 'Adres ophalen…',
       'locationTest.busy': 'Bezig met opzoeken…',
       'locationTest.success': 'Gelukt! Nauwkeurig tot op ±{n} meter.',
@@ -2979,6 +3040,12 @@
       'chat.systemBadgeUpdate': 'Update',
       'chat.systemBadgeWelcome': 'Welcome',
       'chat.systemBadgeAlarm': 'Alarm',
+      'nori.openMaps': '📍 Open location',
+      'nori.openRescue': '🩺 Open rescue card',
+      'nori.rescueOverlayTitle': 'Rescue card',
+      'nori.rescueOverlayAbout': 'Everything helpers need to know now about {name}',
+      'nori.rescueEmpty': 'No medical info filled in yet.',
+      'nori.rescueLoadError': 'Could not load the rescue card.',
       'location.fetchingAddress': 'Fetching address…',
       'locationTest.busy': 'Looking it up…',
       'locationTest.success': 'It works! Accurate to within ±{n} metres.',
@@ -3225,6 +3292,14 @@
     ehboOverlay: document.getElementById('ehboOverlay'),
     ehboCloseButton: document.getElementById('ehboCloseButton'),
     ehboStepsList: document.getElementById('ehboStepsList'),
+    rescueOverlay: document.getElementById('rescueOverlay'),
+    rescueOverlayTitle: document.getElementById('rescueOverlayTitle'),
+    rescueOverlayCloseButton: document.getElementById('rescueOverlayCloseButton'),
+    rescueOverlayResusBanner: document.getElementById('rescueOverlayResusBanner'),
+    rescueOverlayEhboButton: document.getElementById('rescueOverlayEhboButton'),
+    rescueOverlayKicker: document.getElementById('rescueOverlayKicker'),
+    rescueOverlaySubtitle: document.getElementById('rescueOverlaySubtitle'),
+    rescueOverlayBody: document.getElementById('rescueOverlayBody'),
     ackStatusCard: document.getElementById('ackStatusCard'),
     ackStatusCardTitle: document.getElementById('ackStatusCardTitle'),
     ackStatusCardHint: document.getElementById('ackStatusCardHint'),
@@ -5232,10 +5307,10 @@
     // piepklein, tekstloos bolletje zodat degene die het indrukte zelf wel
     // weet dat het gelukt is, zonder dat iemand die meekijkt iets ziet.
     if (silent){
-      if (!sendError && result.alarmId){
+        if (!sendError && result.alarmId){
         lastTriggeredAlarmId = result.alarmId;
         startLiveLocationSharing(result.alarmId);
-        if (!testMode) postNoriAlarmRescueMessage(result.alarmId);
+        postNoriAlarmRescueMessage(result.alarmId);
       }
       showDiscreetToast(!sendError);
       return;
@@ -5305,10 +5380,10 @@
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;
       startLiveLocationSharing(result.alarmId);
-      // Bij een écht alarm: NORI plaatst locatie + medische info als
-      // chatbericht in de kring, zodat helpers het in Berichten lezen
-      // zonder grote kaarten die het typen blokkeren. Oefenalarm: overslaan.
-      if (!testMode) postNoriAlarmRescueMessage(result.alarmId);
+      // NORI plaatst een compact bericht met knoppen naar locatie +
+      // reddingskaart. Oefenalarm: alleen in jouw eigen kring (contacten
+      // merken niets). Echt alarm: ook in de kring van elk noodcontact.
+      postNoriAlarmRescueMessage(result.alarmId);
     }
   }
 
@@ -5369,6 +5444,53 @@
     if (isNoriWelcomeMessage(msg)) return t('chat.systemBadgeWelcome');
     if (isNoriAlarmRescueMessage(msg)) return t('chat.systemBadgeAlarm');
     return t('chat.systemBadgeUpdate');
+  }
+
+  // Compact NORI-alarmbericht: korte tekst + knoppen (Maps / reddingskaart).
+  // Ruwe tokens (nori-rescue:…, kale Maps-URL) verdwijnen achter grote,
+  // duidelijke knoppen — beter leesbaar voor 60+.
+  function parseNoriAlarmBody(body){
+    const text = String(body || '');
+    const mapsMatch = text.match(/https:\/\/www\.google\.com\/maps\/[^\s]+/i);
+    const rescueMatch = text.match(/nori-rescue:([0-9a-f-]{36})/i);
+    let lead = text
+      .replace(/https:\/\/www\.google\.com\/maps\/[^\s]+/gi, '')
+      .replace(/nori-rescue:[0-9a-f-]{36}/gi, '')
+      .replace(/📍\s*/g, '')
+      .replace(/🩺\s*/g, '')
+      .replace(/Tik op een knop hieronder:?\s*/gi, '')
+      .replace(/Tap a button below:?\s*/gi, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    if (!lead) lead = '🚨';
+    return {
+      lead,
+      mapsUrl: mapsMatch ? mapsMatch[0] : null,
+      rescueId: rescueMatch ? rescueMatch[1] : null
+    };
+  }
+  function renderNoriAlarmBody(msg){
+    const parsed = parseNoriAlarmBody(msg.body);
+    const alarmId = msg.alarm_id || parsed.rescueId || '';
+    let html = '<p class="nori-alarm-lead">' + escapeHtml(parsed.lead) + '</p>';
+    html += '<div class="nori-alarm-actions">';
+    if (parsed.mapsUrl || alarmId){
+      const href = parsed.mapsUrl || '#';
+      html += '<a class="nori-alarm-action maps" href="' + escapeHtml(href) + '" target="_blank" rel="noopener noreferrer"' +
+        (alarmId ? ' data-alarm-id="' + escapeHtml(alarmId) + '"' : '') +
+        '>' + escapeHtml(t('nori.openMaps')) + '</a>';
+    }
+    if (parsed.rescueId || alarmId){
+      html += '<button type="button" class="nori-alarm-action rescue" data-nori-rescue="' +
+        escapeHtml(parsed.rescueId || alarmId) + '">' + escapeHtml(t('nori.openRescue')) + '</button>';
+    }
+    html += '</div>';
+    return html;
+  }
+  function chatMessageBodyHtml(msg){
+    if (!msg || !msg.body) return '';
+    if (isNoriAlarmRescueMessage(msg)) return renderNoriAlarmBody(msg);
+    return linkifyHtml(msg.body);
   }
 
   const CHAT_NAME_COLOR_COUNT = 6;
@@ -5728,7 +5850,7 @@
     const bubble = '<div class="' + bubbleClass + '">' +
       (own ? '' : '<div class="who"' + whoStyle + '>' + whoLabel + '</div>') +
       media +
-      '<div class="' + textClass + '">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
+      '<div class="' + textClass + '">' + chatMessageBodyHtml(msg) + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
     const rowClass = 'chat-row ' + (own ? 'own' : ('other' + (isSystem ? ' system' : ''))) +
       (isFirst ? ' has-tail' : ' grouped');
@@ -5900,17 +6022,21 @@
 
   // Locatie / medische info / escalatie hangen van een actief alarm af —
   // compose is altijd aan (versturen = eigen kring).
+  // Locatiekaart en reddingskaart staan NIET meer boven Berichten (ook
+  // niet voor de activator): alles zit in het compacte NORI-bericht met
+  // knoppen. Hulpteam + testbanner blijven wel zichtbaar.
   function handleActiveAlarmChanged(alarmRow){
     els.chatForm.classList.remove('hidden');
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
-    renderLocationCard(alarmRow);
-    renderMedicalInfoCard(alarmRow);
+    // Altijd verbergen — helpers én activator lezen via NORI-knoppen.
+    els.locationCard.classList.add('hidden');
+    els.medicalInfoCard.classList.add('hidden');
     if (alarmRow && alarmRow.status === 'active'){
       const isActivator = alarmRow.triggered_by === currentSession.user.id;
       const isTest = !!alarmRow.test_mode;
       // Oefenalarm: alleen de activator mag de 1-op-1 preview zien
-      // (hulpteam + reddingskaart). Helpers/contacten krijgen hier nooit
-      // een watcher — zij zijn niet gewaarschuwd.
+      // (hulpteam). Helpers/contacten krijgen hier nooit een watcher —
+      // zij zijn niet gewaarschuwd.
       if (isTest && !isActivator){
         stopAckWatcher();
         return;
@@ -5970,49 +6096,12 @@
   let lastAccuracyText = '';
   const locationMapState = { map: null, marker: null };
   function renderLocationCard(alarmRow){
-    if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
-      els.locationCard.classList.add('hidden');
-      els.locationAddress.textContent = '';
-      lastAddressCoords = null;
-      return;
-    }
-    // Helpers zien locatie in het NORI-chatbericht (klikbare Maps-link) —
-    // geen grote kaart boven de chat die het typen in de weg zit.
-    // Alleen op de telefoon van de activator houden we de live kaart.
-    const isOwn = alarmRow.triggered_by === currentSession.user.id;
-    if (!isOwn){
-      els.locationCard.classList.add('hidden');
-      return;
-    }
-    const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
-    const activator = chatParticipantById[triggered_by];
-    els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
-    lastAccuracyText = location_accuracy ? t('location.accuracy', { n: Math.round(location_accuracy) }) : '';
-    // "Open in Maps" mag altijd meteen naar de nieuwste positie wijzen (kost
-    // niets, er wordt pas iets opgehaald als iemand er ook echt op tikt) —
-    // de officiële, platformonafhankelijke Google Maps-linkvorm, die altijd
-    // exact op de coördinaat een pin zet in plaats van er soms een
-    // zoekopdracht van te maken.
-    els.locationOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
-    els.locationCard.classList.remove('hidden');
-    // Eind-knop zit op de hulpteam-kaart (ook bij oefenalarm); hier dus niet
-    // dubbel tonen.
-    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.add('hidden');
-    els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
-    renderLocationMeta(location_updated_at);
-
-    // Live locatie stuurt elke 25 seconden een nieuwe GPS-meting door, ook
-    // als iemand gewoon stilstaat (GPS-metingen wijken altijd een klein
-    // beetje af) — zonder deze drempel ververst de kaartafbeelding dan om
-    // de 25 seconden zichtbaar, wat erg onrustig oogt. Kaart én adres
-    // daarom alleen verversen bij een écht noemenswaardige verplaatsing.
-    const moved = !lastAddressCoords || haversineMeters(lastAddressCoords.lat, lastAddressCoords.lng, lat, lng) > 30;
-    if (moved){
-      lastAddressCoords = { lat, lng };
-      renderLeafletMap(locationMapState, els.locationMapImg, lat, lng);
-      els.locationAddress.textContent = t('location.fetchingAddress');
-      fetchStreetAddress(lat, lng);
-    }
+    // Locatie zit in het compacte NORI-bericht (Maps-knop). Geen grote
+    // kaart boven Berichten — ook niet voor de activator.
+    void alarmRow;
+    els.locationCard.classList.add('hidden');
+    if (els.locationAddress) els.locationAddress.textContent = '';
+    lastAddressCoords = null;
   }
 
   function haversineMeters(lat1, lng1, lat2, lng2){
@@ -6042,55 +6131,12 @@
     locationUpdatedTimer = setInterval(paint, 15000);
   }
 
-  // Medische info-kaart:
-  // - Op de telefoon van de activator: alleen bij oefenalarm in Berichten
-  //   (1-op-1 preview). Bij een écht alarm staat de reddingskaart al open
-  //   op het verzonden-scherm voor de ambulance.
-  // - Helpers: géén kaart — zij krijgen locatie + medisch als NORI-
-  //   chatbericht, zodat typen in Berichten vrij blijft.
+  // Medische info-kaart boven Berichten: uit. Helpers én activator openen
+  // de reddingskaart via de knop in het NORI-bericht (overlay). Op het
+  // verzonden-scherm blijft de kaart open voor de ambulance.
   async function renderMedicalInfoCard(alarmRow){
-    if (!alarmRow){
-      els.medicalInfoCard.classList.add('hidden');
-      return;
-    }
-    const isOwn = alarmRow.triggered_by === currentSession.user.id;
-    const isTestPreview = isOwn && !!alarmRow.test_mode;
-    if (!isTestPreview){
-      els.medicalInfoCard.classList.add('hidden');
-      return;
-    }
-    // Zelfde reden als de guard in openMessages(): als iemand tijdens deze
-    // await Berichten opnieuw opent, mag de medische info van DEZE
-    // (oudere) activator niet alsnog over het nieuwe scherm heen geplakt
-    // worden.
-    const genAtStart = chatOpenGen;
-    els.medicalInfoCard.classList.remove('hidden');
-    const { info, practical } = await loadOwnMedicalAndPractical();
-    if (genAtStart !== chatOpenGen) return;
-    const activatorName = currentProfile ? currentProfile.full_name : t('location.you');
-    const built = buildRescueCardContent(info, practical, activatorName, {
-      previewHint: t('medical.previewHint')
-    });
-    els.medicalInfoToggle.classList.toggle('hidden', !built.hasAny);
-    if (!built.hasAny){
-      els.medicalInfoBody.classList.add('hidden');
-      els.medicalInfoCard.classList.remove('open');
-      els.medicalInfoBody.innerHTML = '';
-      els.medicalResusBanner.classList.add('hidden');
-      els.medicalInfoCard.classList.remove('hidden');
-      return;
-    }
-    els.medicalInfoCard.classList.add('open');
-    els.medicalInfoBody.classList.remove('hidden');
-    els.medicalInfoName.textContent = activatorName;
-    if (built.hasResus){
-      els.medicalResusBanner.textContent = built.resusText;
-      els.medicalResusBanner.className = built.resusClass;
-    } else {
-      els.medicalResusBanner.classList.add('hidden');
-    }
-    els.medicalInfoBody.innerHTML = built.rowsHtml;
-    els.medicalInfoCard.classList.remove('hidden');
+    void alarmRow;
+    els.medicalInfoCard.classList.add('hidden');
   }
   // Reddingskaart blijft tijdens alarm open (geen inklappen).
   els.medicalInfoToggle.addEventListener('click', (ev) => {
@@ -6132,6 +6178,91 @@
   }
   if (els.ehboCloseButton){
     els.ehboCloseButton.addEventListener('click', () => els.ehboOverlay.classList.add('hidden'));
+  }
+
+  function closeRescueOverlay(){
+    if (!els.rescueOverlay) return;
+    els.rescueOverlay.classList.add('hidden');
+    if (els.rescueOverlayBody) els.rescueOverlayBody.innerHTML = '';
+    if (els.rescueOverlayResusBanner){
+      els.rescueOverlayResusBanner.className = 'medical-resus-banner hidden';
+      els.rescueOverlayResusBanner.textContent = '';
+    }
+  }
+  async function openRescueOverlay(alarmId){
+    if (!els.rescueOverlay || !alarmId) return;
+    if (els.rescueOverlayTitle) els.rescueOverlayTitle.textContent = t('nori.rescueOverlayTitle');
+    if (els.rescueOverlayBody){
+      els.rescueOverlayBody.innerHTML = '<div class="medical-info-row" style="color:var(--text-muted);">…</div>';
+    }
+    els.rescueOverlay.classList.remove('hidden');
+
+    const { data, error } = await sb.rpc('get_alarm_rescue_card', { p_alarm_id: alarmId });
+    if (error || !data){
+      if (els.rescueOverlayBody){
+        els.rescueOverlayBody.innerHTML = '<div class="medical-info-row" style="color:var(--danger);">' +
+          escapeHtml(t('nori.rescueLoadError')) + '</div>';
+      }
+      return;
+    }
+    const name = data.activator_name || t('conversation.someone');
+    if (els.rescueOverlaySubtitle){
+      els.rescueOverlaySubtitle.textContent = t('nori.rescueOverlayAbout', { name });
+    }
+    const built = buildRescueCardContent(data.medical || null, data.practical || null, name);
+    if (els.rescueOverlayResusBanner){
+      if (built.hasResus){
+        els.rescueOverlayResusBanner.textContent = built.resusText;
+        els.rescueOverlayResusBanner.className = built.resusClass;
+      } else {
+        els.rescueOverlayResusBanner.className = 'medical-resus-banner hidden';
+        els.rescueOverlayResusBanner.textContent = '';
+      }
+    }
+    if (els.rescueOverlayBody){
+      els.rescueOverlayBody.innerHTML = built.hasAny
+        ? built.rowsHtml
+        : '<div class="medical-info-row" style="color:var(--text-muted);">' + escapeHtml(t('nori.rescueEmpty')) + '</div>';
+    }
+  }
+  if (els.rescueOverlayCloseButton){
+    els.rescueOverlayCloseButton.addEventListener('click', closeRescueOverlay);
+  }
+  if (els.rescueOverlayEhboButton){
+    els.rescueOverlayEhboButton.addEventListener('click', () => {
+      renderEhboSteps();
+      els.ehboOverlay.classList.remove('hidden');
+    });
+  }
+  if (els.rescueOverlay){
+    els.rescueOverlay.addEventListener('click', (ev) => {
+      if (ev.target === els.rescueOverlay) closeRescueOverlay();
+    });
+  }
+
+  // Knoppen in compacte NORI-alarmberichten (event delegation).
+  if (els.chatMessages){
+    els.chatMessages.addEventListener('click', async (ev) => {
+      const rescueBtn = ev.target.closest('[data-nori-rescue]');
+      if (rescueBtn){
+        ev.preventDefault();
+        openRescueOverlay(rescueBtn.getAttribute('data-nori-rescue'));
+        return;
+      }
+      const mapsBtn = ev.target.closest('a.nori-alarm-action.maps[data-alarm-id]');
+      if (mapsBtn){
+        const alarmId = mapsBtn.getAttribute('data-alarm-id');
+        if (!alarmId) return;
+        // Nieuwste GPS-punt ophalen zodat “Open locatie” live blijft,
+        // ook als het bericht al even geleden geplaatst is.
+        try {
+          const { data } = await sb.from('alarms').select('lat, lng').eq('id', alarmId).maybeSingle();
+          if (data && data.lat != null && data.lng != null){
+            mapsBtn.href = 'https://www.google.com/maps/search/?api=1&query=' + data.lat + ',' + data.lng;
+          }
+        } catch (e){ /* fallback: href uit het bericht */ }
+      }
+    });
   }
 
   /* -------- Hulpteam live: wie heeft gezien / komt eraan -------- */
@@ -6396,7 +6527,7 @@
         const textEl = row.querySelector('.chat-bubble .text');
         if (textEl){
           const whenEl = textEl.querySelector('.when');
-          textEl.innerHTML = (msg.body ? linkifyHtml(msg.body) : '') + (whenEl ? whenEl.outerHTML : '');
+          textEl.innerHTML = chatMessageBodyHtml(msg) + (whenEl ? whenEl.outerHTML : '');
         }
       }
     }
