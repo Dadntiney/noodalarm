@@ -426,6 +426,18 @@
 
   .password-field{ position:relative; }
   .password-field input{ padding-right:48px; }
+  /* Eigen oogje tonen; het browser-oogje (Edge/Chrome) verbergen zodat
+     er nergens twee oogjes naast elkaar staan. */
+  .password-field input[type="password"]::-ms-reveal,
+  .password-field input[type="password"]::-ms-clear,
+  .password-field input[type="text"]::-ms-reveal,
+  .password-field input[type="text"]::-ms-clear{
+    display:none;
+  }
+  .password-field input::-webkit-credentials-auto-fill-button,
+  .password-field input::-webkit-strong-password-auto-fill-button{
+    visibility:hidden; pointer-events:none; position:absolute; right:0;
+  }
   .password-toggle{
     position:absolute; top:50%; right:4px; transform:translateY(-50%);
     width:40px; height:40px; border:none; background:none; color:var(--text-faint);
