@@ -363,18 +363,30 @@ def scene_alarm(t_local, seg, total_in_scene):
     tw, th = text_size(draw, "ALARM", af)
     draw.text((cx - tw / 2, cy - th / 2), "ALARM", font=af, fill=WHITE)
 
-    # outcomes
+    # outcomes — getekende iconen (geen emoji: fonts missen die vaak)
     cards = [
-        ("🔔", "Noodcontacten\nkrijgen melding", 0.4),
-        ("📍", "Jouw locatie\ngaat mee", 0.7),
-        ("🩺", "Reddingskaart\nop jouw telefoon", 1.0),
+        ("bell", "Noodcontacten\nkrijgen melding", 0.4),
+        ("pin", "Jouw locatie\ngaat mee", 0.7),
+        ("cross", "Reddingskaart\nop jouw telefoon", 1.0),
     ]
     for i, (icon, label, delay) in enumerate(cards):
         p = ease_out(max(0.0, min(1.0, (t_local - delay) / 0.5)))
         x = 70 + i * 330
         y = int(lerp(1400, 1080, p))
         rounded_rect(draw, [x, y, x + 300, y + 280], 28, WHITE, (226, 232, 240), 3)
-        draw.text((x + 110, y + 36), icon, font=load_font(52), fill=INK)
+        cx, cy = x + 150, y + 78
+        draw.ellipse([cx - 36, cy - 36, cx + 36, cy + 36], fill=TEAL if icon != "cross" else RED)
+        if icon == "bell":
+            draw.rounded_rectangle([cx - 14, cy - 16, cx + 14, cy + 10], radius=8, fill=WHITE)
+            draw.rectangle([cx - 4, cy + 10, cx + 4, cy + 18], fill=WHITE)
+            draw.ellipse([cx - 6, cy + 16, cx + 6, cy + 24], fill=WHITE)
+        elif icon == "pin":
+            draw.ellipse([cx - 14, cy - 18, cx + 14, cy + 10], outline=WHITE, width=5)
+            draw.polygon([(cx, cy + 28), (cx - 12, cy + 6), (cx + 12, cy + 6)], fill=WHITE)
+            draw.ellipse([cx - 5, cy - 8, cx + 5, cy + 2], fill=TEAL)
+        else:
+            draw.rectangle([cx - 6, cy - 18, cx + 6, cy + 18], fill=WHITE)
+            draw.rectangle([cx - 18, cy - 6, cx + 18, cy + 6], fill=WHITE)
         lf = load_font(28, bold=True)
         for j, line in enumerate(label.split("\n")):
             tw, _ = text_size(draw, line, lf)
