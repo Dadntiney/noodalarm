@@ -1,0 +1,15 @@
+{
+  "name": "nori-load-suite",
+  "private": true,
+  "type": "module",
+  "description": "Synthetische load/E2E-suite voor NORI (users, connecties, alarmen, chat, cleanup)",
+  "scripts": {
+    "test": "node run.mjs",
+    "test:small": "node run.mjs --users=6",
+    "test:medium": "node run.mjs --users=20",
+    "cleanup": "node run.mjs --cleanup-only"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

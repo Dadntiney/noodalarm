@@ -66,6 +66,7 @@
     --danger:#ef4444;
     --accent:#1877f2;
     --accent-dark:#125fcc;
+    --nori-msg:#0f766e;
     --font:'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
     --radius-lg:24px;
     --radius-md:16px;
@@ -106,6 +107,7 @@
     --amber-soft:#332a1a;
     --shadow-card:0 2px 10px rgba(0,0,0,.5);
     --scrim:rgba(0,0,0,.92);
+    --nori-msg:#5eead4;
     --chat-name-1:#a78bfa;
     --chat-name-2:#f472b6;
     --chat-name-3:#2dd4bf;
@@ -136,6 +138,7 @@
       --amber-soft:#332a1a;
       --shadow-card:0 2px 10px rgba(0,0,0,.5);
       --scrim:rgba(0,0,0,.92);
+      --nori-msg:#5eead4;
       --chat-name-1:#a78bfa;
       --chat-name-2:#f472b6;
       --chat-name-3:#2dd4bf;
@@ -315,6 +318,25 @@
      gaf een rommelige, hologige indruk. Hier dus een eigen, strakkere
      ritme: vaste, kleinere gap, en niet geforceerd oprekken. */
   #screen-contacts{ flex:none; gap:18px; }
+  /* Gedeelde stijl voor platte uitlegteksten (Contacten-footer + Alarm-hint). */
+  .plain-copy{
+    text-align:center;
+    color:var(--text-muted);
+    font-size:0.9375rem;
+    line-height:1.5;
+    font-weight:500;
+    margin:0;
+  }
+  .contacts-community-note{
+    margin-top:8px;
+    padding:14px 18px max(10px, env(safe-area-inset-bottom));
+  }
+  .contacts-community-note.hidden{ display:none; }
+  .contacts-community-note strong{ color:var(--text); font-weight:750; }
+  .intro{
+    max-width:300px;
+    padding:0 18px;
+  }
   /* #addContactPanel (zoekveld + QR-kaart + zoekresultaten) had geen eigen
      ritme — de afstand tussen het zoekveld en "Zoekresultaten" kwam toevallig
      uit een kleinere, impliciete waarde i.p.v. dezelfde 18px als de rest van
@@ -354,7 +376,6 @@
   .view{ width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; gap:24px; }
   .view.hidden{ display:none; }
 
-  .intro{ color:var(--text-muted); font-size:1.0625rem; line-height:1.55; max-width:320px; margin:0; }
   .hint{ color:var(--text-muted); font-size:1rem; line-height:1.4; margin:0; }
 
   /* ---------- Auth screen ---------- */
@@ -388,7 +409,8 @@
   .privacy-text a{ color:var(--accent); }
   .consent-row{ display:flex; align-items:flex-start; gap:14px; cursor:pointer; text-align:left; }
   .consent-row input[type="checkbox"]{ width:26px; height:26px; flex-shrink:0; margin-top:2px; accent-color:var(--accent); cursor:pointer; }
-  .consent-row .field-hint{ margin:0; line-height:1.5; font-size:0.90625rem; }
+  .consent-row > span{ margin:0; line-height:1.5; font-size:0.90625rem; color:var(--text); }
+  .consent-row .field-hint{ margin:0; line-height:1.5; font-size:0.90625rem; color:var(--text-muted); }
   .consent-row .field-hint button{ background:none; border:none; padding:0; color:var(--accent); font:inherit; font-weight:700; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
   .settings-item-hint.ok{ color:var(--green); font-weight:600; }
   .settings-item-hint.bad{ color:var(--danger); font-weight:600; }
@@ -591,9 +613,20 @@
   .status-badge.test{ background:var(--amber); box-shadow:0 10px 24px rgba(242,169,59,.35); }
   .status-badge.warn{ background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); box-shadow:none; }
   .test-mode-banner{
-    background:var(--amber-soft); color:var(--amber); border:1px solid var(--amber); border-radius:var(--radius-md);
-    padding:12px 16px; font-weight:700; font-size:0.9375rem; text-align:center; margin-bottom:14px;
+    flex-shrink:0;
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-md);
+    box-shadow:var(--shadow-card);
+    padding:14px 16px;
+    font-weight:600;
+    font-size:0.96875rem;
+    text-align:left;
+    margin:12px 18px 0;
+    line-height:1.45;
   }
+  .test-mode-banner strong{ font-weight:800; }
   .status-badge svg{ width:19px; height:19px; }
 
   .info-row{ display:flex; justify-content:space-between; align-items:center; gap:14px; padding:11px 0; font-size:1rem; }
@@ -638,7 +671,7 @@
     border:2px solid var(--bg);
   }
   .voice-mic-badge svg{ width:9px; height:9px; }
-  .chat-row.other.grouped .voice-mic-badge{ visibility:hidden; }
+  .chat-row.grouped .voice-mic-badge{ visibility:hidden; }
 
   /* ---------- Contacten / zoeken ---------- */
   .section-title{ font-size:0.90625rem; font-weight:700; color:var(--text-muted); margin:0 0 12px; text-transform:uppercase; letter-spacing:.03em; }
@@ -713,6 +746,25 @@
   .form-actions .save-button{ flex:1; }
 
   footer.note{ text-align:center; color:var(--text-muted); font-size:0.84375rem; padding-top:20px; line-height:1.5; }
+  /* Op Alarm: copyright onderaan het scherm, los van de knop — zo hoort
+     de zin niet bij de actie en oogt het scherm rustiger. */
+  #screen-alarm{ gap:0; }
+  /* Ruimte boven de knop zodat de rode gloed niet tegen de tabs
+     “afgeknipt” oogt; iets meer lucht tussen knop en uitlegtekst. */
+  #screen-alarm > .stage{
+    width:100%;
+    padding-top:40px;
+  }
+  #view-idle{
+    gap:40px;
+  }
+  #screen-alarm > footer.note{
+    margin-top:auto;
+    padding-top:32px;
+    padding-bottom:4px;
+    color:var(--text-faint);
+    font-size:0.8125rem;
+  }
 
   .link-button{
     background:none; border:none; color:var(--text-muted); font-size:0.90625rem; font-weight:600;
@@ -777,8 +829,8 @@
   .slide-page.open{ transform:translateX(0); }
   /* Terug-knop hield geen rekening met de veilige zone bovenaan (notch/
      Dynamic Island) — een vaste 14px kon daardoor pal tegen de rand
-     aanzitten. Zelfde patroon als .app-header hieronder.
-     Extra ruimte onder het ronde terug-icoon, zodat de pagina-inhoud
+     aanzitten. Zelfde patroon als .app-header hieronder. */
+  /* Extra ruimte onder het ronde terug-icoon, zodat de pagina-inhoud
      (ook bij scrollen) er niet tegenaan zit. */
   .slide-page-header{ display:flex; align-items:center; padding:max(14px, env(safe-area-inset-top)) 12px 16px 8px; flex-shrink:0; }
   .slide-page-content{ flex:1; overflow-y:auto; overscroll-behavior:contain; padding:4px 20px 40px; }
@@ -830,7 +882,7 @@
   }
   .chat-messages{
     flex:1; min-height:0; overflow-y:auto; overscroll-behavior-y:contain;
-    display:flex; flex-direction:column; gap:14px;
+    display:flex; flex-direction:column; gap:3px;
     padding:18px; -webkit-overflow-scrolling:touch;
     color:var(--text);
     background-color:var(--bg);
@@ -847,21 +899,70 @@
   }
   .chat-bubble{ touch-action:pan-y; }
   .chat-empty-hint{ color:var(--text-muted); font-size:1rem; line-height:1.5; text-align:center; margin:auto; max-width:280px; }
+  /* Avatar onderaan naast de bubbel; geen praatballon-puntje. */
   .chat-row{ display:flex; align-items:flex-end; gap:10px; max-width:100%; }
   .chat-row.own{ justify-content:flex-end; }
-  .chat-row .avatar{ margin-bottom:2px; }
-  /* Vervolgberichten van dezelfde afzender op rij tonen geen avatar/naam
-     meer (alleen het laatste bericht van zo'n reeks doet dat) — de ruimte
-     blijft wel gereserveerd zodat de tekstballonnen niet opschuiven. */
-  .chat-row.other.grouped .avatar{ visibility:hidden; }
-  .chat-row.other.grouped .who{ display:none; }
-  .chat-bubble{ max-width:78%; padding:12px 16px; border-radius:20px; font-size:1.0625rem; line-height:1.45; overflow:hidden; }
+  .chat-row.has-tail{ margin-top:10px; }
+  .chat-row.has-tail:first-child{ margin-top:0; }
+  /* Vervolgberichten: geen avatar/naam (ruimte blijft gereserveerd). */
+  .chat-row.grouped .avatar-wrap{ visibility:hidden; }
+  .chat-row.grouped .who{ display:none; }
+  .chat-bubble{
+    position:relative;
+    max-width:78%;
+    padding:8px 12px 8px 14px;
+    border-radius:7.5px;
+    font-size:1.0625rem;
+    line-height:1.45;
+    overflow:visible;
+    --bubble-bg:var(--surface);
+    background:var(--bubble-bg);
+  }
   /* Net als bij WhatsApp: een bubbel met een foto/video mag flink breder
      zijn dan een gewone tekstbubbel — media moet groot en duidelijk ogen,
      niet ingeklemd in dezelfde smalle breedte als een kort berichtje. */
-  .chat-bubble:has(.chat-media){ max-width:90%; }
-  .chat-bubble.own{ background:var(--accent); color:#fff; }
-  .chat-bubble.other{ background:var(--surface); border:1px solid var(--border-soft); box-shadow:var(--shadow-card); }
+  .chat-bubble:has(.chat-media),
+  .chat-bubble:has(.chat-video-wrap){ max-width:90%; }
+  .chat-bubble.own{
+    --bubble-bg:var(--accent);
+    background:var(--bubble-bg);
+    color:#fff;
+  }
+  .chat-bubble.other{ box-shadow:none; }
+  /* NORI-systeemberichten: warm & vriendelijk (zacht teal), geen rood —
+     rood is voor alarm/gevaar en voelde hier te dreigend. Logo blijft
+     het officiële NORI-beeldmerk in de avatar. */
+  .chat-bubble.system{
+    --bubble-bg:color-mix(in srgb, var(--nori-msg) 10%, var(--surface));
+    background:var(--bubble-bg);
+    box-shadow:none;
+  }
+  .chat-bubble.system .who{
+    color:var(--nori-msg);
+    opacity:1;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .chat-system-badge{
+    display:inline-flex;
+    align-items:center;
+    font-size:0.6875rem;
+    font-weight:800;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--nori-msg);
+    background:color-mix(in srgb, var(--nori-msg) 14%, transparent);
+    border-radius:999px;
+    padding:2px 7px;
+  }
+  .avatar.nori-system-avatar{
+    background:var(--surface-2);
+    color:#fff;
+    overflow:hidden;
+    border:1.5px solid color-mix(in srgb, var(--nori-msg) 28%, var(--border-soft));
+  }
+  .avatar.nori-system-avatar img{ width:100%; height:100%; object-fit:cover; }
   .chat-bubble .who{ font-size:0.84375rem; opacity:.85; margin-bottom:3px; font-weight:700; }
   .chat-bubble .text{ white-space:pre-wrap; word-break:break-word; overflow:hidden; }
   .chat-bubble .when{ float:right; margin:4px 0 -2px 10px; font-size:0.75rem; white-space:nowrap; display:flex; align-items:center; gap:3px; }
@@ -870,17 +971,35 @@
   .tick-icon{ color:rgba(255,255,255,.75); }
   .tick-icon.read{ color:#6fd8ff; }
   .chat-link{ color:inherit; text-decoration:underline; word-break:break-all; }
-  /* Foto/video vult de bubbel tot aan de rand (negatieve margin cancelt
-     precies de padding van .chat-bubble) — de ronding komt dan vanzelf van
-     de bubbel zelf (overflow:hidden hierboven), exact zoals bij WhatsApp,
-     i.p.v. een los, kleiner afgerond plaatje mét zichtbare rand eromheen. */
+  /* Foto/video vult de bubbel tot aan de rand. Zonder bijschrift: tijd
+     over de media (geen aparte blauwe balk). Met bijschrift: media tot
+     aan de tekst, compacte footer. */
   .chat-media{
     display:block; max-height:380px;
-    margin:-12px -16px 6px; width:calc(100% + 32px); object-fit:cover; background:var(--surface-2);
+    margin:-8px -12px -8px -14px; width:calc(100% + 26px); object-fit:cover; background:var(--surface-2);
+    border-radius:7.5px;
   }
   img.chat-media{ cursor:pointer; }
-  .chat-video-wrap{ position:relative; margin:-12px -16px 6px; width:calc(100% + 32px); cursor:pointer; }
-  .chat-video-wrap .chat-media{ margin:0; width:100%; }
+  .chat-video-wrap{ position:relative; margin:-8px -12px -8px -14px; width:calc(100% + 26px); cursor:pointer; border-radius:7.5px; overflow:hidden; }
+  .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
+  /* Foto/video mét bijschrift: media alleen bovenaan afronden, tekst eronder. */
+  .chat-bubble:has(.text:not(.media-caption-empty)) > img.chat-media,
+  .chat-bubble:has(.text:not(.media-caption-empty)) > .chat-video-wrap{
+    margin-bottom:6px; border-radius:7.5px 7.5px 0 0;
+  }
+  /* Zonder bijschrift: tijd+vinkjes over de foto, rechtsonder. */
+  .chat-bubble:has(> .text.media-caption-empty){ padding-bottom:8px; }
+  .chat-bubble .text.media-caption-empty{
+    position:absolute; right:10px; bottom:7px; left:auto;
+    margin:0; padding:0; line-height:1; min-height:0;
+    display:flex; justify-content:flex-end; align-items:center;
+    z-index:1;
+    text-shadow:0 1px 2px rgba(0,0,0,.45);
+  }
+  .chat-bubble .text.media-caption-empty .when{ float:none; margin:0; }
+  .chat-bubble .text.media-caption-empty .when-time{ opacity:.95; color:#fff; }
+  .chat-bubble.own .text.media-caption-empty .tick-icon{ color:rgba(255,255,255,.92); }
+  .chat-bubble.own .text.media-caption-empty .tick-icon.read{ color:#6fd8ff; filter:drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
   .chat-video-play{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
     width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,.92);
@@ -1090,6 +1209,26 @@
 
   /* ---------- Medische info-kaart ---------- */
   .medical-info-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--amber-soft); margin-bottom:14px; overflow:hidden; }
+  /* Reddingskaart: dominant bij alarm voor helpers — meteen open, groot, rustig. */
+  .medical-info-card.rescue-card{
+    border:2px solid color-mix(in srgb, var(--amber) 55%, var(--border));
+    background:color-mix(in srgb, var(--amber-soft) 85%, var(--surface));
+    box-shadow:0 8px 28px rgba(0,0,0,.12);
+    margin-bottom:16px;
+  }
+  .medical-info-card.rescue-card .medical-info-toggle{ padding:16px 18px; font-size:1.0625rem; pointer-events:none; }
+  .medical-info-card.rescue-card .medical-info-chevron{ display:none; }
+  .medical-info-card.rescue-card .medical-info-body{ padding:4px 18px 18px; gap:10px; }
+  .medical-info-card.rescue-card .medical-info-row{ font-size:1rem; line-height:1.45; }
+  .medical-info-card.rescue-card .medical-info-actions{ padding:14px 18px 4px; }
+  .medical-info-card.rescue-card .rescue-card-kicker{
+    display:block; font-size:0.75rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--amber); margin:0 0 4px; opacity:.95;
+  }
+  .sent-rescue-hint{
+    margin:0 18px 10px; font-size:0.875rem; color:var(--text-muted); line-height:1.4; font-weight:600;
+  }
+  .medical-info-card.rescue-card.open .sent-rescue-hint{ display:block; }
   .medical-info-toggle{
     width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
     background:none; border:none; padding:14px 16px; cursor:pointer; color:var(--text); font-size:0.96875rem; font-weight:700; text-align:left;
@@ -1108,29 +1247,73 @@
   .medical-info-row-warn strong{ display:block; margin-bottom:2px; }
   .medical-info-actions{ display:flex; gap:10px; flex-wrap:wrap; padding:12px 16px; }
 
-  /* ---------- "Wie heeft gereageerd" + escalatie ---------- */
-  .ack-status-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--surface); padding:14px 16px; margin-bottom:14px; }
-  .ack-status-card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
-  .ack-status-card-title{ font-weight:700; font-size:0.90625rem; color:var(--text-muted); }
+  /* ---------- Hulpteam tijdens alarm (strak, zelfde kaartstijl als rest) ---------- */
+  .ack-status-card{
+    flex-shrink:0;
+    border-radius:var(--radius-md);
+    border:1px solid var(--border-soft);
+    background:var(--surface);
+    box-shadow:var(--shadow-card);
+    padding:16px 18px;
+    margin:12px 18px 0;
+  }
+  .ack-status-card-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; flex-wrap:wrap; }
+  .ack-status-card-title{ font-weight:800; font-size:1.0625rem; color:var(--text); }
+  .ack-status-card-hint{ width:100%; margin:0 0 12px; font-size:0.9375rem; color:var(--text-muted); line-height:1.45; }
   .ack-end-button{
-    background:none; border:1.5px solid var(--danger); color:var(--danger); font-weight:700;
-    font-size:0.8125rem; padding:8px 12px; border-radius:999px; cursor:pointer; flex-shrink:0;
+    background:var(--surface-2); border:1.5px solid var(--danger); color:var(--danger); font-weight:700;
+    font-size:0.875rem; padding:10px 14px; border-radius:12px; cursor:pointer; flex-shrink:0; min-height:44px;
   }
   .ack-end-button:hover{ background:rgba(239,68,68,.1); }
-  .ack-status-list{ display:flex; flex-wrap:wrap; gap:8px; }
-  .ack-pill{ display:inline-flex; align-items:center; gap:6px; font-size:0.8125rem; font-weight:600; padding:6px 10px; border-radius:999px; background:var(--surface-2); color:var(--text-muted); }
-  .ack-pill.acked{ color:var(--green); }
-  .ack-dot{ width:7px; height:7px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
-  .ack-pill.acked .ack-dot{ background:var(--green); }
+  .ack-omw-button{
+    width:100%; margin:0 0 12px; border:none; border-radius:12px; padding:14px 16px; min-height:52px;
+    background:var(--green); color:#fff; font-weight:800; font-size:1.0625rem; cursor:pointer;
+  }
+  .ack-omw-button:disabled{ opacity:.55; cursor:default; }
+  .ack-omw-button.done{ background:color-mix(in srgb, var(--green) 22%, var(--surface-2)); color:var(--green); }
+  .ack-status-list{ display:flex; flex-direction:column; gap:8px; }
+  .ack-pill{
+    display:flex; align-items:center; gap:12px; font-size:1rem; font-weight:600;
+    padding:12px 14px; border-radius:12px; background:var(--surface-2); color:var(--text-muted);
+  }
+  .ack-pill.acked{ color:var(--text); }
+  .ack-pill.coming{ color:var(--green); background:color-mix(in srgb, var(--green) 14%, var(--surface-2)); }
+  .ack-dot{ width:10px; height:10px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
+  .ack-pill.acked .ack-dot{ background:var(--accent); }
+  .ack-pill.coming .ack-dot{ background:var(--green); }
+  .ack-pill-status{ margin-left:auto; font-size:0.875rem; font-weight:700; color:inherit; opacity:.9; }
   .escalation-banner{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border-soft); }
-  .escalation-text{ margin:0 0 10px; font-weight:700; color:var(--danger); font-size:0.9375rem; }
+  .escalation-text{ margin:0 0 10px; font-weight:700; color:var(--danger); font-size:0.96875rem; }
   .escalation-actions{ display:flex; flex-direction:column; gap:8px; }
   .escalation-call-button{
     display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; font-weight:700;
-    padding:12px; border-radius:12px; font-size:0.96875rem; color:#fff;
+    padding:14px; border-radius:12px; font-size:1rem; color:#fff; min-height:48px;
   }
   .escalation-call-button.emergency{ background:var(--danger); }
   .escalation-call-button.contact{ background:var(--accent); }
+
+  /* Compacte actieknoppen in NORI-alarmbericht */
+  .chat-bubble:has(.nori-alarm-actions){ max-width:92%; }
+  .nori-alarm-actions{ display:flex; flex-direction:column; gap:10px; margin:12px 0 4px; }
+  .nori-alarm-action{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; min-height:48px; padding:12px 14px; border-radius:12px;
+    font-weight:800; font-size:1rem; text-decoration:none; border:none; cursor:pointer;
+    text-align:center; box-sizing:border-box; font-family:inherit;
+  }
+  .nori-alarm-action.maps{ background:var(--accent); color:#fff; }
+  .nori-alarm-action.rescue{ background:var(--surface-2); color:var(--text); border:1.5px solid var(--border); }
+  .nori-alarm-action.omw{ background:var(--green); color:#fff; }
+  .nori-alarm-action.omw.done{ background:color-mix(in srgb, var(--green) 22%, var(--surface-2)); color:var(--green); cursor:default; }
+  .nori-alarm-lead{ margin:0; line-height:1.45; white-space:pre-wrap; }
+  .rescue-overlay-card{ max-width:440px; }
+  .rescue-overlay-body{ display:flex; flex-direction:column; gap:10px; margin-top:4px; }
+  .rescue-overlay-actions{ display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 4px; }
+  .rescue-overlay-actions .small-btn{ flex:1; min-width:140px; justify-content:center; }
+
+  /* Check-in uitleg op profiel */
+  .check-in-block{ display:flex; flex-direction:column; gap:8px; padding:4px 0 2px; }
+  .check-in-block .settings-item-hint{ margin:0; }
 
   /* ---------- Onboarding (uitleg) ---------- */
   .onboarding-skip{
@@ -1139,9 +1322,9 @@
   }
   .onboarding-icon{
     width:84px; height:84px; border-radius:50%; flex-shrink:0; align-self:center;
-    background:radial-gradient(circle at 35% 28%, #63a4ff, var(--accent) 55%, var(--accent-dark) 100%);
+    background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
     display:flex; align-items:center; justify-content:center;
-    box-shadow:0 12px 26px rgba(24,119,242,.35);
+    box-shadow:0 12px 26px rgba(227,32,61,.35);
   }
   .onboarding-icon.emergency{
     background:radial-gradient(circle at 35% 28%, var(--red-bright), var(--red) 55%, var(--red-dark) 100%);
@@ -1153,7 +1336,7 @@
   .onboarding-text strong{ color:var(--text); }
   .onboarding-dots{ display:flex; gap:9px; justify-content:center; }
   .onboarding-dot{ width:10px; height:10px; border-radius:50%; background:var(--border); }
-  .onboarding-dot.active{ background:var(--accent); }
+  .onboarding-dot.active{ background:var(--red); }
 
   /* ---------- Installatie-stappen (onboarding, groot en simpel) ---------- */
   .install-steps{ display:flex; flex-direction:column; gap:12px; width:100%; }
@@ -1191,7 +1374,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="7" stroke-opacity=".55"/><circle cx="12" cy="12" r="10.6" stroke-opacity=".28"/></svg>
         </div>
         <h2 class="onboarding-title">Welkom bij NORI</h2>
-        <p class="onboarding-text">Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt.</p>
+        <p class="onboarding-text">Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt — mét locatie en medische info.</p>
       </div>
 
       <div id="onboardingStepInstall" class="onboarding-step hidden" style="display:flex; flex-direction:column; align-items:center; gap:18px;">
@@ -1242,7 +1425,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
         <h2 class="onboarding-title">Stap 3: Druk op ALARM bij nood</h2>
-        <p class="onboarding-text">Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding in de app, mét jouw locatie op dat moment.</p>
+        <p class="onboarding-text">Je hebt daarna nog <strong>4 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding — mét jouw locatie en medische info. Op jouw telefoon staat de reddingskaart open voor de ambulance.</p>
       </div>
 
       <div class="onboarding-dots">
@@ -1344,6 +1527,21 @@
         </div>
 
         <div class="settings-item">
+          <div class="settings-item-row" style="align-items:flex-start;">
+            <span class="settings-item-icon icon-green" style="margin-top:2px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <div class="settings-item-body check-in-block">
+              <div class="settings-item-title" id="checkInTitle">Af en toe vragen of je er nog bent</div>
+              <p class="settings-item-hint" id="checkInHint">Standaard staat dit uit. Zet je het aan, dan vraagt NORI zo nu en dan vriendelijk of alles goed gaat (bijvoorbeeld via een melding). Reageer je een tijdje niet, dan krijgen je noodcontacten een zachte tip — geen paniekalarm. Handig als je wilt dat mensen meekijken wanneer je de app maanden niet opent. Je kunt dit altijd weer uitzetten.</p>
+            </div>
+            <button type="button" id="checkInToggle" class="toggle-switch" role="switch" aria-checked="false" aria-label="Af en toe vragen of je er nog bent" style="margin-top:4px;">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-item">
           <div class="settings-item-row">
             <span class="settings-item-icon icon-green">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
@@ -1376,7 +1574,7 @@
             </span>
             <div class="settings-item-body">
               <div class="settings-item-title" id="testAlarmSectionTitle">Oefenen met een testalarm</div>
-              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop zonder dat je noodcontacten er iets van merken — zo weet je precies hoe het voelt en werkt.</p>
+              <p class="settings-item-hint" id="testAlarmSectionHint">Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet het NORI-bericht met knoppen naar locatie en reddingskaart, plus jouw hulpteam. Je noodcontacten merken er niets van.</p>
             </div>
           </div>
           <div class="settings-item-control">
@@ -1571,46 +1769,67 @@
           <div class="field">
             <label for="medicalMedications">Medicijnen die je gebruikt</label>
             <input type="text" id="medicalMedications" placeholder="Bijv. bloedverdunners">
+            <div class="field-hint" id="medicalMedicationsHint">Alles wat je dagelijks of regelmatig inneemt — ook als het van de drogist komt.</div>
           </div>
           <div class="field">
-            <label for="medicalConditions">Ziektes die je hebt</label>
+            <label for="medicalConditions">Ziektes of aandoeningen</label>
             <input type="text" id="medicalConditions" placeholder="Bijv. diabetes, hartklachten">
+            <div class="field-hint" id="medicalConditionsHint">Zaken die helpers moeten weten, zoals diabetes, epilepsie of hartproblemen.</div>
           </div>
           <label class="consent-row" for="medicalPacemaker">
             <input type="checkbox" id="medicalPacemaker">
-            <span class="field-hint" id="medicalPacemakerLabel">Ik heb een pacemaker of ICD</span>
+            <span id="medicalPacemakerLabel">Ik heb een pacemaker of ICD</span>
           </label>
           <label class="consent-row" for="medicalPregnant">
             <input type="checkbox" id="medicalPregnant">
-            <span class="field-hint" id="medicalPregnantLabel">Ik ben zwanger</span>
+            <span id="medicalPregnantLabel">Ik ben zwanger</span>
           </label>
           <div class="field">
-            <label id="mobilityFieldLabel">Hoe goed kun je lopen?</label>
-            <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Mobiliteit">
+            <label id="mobilityFieldLabel">Heb je hulp nodig bij lopen?</label>
+            <nav class="segmented mobility-segmented" id="mobilitySegmented" role="tablist" aria-label="Lopen">
               <button type="button" data-mobility="" role="tab">Nog niet gekozen</button>
-              <button type="button" data-mobility="good" role="tab">Goed mobiel</button>
+              <button type="button" data-mobility="good" role="tab">Zonder hulp</button>
               <button type="button" data-mobility="walker" role="tab">Rollator</button>
               <button type="button" data-mobility="wheelchair" role="tab">Rolstoel</button>
             </nav>
           </div>
         </div>
 
-        <div class="settings-group-label" id="medicalContactsGroupLabel" style="margin-top:30px;">Contactpersonen</div>
-        <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
-          <div class="field">
-            <label id="contact1Label">Contactpersoon 1 (bel deze eerst)</label>
-            <input type="text" id="medicalContact1Name" placeholder="Naam">
+        <div class="settings-group-label" id="medicalContactsGroupLabel" style="margin-top:30px;">Wie moet er gebeld worden?</div>
+        <p class="field-hint" id="medicalContactsGroupHint" style="margin:0 6px 12px;">Dit zijn mensen die je noodcontacten kunnen bellen tijdens een alarm — bijvoorbeeld familie. Dit is iets anders dan je NORI-noodcontacten in de app.</p>
+        <div class="form-card" style="display:flex; flex-direction:column; gap:18px;">
+          <div class="field" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="settings-row-title" id="contact1Label">Eerste persoon om te bellen</div>
+            <div class="field">
+              <label for="medicalContact1Name" id="contact1NameLabel">Naam</label>
+              <input type="text" id="medicalContact1Name" placeholder="Bijv. Marie">
+            </div>
             <div class="field-row" style="grid-template-columns:1fr 1fr;">
-              <input type="text" id="medicalContact1Relation" placeholder="Relatie">
-              <input type="tel" id="medicalContact1Phone" placeholder="Telefoon">
+              <div class="field">
+                <label for="medicalContact1Relation" id="contact1RelationLabel">Relatie</label>
+                <input type="text" id="medicalContact1Relation" placeholder="Bijv. dochter">
+              </div>
+              <div class="field">
+                <label for="medicalContact1Phone" id="contact1PhoneLabel">Telefoon</label>
+                <input type="tel" id="medicalContact1Phone" placeholder="06-…">
+              </div>
             </div>
           </div>
-          <div class="field">
-            <label id="contact2Label">Contactpersoon 2 (bel deze als 1 niet opneemt)</label>
-            <input type="text" id="medicalContact2Name" placeholder="Naam">
+          <div class="field" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="settings-row-title" id="contact2Label">Tweede persoon (als de eerste niet opneemt)</div>
+            <div class="field">
+              <label for="medicalContact2Name" id="contact2NameLabel">Naam</label>
+              <input type="text" id="medicalContact2Name" placeholder="Bijv. Jan">
+            </div>
             <div class="field-row" style="grid-template-columns:1fr 1fr;">
-              <input type="text" id="medicalContact2Relation" placeholder="Relatie">
-              <input type="tel" id="medicalContact2Phone" placeholder="Telefoon">
+              <div class="field">
+                <label for="medicalContact2Relation" id="contact2RelationLabel">Relatie</label>
+                <input type="text" id="medicalContact2Relation" placeholder="Bijv. buurman">
+              </div>
+              <div class="field">
+                <label for="medicalContact2Phone" id="contact2PhoneLabel">Telefoon</label>
+                <input type="tel" id="medicalContact2Phone" placeholder="06-…">
+              </div>
             </div>
           </div>
         </div>
@@ -1634,8 +1853,13 @@
         <div class="settings-group-label" id="medicalOtherGroupLabel" style="margin-top:30px;">Overig</div>
         <div class="form-card" style="display:flex; flex-direction:column; gap:14px;">
           <div class="field">
+            <label for="medicalSpareKey" id="spareKeyLabel">Waar ligt een reservesleutel?</label>
+            <input type="text" id="medicalSpareKey" placeholder="Bijv. kluisje bij de voordeur">
+          </div>
+          <div class="field">
             <label for="medicalNotes">Nog iets anders belangrijks?</label>
-            <input type="text" id="medicalNotes" placeholder="Bijv. bijzonderheden">
+            <textarea id="medicalNotes" rows="3" placeholder="Bijv. slechthorend, spreekt alleen Nederlands…"></textarea>
+            <div class="field-hint" id="medicalNotesHint">Alles wat helpers verder nog moeten weten.</div>
           </div>
         </div>
 
@@ -1652,34 +1876,6 @@
         <button type="submit" id="medicalSaveButton" class="save-button" style="margin-top:20px;">Medische info opslaan</button>
       </form>
       <div id="medicalMessage" class="auth-message hidden" style="margin:20px 0;"></div>
-    </div>
-  </div>
-
-  <!-- =========================== OVERIGE INFORMATIE =========================== -->
-  <div id="extraInfoOverlay" class="slide-page hidden">
-    <div class="slide-page-header">
-      <button type="button" id="extraInfoOverlayCloseButton" class="profile-back-button" style="margin-bottom:0;" aria-label="Terug">
-        <span class="profile-back-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </span>
-        Terug
-      </button>
-    </div>
-    <div class="slide-page-content">
-      <h1 class="slide-page-title" id="extraInfoOverlayTitle">Overige informatie</h1>
-
-      <form id="extraInfoForm" class="form-card" style="display:flex; flex-direction:column; gap:14px;">
-        <div>
-          <div class="settings-row-title" id="extraInfoSectionTitle" style="margin-bottom:4px;">Praktische info</div>
-          <p class="field-hint" id="extraInfoSectionHint" style="margin-top:0;">Vul dit zeker in — hiermee kunnen je noodcontacten je sneller helpen als het nodig is. Ze zien het pas op het moment dat jij op ALARM drukt.</p>
-        </div>
-        <div class="field">
-          <label for="extraInfoSpareKey" id="spareKeyLabel">Waar ligt een reservesleutel?</label>
-          <input type="text" id="extraInfoSpareKey" placeholder="Bijv. kluisje bij de voordeur">
-        </div>
-        <button type="submit" id="extraInfoSaveButton" class="save-button">Opslaan</button>
-      </form>
-      <div id="extraInfoMessage" class="auth-message hidden" style="margin:20px 0;"></div>
     </div>
   </div>
 
@@ -1900,8 +2096,6 @@
 
         <!-- IDLE -->
         <div id="view-idle" class="view">
-          <p class="intro">Druk op de knop om je contacten te waarschuwen.</p>
-
           <div class="alarm-button-wrap">
             <svg class="hold-ring" viewBox="0 0 240 240">
               <circle class="bg" cx="120" cy="120" r="112"/>
@@ -1913,6 +2107,8 @@
               <span class="sublabel hidden" id="alarmButtonSublabel">tik om te annuleren</span>
             </button>
           </div>
+
+          <p class="intro plain-copy">Druk op de knop om je contacten te waarschuwen.</p>
 
           <button type="button" id="cancelAlarmButton" class="cancel-button hidden">Annuleren</button>
 
@@ -1949,6 +2145,24 @@
           <div class="status-badge" id="statusBadge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             <span id="statusBadgeText">NOODALARM VERZONDEN</span>
+          </div>
+
+          <!-- Reddingskaart meteen bovenaan: ambulance/dokter kan dit op
+               DEZE telefoon aflezen zonder te navigeren. -->
+          <div id="sentRescueCard" class="medical-info-card rescue-card hidden">
+            <div id="sentRescueResusBanner" class="medical-resus-banner hidden"></div>
+            <div class="medical-info-actions">
+              <button type="button" id="sentEhboButton" class="small-btn">🩹 EHBO-instructies</button>
+              <a href="tel:112" id="sentCall112Button" class="small-btn danger">📞 Bel 112</a>
+            </div>
+            <div class="medical-info-toggle">
+              <span>
+                <span class="rescue-card-kicker" id="sentRescueKicker">Reddingskaart</span>
+                <span id="sentRescueTitleLabel">Voor de ambulance — over <strong id="sentRescueName">—</strong></span>
+              </span>
+            </div>
+            <p class="sent-rescue-hint" id="sentRescueHint">Laat dit scherm zien aan de dokter of ambulance.</p>
+            <div id="sentRescueBody" class="medical-info-body"></div>
           </div>
 
           <div class="info-card">
@@ -2029,12 +2243,31 @@
         </div>
       </div>
 
+      <p id="contactsCommunityNote" class="contacts-community-note plain-copy hidden" aria-live="polite"></p>
+
     </section>
 
     <!-- =========================== BERICHTEN SCHERM =========================== -->
     <section id="screen-messages" class="screen hidden" style="gap:0;">
 
-      <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.</div>
+      <div id="testModeBanner" class="test-mode-banner hidden">🧪 <strong>Dit is een TEST-alarm</strong> — jij oefent alleen; je noodcontacten merken hier niets van.</div>
+
+      <!-- Reddingskaart eerst: helpers zien meteen wat ze moeten weten. -->
+      <div id="medicalInfoCard" class="medical-info-card rescue-card hidden">
+        <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
+        <div class="medical-info-actions">
+          <button type="button" id="ehboInstructionsButton" class="small-btn">🩹 EHBO-instructies</button>
+          <a href="tel:112" id="call112Button" class="small-btn danger">📞 Bel 112</a>
+        </div>
+        <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
+          <span>
+            <span class="rescue-card-kicker" id="rescueCardKicker">Reddingskaart</span>
+            <span id="medicalInfoToggleLabel">Alles wat helpers nu moeten weten over <strong id="medicalInfoName">—</strong></span>
+          </span>
+          <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="medicalInfoBody" class="medical-info-body hidden"></div>
+      </div>
 
       <div id="locationCard" class="location-card hidden">
         <div class="location-head">
@@ -2053,17 +2286,21 @@
         <button type="button" id="endAlarmFromLocationButton" class="location-end-button hidden">Alarm beëindigen</button>
       </div>
 
-      <div id="medicalInfoCard" class="medical-info-card hidden">
-        <div id="medicalResusBanner" class="medical-resus-banner hidden"></div>
-        <div class="medical-info-actions">
-          <button type="button" id="ehboInstructionsButton" class="small-btn">🩹 EHBO-instructies</button>
-          <a href="tel:112" id="call112Button" class="small-btn danger">📞 Bel 112</a>
+      <div id="ackStatusCard" class="ack-status-card hidden">
+        <div class="ack-status-card-head">
+          <span class="ack-status-card-title" id="ackStatusCardTitle">Hulpteam</span>
+          <button type="button" id="endAlarmFromChatButton" class="ack-end-button hidden">Alarm beëindigen</button>
         </div>
-        <button type="button" id="medicalInfoToggle" class="medical-info-toggle">
-          <span>🩺 Medische info van <strong id="medicalInfoName">—</strong></span>
-          <svg class="medical-info-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div id="medicalInfoBody" class="medical-info-body hidden"></div>
+        <p class="ack-status-card-hint" id="ackStatusCardHint">Zie live wie het alarm heeft gezien en wie eraan komt.</p>
+        <button type="button" id="ackOmwButton" class="ack-omw-button hidden">Ik kom eraan</button>
+        <div id="ackStatusList" class="ack-status-list"></div>
+        <div id="escalationBanner" class="escalation-banner hidden">
+          <p class="escalation-text">⚠️ Nog niemand heeft gereageerd.</p>
+          <div class="escalation-actions">
+            <a href="tel:112" class="escalation-call-button emergency">Bel 112</a>
+            <div id="escalationContactButtons"></div>
+          </div>
+        </div>
       </div>
 
       <div id="ehboOverlay" class="overlay hidden">
@@ -2080,18 +2317,22 @@
         </div>
       </div>
 
-      <div id="ackStatusCard" class="ack-status-card hidden">
-        <div class="ack-status-card-head">
-          <span class="ack-status-card-title">Jouw actieve alarm</span>
-          <button type="button" id="endAlarmFromChatButton" class="ack-end-button">Alarm beëindigen</button>
-        </div>
-        <div id="ackStatusList" class="ack-status-list"></div>
-        <div id="escalationBanner" class="escalation-banner hidden">
-          <p class="escalation-text">⚠️ Nog niemand heeft gereageerd.</p>
-          <div class="escalation-actions">
-            <a href="tel:112" class="escalation-call-button emergency">Bel 112</a>
-            <div id="escalationContactButtons"></div>
+      <div id="rescueOverlay" class="overlay hidden">
+        <div class="overlay-card rescue-overlay-card">
+          <div class="overlay-header">
+            <h2 class="overlay-title" id="rescueOverlayTitle">Reddingskaart</h2>
+            <button type="button" id="rescueOverlayCloseButton" class="overlay-close" aria-label="Sluiten">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
           </div>
+          <div id="rescueOverlayResusBanner" class="medical-resus-banner hidden"></div>
+          <div class="rescue-overlay-actions">
+            <button type="button" id="rescueOverlayEhboButton" class="small-btn">🩹 EHBO-instructies</button>
+            <a href="tel:112" class="small-btn danger">📞 Bel 112</a>
+          </div>
+          <p class="rescue-card-kicker" id="rescueOverlayKicker">Reddingskaart</p>
+          <p id="rescueOverlaySubtitle" style="margin:0 0 8px; font-weight:700; font-size:1.0625rem;"></p>
+          <div id="rescueOverlayBody" class="rescue-overlay-body"></div>
         </div>
       </div>
 
@@ -2175,16 +2416,6 @@
         </div>
 
         <div class="settings-item">
-          <button type="button" id="openExtraInfoButton" class="settings-item-nav">
-            <span class="settings-item-icon icon-amber">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 9.5 1 1"/><path d="m2 22 6.4-6.4"/><circle cx="16.5" cy="7.5" r="5.5"/></svg>
-            </span>
-            <span class="settings-item-body"><span class="settings-link-label">Overige informatie</span></span>
-            <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
-        </div>
-
-        <div class="settings-item">
           <button type="button" id="openSettingsButton" class="settings-item-nav">
             <span class="settings-item-icon icon-violet">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -2217,6 +2448,24 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkb2hmbm1oemJ0dHFtc2lub2xuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2NDQzNjYsImV4cCI6MjEwNTIyMDM2Nn0.KXZC5lOtTt0R2JyWEvhm-4pjFK3kr4NEPZleVSyGKCY';
   const VAPID_PUBLIC_KEY = 'BKaq76q5i2lyKB7XqW9sP-J5CDDv3VxCRgyJvsmGQwYjOcgNdmd2zsbbpKUMiptIFSfDBnpeMAYcn1gTs4uDn8g';
   const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+
+  // Vast systeemprofiel NORI — geen gewoon contact. Verborgen in Contacten,
+  // wel zichtbaar als afzender van systeemberichten/updates in Berichten.
+  const NORI_SYSTEM_USER_ID = '961b3add-ad24-4e56-8c43-461676800cb2';
+  const NORI_DISPLAY_NAME = 'NORI';
+  const NORI_AVATAR_URL = 'icon-192.png';
+  function isNoriSystemSender(userId){
+    return !!userId && userId === NORI_SYSTEM_USER_ID;
+  }
+  function noriSystemParticipant(){
+    return {
+      full_name: NORI_DISPLAY_NAME,
+      avatar_url: NORI_AVATAR_URL,
+      phone_number: null,
+      added_at: null,
+      is_system: true
+    };
+  }
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -2258,7 +2507,7 @@
   const STATIC_I18N = [
     { sel: '#onboardingSkip', nl: 'Overslaan', en: 'Skip' },
     { sel: '#onboardingStep1 .onboarding-title', nl: 'Welkom bij NORI', en: 'Welcome to NORI' },
-    { sel: '#onboardingStep1 .onboarding-text', m: 'h', nl: 'Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt.', en: 'With <strong>one press of the button</strong> you automatically alert the people you trust.' },
+    { sel: '#onboardingStep1 .onboarding-text', m: 'h', nl: 'Met <strong>één druk op de knop</strong> waarschuw je automatisch de mensen die jij vertrouwt — mét locatie en medische info.', en: 'With <strong>one press of the button</strong> you automatically alert the people you trust — with location and medical info.' },
     { sel: '#onboardingStepInstall .onboarding-title', nl: 'Zet NORI op je scherm', en: 'Add NORI to your home screen' },
     { sel: '#onboardingStepInstallText', m: 'h', nl: 'Dit is heel belangrijk: <strong>zonder dit mis je een noodmelding</strong> van een contact. Het kost maar 10 seconden.', en: 'This is really important: <strong>without this you\'ll miss an emergency alert</strong> from a contact. It only takes 10 seconds.' },
     { sel: '#installStepIos1', m: 'h', nl: 'Tik onderin Safari op <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (het deel-icoon)', en: 'Tap <svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> (the share icon) at the bottom of Safari' },
@@ -2272,7 +2521,7 @@
     { sel: '#onboardingStep3 .onboarding-title', nl: 'Stap 2: Die persoon bevestigt', en: 'Step 2: That person confirms' },
     { sel: '#onboardingStep3 .onboarding-text', m: 'h', nl: 'Diegene krijgt een melding (🔔) en drukt op <strong>Accepteren</strong>. Daarna staan jullie in elkaars lijst.', en: 'They get a notification (🔔) and press <strong>Accept</strong>. After that you\'re both in each other\'s list.' },
     { sel: '#onboardingStep4 .onboarding-title', nl: 'Stap 3: Druk op ALARM bij nood', en: 'Step 3: Press ALARM in an emergency' },
-    { sel: '#onboardingStep4 .onboarding-text', m: 'h', nl: 'Je hebt daarna nog <strong>3 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding in de app, mét jouw locatie op dat moment.', en: 'You then have <strong>3 seconds</strong> to cancel. After that your contacts get an instant alert in the app, with your location at that moment.' },
+    { sel: '#onboardingStep4 .onboarding-text', m: 'h', nl: 'Je hebt daarna nog <strong>4 seconden</strong> om te annuleren. Daarna krijgen je contacten meteen een melding — mét jouw locatie en medische info. Op jouw telefoon staat de reddingskaart open voor de ambulance.', en: 'You then have <strong>4 seconds</strong> to cancel. After that your contacts get an instant alert — with your location and medical info. On your phone the rescue card opens for the ambulance.' },
     { sel: '#deleteAccountOverlay .overlay-title', nl: 'Account verwijderen', en: 'Delete account' },
     { sel: '#deleteAccountOverlay .onboarding-text', m: 'h', nl: 'Dit verwijdert je account, je profiel, je contacten en al je meldingen <strong>definitief</strong>. Dit kan niet ongedaan worden gemaakt.', en: 'This <strong>permanently</strong> deletes your account, profile, contacts and all notifications. This cannot be undone.' },
     { sel: '#deleteAccountCancelButton', nl: 'Annuleren', en: 'Cancel' },
@@ -2291,7 +2540,7 @@
     { sel: '#locationTestSectionHint', nl: 'Test of NORI je locatie kan vinden, zodat je het al weet vóórdat er ooit een echt alarm is.', en: 'Test whether NORI can find your location, so you already know before there\'s ever a real alarm.' },
     { sel: '#locationTestButton', nl: 'Test mijn locatie', en: 'Test my location' },
     { sel: '#testAlarmSectionTitle', nl: 'Oefenen met een testalarm', en: 'Practice with a test alarm' },
-    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop zonder dat je noodcontacten er iets van merken — zo weet je precies hoe het voelt en werkt.', en: 'Practice pressing the alarm button without your emergency contacts noticing anything — so you know exactly how it feels and works.' },
+    { sel: '#testAlarmSectionHint', nl: 'Oefen het indrukken van de alarmknop precies zoals bij een echt noodalarm — jij ziet het NORI-bericht met knoppen naar locatie en reddingskaart, plus jouw hulpteam. Je noodcontacten merken er niets van.', en: 'Practice pressing the alarm button exactly like a real emergency — you see the NORI message with buttons to location and rescue card, plus your help team. Your emergency contacts notice nothing.' },
     { sel: '#languageSectionTitle', nl: 'Taal', en: 'Language' },
     { sel: '#languageSectionHint', nl: 'Kies de taal van de app.', en: 'Choose the app\'s language.' },
     { sel: '#sirenSectionTitle', nl: 'Alarmgeluid', en: 'Alarm sound' },
@@ -2325,7 +2574,8 @@
     { sel: '#medicalForm > p.field-hint', nl: 'Vul dit zeker in — dit kan doorslaggevend zijn als je zelf niet kunt vertellen wat er aan de hand is. Je noodcontacten zien het pas op het moment dat jij op ALARM drukt.', en: 'Please fill this in — it can be decisive if you can\'t speak for yourself. Your emergency contacts only see it the moment you press ALARM yourself.' },
     { sel: '#medicalResusGroupLabel', nl: 'Reanimatie & wensen', en: 'Resuscitation & wishes' },
     { sel: '#medicalHealthGroupLabel', nl: 'Gezondheid', en: 'Health' },
-    { sel: '#medicalContactsGroupLabel', nl: 'Contactpersonen', en: 'Contact persons' },
+    { sel: '#medicalContactsGroupLabel', nl: 'Wie moet er gebeld worden?', en: 'Who should be called?' },
+    { sel: '#medicalContactsGroupHint', nl: 'Dit zijn mensen die je noodcontacten kunnen bellen tijdens een alarm — bijvoorbeeld familie. Dit is iets anders dan je NORI-noodcontacten in de app.', en: 'These are people your emergency contacts can call during an alarm — for example family. This is different from your NORI emergency contacts in the app.' },
     { sel: '#medicalCareGroupLabel', nl: 'Zorgverleners', en: 'Care providers' },
     { sel: '#medicalOtherGroupLabel', nl: 'Overig', en: 'Other' },
     { sel: '#resusSegmented', attr: 'aria-label', nl: 'Reanimatievoorkeur', en: 'Resuscitation preference' },
@@ -2347,32 +2597,43 @@
     { sel: '#medicalAllergiesHint', nl: 'Iets waar je ziek van wordt, zoals een medicijn of eten.', en: 'Something that makes you ill, like a medicine or a food.' },
     { sel: 'label[for="medicalMedications"]', nl: 'Medicijnen die je gebruikt', en: 'Medicines you take' },
     { sel: '#medicalMedications', attr: 'placeholder', nl: 'Bijv. bloedverdunners', en: 'E.g. blood thinners' },
-    { sel: 'label[for="medicalConditions"]', nl: 'Ziektes die je hebt', en: 'Illnesses you have' },
+    { sel: '#medicalMedicationsHint', nl: 'Alles wat je dagelijks of regelmatig inneemt — ook als het van de drogist komt.', en: 'Everything you take daily or regularly — including over-the-counter medicine.' },
+    { sel: 'label[for="medicalConditions"]', nl: 'Ziektes of aandoeningen', en: 'Illnesses or conditions' },
     { sel: '#medicalConditions', attr: 'placeholder', nl: 'Bijv. diabetes, hartklachten', en: 'E.g. diabetes, heart condition' },
+    { sel: '#medicalConditionsHint', nl: 'Zaken die helpers moeten weten, zoals diabetes, epilepsie of hartproblemen.', en: 'Things helpers need to know, such as diabetes, epilepsy or heart problems.' },
     { sel: '#medicalPacemakerLabel', nl: 'Ik heb een pacemaker of ICD', en: 'I have a pacemaker or ICD' },
     { sel: '#medicalPregnantLabel', nl: 'Ik ben zwanger', en: 'I am pregnant' },
-    { sel: '#mobilityFieldLabel', nl: 'Hoe goed kun je lopen?', en: 'How well can you walk?' },
-    { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Mobiliteit', en: 'Mobility' },
+    { sel: '#mobilityFieldLabel', nl: 'Heb je hulp nodig bij lopen?', en: 'Do you need help walking?' },
+    { sel: '#mobilitySegmented', attr: 'aria-label', nl: 'Lopen', en: 'Walking' },
     { sel: '#mobilitySegmented button[data-mobility=""]', nl: 'Nog niet gekozen', en: 'Not chosen yet' },
-    { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Goed mobiel', en: 'Fully mobile' },
+    { sel: '#mobilitySegmented button[data-mobility="good"]', nl: 'Zonder hulp', en: 'Without help' },
     { sel: '#mobilitySegmented button[data-mobility="walker"]', nl: 'Rollator', en: 'Walker' },
     { sel: '#mobilitySegmented button[data-mobility="wheelchair"]', nl: 'Rolstoel', en: 'Wheelchair' },
-    { sel: '#contact1Label', nl: 'Contactpersoon 1 (bel deze eerst)', en: 'Contact person 1 (call this one first)' },
-    { sel: '#medicalContact1Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
-    { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Relatie', en: 'Relation' },
-    { sel: '#medicalContact1Phone', attr: 'placeholder', nl: 'Telefoon', en: 'Phone' },
-    { sel: '#contact2Label', nl: 'Contactpersoon 2 (bel deze als 1 niet opneemt)', en: 'Contact person 2 (call this one if 1 doesn\'t answer)' },
-    { sel: '#medicalContact2Name', attr: 'placeholder', nl: 'Naam', en: 'Name' },
-    { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Relatie', en: 'Relation' },
-    { sel: '#medicalContact2Phone', attr: 'placeholder', nl: 'Telefoon', en: 'Phone' },
-    { sel: 'label[for="medicalDoctorName"]', nl: 'Huisarts', en: 'Doctor' },
+    { sel: '#contact1Label', nl: 'Eerste persoon om te bellen', en: 'First person to call' },
+    { sel: '#contact1NameLabel', nl: 'Naam', en: 'Name' },
+    { sel: '#medicalContact1Name', attr: 'placeholder', nl: 'Bijv. Marie', en: 'E.g. Marie' },
+    { sel: '#contact1RelationLabel', nl: 'Relatie', en: 'Relation' },
+    { sel: '#medicalContact1Relation', attr: 'placeholder', nl: 'Bijv. dochter', en: 'E.g. daughter' },
+    { sel: '#contact1PhoneLabel', nl: 'Telefoon', en: 'Phone' },
+    { sel: '#medicalContact1Phone', attr: 'placeholder', nl: '06-…', en: 'Phone number' },
+    { sel: '#contact2Label', nl: 'Tweede persoon (als de eerste niet opneemt)', en: 'Second person (if the first doesn\'t answer)' },
+    { sel: '#contact2NameLabel', nl: 'Naam', en: 'Name' },
+    { sel: '#medicalContact2Name', attr: 'placeholder', nl: 'Bijv. Jan', en: 'E.g. Jan' },
+    { sel: '#contact2RelationLabel', nl: 'Relatie', en: 'Relation' },
+    { sel: '#medicalContact2Relation', attr: 'placeholder', nl: 'Bijv. buurman', en: 'E.g. neighbour' },
+    { sel: '#contact2PhoneLabel', nl: 'Telefoon', en: 'Phone' },
+    { sel: '#medicalContact2Phone', attr: 'placeholder', nl: '06-…', en: 'Phone number' },
+    { sel: 'label[for="medicalDoctorName"]', nl: 'Huisarts', en: 'Family doctor' },
     { sel: '#medicalDoctorName', attr: 'placeholder', nl: 'Naam huisarts of praktijk', en: 'Doctor or practice name' },
-    { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Doctor\'s phone number' },
+    { sel: 'label[for="medicalDoctorPhone"]', nl: 'Telefoonnummer huisarts', en: 'Family doctor\'s phone number' },
     { sel: '#medicalDoctorPhone', attr: 'placeholder', nl: 'Praktijknummer', en: 'Practice number' },
     { sel: 'label[for="medicalHospital"]', nl: 'In welk ziekenhuis ben je bekend?', en: 'Which hospital knows you?' },
     { sel: '#medicalHospital', attr: 'placeholder', nl: 'Bijv. Radboudumc, locatie X', en: 'E.g. Radboudumc, location X' },
+    { sel: '#spareKeyLabel', nl: 'Waar ligt een reservesleutel?', en: 'Where is a spare key?' },
+    { sel: '#medicalSpareKey', attr: 'placeholder', nl: 'Bijv. kluisje bij de voordeur', en: 'E.g. lockbox by the front door' },
     { sel: 'label[for="medicalNotes"]', nl: 'Nog iets anders belangrijks?', en: 'Anything else important?' },
-    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. bijzonderheden', en: 'E.g. other notes' },
+    { sel: '#medicalNotes', attr: 'placeholder', nl: 'Bijv. slechthorend, spreekt alleen Nederlands…', en: 'E.g. hard of hearing, only speaks Dutch…' },
+    { sel: '#medicalNotesHint', nl: 'Alles wat helpers verder nog moeten weten.', en: 'Anything else helpers still need to know.' },
     { sel: '#medicalConsentText', nl: 'Ik geef uitdrukkelijk toestemming om deze gezondheidsgegevens op te slaan, zodat mijn bevestigde noodcontacten ze kunnen zien tijdens een alarm.', en: 'I explicitly consent to storing this health information, so my confirmed emergency contacts can see it during an alarm.' },
     { sel: '#medicalPrivacyLinkButton', nl: 'Lees het privacybeleid', en: 'Read the privacy policy' },
     { sel: '#medicalSaveButton', nl: 'Medische info opslaan', en: 'Save medical info' },
@@ -2439,8 +2700,6 @@
     { sel: '#accountCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#medicalOverlayCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
     { sel: '#medicalOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
-    { sel: '#extraInfoOverlayCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
-    { sel: '#extraInfoOverlayCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', m: 'l', nl: 'Terug', en: 'Back' },
     { sel: '#notifCloseButton', attr: 'aria-label', nl: 'Terug', en: 'Back' },
     { sel: '#brandHomeButton', attr: 'aria-label', nl: 'Naar Alarm', en: 'Go to Alarm' },
@@ -2462,9 +2721,13 @@
     { sel: '#sentByLabel', nl: 'Geactiveerd door', en: 'Activated by' },
     { sel: '#sentAtLabel', nl: 'Tijdstip', en: 'Time' },
     { sel: '#entriesCard h3', nl: 'Noodcontacten', en: 'Emergency contacts' },
-    { sel: '#openMessagesFromSentButton', m: 'l', nl: 'Open Berichten', en: 'Open Messages' },
+    { sel: '#sentRescueKicker', nl: 'Reddingskaart', en: 'Rescue card' },
+    { sel: '#sentRescueHint', nl: 'Laat dit scherm zien aan de dokter of ambulance.', en: 'Show this screen to the doctor or ambulance crew.' },
+    { sel: '#sentEhboButton', nl: '🩹 EHBO-instructies', en: '🩹 First aid instructions' },
+    { sel: '#sentCall112Button', nl: '📞 Bel 112', en: '📞 Call 112' },
+    { sel: '#openMessagesFromSentButton', m: 'l', nl: ' Open Berichten', en: ' Open Messages' },
     { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
-    { sel: '.ack-status-card-title', nl: 'Jouw actieve alarm', en: 'Your active alarm' },
+    { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
     { sel: '#endAlarmFromChatButton', nl: 'Alarm beëindigen', en: 'End alarm' },
     { sel: '#endAlarmFromLocationButton', nl: 'Alarm beëindigen', en: 'End alarm' },
     { sel: '.note', m: 'l', nl: ' NORI. Alle rechten voorbehouden.', en: ' NORI. All rights reserved.' },
@@ -2481,9 +2744,16 @@
     { sel: '#contactsSection .section-title', nl: 'Mijn contacten', en: 'My contacts' },
     { sel: '#contactsEmpty', nl: 'Nog geen contacten. Klik hieronder op "Contact toevoegen" om te beginnen.', en: 'No contacts yet. Click "Add contact" below to get started.' },
     { sel: '#contactsFilterEmpty', nl: 'Niemand gevonden in je contacten.', en: 'No one found in your contacts.' },
-    { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — er is niets aan de hand.', en: '🧪 <strong>This is a TEST alarm</strong> — nothing is wrong.' },
+    { sel: '#testModeBanner', m: 'h', nl: '🧪 <strong>Dit is een TEST-alarm</strong> — jij oefent alleen; je noodcontacten merken hier niets van.', en: '🧪 <strong>This is a TEST alarm</strong> — practice for you only; your emergency contacts notice nothing.' },
     { sel: '.location-title', m: 'f', nl: '📍 Locatie van ', en: '📍 Location of ' },
-    { sel: '#medicalInfoToggle > span', m: 'f', nl: '🩺 Medische info van ', en: '🩺 Medical info from ' },
+    { sel: '#rescueCardKicker', nl: 'Reddingskaart', en: 'Rescue card' },
+    { sel: '#medicalInfoToggleLabel', m: 'f', nl: 'Alles wat helpers nu moeten weten over ', en: 'Everything helpers need to know about ' },
+    { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
+    { sel: '#ackStatusCardHint', nl: 'Zie live wie het alarm heeft gezien en wie eraan komt.', en: 'See live who has seen the alarm and who is on the way.' },
+    { sel: '#ackOmwButton', nl: 'Ik kom eraan', en: 'I\'m on my way' },
+    { sel: '#checkInTitle', nl: 'Af en toe vragen of je er nog bent', en: 'Occasionally ask if you\'re still okay' },
+    { sel: '#checkInHint', nl: 'Standaard staat dit uit. Zet je het aan, dan vraagt NORI zo nu en dan vriendelijk of alles goed gaat (bijvoorbeeld via een melding). Reageer je een tijdje niet, dan krijgen je noodcontacten een zachte tip — geen paniekalarm. Handig als je wilt dat mensen meekijken wanneer je de app maanden niet opent. Je kunt dit altijd weer uitzetten.', en: 'This is off by default. If you turn it on, NORI will occasionally ask kindly if everything is okay (for example with a notification). If you don\'t reply for a while, your emergency contacts get a gentle tip — not a panic alarm. Useful if you want people looking out when you don\'t open the app for months. You can turn it off anytime.' },
+    { sel: '#checkInToggle', attr: 'aria-label', nl: 'Af en toe vragen of je er nog bent', en: 'Occasionally ask if you\'re still okay' },
     { sel: '#ehboInstructionsButton', nl: '🩹 EHBO-instructies', en: '🩹 First aid instructions' },
     { sel: '#call112Button', nl: '📞 Bel 112', en: '📞 Call 112' },
     { sel: '#ehboOverlayTitle', nl: 'EHBO-instructies', en: 'First aid instructions' },
@@ -2504,13 +2774,6 @@
     { sel: '#editAvatarButton', attr: 'aria-label', nl: 'Foto wijzigen', en: 'Change photo' },
     { sel: '#openAccountButton .settings-link-label', nl: 'Account', en: 'Account' },
     { sel: '#openMedicalButton .settings-link-label', nl: 'Medische informatie', en: 'Medical information' },
-    { sel: '#openExtraInfoButton .settings-link-label', nl: 'Overige informatie', en: 'Other information' },
-    { sel: '#extraInfoOverlayTitle', nl: 'Overige informatie', en: 'Other information' },
-    { sel: '#extraInfoSectionTitle', nl: 'Praktische info', en: 'Practical info' },
-    { sel: '#extraInfoSectionHint', nl: 'Vul dit zeker in — hiermee kunnen je noodcontacten je sneller helpen als het nodig is. Ze zien het pas op het moment dat jij op ALARM drukt.', en: 'Please fill this in — it helps your emergency contacts reach you faster when it matters. They only see it the moment you press ALARM yourself.' },
-    { sel: '#spareKeyLabel', nl: 'Waar ligt een reservesleutel?', en: 'Where is a spare key?' },
-    { sel: '#extraInfoSpareKey', attr: 'placeholder', nl: 'Bijv. kluisje bij de voordeur', en: 'E.g. lockbox by the front door' },
-    { sel: '#extraInfoSaveButton', nl: 'Opslaan', en: 'Save' },
     { sel: '#openSettingsButton .settings-link-label', nl: 'Instellingen', en: 'Settings' },
     { sel: '#profileLogoutButton', nl: 'Uitloggen', en: 'Log out' },
     { sel: '#deleteAccountButton', nl: 'Account verwijderen', en: 'Delete account' },
@@ -2558,12 +2821,19 @@
       'alert.micUnsupported': 'Je toestel of browser ondersteunt geen spraakberichten.',
       'common.busy': 'Bezig…',
       'status.sendFailed': 'VERSTUREN MISLUKT',
-      'status.testSent': '🧪 TESTALARM VOLTOOID',
+      'status.testSent': '🧪 OEFENING GESTART',
       'status.alarmSent': 'NOODALARM VERZONDEN',
       'entry.notified': 'Pushmelding verstuurd',
       'entry.inApp': 'Geen push, wel in app',
+      'entry.wouldNotify': 'Zou melding krijgen',
       'entry.noContacts': 'Geen noodcontacten gekoppeld',
-      'entry.testNote': '🧪 Dit was een oefening — je noodcontacten hebben hier niets van gemerkt (geen melding).',
+      'entry.testNote': '🧪 Oefening — niemand heeft een melding gekregen. Hieronder zie je hoe het eruitziet bij een echt alarm.',
+      'sent.openPreview': 'Bekijk wat er gebeurt',
+      'sent.openMessages': 'Open Berichten',
+      'sent.rescueTitle': 'Voor de ambulance — over <strong>{name}</strong>',
+      'sent.rescueEmpty': 'Nog geen medische info ingevuld. Vul dit in via Profiel → Medische informatie, zodat de ambulance dit meteen kan lezen.',
+      'ack.hintTest': 'Bij een echt alarm zie je hier live wie reageert. Nu oefen je alleen — niemand is gewaarschuwd.',
+      'medical.previewHint': 'Zo ziet jouw reddingskaart eruit voor wie je helpt.',
       'time.now': 'zojuist',
       'time.minAgo': '{n} min geleden',
       'time.hourAgo': '{n} uur geleden',
@@ -2573,6 +2843,19 @@
       'location.accuracy': '±{n} m nauwkeurig',
       'location.you': 'jou',
       'ack.responded': '{name} heeft gereageerd',
+      'ack.coming': 'Komt eraan',
+      'ack.seen': 'Heeft gezien',
+      'ack.waiting': 'Nog niet',
+      'ack.omwDone': 'Je komt eraan — bedankt',
+      'ack.titleActivator': 'Jouw hulpteam',
+      'ack.titleHelper': 'Hulpteam',
+      'ack.hintActivator': 'Zie live wie jouw alarm heeft gezien en wie eraan komt.',
+      'ack.hintHelper': 'Zie live wie eraan komt. Tik op “Ik kom eraan” zodat iedereen het ziet.',
+      'checkIn.promptTitle': 'Alles goed?',
+      'checkIn.promptBody': 'NORI checkt even of je er nog bent. Tik op “Ja, ik ben ok” — dan weten je noodcontacten dat alles goed is.',
+      'checkIn.promptYes': 'Ja, ik ben ok',
+      'checkIn.promptLater': 'Later',
+      'checkIn.saved': 'Fijn, genoteerd.',
       'ack.call': 'Bel {name}',
       'medical.resusYes': '✅ {name} mag gereanimeerd worden',
       'medical.resusNo': '⛔ {name} wil NIET gereanimeerd worden',
@@ -2584,16 +2867,16 @@
       'medical.pregnant': '⚠️ Is zwanger',
       'medical.allergies': 'Allergieën:',
       'medical.medications': 'Medicijnen:',
-      'medical.conditions': 'Ziektes:',
-      'medical.mobility': 'Hoe goed lopen:',
-      'medical.mobilityGood': 'Goed mobiel',
+      'medical.conditions': 'Ziektes / aandoeningen:',
+      'medical.mobility': 'Lopen:',
+      'medical.mobilityGood': 'Zonder hulpmiddel',
       'medical.mobilityWalker': 'Rollator',
       'medical.mobilityWheelchair': 'Rolstoel',
-      'medical.contact1': 'Contactpersoon 1:',
-      'medical.contact2': 'Contactpersoon 2:',
+      'medical.contact1': 'Eerst bellen:',
+      'medical.contact2': 'Daarna bellen:',
       'medical.doctor': 'Huisarts:',
       'medical.hospital': 'Ziekenhuis:',
-      'medical.other': 'Overige medische bijzonderheden:',
+      'medical.other': 'Overige bijzonderheden:',
       'extra.spareKey': '🔑 Sleutel buitenshuis:',
       'ehbo.step1': 'Zorg eerst voor je eigen veiligheid voordat je dichterbij komt.',
       'ehbo.step2': 'Spreek het slachtoffer aan en schud voorzichtig aan de schouders. Geen reactie? Ga door naar de volgende stap.',
@@ -2610,6 +2893,18 @@
       'chat.headerSub': 'Je berichten met je contacten',
       'chat.loading': 'Bericht laden…',
       'chat.empty': 'Nog geen berichten. Laat de rest weten wat er speelt, bijvoorbeeld of je onderweg bent.',
+      'chat.systemBadge': 'Update',
+      'chat.systemBadgeUpdate': 'Update',
+      'chat.systemBadgeWelcome': 'Welkom',
+      'chat.systemBadgeAlarm': 'Alarm',
+      'nori.openMaps': '📍 Open locatie',
+      'nori.openRescue': '🩺 Open reddingskaart',
+      'nori.omw': '✅ Ik kom eraan',
+      'nori.omwDone': 'Je komt eraan — bedankt',
+      'nori.rescueOverlayTitle': 'Reddingskaart',
+      'nori.rescueOverlayAbout': 'Alles wat helpers nu moeten weten over {name}',
+      'nori.rescueEmpty': 'Nog geen medische info ingevuld.',
+      'nori.rescueLoadError': 'Reddingskaart kon niet worden geladen.',
       'location.fetchingAddress': 'Adres ophalen…',
       'locationTest.busy': 'Bezig met opzoeken…',
       'locationTest.success': 'Gelukt! Nauwkeurig tot op ±{n} meter.',
@@ -2633,6 +2928,9 @@
       'contacts.add': '+ Toevoegen',
       'contacts.sentInvite': 'Uitnodiging verzonden',
       'contacts.connected': 'Verbonden',
+      'contacts.communityNote': 'Met NORI blijf je verbonden met de mensen die belangrijk voor je zijn. Samen ben je er voor elkaar, wanneer dat nodig is.',
+      'contacts.noriNotAddable': 'NORI is geen gewoon contact en kan niet worden toegevoegd.',
+      'contacts.noriNotRemovable': 'NORI is een vast systeemcontact en kan niet worden verwijderd.',
       'errorPrefix.save': 'Opslaan mislukt: {msg}',
       'success.saved': 'Wijzigingen opgeslagen.',
       'success.medicalSaved': 'Medische info opgeslagen.',
@@ -2684,12 +2982,19 @@
       'alert.micUnsupported': 'Your device or browser doesn\'t support voice messages.',
       'common.busy': 'Working…',
       'status.sendFailed': 'SENDING FAILED',
-      'status.testSent': '🧪 TEST ALARM COMPLETE',
+      'status.testSent': '🧪 PRACTICE STARTED',
       'status.alarmSent': 'EMERGENCY ALARM SENT',
       'entry.notified': 'Push notification sent',
       'entry.inApp': 'No push, but in app',
+      'entry.wouldNotify': 'Would be notified',
       'entry.noContacts': 'No emergency contacts linked',
-      'entry.testNote': '🧪 This was a practice run — your emergency contacts didn\'t notice anything (no notification).',
+      'entry.testNote': '🧪 Practice — nobody received a notification. Below is how a real alarm looks.',
+      'sent.openPreview': 'See what happens',
+      'sent.openMessages': 'Open Messages',
+      'sent.rescueTitle': 'For the ambulance — about <strong>{name}</strong>',
+      'sent.rescueEmpty': 'No medical info filled in yet. Add it via Profile → Medical information so ambulance crews can read it right away.',
+      'ack.hintTest': 'In a real alarm you see live who responds here. This is practice only — nobody was alerted.',
+      'medical.previewHint': 'This is how your rescue card looks to the people helping you.',
       'time.now': 'just now',
       'time.minAgo': '{n} min ago',
       'time.hourAgo': '{n} hr ago',
@@ -2699,6 +3004,19 @@
       'location.accuracy': '±{n} m accurate',
       'location.you': 'you',
       'ack.responded': '{name} has responded',
+      'ack.coming': 'On the way',
+      'ack.seen': 'Has seen it',
+      'ack.waiting': 'Not yet',
+      'ack.omwDone': 'You\'re on the way — thank you',
+      'ack.titleActivator': 'Your help team',
+      'ack.titleHelper': 'Help team',
+      'ack.hintActivator': 'See live who has seen your alarm and who is on the way.',
+      'ack.hintHelper': 'See live who is on the way. Tap “I\'m on my way” so everyone can see.',
+      'checkIn.promptTitle': 'Everything okay?',
+      'checkIn.promptBody': 'NORI is checking whether you\'re still okay. Tap “Yes, I\'m okay” — then your emergency contacts know all is well.',
+      'checkIn.promptYes': 'Yes, I\'m okay',
+      'checkIn.promptLater': 'Later',
+      'checkIn.saved': 'Noted — glad to hear it.',
       'ack.call': 'Call {name}',
       'medical.resusYes': '✅ {name} may be resuscitated',
       'medical.resusNo': '⛔ {name} does NOT want to be resuscitated',
@@ -2710,16 +3028,16 @@
       'medical.pregnant': '⚠️ Is pregnant',
       'medical.allergies': 'Allergies:',
       'medical.medications': 'Medicines:',
-      'medical.conditions': 'Illnesses:',
-      'medical.mobility': 'How well they walk:',
-      'medical.mobilityGood': 'Fully mobile',
+      'medical.conditions': 'Illnesses / conditions:',
+      'medical.mobility': 'Walking:',
+      'medical.mobilityGood': 'Without aid',
       'medical.mobilityWalker': 'Walker',
       'medical.mobilityWheelchair': 'Wheelchair',
-      'medical.contact1': 'Contact person 1:',
-      'medical.contact2': 'Contact person 2:',
-      'medical.doctor': 'Doctor:',
+      'medical.contact1': 'Call first:',
+      'medical.contact2': 'Call next:',
+      'medical.doctor': 'Family doctor:',
       'medical.hospital': 'Hospital:',
-      'medical.other': 'Other medical details:',
+      'medical.other': 'Other details:',
       'extra.spareKey': '🔑 Spare key location:',
       'ehbo.step1': 'First make sure the scene is safe before you approach.',
       'ehbo.step2': 'Speak to the person and gently shake their shoulders. No response? Move to the next step.',
@@ -2736,6 +3054,18 @@
       'chat.headerSub': 'Your messages with your contacts',
       'chat.loading': 'Loading messages…',
       'chat.empty': 'No messages yet. Let everyone know what\'s going on, for example whether you\'re on your way.',
+      'chat.systemBadge': 'Update',
+      'chat.systemBadgeUpdate': 'Update',
+      'chat.systemBadgeWelcome': 'Welcome',
+      'chat.systemBadgeAlarm': 'Alarm',
+      'nori.openMaps': '📍 Open location',
+      'nori.openRescue': '🩺 Open rescue card',
+      'nori.omw': '✅ I\'m on my way',
+      'nori.omwDone': 'You\'re on the way — thank you',
+      'nori.rescueOverlayTitle': 'Rescue card',
+      'nori.rescueOverlayAbout': 'Everything helpers need to know now about {name}',
+      'nori.rescueEmpty': 'No medical info filled in yet.',
+      'nori.rescueLoadError': 'Could not load the rescue card.',
       'location.fetchingAddress': 'Fetching address…',
       'locationTest.busy': 'Looking it up…',
       'locationTest.success': 'It works! Accurate to within ±{n} metres.',
@@ -2759,6 +3089,9 @@
       'contacts.add': '+ Add',
       'contacts.sentInvite': 'Invite sent',
       'contacts.connected': 'Connected',
+      'contacts.communityNote': 'With NORI you stay connected to the people who matter to you. Together you\'re there for each other, when it\'s needed.',
+      'contacts.noriNotAddable': 'NORI is not a regular contact and cannot be added.',
+      'contacts.noriNotRemovable': 'NORI is a fixed system contact and cannot be removed.',
       'errorPrefix.save': 'Saving failed: {msg}',
       'success.saved': 'Changes saved.',
       'success.medicalSaved': 'Medical info saved.',
@@ -2794,6 +3127,8 @@
   function localeTag(){ return currentLang === 'en' ? 'en-GB' : 'nl-NL'; }
   function applyTranslations(){
     applyStaticTranslations();
+    renderCommunityUserCount();
+    refreshOpenMessagesFromSentLabel();
   }
   function setLanguage(lang){
     currentLang = lang === 'en' ? 'en' : 'nl';
@@ -2977,11 +3312,23 @@
     ehboOverlay: document.getElementById('ehboOverlay'),
     ehboCloseButton: document.getElementById('ehboCloseButton'),
     ehboStepsList: document.getElementById('ehboStepsList'),
+    rescueOverlay: document.getElementById('rescueOverlay'),
+    rescueOverlayTitle: document.getElementById('rescueOverlayTitle'),
+    rescueOverlayCloseButton: document.getElementById('rescueOverlayCloseButton'),
+    rescueOverlayResusBanner: document.getElementById('rescueOverlayResusBanner'),
+    rescueOverlayEhboButton: document.getElementById('rescueOverlayEhboButton'),
+    rescueOverlayKicker: document.getElementById('rescueOverlayKicker'),
+    rescueOverlaySubtitle: document.getElementById('rescueOverlaySubtitle'),
+    rescueOverlayBody: document.getElementById('rescueOverlayBody'),
     ackStatusCard: document.getElementById('ackStatusCard'),
+    ackStatusCardTitle: document.getElementById('ackStatusCardTitle'),
+    ackStatusCardHint: document.getElementById('ackStatusCardHint'),
+    ackOmwButton: document.getElementById('ackOmwButton'),
     ackStatusList: document.getElementById('ackStatusList'),
     endAlarmFromChatButton: document.getElementById('endAlarmFromChatButton'),
     escalationBanner: document.getElementById('escalationBanner'),
     escalationContactButtons: document.getElementById('escalationContactButtons'),
+    checkInToggle: document.getElementById('checkInToggle'),
 
     brandHomeButton: document.getElementById('brandHomeButton'),
     discreetToast: document.getElementById('discreetToast'),
@@ -3027,6 +3374,14 @@
     entriesList: document.getElementById('entriesList'),
     openMessagesFromSentButton: document.getElementById('openMessagesFromSentButton'),
     endAlarmButton: document.getElementById('endAlarmButton'),
+    sentRescueCard: document.getElementById('sentRescueCard'),
+    sentRescueResusBanner: document.getElementById('sentRescueResusBanner'),
+    sentRescueBody: document.getElementById('sentRescueBody'),
+    sentRescueName: document.getElementById('sentRescueName'),
+    sentRescueTitleLabel: document.getElementById('sentRescueTitleLabel'),
+    sentRescueHint: document.getElementById('sentRescueHint'),
+    sentEhboButton: document.getElementById('sentEhboButton'),
+    sentCall112Button: document.getElementById('sentCall112Button'),
 
     contactsFilterBox: document.getElementById('contactsFilterBox'),
     contactsFilterInput: document.getElementById('contactsFilterInput'),
@@ -3045,6 +3400,7 @@
     contactsSection: document.getElementById('contactsSection'),
     contactsEmpty: document.getElementById('contactsEmpty'),
     contactsFilterEmpty: document.getElementById('contactsFilterEmpty'),
+    contactsCommunityNote: document.getElementById('contactsCommunityNote'),
     contactsList: document.getElementById('contactsList'),
 
     profileAvatar: document.getElementById('profileAvatar'),
@@ -3078,6 +3434,7 @@
     medicalDoctorName: document.getElementById('medicalDoctorName'),
     medicalDoctorPhone: document.getElementById('medicalDoctorPhone'),
     medicalHospital: document.getElementById('medicalHospital'),
+    medicalSpareKey: document.getElementById('medicalSpareKey'),
     medicalNotes: document.getElementById('medicalNotes'),
     medicalConsentCheckbox: document.getElementById('medicalConsentCheckbox'),
     medicalPrivacyLinkButton: document.getElementById('medicalPrivacyLinkButton'),
@@ -3127,13 +3484,6 @@
     openMedicalButton: document.getElementById('openMedicalButton'),
     medicalOverlay: document.getElementById('medicalOverlay'),
     medicalOverlayCloseButton: document.getElementById('medicalOverlayCloseButton'),
-    openExtraInfoButton: document.getElementById('openExtraInfoButton'),
-    extraInfoOverlay: document.getElementById('extraInfoOverlay'),
-    extraInfoOverlayCloseButton: document.getElementById('extraInfoOverlayCloseButton'),
-    extraInfoForm: document.getElementById('extraInfoForm'),
-    extraInfoSpareKey: document.getElementById('extraInfoSpareKey'),
-    extraInfoSaveButton: document.getElementById('extraInfoSaveButton'),
-    extraInfoMessage: document.getElementById('extraInfoMessage'),
     openSettingsButton: document.getElementById('openSettingsButton'),
     settingsOverlay: document.getElementById('settingsOverlay'),
     settingsCloseButton: document.getElementById('settingsCloseButton'),
@@ -3149,6 +3499,16 @@
     locationTestMapImg: document.getElementById('locationTestMapImg'),
     locationTestOpenButton: document.getElementById('locationTestOpenButton')
   };
+
+  let lastSentWasTest = false;
+  function refreshOpenMessagesFromSentLabel(){
+    if (!els.openMessagesFromSentButton) return;
+    const label = lastSentWasTest ? t('sent.openPreview') : t('sent.openMessages');
+    const icon = els.openMessagesFromSentButton.querySelector('svg');
+    els.openMessagesFromSentButton.textContent = '';
+    if (icon) els.openMessagesFromSentButton.appendChild(icon);
+    els.openMessagesFromSentButton.appendChild(document.createTextNode(' ' + label));
+  }
 
   const copyrightYearEl = document.getElementById('copyrightYear');
   if (copyrightYearEl) copyrightYearEl.textContent = String(new Date().getFullYear());
@@ -3510,8 +3870,6 @@
   els.accountCloseButton.addEventListener('click', () => closeSlidePage(els.accountOverlay));
   els.openMedicalButton.addEventListener('click', () => openSlidePage(els.medicalOverlay));
   els.medicalOverlayCloseButton.addEventListener('click', () => closeSlidePage(els.medicalOverlay));
-  els.openExtraInfoButton.addEventListener('click', () => openSlidePage(els.extraInfoOverlay));
-  els.extraInfoOverlayCloseButton.addEventListener('click', () => closeSlidePage(els.extraInfoOverlay));
   els.openSettingsButton.addEventListener('click', () => {
     openSlidePage(els.settingsOverlay);
     renderInstallStatusRow();
@@ -3541,6 +3899,49 @@
     if (next) primeLocation();
   });
   renderLocationToggle();
+
+  /* -------- Check-in (optioneel, standaard uit) -------- */
+  const CHECK_IN_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000; // ~1 maand
+  function isCheckInEnabled(){
+    return !!(currentProfile && currentProfile.check_in_enabled);
+  }
+  function renderCheckInToggle(){
+    if (!els.checkInToggle) return;
+    const on = isCheckInEnabled();
+    els.checkInToggle.classList.toggle('on', on);
+    els.checkInToggle.setAttribute('aria-checked', String(on));
+  }
+  if (els.checkInToggle){
+    els.checkInToggle.addEventListener('click', async () => {
+      if (!currentSession) return;
+      const next = !isCheckInEnabled();
+      els.checkInToggle.disabled = true;
+      const patch = { check_in_enabled: next };
+      if (next && !currentProfile.check_in_at) patch.check_in_at = new Date().toISOString();
+      const { error } = await sb.from('profiles').update(patch).eq('id', currentSession.user.id);
+      els.checkInToggle.disabled = false;
+      if (error){
+        window.alert(error.message);
+        return;
+      }
+      currentProfile = { ...currentProfile, ...patch };
+      renderCheckInToggle();
+    });
+  }
+  async function confirmCheckInOk(){
+    if (!currentSession) return;
+    const now = new Date().toISOString();
+    await sb.from('profiles').update({ check_in_at: now }).eq('id', currentSession.user.id);
+    currentProfile = { ...currentProfile, check_in_at: now };
+    window.alert(t('checkIn.saved'));
+  }
+  function maybePromptCheckIn(){
+    if (!isCheckInEnabled()) return;
+    const last = currentProfile && currentProfile.check_in_at ? new Date(currentProfile.check_in_at).getTime() : 0;
+    if (last && (Date.now() - last) < CHECK_IN_INTERVAL_MS) return;
+    const yes = window.confirm(t('checkIn.promptBody'));
+    if (yes) confirmCheckInOk();
+  }
 
   /* =========================================================================
      Wachtwoord tonen/verbergen
@@ -3820,13 +4221,15 @@
     // i.p.v. vier keer na elkaar scheelt meteen bij het opstarten van de
     // app meerdere hele netwerk-rondjes.
     const [{ data: profile }] = await Promise.all([
-      sb.from('profiles').select('first_name, last_name, full_name, username, avatar_url, phone_number, language').eq('id', currentSession.user.id).single(),
+      sb.from('profiles').select('first_name, last_name, full_name, username, avatar_url, phone_number, language, check_in_enabled, check_in_at').eq('id', currentSession.user.id).single(),
       loadMyGroupId(),
       refreshContacts(),
       refreshNotifications()
     ]);
     currentProfile = profile || { full_name: 'Onbekende gebruiker', username: '—' };
     renderProfile();
+    renderCheckInToggle();
+    maybePromptCheckIn();
 
     // De taal die op het account staat is leidend zodra je bent ingelogd
     // (werkt zo ook mee op een ander toestel) — vóór het inloggen viel de
@@ -3894,7 +4297,8 @@
     if (!alarmId || !currentSession) return;
     const { data: alarmRow } = await sb.from('alarms').select('group_id').eq('id', alarmId).single();
     if (!alarmRow || !alarmRow.group_id) return;
-    await sb.from('notifications').update({ is_read: true })
+    const now = new Date().toISOString();
+    await sb.from('notifications').update({ is_read: true, omw_at: now })
       .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmId);
     const name = currentProfile ? currentProfile.full_name : t('conversation.someone');
     // Altijd in de EIGEN kring posten — de activator ziet 't via de
@@ -3903,6 +4307,11 @@
     if (myGroupId){
       await sb.from('alarm_messages').insert({ group_id: myGroupId, sender_id: currentSession.user.id, body: t('chat.onMyWay', { name }) });
     }
+    if (activeAlarmContext.id === alarmId){
+      activeAlarmContext.omwDone = true;
+      refreshNoriOmwButtons();
+    }
+    if (ackWatcherAlarmId === alarmId) pollAckStatus(alarmId, ackWatcherCreatedAt);
     openMessages();
   }
   function maybeHandleOmwFromUrl(){
@@ -4091,6 +4500,7 @@
 
   async function handleInvite(inviterId){
     if (inviterId === currentSession.user.id) return;
+    if (isNoriSystemSender(inviterId)) return;
     const { data } = await sb.rpc('get_invite_profile', { p_user_id: inviterId });
     const profile = data && data[0];
     if (!profile) return;
@@ -4169,6 +4579,10 @@
   els.searchInput.addEventListener('input', runSearch);
 
   async function sendInvite(btn){
+    if (isNoriSystemSender(btn.dataset.id)){
+      window.alert(t('alert.inviteFailed', { msg: t('contacts.noriNotAddable') }));
+      return;
+    }
     btn.disabled = true;
     btn.textContent = t('common.busy');
     const { error } = await sb.rpc('send_connection_request', { p_target_id: btn.dataset.id });
@@ -4250,7 +4664,14 @@
   const CONTACTS_FILTER_MIN = 10;
   async function refreshContacts(){
     const { data } = await sb.rpc('my_contacts');
-    myContactsData = data || [];
+    // NORI is een systeem-afzender, nooit een gewoon contact in de lijst.
+    // Alfabetisch op naam (NL), zodat je snel vindt wie je zoekt.
+    myContactsData = (data || [])
+      .filter(c => !isNoriSystemSender(c.contact_id) && c.username !== 'nori')
+      .sort((a, b) => {
+        const byName = (a.full_name || '').localeCompare(b.full_name || '', 'nl', { sensitivity: 'base' });
+        return byName || (a.username || '').localeCompare(b.username || '', 'nl', { sensitivity: 'base' });
+      });
     els.tabContactsCount.textContent = myContactsData.length > 0 ? '(' + myContactsData.length + ')' : '';
     els.tabContactsCount.classList.toggle('hidden', myContactsData.length === 0);
     const showFilter = myContactsData.length > CONTACTS_FILTER_MIN;
@@ -4263,7 +4684,19 @@
     return myContactsData;
   }
 
+  // Warm zinnetje onderaan Contacten (vaste tekst).
+  function renderCommunityUserCount(){
+    if (!els.contactsCommunityNote) return;
+    els.contactsCommunityNote.textContent = t('contacts.communityNote');
+    els.contactsCommunityNote.classList.remove('hidden');
+  }
+
   async function removeContact(btn){
+    const contact = (myContactsData || []).find(c => String(c.connection_id) === String(btn.dataset.id));
+    if (contact && (isNoriSystemSender(contact.contact_id) || contact.username === 'nori')){
+      window.alert(t('contacts.noriNotRemovable'));
+      return;
+    }
     if (!window.confirm(t('confirm.removeContact'))) return;
     btn.disabled = true;
     const { error } = await sb.from('connections').update({ status: 'removed' }).eq('id', btn.dataset.id);
@@ -4376,6 +4809,7 @@
       if (els.addContactPanel) els.addContactPanel.classList.add('hidden');
       refreshContacts();
       refreshSentRequests();
+      renderCommunityUserCount();
     }
   }
 
@@ -4454,7 +4888,10 @@
   });
 
   async function loadMedicalInfo(){
-    const { data } = await sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle();
+    const [{ data }, { data: practical }] = await Promise.all([
+      sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle(),
+      sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle()
+    ]);
     setResusSelection(data && typeof data.resuscitate === 'boolean' ? data.resuscitate : null);
     setMobilitySelection(data?.mobility || null);
     els.medicalAdvanceDirective.value = data?.advance_directive || '';
@@ -4474,6 +4911,7 @@
     els.medicalDoctorName.value = data?.doctor_name || '';
     els.medicalDoctorPhone.value = data?.doctor_phone || '';
     els.medicalHospital.value = data?.hospital || '';
+    els.medicalSpareKey.value = practical?.spare_key_location || '';
     els.medicalNotes.value = data?.notes || '';
     // Wie al eerder expliciet toestemming gaf, hoeft het vinkje niet elke
     // keer opnieuw aan te zetten — wél moet het nog steeds aan staan om
@@ -4483,37 +4921,47 @@
   els.medicalForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     els.medicalSaveButton.disabled = true;
-    const { error } = await sb.from('medical_info').upsert({
-      user_id: currentSession.user.id,
-      resuscitate: getResusSelection(),
-      mobility: getMobilitySelection(),
-      advance_directive: els.medicalAdvanceDirective.value.trim() || null,
-      birth_date: els.medicalBirthDate.value || null,
-      weight_kg: els.medicalWeight.value !== '' ? Number(els.medicalWeight.value) : null,
-      allergies: els.medicalAllergies.value.trim() || null,
-      medications: els.medicalMedications.value.trim() || null,
-      conditions: els.medicalConditions.value.trim() || null,
-      pacemaker_icd: els.medicalPacemaker.checked,
-      pregnant: els.medicalPregnant.checked,
-      contact1_name: els.medicalContact1Name.value.trim() || null,
-      contact1_relation: els.medicalContact1Relation.value.trim() || null,
-      contact1_phone: els.medicalContact1Phone.value.trim() || null,
-      contact2_name: els.medicalContact2Name.value.trim() || null,
-      contact2_relation: els.medicalContact2Relation.value.trim() || null,
-      contact2_phone: els.medicalContact2Phone.value.trim() || null,
-      doctor_name: els.medicalDoctorName.value.trim() || null,
-      doctor_phone: els.medicalDoctorPhone.value.trim() || null,
-      hospital: els.medicalHospital.value.trim() || null,
-      notes: els.medicalNotes.value.trim() || null,
-      // De checkbox is verplicht (HTML required) om dit formulier
-      // überhaupt te kunnen versturen — dit is dus altijd een bewuste,
-      // uitdrukkelijke bevestiging op het moment van opslaan (AVG art. 9).
-      consent_given_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    });
+    const userId = currentSession.user.id;
+    const now = new Date().toISOString();
+    const [{ error }, { error: practicalError }] = await Promise.all([
+      sb.from('medical_info').upsert({
+        user_id: userId,
+        resuscitate: getResusSelection(),
+        mobility: getMobilitySelection(),
+        advance_directive: els.medicalAdvanceDirective.value.trim() || null,
+        birth_date: els.medicalBirthDate.value || null,
+        weight_kg: els.medicalWeight.value !== '' ? Number(els.medicalWeight.value) : null,
+        allergies: els.medicalAllergies.value.trim() || null,
+        medications: els.medicalMedications.value.trim() || null,
+        conditions: els.medicalConditions.value.trim() || null,
+        pacemaker_icd: els.medicalPacemaker.checked,
+        pregnant: els.medicalPregnant.checked,
+        contact1_name: els.medicalContact1Name.value.trim() || null,
+        contact1_relation: els.medicalContact1Relation.value.trim() || null,
+        contact1_phone: els.medicalContact1Phone.value.trim() || null,
+        contact2_name: els.medicalContact2Name.value.trim() || null,
+        contact2_relation: els.medicalContact2Relation.value.trim() || null,
+        contact2_phone: els.medicalContact2Phone.value.trim() || null,
+        doctor_name: els.medicalDoctorName.value.trim() || null,
+        doctor_phone: els.medicalDoctorPhone.value.trim() || null,
+        hospital: els.medicalHospital.value.trim() || null,
+        notes: els.medicalNotes.value.trim() || null,
+        // De checkbox is verplicht (HTML required) om dit formulier
+        // überhaupt te kunnen versturen — dit is dus altijd een bewuste,
+        // uitdrukkelijke bevestiging op het moment van opslaan (AVG art. 9).
+        consent_given_at: now,
+        updated_at: now
+      }),
+      // Reservesleutel is geen gezondheidsgegeven — apart in practical_info.
+      sb.from('practical_info').upsert({
+        user_id: userId,
+        spare_key_location: els.medicalSpareKey.value.trim() || null,
+        updated_at: now
+      })
+    ]);
     els.medicalSaveButton.disabled = false;
-    if (error){
-      showMedicalMessage(t('errorPrefix.save', { msg: error.message }), 'error');
+    if (error || practicalError){
+      showMedicalMessage(t('errorPrefix.save', { msg: (error || practicalError).message }), 'error');
       return;
     }
     showMedicalMessage(t('success.medicalSaved'), 'success');
@@ -4525,34 +4973,6 @@
     els.medicalMessage.classList.remove('hidden');
   }
   els.openMedicalButton.addEventListener('click', loadMedicalInfo);
-
-  /* -------- Overige informatie (sleutel buitenshuis, e.d.) -------- */
-  async function loadExtraInfo(){
-    const { data } = await sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle();
-    els.extraInfoSpareKey.value = data?.spare_key_location || '';
-  }
-  els.openExtraInfoButton.addEventListener('click', loadExtraInfo);
-  els.extraInfoForm.addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    els.extraInfoSaveButton.disabled = true;
-    const { error } = await sb.from('practical_info').upsert({
-      user_id: currentSession.user.id,
-      spare_key_location: els.extraInfoSpareKey.value.trim() || null,
-      updated_at: new Date().toISOString()
-    });
-    els.extraInfoSaveButton.disabled = false;
-    if (error){
-      showExtraInfoMessage(t('errorPrefix.save', { msg: error.message }), 'error');
-      return;
-    }
-    showExtraInfoMessage(t('success.saved'), 'success');
-  });
-  function showExtraInfoMessage(text, kind){
-    if (!text){ els.extraInfoMessage.classList.add('hidden'); return; }
-    els.extraInfoMessage.textContent = text;
-    els.extraInfoMessage.className = 'auth-message' + (kind ? ' ' + kind : '');
-    els.extraInfoMessage.classList.remove('hidden');
-  }
 
   function showProfileMessage(text, kind){
     if (!text){ els.profileMessage.classList.add('hidden'); return; }
@@ -4773,6 +5193,7 @@
   });
 
   els.endAlarmButton.addEventListener('click', async () => {
+    hideSentRescueCard();
     switchView(els.viewIdle);
     await endMyActiveAlarm();
   });
@@ -4787,8 +5208,12 @@
     els.endAlarmFromChatButton.addEventListener('click', async () => {
       els.endAlarmFromChatButton.disabled = true;
       await endMyActiveAlarm();
+      activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
       els.ackStatusCard.classList.add('hidden');
       els.locationCard.classList.add('hidden');
+      els.medicalInfoCard.classList.add('hidden');
+      els.testModeBanner.classList.add('hidden');
+      removeInactiveNoriAlarmRows();
       els.endAlarmFromChatButton.disabled = false;
     });
   }
@@ -4861,6 +5286,12 @@
     target.classList.remove('hidden');
   }
 
+  function postNoriAlarmRescueMessage(alarmId){
+    if (!alarmId) return;
+    sb.rpc('post_nori_alarm_rescue_message', { p_alarm_id: alarmId })
+      .then(({ error }) => { if (error) console.warn('nori rescue message', error.message); });
+  }
+
   async function activateAlarm(testMode, silent){
     els.alarmButton.disabled = true;
     if (!silent && navigator.vibrate) navigator.vibrate([80,40,80]);
@@ -4902,9 +5333,10 @@
     // piepklein, tekstloos bolletje zodat degene die het indrukte zelf wel
     // weet dat het gelukt is, zonder dat iemand die meekijkt iets ziet.
     if (silent){
-      if (!sendError && result.alarmId){
+        if (!sendError && result.alarmId){
         lastTriggeredAlarmId = result.alarmId;
         startLiveLocationSharing(result.alarmId);
+        postNoriAlarmRescueMessage(result.alarmId);
       }
       showDiscreetToast(!sendError);
       return;
@@ -4925,12 +5357,21 @@
     }
 
     // Oefenmodus stuurt bewust geen push/in-app-melding naar wie dan
-    // ook (zie send-alert) — de "notified"-namen die de server teruggeeft
-    // gelden dus NIET als echte afleverstatus hier, alleen bij een echt
-    // alarm. Anders zou dit scherm bij een test ten onrechte "Pushmelding
-    // verstuurd" laten zien terwijl niemand iets heeft gekregen.
+    // ook (zie send-alert). Het verzonden-scherm bootst wél 1-op-1 de
+    // echte ervaring na (zelfde contactenlijst), met statussen die
+    // eerlijk zeggen "zou melding krijgen" i.p.v. te doen alsof er
+    // echt iets is verstuurd.
     if (testMode){
-      els.entriesList.innerHTML = '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.testNote')) + '</span></li>';
+      const note = '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.testNote')) + '</span></li>';
+      const rows = contacts.length
+        ? contacts.map(c => '<li>' +
+            '<span class="entry-name">' + escapeHtml(c.full_name) + '</span>' +
+            '<span class="entry-status st-amber">' +
+              '<span class="dot dot-amber"></span>' +
+              escapeHtml(t('entry.wouldNotify')) +
+            '</span></li>').join('')
+        : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
+      els.entriesList.innerHTML = note + rows;
     } else {
       const notifiedSet = new Set(result.notified || []);
       els.entriesList.innerHTML = contacts.length
@@ -4946,16 +5387,28 @@
         : '<li><span class="entry-name" style="color:var(--text-faint);">' + escapeHtml(t('entry.noContacts')) + '</span></li>';
     }
 
+    if (els.openMessagesFromSentButton){
+      lastSentWasTest = !!testMode;
+      refreshOpenMessagesFromSentLabel();
+    }
+
     // Eerst de bevestiging laten zien dat het alarm daadwerkelijk is
     // verzonden (en aan wie) — pas als iemand zelf op "Open Berichten"
     // drukt, gaan we naar de chat/locatie/wie-heeft-gereageerd. Niet
     // automatisch wegnavigeren: net na het drukken op ALARM wil je eerst
     // die geruststelling zien, niet meteen in een ander scherm belanden.
     switchView(els.viewSent);
+    // Reddingskaart meteen open: ambulance/dokter kan dit op deze telefoon
+    // aflezen zonder verder te tikken (ook bij oefenen, zodat je ziet hoe
+    // het eruitziet).
+    renderSentRescueCard();
 
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;
       startLiveLocationSharing(result.alarmId);
+      // Echt alarm: NORI-bericht alleen bij noodcontacten (locatie +
+      // reddingskaart). Oefenalarm: alleen in jouw eigen kring.
+      postNoriAlarmRescueMessage(result.alarmId);
     }
   }
 
@@ -4974,6 +5427,8 @@
   let chatVisibleContactIds = new Set();
   let editingMessageId = null;
   let activeMenuBubble = null;
+  // Actief alarm voor NORI-knoppen (helpers: locatie/redding/OMW zonder hulpteam-kaart).
+  let activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
 
   let chatParticipantById = {};
   let chatMessageById = {};
@@ -4986,13 +5441,103 @@
 
   // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
+  // NORI: welkom blijft; alarm-redding alleen zolang dat alarm ACTIEF is;
+  // dagelijkse updates voorlopig niet.
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
+    if (isNoriSystemSender(msg.sender_id)){
+      if (!myGroupId || msg.group_id !== myGroupId) return false;
+      if (isNoriUpdateMessage(msg)) return false;
+      if (isNoriWelcomeMessage(msg)) return true;
+      if (isNoriAlarmRescueMessage(msg)){
+        return !!(msg.alarm_id && activeAlarmContext.id && msg.alarm_id === activeAlarmContext.id);
+      }
+      return false;
+    }
     if (msg.sender_id === currentSession.user.id) return true;
     if (!chatVisibleContactIds.has(msg.sender_id)) return false;
     const since = chatMemberSinceByGroup[msg.group_id];
     if (since && new Date(msg.created_at) < new Date(since)) return false;
     return true;
+  }
+
+  function resolveChatSender(msg){
+    if (isNoriSystemSender(msg.sender_id)) return noriSystemParticipant();
+    return chatParticipantById[msg.sender_id] || null;
+  }
+
+  function isNoriWelcomeMessage(msg){
+    if (!msg || typeof msg.body !== 'string') return false;
+    // Oudere welkomsten staan zonder 👋-emoji in de DB.
+    return msg.body.indexOf('👋 Welkom bij NORI!') === 0
+      || msg.body.indexOf('Welkom bij NORI!') === 0;
+  }
+  function isNoriAlarmRescueMessage(msg){
+    return !!(msg && msg.alarm_id && isNoriSystemSender(msg.sender_id));
+  }
+  function isNoriUpdateMessage(msg){
+    if (!msg || !isNoriSystemSender(msg.sender_id)) return false;
+    if (isNoriAlarmRescueMessage(msg) || isNoriWelcomeMessage(msg)) return false;
+    const body = String(msg.body || '');
+    return /^(🆕\s*)?Updates? van NORI\b/.test(body);
+  }
+  function noriSystemBadgeLabel(msg){
+    if (isNoriWelcomeMessage(msg)) return t('chat.systemBadgeWelcome');
+    if (isNoriAlarmRescueMessage(msg)) return t('chat.systemBadgeAlarm');
+    return t('chat.systemBadgeUpdate');
+  }
+
+  // Compact NORI-alarmbericht: korte tekst + reddingskaart (+ OMW).
+  // Locatie staat live bovenaan Berichten — Maps-URL in de body wordt
+  // weggefilterd zodat die niet als kale link in de bubbel blijft staan.
+  function parseNoriAlarmBody(body){
+    const text = String(body || '');
+    const rescueMatch = text.match(/nori-rescue:([0-9a-f-]{36})/i);
+    let lead = text
+      .replace(/https:\/\/www\.google\.com\/maps\/[^\s]+/gi, '')
+      .replace(/nori-rescue:[0-9a-f-]{36}/gi, '')
+      .replace(/📍\s*/g, '')
+      .replace(/🩺\s*/g, '')
+      .replace(/Tik op een knop hieronder:?\s*/gi, '')
+      .replace(/Tap a button below:?\s*/gi, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    if (!lead) lead = '🚨';
+    return {
+      lead,
+      rescueId: rescueMatch ? rescueMatch[1] : null
+    };
+  }
+  function renderNoriAlarmBody(msg){
+    const parsed = parseNoriAlarmBody(msg.body);
+    const alarmId = msg.alarm_id || parsed.rescueId || '';
+    let html = '<p class="nori-alarm-lead">' + escapeHtml(parsed.lead) + '</p>';
+    html += '<div class="nori-alarm-actions">';
+    if (parsed.rescueId || alarmId){
+      html += '<button type="button" class="nori-alarm-action rescue" data-nori-rescue="' +
+        escapeHtml(parsed.rescueId || alarmId) + '">' + escapeHtml(t('nori.openRescue')) + '</button>';
+    }
+    // Helpers: “Ik kom eraan” op het NORI-bericht zelf (geen aparte
+    // hulpteam-kaart boven de chat).
+    const showOmw = !!(alarmId
+      && activeAlarmContext.id === alarmId
+      && activeAlarmContext.triggeredBy
+      && activeAlarmContext.triggeredBy !== currentSession.user.id
+      && !activeAlarmContext.testMode);
+    if (showOmw){
+      const done = !!activeAlarmContext.omwDone;
+      html += '<button type="button" class="nori-alarm-action omw' + (done ? ' done' : '') + '"' +
+        (done ? ' disabled' : '') +
+        ' data-nori-omw="' + escapeHtml(alarmId) + '">' +
+        escapeHtml(done ? t('nori.omwDone') : t('nori.omw')) + '</button>';
+    }
+    html += '</div>';
+    return html;
+  }
+  function chatMessageBodyHtml(msg){
+    if (!msg || !msg.body) return '';
+    if (isNoriAlarmRescueMessage(msg)) return renderNoriAlarmBody(msg);
+    return linkifyHtml(msg.body);
   }
 
   const CHAT_NAME_COLOR_COUNT = 6;
@@ -5022,6 +5567,102 @@
     const hadBirthdayThisYear = now.getMonth() > bd.getMonth() || (now.getMonth() === bd.getMonth() && now.getDate() >= bd.getDate());
     if (!hadBirthdayThisYear) age--;
     return age >= 0 ? t('medical.yearsOld', { n: age }) : '';
+  }
+
+  // Bouwt de HTML-rijen van een reddingskaart uit medische + praktische info.
+  // Zelfde inhoud voor helpers in Berichten én voor de activator op het
+  // verzonden-scherm (zodat de ambulance DEZE telefoon kan aflezen).
+  function buildRescueCardContent(info, practical, activatorName, { previewHint } = {}){
+    const hasResus = info && typeof info.resuscitate === 'boolean';
+    const hasAny = (info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
+      || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital
+      || info.birth_date || info.weight_kg || info.pacemaker_icd || info.pregnant))
+      || (practical && practical.spare_key_location);
+    const medical = info || {};
+    const mobilityLabel = { good: t('medical.mobilityGood'), walker: t('medical.mobilityWalker'), wheelchair: t('medical.mobilityWheelchair') }[medical.mobility];
+    const contact1 = [medical.contact1_name, medical.contact1_relation].filter(Boolean).join(' — ') + (medical.contact1_phone ? ' · ' + medical.contact1_phone : '');
+    const contact2 = [medical.contact2_name, medical.contact2_relation].filter(Boolean).join(' — ') + (medical.contact2_phone ? ' · ' + medical.contact2_phone : '');
+    const rows = [];
+    if (previewHint){
+      rows.push('<div class="medical-info-row" style="color:var(--text-faint);"><em>' + escapeHtml(previewHint) + '</em></div>');
+    }
+    if (practical && practical.spare_key_location) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('extra.spareKey')) + '</strong> ' + escapeHtml(practical.spare_key_location) + '</div>');
+    if (medical.advance_directive) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.advanceDirective')) + '</strong> ' + escapeHtml(medical.advance_directive) + '</div>');
+    if (medical.pacemaker_icd) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pacemaker')) + '</strong></div>');
+    if (medical.pregnant) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pregnant')) + '</strong></div>');
+    if (medical.allergies) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.allergies')) + '</strong> ' + escapeHtml(medical.allergies) + '</div>');
+    if (medical.medications) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.medications')) + '</strong> ' + escapeHtml(medical.medications) + '</div>');
+    if (medical.conditions) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.conditions')) + '</strong> ' + escapeHtml(medical.conditions) + '</div>');
+    if (medical.birth_date){
+      const bd = new Date(medical.birth_date + 'T00:00:00');
+      const dateLabel = isNaN(bd.getTime()) ? medical.birth_date : bd.toLocaleDateString(localeTag());
+      const ageLabel = medicalAgeLabel(medical.birth_date);
+      rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.birthDate')) + '</strong> ' + escapeHtml(dateLabel + (ageLabel ? ' (' + ageLabel + ')' : '')) + '</div>');
+    }
+    if (medical.weight_kg) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.weight')) + '</strong> ' + escapeHtml(medical.weight_kg + ' kg') + '</div>');
+    if (mobilityLabel) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.mobility')) + '</strong> ' + escapeHtml(mobilityLabel) + '</div>');
+    if (medical.contact1_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact1')) + '</strong> ' + escapeHtml(contact1) + '</div>');
+    if (medical.contact2_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact2')) + '</strong> ' + escapeHtml(contact2) + '</div>');
+    if (medical.doctor_name || medical.doctor_phone) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.doctor')) + '</strong> ' + escapeHtml([medical.doctor_name, medical.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
+    if (medical.hospital) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.hospital')) + '</strong> ' + escapeHtml(medical.hospital) + '</div>');
+    if (medical.notes) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.other')) + '</strong> ' + escapeHtml(medical.notes) + '</div>');
+    let resusText = '';
+    let resusClass = 'medical-resus-banner hidden';
+    if (hasResus){
+      resusText = info.resuscitate
+        ? t('medical.resusYes', { name: activatorName })
+        : t('medical.resusNo', { name: activatorName });
+      resusClass = 'medical-resus-banner ' + (info.resuscitate ? 'ok' : 'danger');
+    }
+    return { hasResus, hasAny, resusText, resusClass, rowsHtml: rows.join('') };
+  }
+
+  async function loadOwnMedicalAndPractical(){
+    const [{ data: med }, { data: prac }] = await Promise.all([
+      sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle(),
+      sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle()
+    ]);
+    return { info: med || null, practical: prac || null };
+  }
+
+  // Op het verzonden-scherm: reddingskaart meteen open voor ambulance/dokter
+  // die over de schouder (of de telefoon zelf) meekijkt.
+  async function renderSentRescueCard(){
+    if (!els.sentRescueCard) return;
+    const name = currentProfile ? currentProfile.full_name : t('location.you');
+    if (els.sentRescueTitleLabel){
+      els.sentRescueTitleLabel.innerHTML = t('sent.rescueTitle', { name: escapeHtml(name) });
+    }
+    const { info, practical } = await loadOwnMedicalAndPractical();
+    const built = buildRescueCardContent(info, practical, name);
+    if (els.sentRescueResusBanner){
+      if (built.hasResus){
+        els.sentRescueResusBanner.textContent = built.resusText;
+        els.sentRescueResusBanner.className = built.resusClass;
+      } else {
+        els.sentRescueResusBanner.className = 'medical-resus-banner hidden';
+        els.sentRescueResusBanner.textContent = '';
+      }
+    }
+    if (els.sentRescueBody){
+      els.sentRescueBody.innerHTML = built.hasAny
+        ? built.rowsHtml
+        : '<div class="medical-info-row" style="color:var(--text-muted);">' + escapeHtml(t('sent.rescueEmpty')) + '</div>';
+      els.sentRescueBody.classList.remove('hidden');
+    }
+    els.sentRescueCard.classList.add('open');
+    els.sentRescueCard.classList.remove('hidden');
+  }
+
+  function hideSentRescueCard(){
+    if (!els.sentRescueCard) return;
+    els.sentRescueCard.classList.add('hidden');
+    els.sentRescueCard.classList.remove('open');
+    if (els.sentRescueBody) els.sentRescueBody.innerHTML = '';
+    if (els.sentRescueResusBanner){
+      els.sentRescueResusBanner.className = 'medical-resus-banner hidden';
+      els.sentRescueResusBanner.textContent = '';
+    }
   }
 
   // Aantal balkjes in de golfvorm van een spraakbericht.
@@ -5187,8 +5828,11 @@
     // kunnen het ooit gelezen hebben (nieuwere leden zien oudere berichten
     // sowieso niet) — anders bleven vinkjes voor oude berichten voor altijd
     // op "verzonden" staan zodra er later iemand bij kwam.
+    // NORI (systeem) telt niet mee voor vinkjes.
     const others = Object.keys(chatParticipantById).filter(id => {
       if (id === currentSession.user.id) return false;
+      if (isNoriSystemSender(id)) return false;
+      if (chatParticipantById[id] && chatParticipantById[id].is_system) return false;
       if (!msg) return true;
       const addedAt = chatParticipantById[id].added_at;
       // Onbekende added_at (zeldzame race bij een net-live binnengekomen
@@ -5222,13 +5866,11 @@
     if (span) span.innerHTML = ticksInnerHtml(messageId);
   }
 
-  // showMeta bepaalt of avatar+naam zichtbaar zijn — alleen bij het laatste
-  // bericht van een opeenvolgende reeks van dezelfde afzender (net als
-  // WhatsApp). Beide worden altijd wél gerenderd (niet weggelaten), zodat
-  // een reeks later puur met de .grouped-klasse (CSS) kan worden bijgesteld
-  // zonder de HTML opnieuw te hoeven opbouwen.
-  function chatBubbleHtml(msg, showMeta){
+  // isFirst: eerste bericht van een reeks van dezelfde afzender — toont
+  // avatar en naam. Vervolgberichten zijn .grouped.
+  function chatBubbleHtml(msg, isFirst){
     const own = msg.sender_id === currentSession.user.id;
+    const isSystem = isNoriSystemSender(msg.sender_id);
     const time = new Date(msg.created_at).toLocaleTimeString(localeTag(), { hour:'2-digit', minute:'2-digit' });
     // media_url mag ontbreken terwijl media_path er wél is — dan is de
     // getekende URL nog niet opgehaald (zie openMessages: berichten
@@ -5244,15 +5886,29 @@
       ? voiceMsgHtml(msg, srcAttr, pathAttr)
       : '<img' + srcAttr + pathAttr + ' class="chat-media" loading="lazy" alt="">');
     const ticks = own ? chatTicksHtml(msg.id) : '';
-    const bubble = '<div class="chat-bubble ' + (own ? 'own' : 'other') + '">' +
-      (own ? '' : '<div class="who" style="color:' + chatNameColor(msg.sender_id) + ';">' + escapeHtml(msg.senderName || 'Onbekend') + '</div>') +
+    const whoLabel = isSystem
+      ? (escapeHtml(NORI_DISPLAY_NAME) + ' <span class="chat-system-badge">' + escapeHtml(noriSystemBadgeLabel(msg)) + '</span>')
+      : escapeHtml(msg.senderName || 'Onbekend');
+    const whoStyle = isSystem ? '' : ' style="color:' + chatNameColor(msg.sender_id) + ';"';
+    const bubbleClass = 'chat-bubble ' + (own ? 'own' : (isSystem ? 'other system' : 'other'));
+    // Foto/video zonder bijschrift: compacte tijdbalk i.p.v. opgeblazen .text-regel.
+    const mediaCaptionEmpty = !!(msg.media_path && msg.media_type !== 'audio' && !msg.body);
+    const textClass = 'text' + (mediaCaptionEmpty ? ' media-caption-empty' : '');
+    const bubble = '<div class="' + bubbleClass + '">' +
+      (own ? '' : '<div class="who"' + whoStyle + '>' + whoLabel + '</div>') +
       media +
-      '<div class="text">' + (msg.body ? linkifyHtml(msg.body) : '') + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
+      '<div class="' + textClass + '">' + chatMessageBodyHtml(msg) + '<span class="when"><span class="when-time">' + time + '</span>' + ticks + '</span></div>' +
       '</div>';
-    if (own) return '<div class="chat-row own" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' + bubble + '</div>';
+    const rowClass = 'chat-row ' + (own ? 'own' : ('other' + (isSystem ? ' system' : ''))) +
+      (isFirst ? ' has-tail' : ' grouped');
+    if (own) return '<div class="' + rowClass + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' + bubble + '</div>';
     const isVoice = msg.media_type === 'audio';
-    return '<div class="chat-row other' + (showMeta ? '' : ' grouped') + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
-      '<span class="avatar-wrap"><div class="avatar sm">' + avatarInner(msg.senderAvatar) + '</div>' + (isVoice ? VOICE_MIC_BADGE_HTML : '') + '</span>' +
+    const avatarClass = isSystem ? 'avatar sm nori-system-avatar' : 'avatar sm';
+    const avatarHtml = isSystem
+      ? '<img src="' + escapeHtml(NORI_AVATAR_URL) + '" alt="" decoding="async">'
+      : avatarInner(msg.senderAvatar);
+    return '<div class="' + rowClass + '" data-message-id="' + msg.id + '" data-sender-id="' + msg.sender_id + '">' +
+      '<span class="avatar-wrap"><div class="' + avatarClass + '">' + avatarHtml + '</div>' + (isVoice ? VOICE_MIC_BADGE_HTML : '') + '</span>' +
       bubble +
       '</div>';
   }
@@ -5268,7 +5924,7 @@
   }
   function renderChatHeader(){
     const others = Object.keys(chatParticipantById)
-      .filter(id => id !== currentSession.user.id)
+      .filter(id => id !== currentSession.user.id && !isNoriSystemSender(id) && !(chatParticipantById[id] && chatParticipantById[id].is_system))
       .map(id => chatParticipantById[id]);
     els.chatHeaderAvatar.innerHTML = chatHeaderFacepileHtml(others);
     els.chatHeaderTitle.textContent = t('chat.headerTitle');
@@ -5335,11 +5991,13 @@
 
     chatParticipantById = {};
     (myMembers || []).forEach(m => {
+      if (isNoriSystemSender(m.user_id)) return;
       chatParticipantById[m.user_id] = { full_name: m.full_name, avatar_url: m.avatar_url, phone_number: m.phone_number, added_at: m.added_at };
     });
     // Contacten die we uit hun eigen groep-berichten tonen, moeten ook een
     // naam/avatar hebben — ook als get_group_participants ze (nog) niet gaf.
     (myContactsData || []).forEach(c => {
+      if (isNoriSystemSender(c.contact_id)) return;
       if (!chatParticipantById[c.contact_id]){
         chatParticipantById[c.contact_id] = { full_name: c.full_name, avatar_url: c.avatar_url, phone_number: c.phone_number || null, added_at: null };
       }
@@ -5347,13 +6005,61 @@
     renderChatHeader();
 
     // Locatiekaart alleen voor alarm van jezelf of een bevestigd contact.
+    // Oefenalarms (test_mode) zijn strikt privé voor de activator — ook
+    // als een contact toevallig Berichten open heeft, mag die er niets
+    // van zien (geen melding, geen kaart, geen hulpteam).
     let visibleAlarm = alarmRow;
     if (visibleAlarm && visibleAlarm.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visibleAlarm.triggered_by)){
       visibleAlarm = null;
     }
-    handleActiveAlarmChanged(visibleAlarm);
+    if (visibleAlarm && visibleAlarm.test_mode && visibleAlarm.triggered_by !== currentSession.user.id){
+      visibleAlarm = null;
+    }
 
-    const list = (messages || []).filter(shouldShowChatMessage);
+    const rawMessages = messages || [];
+
+    // NORI-bericht landt in de EIGEN groep van een helper — die is niet
+    // altijd lid van de activator-groep, dus alarmRow kan leeg zijn.
+    // Context dan via het alarm_id in het NORI-bericht ophalen (vóór
+    // filteren: inactieve NORI-alarms verdwijnen daarna uit de lijst).
+    if (!visibleAlarm){
+      const noriAlarmIds = [];
+      for (let i = rawMessages.length - 1; i >= 0; i--){
+        const m = rawMessages[i];
+        if (isNoriAlarmRescueMessage(m) && m.group_id === myGroupId && m.alarm_id && noriAlarmIds.indexOf(m.alarm_id) === -1){
+          noriAlarmIds.push(m.alarm_id);
+        }
+        if (noriAlarmIds.length >= 5) break;
+      }
+      for (const aid of noriAlarmIds){
+        const { data: ctx } = await sb.rpc('get_alarm_helper_context', { p_alarm_id: aid });
+        if (gen !== chatOpenGen) return;
+        if (ctx && ctx.status === 'active' && !ctx.is_activator && !ctx.test_mode){
+          visibleAlarm = {
+            id: ctx.id,
+            triggered_by: ctx.triggered_by,
+            status: ctx.status,
+            test_mode: ctx.test_mode,
+            lat: ctx.lat,
+            lng: ctx.lng,
+            location_accuracy: ctx.location_accuracy,
+            location_updated_at: ctx.location_updated_at,
+            created_at: ctx.created_at,
+            _omwDone: !!ctx.omw_done
+          };
+          break;
+        }
+      }
+    }
+
+    // Eerst context zetten, daarna filteren — NORI-alarmberichten zijn
+    // alleen zichtbaar zolang dát alarm actief is.
+    handleActiveAlarmChanged(visibleAlarm);
+    if (visibleAlarm && visibleAlarm._omwDone){
+      activeAlarmContext.omwDone = true;
+    }
+
+    const list = rawMessages.filter(shouldShowChatMessage);
     chatMessageById = {};
     list.forEach(m => { chatMessageById[m.id] = m; });
     chatReceiptsByMessageId = {};
@@ -5364,16 +6070,18 @@
 
     els.chatMessages.innerHTML = list.length
       ? list.map((m, i) => {
-          const next = list[i + 1];
-          const showMeta = !next || next.sender_id !== m.sender_id;
+          const prev = list[i - 1];
+          const isFirst = !prev || prev.sender_id !== m.sender_id;
+          const sender = resolveChatSender(m);
           return chatBubbleHtml({
             ...m,
             media_url: null,
-            senderName: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].full_name : 'Onbekend',
-            senderAvatar: chatParticipantById[m.sender_id] ? chatParticipantById[m.sender_id].avatar_url : null
-          }, showMeta);
+            senderName: sender ? sender.full_name : 'Onbekend',
+            senderAvatar: sender ? sender.avatar_url : null
+          }, isFirst);
         }).join('')
       : '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
+    if (activeAlarmContext.omwDone) refreshNoriOmwButtons();
     scrollChatToBottom();
     requestAnimationFrame(scrollChatToBottom);
     markIncomingMessagesSeen(list.filter(m => m.sender_id !== currentSession.user.id).map(m => m.id));
@@ -5402,17 +6110,82 @@
     openMessages();
   }
 
-  // Locatie / medische info / escalatie hangen van een actief alarm af —
-  // compose is altijd aan (versturen = eigen kring).
+  // Live locatiekaart bovenaan voor iedereen bij een actief alarm.
+  // Reddingskaart blijft via de knop in het NORI-bericht (overlay).
+  // Helpers: geen hulpteam-kaart. Activator ziet wél hulpteam.
   function handleActiveAlarmChanged(alarmRow){
     els.chatForm.classList.remove('hidden');
-    els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode));
-    renderLocationCard(alarmRow);
-    renderMedicalInfoCard(alarmRow);
-    if (alarmRow && alarmRow.status === 'active' && !alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id){
-      startAckWatcher(alarmRow.id, alarmRow.created_at);
+    els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id));
+    els.medicalInfoCard.classList.add('hidden');
+    renderLocationCard(alarmRow && alarmRow.status === 'active' ? alarmRow : null);
+    if (alarmRow && alarmRow.status === 'active'){
+      const isActivator = alarmRow.triggered_by === currentSession.user.id;
+      const isTest = !!alarmRow.test_mode;
+      activeAlarmContext = {
+        id: alarmRow.id,
+        triggeredBy: alarmRow.triggered_by,
+        testMode: isTest,
+        omwDone: false
+      };
+      // Oefenalarm: alleen de activator mag de 1-op-1 preview zien
+      // (hulpteam). Helpers/contacten krijgen hier nooit een watcher.
+      if (isTest && !isActivator){
+        stopAckWatcher();
+        return;
+      }
+      // Helpers bij écht alarm: geen hulpteam-kaart — alleen NORI-bericht.
+      if (!isActivator && !isTest){
+        stopAckWatcher();
+        sb.from('notifications').update({ is_read: true })
+          .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmRow.id)
+          .is('omw_at', null);
+        // Of deze helper al “Ik kom eraan” heeft getikt (voor knop-state).
+        sb.from('notifications').select('omw_at')
+          .eq('user_id', currentSession.user.id).eq('type', 'alarm').eq('related_alarm_id', alarmRow.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (activeAlarmContext.id === alarmRow.id){
+              activeAlarmContext.omwDone = !!(data && data.omw_at);
+              refreshNoriOmwButtons();
+            }
+          });
+        return;
+      }
+      startAckWatcher(alarmRow.id, alarmRow.created_at, isActivator, isTest);
     } else {
+      activeAlarmContext = { id: null, triggeredBy: null, testMode: false, omwDone: false };
       stopAckWatcher();
+      removeInactiveNoriAlarmRows();
+    }
+  }
+
+  function refreshNoriOmwButtons(){
+    if (!els.chatMessages) return;
+    els.chatMessages.querySelectorAll('.nori-alarm-action.omw').forEach(btn => {
+      const id = btn.getAttribute('data-nori-omw');
+      if (!id || id !== activeAlarmContext.id) return;
+      const done = !!activeAlarmContext.omwDone;
+      btn.disabled = done;
+      btn.classList.toggle('done', done);
+      btn.textContent = done ? t('nori.omwDone') : t('nori.omw');
+    });
+  }
+
+  // NORI-alarmbubbels horen alleen bij een actief alarm — haal ze weg
+  // zodra het alarm stopt (DB-trigger ruimt ze ook op; dit is de UI-kant).
+  function removeInactiveNoriAlarmRows(){
+    if (!els.chatMessages) return;
+    const activeId = activeAlarmContext.id;
+    els.chatMessages.querySelectorAll('.chat-row').forEach(row => {
+      const mid = row.getAttribute('data-message-id');
+      const msg = chatMessageById[mid];
+      if (!msg || !isNoriAlarmRescueMessage(msg)) return;
+      if (activeId && msg.alarm_id === activeId) return;
+      delete chatMessageById[mid];
+      row.remove();
+    });
+    if (!els.chatMessages.querySelector('.chat-row') && !els.chatMessages.querySelector('.chat-empty-hint')){
+      els.chatMessages.innerHTML = '<p class="chat-empty-hint">' + escapeHtml(t('chat.empty')) + '</p>';
     }
   }
 
@@ -5460,35 +6233,29 @@
   function renderLocationCard(alarmRow){
     if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
       els.locationCard.classList.add('hidden');
-      els.locationAddress.textContent = '';
+      if (els.locationAddress) els.locationAddress.textContent = '';
       lastAddressCoords = null;
       return;
     }
-    const { lat, lng, location_accuracy, location_updated_at, triggered_by, test_mode } = alarmRow;
+    // Oefenalarm blijft privé: contacten zien geen locatiekaart.
+    if (alarmRow.test_mode && alarmRow.triggered_by !== currentSession.user.id){
+      els.locationCard.classList.add('hidden');
+      return;
+    }
+    const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
     const isOwn = triggered_by === currentSession.user.id;
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
     lastAccuracyText = location_accuracy ? t('location.accuracy', { n: Math.round(location_accuracy) }) : '';
-    // "Open in Maps" mag altijd meteen naar de nieuwste positie wijzen (kost
-    // niets, er wordt pas iets opgehaald als iemand er ook echt op tikt) —
-    // de officiële, platformonafhankelijke Google Maps-linkvorm, die altijd
-    // exact op de coördinaat een pin zet in plaats van er soms een
-    // zoekopdracht van te maken.
     els.locationOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
     els.locationCard.classList.remove('hidden');
-    // Bij een oefenalarm (test_mode) verschijnt het "wie heeft gereageerd"-
-    // kaartje nooit, dus is dit de enige plek in Berichten om zo'n oefening
-    // zelf af te sluiten — bij een écht alarm staat die knop al op de
-    // ack-status-kaart, dus dan niet nog een keer hier tonen.
-    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.toggle('hidden', !(isOwn && test_mode));
+    // Eind-knop zit op de hulpteam-kaart; hier niet dubbel tonen.
+    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.add('hidden');
     els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
     renderLocationMeta(location_updated_at);
 
-    // Live locatie stuurt elke 25 seconden een nieuwe GPS-meting door, ook
-    // als iemand gewoon stilstaat (GPS-metingen wijken altijd een klein
-    // beetje af) — zonder deze drempel ververst de kaartafbeelding dan om
-    // de 25 seconden zichtbaar, wat erg onrustig oogt. Kaart én adres
-    // daarom alleen verversen bij een écht noemenswaardige verplaatsing.
+    // Kaart/adres alleen verversen bij échte verplaatsing (~30 m), anders
+    // flikkert de kaart bij elke GPS-tik terwijl iemand stilstaat.
     const moved = !lastAddressCoords || haversineMeters(lastAddressCoords.lat, lastAddressCoords.lng, lat, lng) > 30;
     if (moved){
       lastAddressCoords = { lat, lng };
@@ -5525,96 +6292,29 @@
     locationUpdatedTimer = setInterval(paint, 15000);
   }
 
-  // Medische info-kaart: de knoppen EHBO-instructies + Bel 112 zijn altijd
-  // zichtbaar zodra iemand ANDERS dan jijzelf een alarm heeft geactiveerd —
-  // ook als diegene geen medische info heeft ingevuld, want dan zijn dit
-  // juist de twee dingen die een reagerend contact nog wél direct kan doen.
-  // De uitklapbare medische details tonen we alleen als er iets is ingevuld.
+  // Medische info-kaart boven Berichten: uit. Helpers én activator openen
+  // de reddingskaart via de knop in het NORI-bericht (overlay). Op het
+  // verzonden-scherm blijft de kaart open voor de ambulance.
   async function renderMedicalInfoCard(alarmRow){
-    if (!alarmRow || alarmRow.triggered_by === currentSession.user.id){
-      els.medicalInfoCard.classList.add('hidden');
-      return;
-    }
-    // Zelfde reden als de guard in openMessages(): als iemand tijdens deze
-    // await Berichten opnieuw opent, mag de medische info van DEZE
-    // (oudere) activator niet alsnog over het nieuwe scherm heen geplakt
-    // worden.
-    const genAtStart = chatOpenGen;
-    els.medicalInfoCard.classList.remove('hidden');
-    const [{ data }, { data: practicalData }] = await Promise.all([
-      sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id }),
-      sb.rpc('get_activator_practical_info', { p_alarm_id: alarmRow.id })
-    ]);
-    if (genAtStart !== chatOpenGen) return;
-    const info = data && data[0];
-    const practical = practicalData && practicalData[0];
-    const hasResus = info && typeof info.resuscitate === 'boolean';
-    const hasAny = (info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
-      || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital
-      || info.birth_date || info.weight_kg || info.pacemaker_icd || info.pregnant))
-      || (practical && practical.spare_key_location);
-    els.medicalInfoToggle.classList.toggle('hidden', !hasAny);
-    if (!hasAny){
-      els.medicalInfoBody.classList.add('hidden');
-      els.medicalInfoCard.classList.remove('open');
-      els.medicalInfoBody.innerHTML = '';
-      els.medicalResusBanner.classList.add('hidden');
-      return;
-    }
-    // Voor een ambulanceteam dat binnenkomt terwijl jij CPR doet, is elke
-    // extra tik vertraging die je niet wilt — het kaartje staat daarom
-    // meteen opengeklapt in plaats van pas na een tik op de titel.
-    els.medicalInfoCard.classList.add('open');
-    els.medicalInfoBody.classList.remove('hidden');
-    const activator = chatParticipantById[alarmRow.triggered_by];
-    const activatorName = activator ? activator.full_name : t('conversation.unknown');
-    els.medicalInfoName.textContent = activatorName;
-    if (hasResus){
-      els.medicalResusBanner.textContent = info.resuscitate
-        ? t('medical.resusYes', { name: activatorName })
-        : t('medical.resusNo', { name: activatorName });
-      els.medicalResusBanner.className = 'medical-resus-banner ' + (info.resuscitate ? 'ok' : 'danger');
-    } else {
-      els.medicalResusBanner.classList.add('hidden');
-    }
-    const medical = info || {};
-    const mobilityLabel = { good: t('medical.mobilityGood'), walker: t('medical.mobilityWalker'), wheelchair: t('medical.mobilityWheelchair') }[medical.mobility];
-    const contact1 = [medical.contact1_name, medical.contact1_relation].filter(Boolean).join(' — ') + (medical.contact1_phone ? ' · ' + medical.contact1_phone : '');
-    const contact2 = [medical.contact2_name, medical.contact2_relation].filter(Boolean).join(' — ') + (medical.contact2_phone ? ' · ' + medical.contact2_phone : '');
-    const rows = [];
-    // Sleutel buitenshuis staat bewust los van medische info (andere tabel,
-    // eigen knop op het profiel) maar hoort hier wel bovenaan: vaak is
-    // "hoe kom ik binnen" letterlijk de eerste stap voor wie ter plekke komt.
-    if (practical && practical.spare_key_location) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('extra.spareKey')) + '</strong> ' + escapeHtml(practical.spare_key_location) + '</div>');
-    if (medical.advance_directive) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.advanceDirective')) + '</strong> ' + escapeHtml(medical.advance_directive) + '</div>');
-    // Pacemaker/ICD en zwangerschap veranderen direct hoe een ambulanceteam
-    // reanimeert (waar ze wel/niet defibrilleren, ander protocol) — daarom
-    // net als de wilsverklaring in het rood, vlak onder de reanimatiebanner.
-    if (medical.pacemaker_icd) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pacemaker')) + '</strong></div>');
-    if (medical.pregnant) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pregnant')) + '</strong></div>');
-    if (medical.allergies) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.allergies')) + '</strong> ' + escapeHtml(medical.allergies) + '</div>');
-    if (medical.medications) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.medications')) + '</strong> ' + escapeHtml(medical.medications) + '</div>');
-    if (medical.conditions) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.conditions')) + '</strong> ' + escapeHtml(medical.conditions) + '</div>');
-    if (medical.birth_date){
-      const bd = new Date(medical.birth_date + 'T00:00:00');
-      const dateLabel = isNaN(bd.getTime()) ? medical.birth_date : bd.toLocaleDateString(localeTag());
-      const ageLabel = medicalAgeLabel(medical.birth_date);
-      rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.birthDate')) + '</strong> ' + escapeHtml(dateLabel + (ageLabel ? ' (' + ageLabel + ')' : '')) + '</div>');
-    }
-    if (medical.weight_kg) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.weight')) + '</strong> ' + escapeHtml(medical.weight_kg + ' kg') + '</div>');
-    if (mobilityLabel) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.mobility')) + '</strong> ' + escapeHtml(mobilityLabel) + '</div>');
-    if (medical.contact1_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact1')) + '</strong> ' + escapeHtml(contact1) + '</div>');
-    if (medical.contact2_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact2')) + '</strong> ' + escapeHtml(contact2) + '</div>');
-    if (medical.doctor_name || medical.doctor_phone) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.doctor')) + '</strong> ' + escapeHtml([medical.doctor_name, medical.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
-    if (medical.hospital) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.hospital')) + '</strong> ' + escapeHtml(medical.hospital) + '</div>');
-    if (medical.notes) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.other')) + '</strong> ' + escapeHtml(medical.notes) + '</div>');
-    els.medicalInfoBody.innerHTML = rows.join('');
-    els.medicalInfoCard.classList.remove('hidden');
+    void alarmRow;
+    els.medicalInfoCard.classList.add('hidden');
   }
-  els.medicalInfoToggle.addEventListener('click', () => {
+  // Reddingskaart blijft tijdens alarm open (geen inklappen).
+  els.medicalInfoToggle.addEventListener('click', (ev) => {
+    if (els.medicalInfoCard.classList.contains('rescue-card') && els.medicalInfoCard.classList.contains('open')){
+      ev.preventDefault();
+      return;
+    }
     const open = els.medicalInfoCard.classList.toggle('open');
     els.medicalInfoBody.classList.toggle('hidden', !open);
   });
+
+  if (els.ackOmwButton){
+    els.ackOmwButton.addEventListener('click', () => {
+      if (!ackWatcherAlarmId || els.ackOmwButton.disabled) return;
+      handleOmw(ackWatcherAlarmId);
+    });
+  }
 
   // EHBO-instructies: algemene, standaard eerstehulpstappen — bewust geen
   // gepersonaliseerd medisch advies (dat zou buiten onze verantwoordelijkheid
@@ -5631,46 +6331,189 @@
       els.ehboOverlay.classList.remove('hidden');
     });
   }
+  if (els.sentEhboButton){
+    els.sentEhboButton.addEventListener('click', () => {
+      renderEhboSteps();
+      els.ehboOverlay.classList.remove('hidden');
+    });
+  }
   if (els.ehboCloseButton){
     els.ehboCloseButton.addEventListener('click', () => els.ehboOverlay.classList.add('hidden'));
   }
 
-  /* -------- "Wie heeft gereageerd" + escalatie bij geen reactie -------- */
+  function closeRescueOverlay(){
+    if (!els.rescueOverlay) return;
+    els.rescueOverlay.classList.add('hidden');
+    if (els.rescueOverlayBody) els.rescueOverlayBody.innerHTML = '';
+    if (els.rescueOverlayResusBanner){
+      els.rescueOverlayResusBanner.className = 'medical-resus-banner hidden';
+      els.rescueOverlayResusBanner.textContent = '';
+    }
+  }
+  async function openRescueOverlay(alarmId){
+    if (!els.rescueOverlay || !alarmId) return;
+    if (els.rescueOverlayTitle) els.rescueOverlayTitle.textContent = t('nori.rescueOverlayTitle');
+    if (els.rescueOverlayBody){
+      els.rescueOverlayBody.innerHTML = '<div class="medical-info-row" style="color:var(--text-muted);">…</div>';
+    }
+    els.rescueOverlay.classList.remove('hidden');
+
+    const { data, error } = await sb.rpc('get_alarm_rescue_card', { p_alarm_id: alarmId });
+    if (error || !data){
+      if (els.rescueOverlayBody){
+        els.rescueOverlayBody.innerHTML = '<div class="medical-info-row" style="color:var(--danger);">' +
+          escapeHtml(t('nori.rescueLoadError')) + '</div>';
+      }
+      return;
+    }
+    const name = data.activator_name || t('conversation.someone');
+    if (els.rescueOverlaySubtitle){
+      els.rescueOverlaySubtitle.textContent = t('nori.rescueOverlayAbout', { name });
+    }
+    const built = buildRescueCardContent(data.medical || null, data.practical || null, name);
+    if (els.rescueOverlayResusBanner){
+      if (built.hasResus){
+        els.rescueOverlayResusBanner.textContent = built.resusText;
+        els.rescueOverlayResusBanner.className = built.resusClass;
+      } else {
+        els.rescueOverlayResusBanner.className = 'medical-resus-banner hidden';
+        els.rescueOverlayResusBanner.textContent = '';
+      }
+    }
+    if (els.rescueOverlayBody){
+      els.rescueOverlayBody.innerHTML = built.hasAny
+        ? built.rowsHtml
+        : '<div class="medical-info-row" style="color:var(--text-muted);">' + escapeHtml(t('nori.rescueEmpty')) + '</div>';
+    }
+  }
+  if (els.rescueOverlayCloseButton){
+    els.rescueOverlayCloseButton.addEventListener('click', closeRescueOverlay);
+  }
+  if (els.rescueOverlayEhboButton){
+    els.rescueOverlayEhboButton.addEventListener('click', () => {
+      renderEhboSteps();
+      els.ehboOverlay.classList.remove('hidden');
+    });
+  }
+  if (els.rescueOverlay){
+    els.rescueOverlay.addEventListener('click', (ev) => {
+      if (ev.target === els.rescueOverlay) closeRescueOverlay();
+    });
+  }
+
+  // Knoppen in compacte NORI-alarmberichten (event delegation).
+  // Op touch-apparaten komt deze 'click' vaak niet aan (touchend hieronder
+  // onderdrukt die) — daar wordt dezelfde actie via touchend afgevuurd.
+  function handleNoriAlarmAction(el){
+    if (!el) return false;
+    const omwBtn = el.closest ? el.closest('[data-nori-omw]') : null;
+    if (omwBtn || (el.getAttribute && el.getAttribute('data-nori-omw'))){
+      const btn = omwBtn || el;
+      if (btn.disabled) return true;
+      handleOmw(btn.getAttribute('data-nori-omw'));
+      return true;
+    }
+    const rescueBtn = el.closest ? el.closest('[data-nori-rescue]') : null;
+    if (rescueBtn || (el.getAttribute && el.getAttribute('data-nori-rescue'))){
+      const btn = rescueBtn || el;
+      openRescueOverlay(btn.getAttribute('data-nori-rescue'));
+      return true;
+    }
+    return false;
+  }
+  if (els.chatMessages){
+    els.chatMessages.addEventListener('click', (ev) => {
+      if (handleNoriAlarmAction(ev.target)){
+        ev.preventDefault();
+      }
+    });
+  }
+
+  /* -------- Hulpteam live: wie heeft gezien / komt eraan -------- */
   const ESCALATION_TIMEOUT_MS = 2 * 60 * 1000;
   let ackWatcherTimer = null;
   let ackWatcherAlarmId = null;
+  let ackWatcherCreatedAt = null;
+  let ackWatcherIsActivator = false;
+  let ackWatcherIsTest = false;
   let escalationTriggered = false;
 
   function stopAckWatcher(){
     if (ackWatcherTimer){ clearInterval(ackWatcherTimer); ackWatcherTimer = null; }
     ackWatcherAlarmId = null;
+    ackWatcherCreatedAt = null;
+    ackWatcherIsActivator = false;
+    ackWatcherIsTest = false;
     escalationTriggered = false;
     els.ackStatusCard.classList.add('hidden');
     els.escalationBanner.classList.add('hidden');
+    if (els.ackOmwButton) els.ackOmwButton.classList.add('hidden');
   }
 
   async function pollAckStatus(alarmId, createdAt){
-    const others = Object.keys(chatParticipantById).filter(id => id !== currentSession.user.id);
-    if (!others.length){ els.ackStatusCard.classList.add('hidden'); return; }
+    const me = currentSession.user.id;
+    const others = Object.keys(chatParticipantById).filter(id => id !== me && !isNoriSystemSender(id));
+    if (!others.length && ackWatcherIsActivator){ els.ackStatusCard.classList.add('hidden'); return; }
 
     const { data } = await sb.rpc('get_alarm_acknowledgments', { p_alarm_id: alarmId });
-    const ackByUser = {};
-    (data || []).forEach(r => { ackByUser[r.user_id] = r.is_read; });
+    const byUser = {};
+    (data || []).forEach(r => { byUser[r.user_id] = { is_read: !!r.is_read, omw_at: r.omw_at || null }; });
 
-    els.ackStatusList.innerHTML = others.map(id => {
-      const acked = !!ackByUser[id];
-      const name = chatParticipantById[id] ? chatParticipantById[id].full_name : 'Onbekend';
-      return '<span class="ack-pill' + (acked ? ' acked' : '') + '"><span class="ack-dot"></span>' + escapeHtml(acked ? t('ack.responded', { name }) : name) + '</span>';
+    const teamIds = ackWatcherIsActivator
+      ? others
+      : others; // helpers zien ook de rest van het team
+
+    els.ackStatusList.innerHTML = teamIds.map(id => {
+      const row = byUser[id] || {};
+      const coming = !!row.omw_at;
+      const seen = !!row.is_read;
+      const name = chatParticipantById[id] ? chatParticipantById[id].full_name : t('conversation.unknown');
+      const cls = coming ? ' coming' : (seen ? ' acked' : '');
+      const status = coming ? t('ack.coming') : (seen ? t('ack.seen') : t('ack.waiting'));
+      return '<div class="ack-pill' + cls + '"><span class="ack-dot"></span><span>' + escapeHtml(name) + '</span><span class="ack-pill-status">' + escapeHtml(status) + '</span></div>';
     }).join('');
+
+    // Titel / hint afhankelijk van rol (en oefenmodus)
+    if (els.ackStatusCardTitle){
+      els.ackStatusCardTitle.textContent = ackWatcherIsActivator ? t('ack.titleActivator') : t('ack.titleHelper');
+    }
+    if (els.ackStatusCardHint){
+      els.ackStatusCardHint.textContent = ackWatcherIsTest
+        ? t('ack.hintTest')
+        : (ackWatcherIsActivator ? t('ack.hintActivator') : t('ack.hintHelper'));
+    }
+
+    // Helper: knop “Ik kom eraan” — niet tijdens oefen-preview (jij bent activator)
+    if (els.ackOmwButton){
+      const mine = byUser[me] || {};
+      const iAmHelper = !ackWatcherIsActivator;
+      els.ackOmwButton.classList.toggle('hidden', !iAmHelper);
+      if (iAmHelper){
+        const done = !!mine.omw_at;
+        els.ackOmwButton.disabled = done;
+        els.ackOmwButton.classList.toggle('done', done);
+        els.ackOmwButton.textContent = done ? t('ack.omwDone') : (currentLang === 'en' ? 'I\'m on my way' : 'Ik kom eraan');
+      }
+    }
+
+    els.endAlarmFromChatButton.classList.toggle('hidden', !ackWatcherIsActivator);
     els.ackStatusCard.classList.remove('hidden');
 
-    const anyAcked = others.some(id => ackByUser[id]);
-    const elapsed = Date.now() - new Date(createdAt).getTime();
-    if (!anyAcked && elapsed >= ESCALATION_TIMEOUT_MS){
-      showEscalationBanner(others);
-      if (!escalationTriggered){
-        escalationTriggered = true;
-        resendAlert(alarmId);
+    if (ackWatcherIsActivator){
+      const anyComing = others.some(id => byUser[id] && byUser[id].omw_at);
+      const anySeen = others.some(id => byUser[id] && byUser[id].is_read);
+      const elapsed = Date.now() - new Date(createdAt).getTime();
+      if (!anyComing && !anySeen && elapsed >= ESCALATION_TIMEOUT_MS){
+        // Escalatie-UI tonen mag ook bij oefenen (zo zie je wat er zou
+        // gebeuren), maar NOOIT opnieuw een alert versturen — dat zou
+        // contacten alsnog wakker maken.
+        showEscalationBanner(others);
+        if (!escalationTriggered && !ackWatcherIsTest){
+          escalationTriggered = true;
+          resendAlert(alarmId);
+        }
+      } else {
+        els.escalationBanner.classList.add('hidden');
       }
     } else {
       els.escalationBanner.classList.add('hidden');
@@ -5697,13 +6540,16 @@
     } catch (err){ /* stille poging — de belknoppen blijven hoe dan ook zichtbaar */ }
   }
 
-  function startAckWatcher(alarmId, createdAt){
-    if (ackWatcherAlarmId === alarmId) return;
+  function startAckWatcher(alarmId, createdAt, isActivator, isTest){
+    if (ackWatcherAlarmId === alarmId && ackWatcherIsActivator === !!isActivator && ackWatcherIsTest === !!isTest) return;
     stopAckWatcher();
     ackWatcherAlarmId = alarmId;
+    ackWatcherCreatedAt = createdAt;
+    ackWatcherIsActivator = !!isActivator;
+    ackWatcherIsTest = !!isTest;
     escalationTriggered = false;
     pollAckStatus(alarmId, createdAt);
-    ackWatcherTimer = setInterval(() => pollAckStatus(alarmId, createdAt), 10000);
+    ackWatcherTimer = setInterval(() => pollAckStatus(alarmId, createdAt), 8000);
   }
 
   // Nominatim (OpenStreetMap) — gratis, geen API-sleutel nodig. Zet
@@ -5805,11 +6651,11 @@
       if (!shouldShowChatMessage(msg)) return;
       (async () => {
         chatMessageById[msg.id] = msg;
-        let participant = chatParticipantById[msg.sender_id];
+        let participant = resolveChatSender(msg);
         if (!participant){
           const { data: p } = await sb.from('profiles').select('full_name, avatar_url, phone_number').eq('id', msg.sender_id).single();
           participant = p ? { full_name: p.full_name, avatar_url: p.avatar_url, phone_number: p.phone_number } : { full_name: 'Onbekend', avatar_url: null, phone_number: null };
-          chatParticipantById[msg.sender_id] = participant;
+          if (!isNoriSystemSender(msg.sender_id)) chatParticipantById[msg.sender_id] = participant;
         }
         let mediaUrl = null;
         if (msg.media_path){
@@ -5819,10 +6665,10 @@
         const emptyHint = els.chatMessages.querySelector('.chat-empty-hint');
         if (emptyHint) emptyHint.remove();
         const prevLastRow = els.chatMessages.querySelector('.chat-row:last-child');
-        if (prevLastRow && !prevLastRow.classList.contains('own') && prevLastRow.getAttribute('data-sender-id') === msg.sender_id){
-          prevLastRow.classList.add('grouped');
-        }
-        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }, true));
+        const isFirst = !(prevLastRow && prevLastRow.getAttribute('data-sender-id') === msg.sender_id);
+        // Bij een vervolgbericht van dezelfde afzender: vorige houdt avatar/
+        // staartje (eerste van de reeks); nieuwe wordt .grouped zonder staart.
+        els.chatMessages.insertAdjacentHTML('beforeend', chatBubbleHtml({ ...msg, media_url: mediaUrl, senderName: participant.full_name, senderAvatar: participant.avatar_url }, isFirst));
         scrollChatToBottom();
         requestAnimationFrame(scrollChatToBottom);
         const lastMedia = els.chatMessages.querySelector('.chat-row:last-child [data-media-path]');
@@ -5845,7 +6691,7 @@
         const textEl = row.querySelector('.chat-bubble .text');
         if (textEl){
           const whenEl = textEl.querySelector('.when');
-          textEl.innerHTML = (msg.body ? linkifyHtml(msg.body) : '') + (whenEl ? whenEl.outerHTML : '');
+          textEl.innerHTML = chatMessageBodyHtml(msg) + (whenEl ? whenEl.outerHTML : '');
         }
       }
     }
@@ -5857,13 +6703,16 @@
       delete chatReceiptsByMessageId[id];
       const row = els.chatMessages.querySelector('.chat-row[data-message-id="' + id + '"]');
       if (row){
-        const prevSib = row.previousElementSibling;
+        const nextSib = row.nextElementSibling;
+        const senderId = row.getAttribute('data-sender-id');
+        const wasFirst = row.classList.contains('has-tail');
         row.remove();
-        if (prevSib && prevSib.classList.contains('chat-row') && !prevSib.classList.contains('own')){
-          const nextOfPrev = prevSib.nextElementSibling;
-          const stillGrouped = nextOfPrev && nextOfPrev.classList.contains('chat-row') &&
-            nextOfPrev.getAttribute('data-sender-id') === prevSib.getAttribute('data-sender-id');
-          prevSib.classList.toggle('grouped', !!stillGrouped);
+        // Als het eerste bericht van een reeks weg is, erft het volgende
+        // bericht van dezelfde afzender avatar + staartje.
+        if (wasFirst && nextSib && nextSib.classList.contains('chat-row') &&
+            nextSib.getAttribute('data-sender-id') === senderId){
+          nextSib.classList.remove('grouped');
+          nextSib.classList.add('has-tail');
         }
       }
       if (!els.chatMessages.querySelector('.chat-row')){
@@ -5886,6 +6735,10 @@
         if (row.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(row.triggered_by)){
           return;
         }
+        // Oefenalarm: alleen de activator mag het zien.
+        if (row.test_mode && row.triggered_by !== currentSession.user.id){
+          return;
+        }
         handleActiveAlarmChanged(row);
         return;
       }
@@ -5898,6 +6751,9 @@
         .order('created_at', { ascending:false }).limit(1).maybeSingle();
       let visible = data || null;
       if (visible && visible.triggered_by !== currentSession.user.id && !chatVisibleContactIds.has(visible.triggered_by)){
+        visible = null;
+      }
+      if (visible && visible.test_mode && visible.triggered_by !== currentSession.user.id){
         visible = null;
       }
       handleActiveAlarmChanged(visible);
@@ -6088,7 +6944,13 @@
     const video = ev.target.closest('.chat-video');
     const image = ev.target.closest('img.chat-media');
     const voicePlay = ev.target.closest('.voice-msg-play');
-    bubbleTouch = { bubble, video, image, voicePlay, startTime: Date.now(), moved: false };
+    const noriAction = ev.target.closest('.nori-alarm-action');
+    bubbleTouch = { bubble, video, image, voicePlay, noriAction, startTime: Date.now(), moved: false };
+    // NORI-actieknoppen: geen long-press-menu, alleen korte tik.
+    if (noriAction){
+      longPressStartXY = null;
+      return;
+    }
     longPressStartXY = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
     longPressTimer = setTimeout(() => {
       longPressTimer = null;
@@ -6122,15 +6984,15 @@
     // Alleen een echte, korte tik (niet verschoven, geen lang-indrukken,
     // geen menu geopend) op een video telt als "afspelen", op een foto als
     // "schermvullend tonen", op de afspeelknop van een spraakbericht als
-    // "starten/pauzeren". Zonder dit expliciet af te handelen bleef er op
-    // touch-apparaten niets gebeuren: de synthetische 'click' hierboven
-    // wordt voor elke tik in een bubbel onderdrukt (preventDefault), dus
-    // de eigen click-listener op de afspeelknop (zie primeVoiceMessages)
-    // kwam op een telefoon nooit aan.
+    // "starten/pauzeren", en op NORI-knoppen als reddingskaart / OMW.
+    // Zonder dit expliciet af te handelen bleef er op touch-apparaten
+    // niets gebeuren: de synthetische 'click' hierboven wordt voor elke
+    // tik in een bubbel onderdrukt (preventDefault).
     if (touch && !touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
       if (touch.video) playVideoFullscreen(touch.video);
       else if (touch.image) openImageLightbox(touch.image.src);
       else if (touch.voicePlay) touch.voicePlay.click();
+      else if (touch.noriAction) handleNoriAlarmAction(touch.noriAction);
     }
   }, { passive: false });
   els.chatMessages.addEventListener('touchcancel', () => { cancelLongPress(); bubbleTouch = null; });
