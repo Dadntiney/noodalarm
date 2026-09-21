@@ -14,7 +14,7 @@
 // — confusing during active development, and in an emergency app "shows
 // the version that was actually just fixed" matters more than shaving a
 // few ms off an already-fast load on a normal connection.
-const SHELL_CACHE = 'nori-shell-v5-uitleg-portrait-fs';
+const SHELL_CACHE = 'nori-shell-v6-beste-versie';
 const SHELL_ASSETS = ['./', './noodalarm.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
