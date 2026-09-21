@@ -66,8 +66,8 @@ Deno.serve(async (req) => {
 
     let body =
       bullets.length === 1
-        ? `🆕 Update van NORI\n\n${bullets[0]}`
-        : `🆕 Updates van NORI\n\n${bullets.map((b) => `• ${b}`).join('\n')}`;
+        ? `Update van NORI\n\n${bullets[0]}`
+        : `Updates van NORI\n\n${bullets.map((b) => `• ${b}`).join('\n')}`;
     if (body.length > 1000) body = body.slice(0, 1000);
 
     const { data: systemProfiles } = await sb.from('profiles').select('id').eq('is_system', true);

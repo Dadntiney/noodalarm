@@ -55,3 +55,10 @@ rij aan `release_notes` voor toe (via Management API / SQL insert in
 `public.release_notes(message_nl)`), in de hierboven beschreven stijl.
 Niet vragen of het mag — dit is al afgesproken staand beleid. Alleen
 weglaten wat puur technisch/intern is.
+
+## Geen standaard-emoji-symbooltjes in UI-teksten
+
+Nooit meer emoji’s als 🆕, 👋, 💛, ✅, 🎉, ⚠️ enz. in chatteksten,
+badges of koppen zetten. Die “blauwe NEW-blokjes” en soortgelijke
+standaard-symbolen horen niet bij NORI. Gewone tekst (en eventueel de
+bestaande UI-badge Welkom/Update) is genoeg.
