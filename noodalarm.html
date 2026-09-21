@@ -925,23 +925,23 @@
   .chat-bubble:has(.chat-media),
   .chat-bubble:has(.chat-video-wrap),
   .chat-bubble:has(.nori-intro-video-wrap){ max-width:90%; }
-  /* NORI-uitlegvideo: groot, rustig, native controls. Geen autoplay. */
+  /* NORI-uitlegvideo: full-bleed 16:9 zoals WhatsApp-chatvideo’s. Geen autoplay. */
   .nori-intro-video-wrap{
     position:relative;
-    margin:8px 0 10px;
-    border-radius:12px;
+    margin:-8px -12px -8px -14px;
+    width:calc(100% + 26px);
+    border-radius:7.5px;
     overflow:hidden;
-    background:#0f172a;
-    aspect-ratio:9 / 16;
-    max-height:min(62vh, 520px);
-    width:100%;
+    background:transparent;
+    aspect-ratio:16 / 9;
+    max-height:min(56vh, 420px);
   }
   .nori-intro-video-wrap video.nori-intro-video{
     display:block;
     width:100%;
     height:100%;
-    object-fit:contain;
-    background:#0f172a;
+    object-fit:cover;
+    background:transparent;
   }
   .nori-intro-lead{
     margin:0 0 4px;
@@ -949,7 +949,7 @@
     line-height:1.45;
   }
   @media (min-width:720px){
-    .nori-intro-video-wrap{ max-height:min(70vh, 640px); }
+    .nori-intro-video-wrap{ max-height:min(50vh, 480px); }
   }
   .chat-bubble.own{
     --bubble-bg:var(--accent);
@@ -1012,7 +1012,8 @@
   .chat-video-wrap .chat-media{ margin:0; width:100%; border-radius:0; }
   /* Foto/video mét bijschrift: media alleen bovenaan afronden, tekst eronder. */
   .chat-bubble:has(.text:not(.media-caption-empty)) > img.chat-media,
-  .chat-bubble:has(.text:not(.media-caption-empty)) > .chat-video-wrap{
+  .chat-bubble:has(.text:not(.media-caption-empty)) > .chat-video-wrap,
+  .chat-bubble:has(.text:not(.media-caption-empty)) > .nori-intro-video-wrap{
     margin-bottom:6px; border-radius:7.5px 7.5px 0 0;
   }
   /* Zonder bijschrift: tijd+vinkjes over de foto, rechtsonder. */
