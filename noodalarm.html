@@ -7701,6 +7701,20 @@
     const img = ev.target.closest('img.chat-media');
     if (img) openImageLightbox(img.src);
   });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && els.noriIntroLightbox && !els.noriIntroLightbox.classList.contains('hidden')){
+      closeNoriIntroLightbox();
+    }
+  });
+  // Keyboard: Enter/Space op de preview-tegel.
+  els.chatMessages.addEventListener('keydown', (ev) => {
+    const introOpen = ev.target.closest('[data-nori-intro-open]');
+    if (!introOpen) return;
+    if (ev.key === 'Enter' || ev.key === ' '){
+      ev.preventDefault();
+      openNoriIntroLightbox();
+    }
+  });
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement){
       els.chatMessages.querySelectorAll('.chat-video').forEach(v => { v.controls = false; });
@@ -7778,13 +7792,14 @@
   els.chatMessages.addEventListener('touchstart', (ev) => {
     const bubble = ev.target.closest('.chat-bubble');
     if (!bubble || ev.touches.length !== 1){ bubbleTouch = null; return; }
-    const video = ev.target.closest('.chat-video');
+    const introOpen = ev.target.closest('[data-nori-intro-open]');
+    const video = introOpen ? null : ev.target.closest('.chat-video');
     const image = ev.target.closest('img.chat-media');
     const voicePlay = ev.target.closest('.voice-msg-play');
     const noriAction = ev.target.closest('.nori-alarm-action');
-    bubbleTouch = { bubble, video, image, voicePlay, noriAction, startTime: Date.now(), moved: false };
-    // NORI-actieknoppen: geen long-press-menu, alleen korte tik.
-    if (noriAction){
+    bubbleTouch = { bubble, video, image, voicePlay, noriAction, introOpen, startTime: Date.now(), moved: false };
+    // NORI-actieknoppen / uitlegpreview: geen long-press-menu, alleen korte tik.
+    if (noriAction || introOpen){
       longPressStartXY = null;
       return;
     }
@@ -7814,6 +7829,15 @@
     cancelLongPress();
     const touch = bubbleTouch;
     bubbleTouch = null;
+    // Uitlegpreview: open lightbox. Op touch komt de synthetische 'click'
+    // niet aan omdat we hier preventDefault doen — dus zelf afhandelen.
+    if (touch && touch.introOpen){
+      if (!touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
+        ev.preventDefault();
+        openNoriIntroLightbox();
+      }
+      return;
+    }
     // Zelf afgehandeld i.p.v. via de synthetische 'click' (die op mobiel
     // hierdoor onderdrukt wordt) — zo blijft precies dezelfde tik nooit
     // dubbel afgevuurd worden.
