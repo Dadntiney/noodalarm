@@ -5557,9 +5557,12 @@
 
   function isNoriWelcomeMessage(msg){
     if (!msg || typeof msg.body !== 'string') return false;
-    // Oudere welkomsten staan zonder 👋-emoji in de DB.
-    return msg.body.indexOf('👋 Welkom bij NORI!') === 0
-      || msg.body.indexOf('Welkom bij NORI!') === 0;
+    const body = msg.body.trim();
+    // Oudere welkomsten staan zonder 👋-emoji in de DB; EN-varianten meenemen.
+    return body.indexOf('👋 Welkom bij NORI!') === 0
+      || body.indexOf('Welkom bij NORI!') === 0
+      || body.indexOf('👋 Welcome to NORI!') === 0
+      || body.indexOf('Welcome to NORI!') === 0;
   }
   function isNoriIntroVideoMessage(msg){
     if (!msg || typeof msg.body !== 'string') return false;
@@ -5652,6 +5655,35 @@
 
   function chatHasIntroVideoMessage(){
     return Object.keys(chatMessageById).some(id => isNoriIntroVideoMessage(chatMessageById[id]));
+  }
+
+  // Voor bestaande accounts zonder DB-migratie: toon de uitlegvideo als
+  // normaal NORI-systeembericht in de tijdlijn (lokaal, eenmalig per render).
+  // Zodra de migratie/RPC het echte bericht plaatst, verdwijnt dit automatisch.
+  const LOCAL_NORI_INTRO_VIDEO_ID = 'local-nori-intro-video-v1';
+  function withLocalNoriIntroVideoMessage(list){
+    if (!Array.isArray(list) || !myGroupId || !currentSession) return list || [];
+    if (list.some(isNoriIntroVideoMessage)) return list;
+    const synthetic = {
+      id: LOCAL_NORI_INTRO_VIDEO_ID,
+      group_id: myGroupId,
+      sender_id: NORI_SYSTEM_USER_ID,
+      body: t('nori.introVideoLead') + '\n\n' + NORI_INTRO_VIDEO.marker,
+      created_at: new Date().toISOString(),
+      media_path: null,
+      media_type: null,
+      alarm_id: null,
+      _localOnly: true
+    };
+    const welcomeIdx = list.findIndex(isNoriWelcomeMessage);
+    if (welcomeIdx >= 0){
+      synthetic.created_at = list[welcomeIdx].created_at || synthetic.created_at;
+      const out = list.slice();
+      out.splice(welcomeIdx + 1, 0, synthetic);
+      return out;
+    }
+    if (list.length) synthetic.created_at = list[0].created_at || synthetic.created_at;
+    return [synthetic].concat(list);
   }
 
   function shouldShowNoriIntroVideo(msg){
@@ -6249,7 +6281,7 @@
       activeAlarmContext.omwDone = true;
     }
 
-    const list = rawMessages.filter(shouldShowChatMessage);
+    const list = withLocalNoriIntroVideoMessage(rawMessages.filter(shouldShowChatMessage));
     chatMessageById = {};
     list.forEach(m => { chatMessageById[m.id] = m; });
     chatReceiptsByMessageId = {};
