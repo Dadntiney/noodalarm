@@ -1163,7 +1163,11 @@
 </head>
 <body>
 
-<!-- Aftel-geluid van de ALARM-knop: gewone <audio>-elementjes met ingebakken (data-URI) geluidjes i.p.v. Web Audio-oscillators. Web Audio bleek op iOS onbetrouwbaar: een AudioContext kan willekeurig weer "suspended" raken (ook na eerder succesvol gebruik, bv. na wat scrollen/navigeren), en zelfs een verse context per druk loste dat niet waterdicht op. Een <audio>-element dat eenmaal vanuit een echte tik is afgespeeld, blijft normaliter wél gewoon werkbaar voor de rest van de sessie — vandaar deze aanpak. Zie unlockCountdownAudioElements() en playCountdownBeep()/playFiredTone() verderop. -->
+<!-- Aftel-geluid van de ALARM-knop: vaste <audio>-elementen met data-URI WAV's.
+     Worden uitsluitend afgespeeld terwijl countdownActive true is (zie
+     isCountdownTicking / playCountdownBeep / playFiredTone). Ontgrendelen
+     op iOS gebeurt alleen bij startCountdown (tik op ALARM), niet bij
+     willekeurige navigatie — dat veroorzaakte eerder onverwachte piepjes. -->
 <audio id="countdownBeepNormal" preload="auto" src="data:audio/wav;base64,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"></audio>
 <audio id="countdownBeepUrgent" preload="auto" src="data:audio/wav;base64,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"></audio>
 <audio id="countdownFiredTone" preload="auto" src="data:audio/wav;base64,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"></audio>
@@ -4337,6 +4341,11 @@
   els.profileBackButton.addEventListener('click', () => switchScreen('alarm'));
   els.chatBackButton.addEventListener('click', () => switchScreen('alarm'));
   function switchScreen(name){
+    // Wegnavigeren tijdens/na aftellen: teller + eventueel restgeluid stil.
+    if (name !== 'alarm'){
+      cancelCountdown();
+      stopCountdownAudio();
+    }
     if (name !== 'messages'){
       unsubscribeChat();
       currentChatGroupId = null;
@@ -4619,20 +4628,36 @@
     els.holdProgress.style.strokeDashoffset = String(HOLD_CIRCUMFERENCE * (1 - fraction));
   }
 
-  // Aftel-geluid via gewone <audio>-elementen (zie de drie <audio>-tags
-  // vlak na <body>) i.p.v. Web Audio-oscillators. Twee eerdere pogingen op
-  // basis van AudioContext (eerst één gedeelde context steeds opnieuw
-  // resumen, daarna zelfs een gloednieuwe context per druk op de knop)
-  // bleken allebei niet waterdicht: iOS kan een AudioContext blijkbaar ook
-  // ná eerder succesvol gebruik weer laten "verdwijnen" (bv. na wat
-  // scrollen/navigeren door de app), waardoor het geluid onvoorspelbaar
-  // stopte. Een <audio>-element dat eenmaal écht is afgespeeld vanuit een
-  // gebruikersactie (zie unlockCountdownAudioElements hieronder) blijft
-  // normaliter gewoon bruikbaar voor de rest van de sessie — geen
-  // AudioContext-status, geen resume(), geen per-pagina-limiet op het
-  // aantal contexts. currentTime terugzetten zodat een snel volgend
-  // piepje niet wacht tot het vorige is uitgespeeld.
+  // Aftel-geluid via de drie vaste <audio>-tags vlak na <body>.
+  //
+  // Bron van waarheid: countdownActive. Alleen terwijl die true is mag
+  // aftelgeluid hoorbaar zijn. Geen globale click/touch-unlock meer: die
+  // riep .play() aan op dezezelfde piepjes bij élke tik in de app, en dat
+  // was de oorzaak van onverwachte piepjes bij navigatie/knoppen (mute-
+  // race: finish() zette muted weer uit terwijl play() nog liep).
+  // Ontgrendelen gebeurt uitsluitend in startCountdown — dat ís al een
+  // echte gebruikersgesture op de ALARM-knop.
+  function isCountdownTicking(){
+    return countdownActive === true;
+  }
+  function countdownAudioEls(){
+    return [els.countdownBeepNormal, els.countdownBeepUrgent, els.countdownFiredTone];
+  }
+  function stopCountdownAudio(){
+    countdownAudioEls().forEach((el) => {
+      if (!el) return;
+      try {
+        el.pause();
+        el.currentTime = 0;
+        el.muted = true;
+      } catch (err){ /* ignore */ }
+    });
+  }
   function playCountdownAudioEl(el){
+    // Harde poort: buiten een lopende aftelling nooit starten — ook niet
+    // via late callbacks. Eenmaal gestarte audio loopt uit; stoppen gebeurt
+    // expliciet via stopCountdownAudio() (annuleren / wegnavigeren).
+    if (!isCountdownTicking() || !el) return;
     try {
       el.muted = false;
       el.currentTime = 0;
@@ -4640,47 +4665,47 @@
     } catch (err){ /* geluid is decoratief — het aftellen zelf mag hier nooit van afhangen */ }
   }
   function playCountdownBeep(urgent){
+    if (!isCountdownTicking()) return;
+    // Stop de andere piep zodat nooit twee aftelgeluiden overlappen.
+    const other = urgent ? els.countdownBeepNormal : els.countdownBeepUrgent;
+    if (other){
+      try { other.pause(); other.currentTime = 0; other.muted = true; } catch (err){ /* ignore */ }
+    }
     playCountdownAudioEl(urgent ? els.countdownBeepUrgent : els.countdownBeepNormal);
   }
   // Eén duidelijk, dalend "bevestigd"-signaal op het exacte moment dat het
-  // aftellen voorbij is — bewust anders dan de oplopende piepjes hiervoor,
-  // zodat het onmiskenbaar voelt als "het is nu echt verstuurd" in plaats
-  // van nog een tel. Speelt synchroon met het aftellen, dus zonder te
-  // wachten op het netwerkverzoek erna.
+  // aftellen voorbij is — bewust anders dan de oplopende piepjes hiervoor.
+  // Wordt aangeroepen zolang countdownActive nog true is; daarna stoppen
+  // we de sessie.
   function playFiredTone(){
+    if (!isCountdownTicking()) return;
+    try {
+      if (els.countdownBeepNormal){ els.countdownBeepNormal.pause(); els.countdownBeepNormal.muted = true; }
+      if (els.countdownBeepUrgent){ els.countdownBeepUrgent.pause(); els.countdownBeepUrgent.muted = true; }
+    } catch (err){ /* ignore */ }
     playCountdownAudioEl(els.countdownFiredTone);
   }
-  // Net als bij de oude AudioContext-aanpak moet ook een <audio>-element
-  // voor het eerst worden afgespeeld vanuit een ECHTE gebruikersactie
-  // voordat de browser het toestaat. Dit draait daarom (net als eerst bij
-  // getSirenAudioCtx) op elke tik ergens in de app — onschuldig en
-  // goedkoop zodra de elementen al ontgrendeld zijn, en dekt zo ook het
-  // scenario af waarbij iemand de allereerste tik ooit ergens anders dan
-  // op de ALARM-knop doet.
+  // iOS/Safari eist dat <audio> eerst vanuit een echte gebruikersactie
+  // is aangeraakt. Alleen aanroepen vanuit startCountdown (ALARM-tik) —
+  // nooit vanaf willekeurige navigatie. Blijft muted; unmute gebeurt pas
+  // in playCountdownAudioEl als de teller echt loopt.
   function unlockCountdownAudioElements(){
-    [els.countdownBeepNormal, els.countdownBeepUrgent, els.countdownFiredTone].forEach((el) => {
-      if (!el || el.dataset.unlocked) return;
-      // 'pending' zodat een tweede tik vlak erna dit niet nog eens start
-      // terwijl de eerste ontgrendeling nog bezig is.
+    countdownAudioEls().forEach((el) => {
+      if (!el || el.dataset.unlocked === '1' || el.dataset.unlocked === 'pending') return;
       el.dataset.unlocked = 'pending';
-      // Muted afspelen: play() en pause() gebeuren niet op exact hetzelfde
-      // moment, dus zonder mute hoorde je bij de eerste tik ergens anders
-      // in de app (een willekeurige knop, niet de ALARM-knop) toch een kort
-      // flitsje van de piep — precies het "willekeurige geluid"-probleem.
       el.muted = true;
       const finish = () => {
-        el.pause();
-        el.currentTime = 0;
-        el.muted = false;
+        try { el.pause(); el.currentTime = 0; } catch (err){ /* ignore */ }
+        el.muted = true;
         el.dataset.unlocked = '1';
       };
-      const p = el.play();
-      if (p && p.then) p.then(finish).catch(finish);
-      else finish();
+      try {
+        const p = el.play();
+        if (p && p.then) p.then(finish).catch(finish);
+        else finish();
+      } catch (err){ finish(); }
     });
   }
-  document.addEventListener('touchstart', unlockCountdownAudioElements, { passive: true });
-  document.addEventListener('click', unlockCountdownAudioElements);
   function resetAlarmButton(){
     els.alarmButtonLabel.textContent = 'ALARM';
     els.alarmButtonSublabel.classList.add('hidden');
@@ -4696,9 +4721,7 @@
   let pendingTestMode = false;
   function startCountdown(testMode){
     if (countdownActive || els.alarmButton.disabled) return;
-    // Nog een laatste, synchrone ontgrendel-poging vlak bij de tik zelf —
-    // overbodig zodra de elementen al ontgrendeld zijn, maar goedkoop en
-    // vangt de allereerste-tik-is-meteen-de-ALARM-knop-situatie af.
+    // Ontgrendel alleen hier (echte ALARM-tik), niet bij willekeurige navigatie.
     unlockCountdownAudioElements();
     pendingTestMode = !!testMode;
     countdownActive = true;
@@ -4714,7 +4737,7 @@
 
     let lastBeepSecond = null;
     function tick(now){
-      if (!countdownActive) return;
+      if (!isCountdownTicking()) return;
       const elapsed = now - countdownStartedAt;
       const fraction = Math.min(1, elapsed / COUNTDOWN_MS);
       setHoldProgress(fraction);
@@ -4730,8 +4753,11 @@
         if (navigator.vibrate) navigator.vibrate(15);
       }
       if (fraction >= 1){
-        countdownActive = false;
+        // Fired-tone nog terwijl de teller "actief" is (poort checkt dat),
+        // daarna sessie dicht — geen late piepjes meer.
         playFiredTone();
+        countdownActive = false;
+        if (countdownRafId){ cancelAnimationFrame(countdownRafId); countdownRafId = null; }
         if (navigator.vibrate) navigator.vibrate([25,40,25,40,120]);
         resetAlarmButton();
         activateAlarm(pendingTestMode);
@@ -4745,7 +4771,8 @@
     if (!countdownActive) return;
     countdownActive = false;
     pendingLocation = null;
-    if (countdownRafId) cancelAnimationFrame(countdownRafId);
+    if (countdownRafId){ cancelAnimationFrame(countdownRafId); countdownRafId = null; }
+    stopCountdownAudio();
     resetAlarmButton();
   }
 
