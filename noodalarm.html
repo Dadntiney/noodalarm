@@ -1200,6 +1200,10 @@
     display:block; font-size:0.75rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
     color:var(--amber); margin:0 0 4px; opacity:.95;
   }
+  .sent-rescue-hint{
+    margin:0 18px 10px; font-size:0.875rem; color:var(--text-muted); line-height:1.4; font-weight:600;
+  }
+  .medical-info-card.rescue-card.open .sent-rescue-hint{ display:block; }
   .medical-info-toggle{
     width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
     background:none; border:none; padding:14px 16px; cursor:pointer; color:var(--text); font-size:0.96875rem; font-weight:700; text-align:left;
@@ -2091,6 +2095,24 @@
             <span id="statusBadgeText">NOODALARM VERZONDEN</span>
           </div>
 
+          <!-- Reddingskaart meteen bovenaan: ambulance/dokter kan dit op
+               DEZE telefoon aflezen zonder te navigeren. -->
+          <div id="sentRescueCard" class="medical-info-card rescue-card hidden">
+            <div id="sentRescueResusBanner" class="medical-resus-banner hidden"></div>
+            <div class="medical-info-actions">
+              <button type="button" id="sentEhboButton" class="small-btn">🩹 EHBO-instructies</button>
+              <a href="tel:112" id="sentCall112Button" class="small-btn danger">📞 Bel 112</a>
+            </div>
+            <div class="medical-info-toggle">
+              <span>
+                <span class="rescue-card-kicker" id="sentRescueKicker">Reddingskaart</span>
+                <span id="sentRescueTitleLabel">Voor de ambulance — over <strong id="sentRescueName">—</strong></span>
+              </span>
+            </div>
+            <p class="sent-rescue-hint" id="sentRescueHint">Laat dit scherm zien aan de dokter of ambulance.</p>
+            <div id="sentRescueBody" class="medical-info-body"></div>
+          </div>
+
           <div class="info-card">
             <div class="info-row"><span id="sentByLabel">Geactiveerd door</span><strong id="sentBy">—</strong></div>
             <div class="info-row"><span id="sentAtLabel">Tijdstip</span><strong id="sentAt">—</strong></div>
@@ -2628,6 +2650,10 @@
     { sel: '#sentByLabel', nl: 'Geactiveerd door', en: 'Activated by' },
     { sel: '#sentAtLabel', nl: 'Tijdstip', en: 'Time' },
     { sel: '#entriesCard h3', nl: 'Noodcontacten', en: 'Emergency contacts' },
+    { sel: '#sentRescueKicker', nl: 'Reddingskaart', en: 'Rescue card' },
+    { sel: '#sentRescueHint', nl: 'Laat dit scherm zien aan de dokter of ambulance.', en: 'Show this screen to the doctor or ambulance crew.' },
+    { sel: '#sentEhboButton', nl: '🩹 EHBO-instructies', en: '🩹 First aid instructions' },
+    { sel: '#sentCall112Button', nl: '📞 Bel 112', en: '📞 Call 112' },
     { sel: '#openMessagesFromSentButton', m: 'l', nl: ' Open Berichten', en: ' Open Messages' },
     { sel: '#endAlarmButton', nl: 'Terug naar start', en: 'Back to start' },
     { sel: '#ackStatusCardTitle', nl: 'Hulpteam', en: 'Help team' },
@@ -2733,6 +2759,8 @@
       'entry.testNote': '🧪 Oefening — niemand heeft een melding gekregen. Hieronder zie je hoe het eruitziet bij een echt alarm.',
       'sent.openPreview': 'Bekijk wat er gebeurt',
       'sent.openMessages': 'Open Berichten',
+      'sent.rescueTitle': 'Voor de ambulance — over <strong>{name}</strong>',
+      'sent.rescueEmpty': 'Nog geen medische info ingevuld. Vul dit in via Profiel → Medische informatie, zodat de ambulance dit meteen kan lezen.',
       'ack.hintTest': 'Bij een echt alarm zie je hier live wie reageert. Nu oefen je alleen — niemand is gewaarschuwd.',
       'medical.previewHint': 'Zo ziet jouw reddingskaart eruit voor wie je helpt.',
       'time.now': 'zojuist',
@@ -2883,6 +2911,8 @@
       'entry.testNote': '🧪 Practice — nobody received a notification. Below is how a real alarm looks.',
       'sent.openPreview': 'See what happens',
       'sent.openMessages': 'Open Messages',
+      'sent.rescueTitle': 'For the ambulance — about <strong>{name}</strong>',
+      'sent.rescueEmpty': 'No medical info filled in yet. Add it via Profile → Medical information so ambulance crews can read it right away.',
       'ack.hintTest': 'In a real alarm you see live who responds here. This is practice only — nobody was alerted.',
       'medical.previewHint': 'This is how your rescue card looks to the people helping you.',
       'time.now': 'just now',
@@ -3247,6 +3277,14 @@
     entriesList: document.getElementById('entriesList'),
     openMessagesFromSentButton: document.getElementById('openMessagesFromSentButton'),
     endAlarmButton: document.getElementById('endAlarmButton'),
+    sentRescueCard: document.getElementById('sentRescueCard'),
+    sentRescueResusBanner: document.getElementById('sentRescueResusBanner'),
+    sentRescueBody: document.getElementById('sentRescueBody'),
+    sentRescueName: document.getElementById('sentRescueName'),
+    sentRescueTitleLabel: document.getElementById('sentRescueTitleLabel'),
+    sentRescueHint: document.getElementById('sentRescueHint'),
+    sentEhboButton: document.getElementById('sentEhboButton'),
+    sentCall112Button: document.getElementById('sentCall112Button'),
 
     contactsFilterBox: document.getElementById('contactsFilterBox'),
     contactsFilterInput: document.getElementById('contactsFilterInput'),
@@ -5054,6 +5092,7 @@
   });
 
   els.endAlarmButton.addEventListener('click', async () => {
+    hideSentRescueCard();
     switchView(els.viewIdle);
     await endMyActiveAlarm();
   });
@@ -5249,6 +5288,10 @@
     // automatisch wegnavigeren: net na het drukken op ALARM wil je eerst
     // die geruststelling zien, niet meteen in een ander scherm belanden.
     switchView(els.viewSent);
+    // Reddingskaart meteen open: ambulance/dokter kan dit op deze telefoon
+    // aflezen zonder verder te tikken (ook bij oefenen, zodat je ziet hoe
+    // het eruitziet).
+    renderSentRescueCard();
 
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;
@@ -5339,6 +5382,102 @@
     const hadBirthdayThisYear = now.getMonth() > bd.getMonth() || (now.getMonth() === bd.getMonth() && now.getDate() >= bd.getDate());
     if (!hadBirthdayThisYear) age--;
     return age >= 0 ? t('medical.yearsOld', { n: age }) : '';
+  }
+
+  // Bouwt de HTML-rijen van een reddingskaart uit medische + praktische info.
+  // Zelfde inhoud voor helpers in Berichten én voor de activator op het
+  // verzonden-scherm (zodat de ambulance DEZE telefoon kan aflezen).
+  function buildRescueCardContent(info, practical, activatorName, { previewHint } = {}){
+    const hasResus = info && typeof info.resuscitate === 'boolean';
+    const hasAny = (info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
+      || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital
+      || info.birth_date || info.weight_kg || info.pacemaker_icd || info.pregnant))
+      || (practical && practical.spare_key_location);
+    const medical = info || {};
+    const mobilityLabel = { good: t('medical.mobilityGood'), walker: t('medical.mobilityWalker'), wheelchair: t('medical.mobilityWheelchair') }[medical.mobility];
+    const contact1 = [medical.contact1_name, medical.contact1_relation].filter(Boolean).join(' — ') + (medical.contact1_phone ? ' · ' + medical.contact1_phone : '');
+    const contact2 = [medical.contact2_name, medical.contact2_relation].filter(Boolean).join(' — ') + (medical.contact2_phone ? ' · ' + medical.contact2_phone : '');
+    const rows = [];
+    if (previewHint){
+      rows.push('<div class="medical-info-row" style="color:var(--text-faint);"><em>' + escapeHtml(previewHint) + '</em></div>');
+    }
+    if (practical && practical.spare_key_location) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('extra.spareKey')) + '</strong> ' + escapeHtml(practical.spare_key_location) + '</div>');
+    if (medical.advance_directive) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.advanceDirective')) + '</strong> ' + escapeHtml(medical.advance_directive) + '</div>');
+    if (medical.pacemaker_icd) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pacemaker')) + '</strong></div>');
+    if (medical.pregnant) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pregnant')) + '</strong></div>');
+    if (medical.allergies) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.allergies')) + '</strong> ' + escapeHtml(medical.allergies) + '</div>');
+    if (medical.medications) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.medications')) + '</strong> ' + escapeHtml(medical.medications) + '</div>');
+    if (medical.conditions) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.conditions')) + '</strong> ' + escapeHtml(medical.conditions) + '</div>');
+    if (medical.birth_date){
+      const bd = new Date(medical.birth_date + 'T00:00:00');
+      const dateLabel = isNaN(bd.getTime()) ? medical.birth_date : bd.toLocaleDateString(localeTag());
+      const ageLabel = medicalAgeLabel(medical.birth_date);
+      rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.birthDate')) + '</strong> ' + escapeHtml(dateLabel + (ageLabel ? ' (' + ageLabel + ')' : '')) + '</div>');
+    }
+    if (medical.weight_kg) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.weight')) + '</strong> ' + escapeHtml(medical.weight_kg + ' kg') + '</div>');
+    if (mobilityLabel) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.mobility')) + '</strong> ' + escapeHtml(mobilityLabel) + '</div>');
+    if (medical.contact1_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact1')) + '</strong> ' + escapeHtml(contact1) + '</div>');
+    if (medical.contact2_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact2')) + '</strong> ' + escapeHtml(contact2) + '</div>');
+    if (medical.doctor_name || medical.doctor_phone) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.doctor')) + '</strong> ' + escapeHtml([medical.doctor_name, medical.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
+    if (medical.hospital) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.hospital')) + '</strong> ' + escapeHtml(medical.hospital) + '</div>');
+    if (medical.notes) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.other')) + '</strong> ' + escapeHtml(medical.notes) + '</div>');
+    let resusText = '';
+    let resusClass = 'medical-resus-banner hidden';
+    if (hasResus){
+      resusText = info.resuscitate
+        ? t('medical.resusYes', { name: activatorName })
+        : t('medical.resusNo', { name: activatorName });
+      resusClass = 'medical-resus-banner ' + (info.resuscitate ? 'ok' : 'danger');
+    }
+    return { hasResus, hasAny, resusText, resusClass, rowsHtml: rows.join('') };
+  }
+
+  async function loadOwnMedicalAndPractical(){
+    const [{ data: med }, { data: prac }] = await Promise.all([
+      sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle(),
+      sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle()
+    ]);
+    return { info: med || null, practical: prac || null };
+  }
+
+  // Op het verzonden-scherm: reddingskaart meteen open voor ambulance/dokter
+  // die over de schouder (of de telefoon zelf) meekijkt.
+  async function renderSentRescueCard(){
+    if (!els.sentRescueCard) return;
+    const name = currentProfile ? currentProfile.full_name : t('location.you');
+    if (els.sentRescueTitleLabel){
+      els.sentRescueTitleLabel.innerHTML = t('sent.rescueTitle', { name: escapeHtml(name) });
+    }
+    const { info, practical } = await loadOwnMedicalAndPractical();
+    const built = buildRescueCardContent(info, practical, name);
+    if (els.sentRescueResusBanner){
+      if (built.hasResus){
+        els.sentRescueResusBanner.textContent = built.resusText;
+        els.sentRescueResusBanner.className = built.resusClass;
+      } else {
+        els.sentRescueResusBanner.className = 'medical-resus-banner hidden';
+        els.sentRescueResusBanner.textContent = '';
+      }
+    }
+    if (els.sentRescueBody){
+      els.sentRescueBody.innerHTML = built.hasAny
+        ? built.rowsHtml
+        : '<div class="medical-info-row" style="color:var(--text-muted);">' + escapeHtml(t('sent.rescueEmpty')) + '</div>';
+      els.sentRescueBody.classList.remove('hidden');
+    }
+    els.sentRescueCard.classList.add('open');
+    els.sentRescueCard.classList.remove('hidden');
+  }
+
+  function hideSentRescueCard(){
+    if (!els.sentRescueCard) return;
+    els.sentRescueCard.classList.add('hidden');
+    els.sentRescueCard.classList.remove('open');
+    if (els.sentRescueBody) els.sentRescueBody.innerHTML = '';
+    if (els.sentRescueResusBanner){
+      els.sentRescueResusBanner.className = 'medical-resus-banner hidden';
+      els.sentRescueResusBanner.textContent = '';
+    }
   }
 
   // Aantal balkjes in de golfvorm van een spraakbericht.
@@ -5893,11 +6032,9 @@
       return;
     }
     const isOwn = alarmRow.triggered_by === currentSession.user.id;
-    const isTestPreview = isOwn && !!alarmRow.test_mode;
-    if (isOwn && !isTestPreview){
-      els.medicalInfoCard.classList.add('hidden');
-      return;
-    }
+    // Op de telefoon van wie op ALARM drukte: altijd de eigen reddingskaart
+    // tonen (ambulance leest déze telefoon). Helpers zien die van de ander.
+    const showOwnRescue = isOwn;
     // Zelfde reden als de guard in openMessages(): als iemand tijdens deze
     // await Berichten opnieuw opent, mag de medische info van DEZE
     // (oudere) activator niet alsnog over het nieuwe scherm heen geplakt
@@ -5906,16 +6043,10 @@
     els.medicalInfoCard.classList.remove('hidden');
     let info = null;
     let practical = null;
-    if (isTestPreview){
-      // Eigen data rechtstreeks: de helper-RPC's zijn bedoeld voor anderen
-      // tijdens een écht alarm; voor de oefen-preview lezen we gewoon de
-      // eigen rijen (die mag je altijd zien).
-      const [{ data: med }, { data: prac }] = await Promise.all([
-        sb.from('medical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle(),
-        sb.from('practical_info').select('*').eq('user_id', currentSession.user.id).maybeSingle()
-      ]);
-      info = med || null;
-      practical = prac || null;
+    if (showOwnRescue){
+      const own = await loadOwnMedicalAndPractical();
+      info = own.info;
+      practical = own.practical;
     } else {
       const [{ data }, { data: practicalData }] = await Promise.all([
         sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id }),
@@ -5925,20 +6056,21 @@
       practical = practicalData && practicalData[0];
     }
     if (genAtStart !== chatOpenGen) return;
-    const hasResus = info && typeof info.resuscitate === 'boolean';
-    const hasAny = (info && (hasResus || info.allergies || info.medications || info.conditions || info.doctor_name || info.doctor_phone
-      || info.notes || info.mobility || info.advance_directive || info.contact1_name || info.contact2_name || info.hospital
-      || info.birth_date || info.weight_kg || info.pacemaker_icd || info.pregnant))
-      || (practical && practical.spare_key_location);
-    els.medicalInfoToggle.classList.toggle('hidden', !hasAny);
-    if (!hasAny){
+    const activator = chatParticipantById[alarmRow.triggered_by];
+    const activatorName = showOwnRescue
+      ? (currentProfile ? currentProfile.full_name : t('location.you'))
+      : (activator ? activator.full_name : t('conversation.unknown'));
+    const built = buildRescueCardContent(info, practical, activatorName, {
+      previewHint: (showOwnRescue && alarmRow.test_mode) ? t('medical.previewHint') : null
+    });
+    els.medicalInfoToggle.classList.toggle('hidden', !built.hasAny);
+    if (!built.hasAny){
       els.medicalInfoBody.classList.add('hidden');
       els.medicalInfoCard.classList.remove('open');
       els.medicalInfoBody.innerHTML = '';
       els.medicalResusBanner.classList.add('hidden');
-      // Bij oefen-preview zonder medische info: EHBO/112-knoppen blijven
-      // zichtbaar zodat je wél ziet wat helpers altijd onder handbereik hebben.
-      if (isTestPreview) els.medicalInfoCard.classList.remove('hidden');
+      // Zonder medische info: EHBO/112 blijven zichtbaar (helpers én eigen telefoon).
+      els.medicalInfoCard.classList.remove('hidden');
       return;
     }
     // Voor een ambulanceteam dat binnenkomt terwijl jij CPR doet, is elke
@@ -5946,54 +6078,14 @@
     // meteen opengeklapt in plaats van pas na een tik op de titel.
     els.medicalInfoCard.classList.add('open');
     els.medicalInfoBody.classList.remove('hidden');
-    const activator = chatParticipantById[alarmRow.triggered_by];
-    const activatorName = isTestPreview
-      ? (currentProfile ? currentProfile.full_name : t('location.you'))
-      : (activator ? activator.full_name : t('conversation.unknown'));
     els.medicalInfoName.textContent = activatorName;
-    if (hasResus){
-      els.medicalResusBanner.textContent = info.resuscitate
-        ? t('medical.resusYes', { name: activatorName })
-        : t('medical.resusNo', { name: activatorName });
-      els.medicalResusBanner.className = 'medical-resus-banner ' + (info.resuscitate ? 'ok' : 'danger');
+    if (built.hasResus){
+      els.medicalResusBanner.textContent = built.resusText;
+      els.medicalResusBanner.className = built.resusClass;
     } else {
       els.medicalResusBanner.classList.add('hidden');
     }
-    const medical = info || {};
-    const mobilityLabel = { good: t('medical.mobilityGood'), walker: t('medical.mobilityWalker'), wheelchair: t('medical.mobilityWheelchair') }[medical.mobility];
-    const contact1 = [medical.contact1_name, medical.contact1_relation].filter(Boolean).join(' — ') + (medical.contact1_phone ? ' · ' + medical.contact1_phone : '');
-    const contact2 = [medical.contact2_name, medical.contact2_relation].filter(Boolean).join(' — ') + (medical.contact2_phone ? ' · ' + medical.contact2_phone : '');
-    const rows = [];
-    if (isTestPreview){
-      rows.push('<div class="medical-info-row" style="color:var(--text-faint);"><em>' + escapeHtml(t('medical.previewHint')) + '</em></div>');
-    }
-    // Sleutel buitenshuis staat bewust los van medische info (andere tabel,
-    // eigen knop op het profiel) maar hoort hier wel bovenaan: vaak is
-    // "hoe kom ik binnen" letterlijk de eerste stap voor wie ter plekke komt.
-    if (practical && practical.spare_key_location) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('extra.spareKey')) + '</strong> ' + escapeHtml(practical.spare_key_location) + '</div>');
-    if (medical.advance_directive) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.advanceDirective')) + '</strong> ' + escapeHtml(medical.advance_directive) + '</div>');
-    // Pacemaker/ICD en zwangerschap veranderen direct hoe een ambulanceteam
-    // reanimeert (waar ze wel/niet defibrilleren, ander protocol) — daarom
-    // net als de wilsverklaring in het rood, vlak onder de reanimatiebanner.
-    if (medical.pacemaker_icd) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pacemaker')) + '</strong></div>');
-    if (medical.pregnant) rows.push('<div class="medical-info-row medical-info-row-warn"><strong>' + escapeHtml(t('medical.pregnant')) + '</strong></div>');
-    if (medical.allergies) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.allergies')) + '</strong> ' + escapeHtml(medical.allergies) + '</div>');
-    if (medical.medications) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.medications')) + '</strong> ' + escapeHtml(medical.medications) + '</div>');
-    if (medical.conditions) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.conditions')) + '</strong> ' + escapeHtml(medical.conditions) + '</div>');
-    if (medical.birth_date){
-      const bd = new Date(medical.birth_date + 'T00:00:00');
-      const dateLabel = isNaN(bd.getTime()) ? medical.birth_date : bd.toLocaleDateString(localeTag());
-      const ageLabel = medicalAgeLabel(medical.birth_date);
-      rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.birthDate')) + '</strong> ' + escapeHtml(dateLabel + (ageLabel ? ' (' + ageLabel + ')' : '')) + '</div>');
-    }
-    if (medical.weight_kg) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.weight')) + '</strong> ' + escapeHtml(medical.weight_kg + ' kg') + '</div>');
-    if (mobilityLabel) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.mobility')) + '</strong> ' + escapeHtml(mobilityLabel) + '</div>');
-    if (medical.contact1_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact1')) + '</strong> ' + escapeHtml(contact1) + '</div>');
-    if (medical.contact2_name) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.contact2')) + '</strong> ' + escapeHtml(contact2) + '</div>');
-    if (medical.doctor_name || medical.doctor_phone) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.doctor')) + '</strong> ' + escapeHtml([medical.doctor_name, medical.doctor_phone].filter(Boolean).join(' — ')) + '</div>');
-    if (medical.hospital) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.hospital')) + '</strong> ' + escapeHtml(medical.hospital) + '</div>');
-    if (medical.notes) rows.push('<div class="medical-info-row"><strong>' + escapeHtml(t('medical.other')) + '</strong> ' + escapeHtml(medical.notes) + '</div>');
-    els.medicalInfoBody.innerHTML = rows.join('');
+    els.medicalInfoBody.innerHTML = built.rowsHtml;
     els.medicalInfoCard.classList.remove('hidden');
   }
   // Reddingskaart blijft tijdens alarm open (geen inklappen).
@@ -6024,6 +6116,12 @@
   }
   if (els.ehboInstructionsButton){
     els.ehboInstructionsButton.addEventListener('click', () => {
+      renderEhboSteps();
+      els.ehboOverlay.classList.remove('hidden');
+    });
+  }
+  if (els.sentEhboButton){
+    els.sentEhboButton.addEventListener('click', () => {
       renderEhboSteps();
       els.ehboOverlay.classList.remove('hidden');
     });
