@@ -2825,6 +2825,7 @@
       'chat.systemBadge': 'Update',
       'chat.systemBadgeUpdate': 'Update',
       'chat.systemBadgeWelcome': 'Welkom',
+      'chat.systemBadgeAlarm': 'Alarm',
       'location.fetchingAddress': 'Adres ophalen…',
       'locationTest.busy': 'Bezig met opzoeken…',
       'locationTest.success': 'Gelukt! Nauwkeurig tot op ±{n} meter.',
@@ -2977,6 +2978,7 @@
       'chat.systemBadge': 'Update',
       'chat.systemBadgeUpdate': 'Update',
       'chat.systemBadgeWelcome': 'Welcome',
+      'chat.systemBadgeAlarm': 'Alarm',
       'location.fetchingAddress': 'Fetching address…',
       'locationTest.busy': 'Looking it up…',
       'locationTest.success': 'It works! Accurate to within ±{n} metres.',
@@ -5183,6 +5185,12 @@
     target.classList.remove('hidden');
   }
 
+  function postNoriAlarmRescueMessage(alarmId){
+    if (!alarmId) return;
+    sb.rpc('post_nori_alarm_rescue_message', { p_alarm_id: alarmId })
+      .then(({ error }) => { if (error) console.warn('nori rescue message', error.message); });
+  }
+
   async function activateAlarm(testMode, silent){
     els.alarmButton.disabled = true;
     if (!silent && navigator.vibrate) navigator.vibrate([80,40,80]);
@@ -5227,6 +5235,7 @@
       if (!sendError && result.alarmId){
         lastTriggeredAlarmId = result.alarmId;
         startLiveLocationSharing(result.alarmId);
+        if (!testMode) postNoriAlarmRescueMessage(result.alarmId);
       }
       showDiscreetToast(!sendError);
       return;
@@ -5296,6 +5305,10 @@
     if (result.alarmId){
       lastTriggeredAlarmId = result.alarmId;
       startLiveLocationSharing(result.alarmId);
+      // Bij een écht alarm: NORI plaatst locatie + medische info als
+      // chatbericht in de kring, zodat helpers het in Berichten lezen
+      // zonder grote kaarten die het typen blokkeren. Oefenalarm: overslaan.
+      if (!testMode) postNoriAlarmRescueMessage(result.alarmId);
     }
   }
 
@@ -5326,14 +5339,17 @@
 
   // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
-  // NORI is een uitzondering: vast systeem-afzender, zichtbaar in je eigen
-  // kring-groep (niet via andermans groepen, anders zie je dezelfde update
-  // meerdere keren). Welkomstbericht komt uit de DB bij succesvolle
-  // aanmelding (create_personal_alarm_group) — nooit opnieuw aanmaken
-  // in de frontend bij login, refresh of nieuwe contacten.
+  // NORI-updates (digest/welkom) alleen in je eigen kring-groep — anders
+  // zie je dezelfde update via andermans groepen meerdere keren.
+  // Uitzondering: alarm-reddingsbericht (alarm_id gezet) mag wél uit de
+  // groep van wie het alarm startte, zodat helpers locatie+medisch in de
+  // chat zien i.p.v. grote kaarten.
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
     if (isNoriSystemSender(msg.sender_id)){
+      if (msg.alarm_id){
+        return memberGroupIds.indexOf(msg.group_id) !== -1;
+      }
       return !!myGroupId && msg.group_id === myGroupId;
     }
     if (msg.sender_id === currentSession.user.id) return true;
@@ -5351,8 +5367,13 @@
   function isNoriWelcomeMessage(msg){
     return !!(msg && typeof msg.body === 'string' && msg.body.indexOf('👋 Welkom bij NORI!') === 0);
   }
+  function isNoriAlarmRescueMessage(msg){
+    return !!(msg && msg.alarm_id && isNoriSystemSender(msg.sender_id));
+  }
   function noriSystemBadgeLabel(msg){
-    return isNoriWelcomeMessage(msg) ? t('chat.systemBadgeWelcome') : t('chat.systemBadgeUpdate');
+    if (isNoriWelcomeMessage(msg)) return t('chat.systemBadgeWelcome');
+    if (isNoriAlarmRescueMessage(msg)) return t('chat.systemBadgeAlarm');
+    return t('chat.systemBadgeUpdate');
   }
 
   const CHAT_NAME_COLOR_COUNT = 6;
@@ -5960,8 +5981,15 @@
       lastAddressCoords = null;
       return;
     }
+    // Helpers zien locatie in het NORI-chatbericht (klikbare Maps-link) —
+    // geen grote kaart boven de chat die het typen in de weg zit.
+    // Alleen op de telefoon van de activator houden we de live kaart.
+    const isOwn = alarmRow.triggered_by === currentSession.user.id;
+    if (!isOwn){
+      els.locationCard.classList.add('hidden');
+      return;
+    }
     const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
-    const isOwn = triggered_by === currentSession.user.id;
     const activator = chatParticipantById[triggered_by];
     els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
     lastAccuracyText = location_accuracy ? t('location.accuracy', { n: Math.round(location_accuracy) }) : '';
@@ -6019,49 +6047,34 @@
     locationUpdatedTimer = setInterval(paint, 15000);
   }
 
-  // Medische info-kaart: de knoppen EHBO-instructies + Bel 112 zijn altijd
-  // zichtbaar zodra iemand ANDERS dan jijzelf een alarm heeft geactiveerd —
-  // ook als diegene geen medische info heeft ingevuld, want dan zijn dit
-  // juist de twee dingen die een reagerend contact nog wél direct kan doen.
-  // De uitklapbare medische details tonen we alleen als er iets is ingevuld.
-  // Uitzondering: bij een oefenalarm mag de activator de reddingskaart wél
-  // zien — precies zoals helpers die zouden zien bij een echt alarm.
+  // Medische info-kaart:
+  // - Op de telefoon van de activator: alleen bij oefenalarm in Berichten
+  //   (1-op-1 preview). Bij een écht alarm staat de reddingskaart al open
+  //   op het verzonden-scherm voor de ambulance.
+  // - Helpers: géén kaart — zij krijgen locatie + medisch als NORI-
+  //   chatbericht, zodat typen in Berichten vrij blijft.
   async function renderMedicalInfoCard(alarmRow){
     if (!alarmRow){
       els.medicalInfoCard.classList.add('hidden');
       return;
     }
     const isOwn = alarmRow.triggered_by === currentSession.user.id;
-    // Op de telefoon van wie op ALARM drukte: altijd de eigen reddingskaart
-    // tonen (ambulance leest déze telefoon). Helpers zien die van de ander.
-    const showOwnRescue = isOwn;
+    const isTestPreview = isOwn && !!alarmRow.test_mode;
+    if (!isTestPreview){
+      els.medicalInfoCard.classList.add('hidden');
+      return;
+    }
     // Zelfde reden als de guard in openMessages(): als iemand tijdens deze
     // await Berichten opnieuw opent, mag de medische info van DEZE
     // (oudere) activator niet alsnog over het nieuwe scherm heen geplakt
     // worden.
     const genAtStart = chatOpenGen;
     els.medicalInfoCard.classList.remove('hidden');
-    let info = null;
-    let practical = null;
-    if (showOwnRescue){
-      const own = await loadOwnMedicalAndPractical();
-      info = own.info;
-      practical = own.practical;
-    } else {
-      const [{ data }, { data: practicalData }] = await Promise.all([
-        sb.rpc('get_activator_medical_info', { p_alarm_id: alarmRow.id }),
-        sb.rpc('get_activator_practical_info', { p_alarm_id: alarmRow.id })
-      ]);
-      info = data && data[0];
-      practical = practicalData && practicalData[0];
-    }
+    const { info, practical } = await loadOwnMedicalAndPractical();
     if (genAtStart !== chatOpenGen) return;
-    const activator = chatParticipantById[alarmRow.triggered_by];
-    const activatorName = showOwnRescue
-      ? (currentProfile ? currentProfile.full_name : t('location.you'))
-      : (activator ? activator.full_name : t('conversation.unknown'));
+    const activatorName = currentProfile ? currentProfile.full_name : t('location.you');
     const built = buildRescueCardContent(info, practical, activatorName, {
-      previewHint: (showOwnRescue && alarmRow.test_mode) ? t('medical.previewHint') : null
+      previewHint: t('medical.previewHint')
     });
     els.medicalInfoToggle.classList.toggle('hidden', !built.hasAny);
     if (!built.hasAny){
@@ -6069,13 +6082,9 @@
       els.medicalInfoCard.classList.remove('open');
       els.medicalInfoBody.innerHTML = '';
       els.medicalResusBanner.classList.add('hidden');
-      // Zonder medische info: EHBO/112 blijven zichtbaar (helpers én eigen telefoon).
       els.medicalInfoCard.classList.remove('hidden');
       return;
     }
-    // Voor een ambulanceteam dat binnenkomt terwijl jij CPR doet, is elke
-    // extra tik vertraging die je niet wilt — het kaartje staat daarom
-    // meteen opengeklapt in plaats van pas na een tik op de titel.
     els.medicalInfoCard.classList.add('open');
     els.medicalInfoBody.classList.remove('hidden');
     els.medicalInfoName.textContent = activatorName;
