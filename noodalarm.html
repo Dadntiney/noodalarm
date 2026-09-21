@@ -158,6 +158,7 @@
   }
   :root[data-contrast="high"] .form-card, :root[data-contrast="high"] .info-card,
   :root[data-contrast="high"] .actions-card, :root[data-contrast="high"] .entries-card,
+  :root[data-contrast="high"] .sent-panel,
   :root[data-contrast="high"] .person-card, :root[data-contrast="high"] .notif-card,
   :root[data-contrast="high"] .settings-link, :root[data-contrast="high"] .chat-bubble.other,
   :root[data-contrast="high"] .theme-tab, :root[data-contrast="high"] .search-box,
@@ -353,7 +354,7 @@
   /* ---------- Tastbare tik-feedback (natuurlijker appgevoel) ---------- */
   .small-btn, .icon-btn, .save-button, .cancel-button, .end-button, .add-button,
   .segmented button, .person-card, .settings-link, .chat-send-button, .chat-attach-button,
-  .top-profile-button, .bell-button, .notif-card, .entries-card li, .danger-button, .link-button{
+  .top-profile-button, .bell-button, .notif-card, .entries-card li, .sent-panel #entriesList li, .danger-button, .link-button{
     transition:transform .12s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
   }
   .small-btn:active, .icon-btn:active, .save-button:active, .cancel-button:active,
@@ -1206,6 +1207,48 @@
   .location-live-badge::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--danger); animation:live-pulse 1.4s ease-in-out infinite; }
   @keyframes live-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
   .platform-icon{ width:18px; height:18px; flex-shrink:0; vertical-align:-4px; margin:0 1px; }
+
+  /* ---------- Verzonden-scherm: één strak paneel (zoals Profiel) ----------
+     Reddingskaart, tijdstip en noodcontacten in één kaart i.p.v. losse
+     blokjes met verschillende achtergronden en schaduwen. */
+  .sent-panel{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border-soft);
+    border-radius:16px;
+    overflow:hidden;
+    text-align:left;
+  }
+  .sent-panel-section{
+    padding:16px 18px;
+    border-top:1px solid var(--border-soft);
+  }
+  .sent-panel > .sent-rescue.hidden + .sent-panel-section{
+    border-top:none;
+  }
+  .sent-panel .sent-rescue{
+    margin:0; border:none; border-radius:0; background:transparent; box-shadow:none;
+  }
+  .sent-panel .sent-rescue.hidden{ display:none; }
+  .sent-panel .sent-rescue-pad{ padding:16px 18px; }
+  .sent-panel .medical-resus-banner{ padding:14px 18px; }
+  .sent-panel .medical-info-card.rescue-card .medical-info-actions{ padding:0 0 12px; }
+  .sent-panel .medical-info-card.rescue-card .medical-info-toggle{ padding:0 0 6px; font-size:1.0625rem; }
+  .sent-panel .medical-info-card.rescue-card .rescue-card-kicker{ margin:0 0 4px; }
+  .sent-panel .sent-rescue-hint{ margin:0 0 12px; }
+  .sent-panel .medical-info-card.rescue-card .medical-info-body{ padding:0; gap:10px; }
+  .sent-panel .medical-info-card.rescue-card .medical-info-row{ font-size:1rem; line-height:1.45; }
+  .sent-panel .info-row{ padding:10px 0; }
+  .sent-panel .info-row:first-child{ padding-top:0; }
+  .sent-panel .info-row:last-child{ padding-bottom:0; }
+  .sent-panel #entriesCard > h3{
+    font-size:0.875rem; font-weight:800; letter-spacing:.02em; text-transform:uppercase;
+    color:var(--text-faint); margin:0 0 12px;
+  }
+  .sent-panel #entriesList{ display:flex; flex-direction:column; gap:2px; margin:0; padding:0; list-style:none; }
+  .sent-panel #entriesList li{ display:flex; align-items:center; gap:12px; padding:12px 0; font-size:1rem; }
+  .sent-panel #entriesList li + li{ border-top:1px solid var(--border-soft); }
+  .sent-panel #entriesList .entry-name{ flex:1; font-weight:600; text-align:left; }
 
   /* ---------- Medische info-kaart ---------- */
   .medical-info-card{ border-radius:var(--radius-md); border:1px solid var(--border-soft); background:var(--amber-soft); margin-bottom:14px; overflow:hidden; }
@@ -2147,32 +2190,36 @@
             <span id="statusBadgeText">NOODALARM VERZONDEN</span>
           </div>
 
-          <!-- Reddingskaart meteen bovenaan: ambulance/dokter kan dit op
-               DEZE telefoon aflezen zonder te navigeren. -->
-          <div id="sentRescueCard" class="medical-info-card rescue-card hidden">
-            <div id="sentRescueResusBanner" class="medical-resus-banner hidden"></div>
-            <div class="medical-info-actions">
-              <button type="button" id="sentEhboButton" class="small-btn">🩹 EHBO-instructies</button>
-              <a href="tel:112" id="sentCall112Button" class="small-btn danger">📞 Bel 112</a>
+          <!-- Eén strakke kaart (zelfde idee als Profiel): reddingskaart,
+               tijdstip en noodcontacten bij elkaar i.p.v. losse blokjes. -->
+          <div class="sent-panel">
+            <div id="sentRescueCard" class="sent-rescue medical-info-card rescue-card hidden">
+              <div id="sentRescueResusBanner" class="medical-resus-banner hidden"></div>
+              <div class="sent-rescue-pad">
+                <div class="medical-info-actions">
+                  <button type="button" id="sentEhboButton" class="small-btn">🩹 EHBO-instructies</button>
+                  <a href="tel:112" id="sentCall112Button" class="small-btn danger">📞 Bel 112</a>
+                </div>
+                <div class="medical-info-toggle">
+                  <span>
+                    <span class="rescue-card-kicker" id="sentRescueKicker">Reddingskaart</span>
+                    <span id="sentRescueTitleLabel">Voor de ambulance — over <strong id="sentRescueName">—</strong></span>
+                  </span>
+                </div>
+                <p class="sent-rescue-hint" id="sentRescueHint">Laat dit scherm zien aan de dokter of ambulance.</p>
+                <div id="sentRescueBody" class="medical-info-body"></div>
+              </div>
             </div>
-            <div class="medical-info-toggle">
-              <span>
-                <span class="rescue-card-kicker" id="sentRescueKicker">Reddingskaart</span>
-                <span id="sentRescueTitleLabel">Voor de ambulance — over <strong id="sentRescueName">—</strong></span>
-              </span>
+
+            <div class="sent-panel-section">
+              <div class="info-row"><span id="sentByLabel">Geactiveerd door</span><strong id="sentBy">—</strong></div>
+              <div class="info-row"><span id="sentAtLabel">Tijdstip</span><strong id="sentAt">—</strong></div>
             </div>
-            <p class="sent-rescue-hint" id="sentRescueHint">Laat dit scherm zien aan de dokter of ambulance.</p>
-            <div id="sentRescueBody" class="medical-info-body"></div>
-          </div>
 
-          <div class="info-card">
-            <div class="info-row"><span id="sentByLabel">Geactiveerd door</span><strong id="sentBy">—</strong></div>
-            <div class="info-row"><span id="sentAtLabel">Tijdstip</span><strong id="sentAt">—</strong></div>
-          </div>
-
-          <div class="entries-card" id="entriesCard">
-            <h3>Noodcontacten</h3>
-            <ul id="entriesList"></ul>
+            <div class="sent-panel-section" id="entriesCard">
+              <h3>Noodcontacten</h3>
+              <ul id="entriesList"></ul>
+            </div>
           </div>
 
           <button type="button" id="openMessagesFromSentButton" class="save-button" style="display:flex; align-items:center; justify-content:center; gap:8px;">
