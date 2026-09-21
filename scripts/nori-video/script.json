@@ -1,7 +1,7 @@
 {
   "voice": "nl-NL-ColetteNeural",
-  "rate": "-12%",
-  "pitch": "+2Hz",
+  "rate": "-15%",
+  "pitch": "+1Hz",
   "segments": [
     {
       "id": "s1",
