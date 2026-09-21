@@ -1,5 +1,32 @@
 # NORI — notities voor toekomstige werksessies
 
+## Direct deployen na elke wijziging (belangrijk, blijf dit doen)
+
+Danny wil dat aanpassingen **meteen online** staan op
+https://noodalarm.vercel.app — niet wachten tot hij zelf in Vercel
+op Redeploy drukt.
+
+**Actiepunt na ieder verzoek waarin code wordt aangepast:**
+
+1. Commit + push naar de werkbranch.
+2. Zorg dat de productie-deploy-branch (`claude/deploy-dit-vercel-fkoka1`
+   of wat dan productie is) de wijziging bevat (merge/PR zoals gebruikelijk).
+3. Deploy daarna meteen naar productie:
+
+```bash
+npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
+```
+
+(Als `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` gezet zijn: die meenemen via
+`.vercel/project.json` of env, zodat het juiste project geraakt wordt.)
+
+4. Controleer kort dat https://noodalarm.vercel.app de nieuwe code
+   serveert (bijv. een unieke string uit de diff is zichtbaar).
+
+Zonder `VERCEL_TOKEN` lukt alleen een anonieme tijdelijke URL — dat telt
+**niet** als live. Vraag/herinner dan om het token; blokkeer het werk
+niet, maar meld duidelijk dat productie nog niet is bijgewerkt.
+
 ## Dagelijkse update-melding (belangrijk, blijf dit doen)
 
 Danny wil geen omkijken hebben naar het informeren van zijn noodcontacten
