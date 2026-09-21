@@ -5473,12 +5473,11 @@
     return t('chat.systemBadgeUpdate');
   }
 
-  // Compact NORI-alarmbericht: korte tekst + knoppen (Maps / reddingskaart).
-  // Ruwe tokens (nori-rescue:…, kale Maps-URL) verdwijnen achter grote,
-  // duidelijke knoppen — beter leesbaar voor 60+.
+  // Compact NORI-alarmbericht: korte tekst + reddingskaart (+ OMW).
+  // Locatie staat live bovenaan Berichten — Maps-URL in de body wordt
+  // weggefilterd zodat die niet als kale link in de bubbel blijft staan.
   function parseNoriAlarmBody(body){
     const text = String(body || '');
-    const mapsMatch = text.match(/https:\/\/www\.google\.com\/maps\/[^\s]+/i);
     const rescueMatch = text.match(/nori-rescue:([0-9a-f-]{36})/i);
     let lead = text
       .replace(/https:\/\/www\.google\.com\/maps\/[^\s]+/gi, '')
@@ -5492,7 +5491,6 @@
     if (!lead) lead = '🚨';
     return {
       lead,
-      mapsUrl: mapsMatch ? mapsMatch[0] : null,
       rescueId: rescueMatch ? rescueMatch[1] : null
     };
   }
@@ -5501,12 +5499,6 @@
     const alarmId = msg.alarm_id || parsed.rescueId || '';
     let html = '<p class="nori-alarm-lead">' + escapeHtml(parsed.lead) + '</p>';
     html += '<div class="nori-alarm-actions">';
-    if (parsed.mapsUrl || alarmId){
-      const href = parsed.mapsUrl || '#';
-      html += '<a class="nori-alarm-action maps" href="' + escapeHtml(href) + '" target="_blank" rel="noopener noreferrer"' +
-        (alarmId ? ' data-alarm-id="' + escapeHtml(alarmId) + '"' : '') +
-        '>' + escapeHtml(t('nori.openMaps')) + '</a>';
-    }
     if (parsed.rescueId || alarmId){
       html += '<button type="button" class="nori-alarm-action rescue" data-nori-rescue="' +
         escapeHtml(parsed.rescueId || alarmId) + '">' + escapeHtml(t('nori.openRescue')) + '</button>';
@@ -6104,15 +6096,14 @@
     openMessages();
   }
 
-  // Locatiekaart en reddingskaart staan NIET boven Berichten.
-  // Helpers zien alleen het compacte NORI-bericht (locatie + reddingskaart
-  // + Ik kom eraan) — geen hulpteam-kaart. Activator ziet wél hulpteam.
+  // Live locatiekaart bovenaan voor iedereen bij een actief alarm.
+  // Reddingskaart blijft via de knop in het NORI-bericht (overlay).
+  // Helpers: geen hulpteam-kaart. Activator ziet wél hulpteam.
   function handleActiveAlarmChanged(alarmRow){
     els.chatForm.classList.remove('hidden');
     els.testModeBanner.classList.toggle('hidden', !(alarmRow && alarmRow.status === 'active' && alarmRow.test_mode && alarmRow.triggered_by === currentSession.user.id));
-    // Altijd verbergen — helpers én activator lezen via NORI-knoppen.
-    els.locationCard.classList.add('hidden');
     els.medicalInfoCard.classList.add('hidden');
+    renderLocationCard(alarmRow && alarmRow.status === 'active' ? alarmRow : null);
     if (alarmRow && alarmRow.status === 'active'){
       const isActivator = alarmRow.triggered_by === currentSession.user.id;
       const isTest = !!alarmRow.test_mode;
@@ -6226,12 +6217,38 @@
   let lastAccuracyText = '';
   const locationMapState = { map: null, marker: null };
   function renderLocationCard(alarmRow){
-    // Locatie zit in het compacte NORI-bericht (Maps-knop). Geen grote
-    // kaart boven Berichten — ook niet voor de activator.
-    void alarmRow;
-    els.locationCard.classList.add('hidden');
-    if (els.locationAddress) els.locationAddress.textContent = '';
-    lastAddressCoords = null;
+    if (!alarmRow || alarmRow.lat == null || alarmRow.lng == null){
+      els.locationCard.classList.add('hidden');
+      if (els.locationAddress) els.locationAddress.textContent = '';
+      lastAddressCoords = null;
+      return;
+    }
+    // Oefenalarm blijft privé: contacten zien geen locatiekaart.
+    if (alarmRow.test_mode && alarmRow.triggered_by !== currentSession.user.id){
+      els.locationCard.classList.add('hidden');
+      return;
+    }
+    const { lat, lng, location_accuracy, location_updated_at, triggered_by } = alarmRow;
+    const isOwn = triggered_by === currentSession.user.id;
+    const activator = chatParticipantById[triggered_by];
+    els.locationName.textContent = isOwn ? t('location.you') : (activator ? activator.full_name : t('conversation.unknown'));
+    lastAccuracyText = location_accuracy ? t('location.accuracy', { n: Math.round(location_accuracy) }) : '';
+    els.locationOpenButton.href = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
+    els.locationCard.classList.remove('hidden');
+    // Eind-knop zit op de hulpteam-kaart; hier niet dubbel tonen.
+    if (els.endAlarmFromLocationButton) els.endAlarmFromLocationButton.classList.add('hidden');
+    els.locationLiveBadge.classList.toggle('hidden', !location_updated_at);
+    renderLocationMeta(location_updated_at);
+
+    // Kaart/adres alleen verversen bij échte verplaatsing (~30 m), anders
+    // flikkert de kaart bij elke GPS-tik terwijl iemand stilstaat.
+    const moved = !lastAddressCoords || haversineMeters(lastAddressCoords.lat, lastAddressCoords.lng, lat, lng) > 30;
+    if (moved){
+      lastAddressCoords = { lat, lng };
+      renderLeafletMap(locationMapState, els.locationMapImg, lat, lng);
+      els.locationAddress.textContent = t('location.fetchingAddress');
+      fetchStreetAddress(lat, lng);
+    }
   }
 
   function haversineMeters(lat1, lng1, lat2, lng2){
@@ -6371,33 +6388,29 @@
   }
 
   // Knoppen in compacte NORI-alarmberichten (event delegation).
+  // Op touch-apparaten komt deze 'click' vaak niet aan (touchend hieronder
+  // onderdrukt die) — daar wordt dezelfde actie via touchend afgevuurd.
+  function handleNoriAlarmAction(el){
+    if (!el) return false;
+    const omwBtn = el.closest ? el.closest('[data-nori-omw]') : null;
+    if (omwBtn || (el.getAttribute && el.getAttribute('data-nori-omw'))){
+      const btn = omwBtn || el;
+      if (btn.disabled) return true;
+      handleOmw(btn.getAttribute('data-nori-omw'));
+      return true;
+    }
+    const rescueBtn = el.closest ? el.closest('[data-nori-rescue]') : null;
+    if (rescueBtn || (el.getAttribute && el.getAttribute('data-nori-rescue'))){
+      const btn = rescueBtn || el;
+      openRescueOverlay(btn.getAttribute('data-nori-rescue'));
+      return true;
+    }
+    return false;
+  }
   if (els.chatMessages){
-    els.chatMessages.addEventListener('click', async (ev) => {
-      const omwBtn = ev.target.closest('[data-nori-omw]');
-      if (omwBtn){
+    els.chatMessages.addEventListener('click', (ev) => {
+      if (handleNoriAlarmAction(ev.target)){
         ev.preventDefault();
-        if (omwBtn.disabled) return;
-        handleOmw(omwBtn.getAttribute('data-nori-omw'));
-        return;
-      }
-      const rescueBtn = ev.target.closest('[data-nori-rescue]');
-      if (rescueBtn){
-        ev.preventDefault();
-        openRescueOverlay(rescueBtn.getAttribute('data-nori-rescue'));
-        return;
-      }
-      const mapsBtn = ev.target.closest('a.nori-alarm-action.maps[data-alarm-id]');
-      if (mapsBtn){
-        const alarmId = mapsBtn.getAttribute('data-alarm-id');
-        if (!alarmId) return;
-        // Nieuwste GPS-punt ophalen zodat “Open locatie” live blijft,
-        // ook als het bericht al even geleden geplaatst is.
-        try {
-          const { data } = await sb.from('alarms').select('lat, lng').eq('id', alarmId).maybeSingle();
-          if (data && data.lat != null && data.lng != null){
-            mapsBtn.href = 'https://www.google.com/maps/search/?api=1&query=' + data.lat + ',' + data.lng;
-          }
-        } catch (e){ /* fallback: href uit het bericht */ }
       }
     });
   }
@@ -6917,7 +6930,13 @@
     const video = ev.target.closest('.chat-video');
     const image = ev.target.closest('img.chat-media');
     const voicePlay = ev.target.closest('.voice-msg-play');
-    bubbleTouch = { bubble, video, image, voicePlay, startTime: Date.now(), moved: false };
+    const noriAction = ev.target.closest('.nori-alarm-action');
+    bubbleTouch = { bubble, video, image, voicePlay, noriAction, startTime: Date.now(), moved: false };
+    // NORI-actieknoppen: geen long-press-menu, alleen korte tik.
+    if (noriAction){
+      longPressStartXY = null;
+      return;
+    }
     longPressStartXY = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
     longPressTimer = setTimeout(() => {
       longPressTimer = null;
@@ -6951,15 +6970,15 @@
     // Alleen een echte, korte tik (niet verschoven, geen lang-indrukken,
     // geen menu geopend) op een video telt als "afspelen", op een foto als
     // "schermvullend tonen", op de afspeelknop van een spraakbericht als
-    // "starten/pauzeren". Zonder dit expliciet af te handelen bleef er op
-    // touch-apparaten niets gebeuren: de synthetische 'click' hierboven
-    // wordt voor elke tik in een bubbel onderdrukt (preventDefault), dus
-    // de eigen click-listener op de afspeelknop (zie primeVoiceMessages)
-    // kwam op een telefoon nooit aan.
+    // "starten/pauzeren", en op NORI-knoppen als reddingskaart / OMW.
+    // Zonder dit expliciet af te handelen bleef er op touch-apparaten
+    // niets gebeuren: de synthetische 'click' hierboven wordt voor elke
+    // tik in een bubbel onderdrukt (preventDefault).
     if (touch && !touch.moved && Date.now() - touch.startTime < LONG_PRESS_MS){
       if (touch.video) playVideoFullscreen(touch.video);
       else if (touch.image) openImageLightbox(touch.image.src);
       else if (touch.voicePlay) touch.voicePlay.click();
+      else if (touch.noriAction) handleNoriAlarmAction(touch.noriAction);
     }
   }, { passive: false });
   els.chatMessages.addEventListener('touchcancel', () => { cancelLongPress(); bubbleTouch = null; });
