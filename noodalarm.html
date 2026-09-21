@@ -5339,17 +5339,12 @@
 
   // Alleen berichten van jezelf of van een bevestigd contact — zo ziet
   // Danny geen berichten van Kees die toevallig in Jans kring staan.
-  // NORI-updates (digest/welkom) alleen in je eigen kring-groep — anders
-  // zie je dezelfde update via andermans groepen meerdere keren.
-  // Uitzondering: alarm-reddingsbericht (alarm_id gezet) mag wél uit de
-  // groep van wie het alarm startte, zodat helpers locatie+medisch in de
-  // chat zien i.p.v. grote kaarten.
+  // NORI (welkom/updates/alarm-redding) alleen in je eigen kring-groep —
+  // alarm-redding wordt bij een echt alarm ook in elke contact-groep
+  // geplaatst, zodat helpers het daar lezen zonder grote kaarten.
   function shouldShowChatMessage(msg){
     if (!msg || !currentSession) return false;
     if (isNoriSystemSender(msg.sender_id)){
-      if (msg.alarm_id){
-        return memberGroupIds.indexOf(msg.group_id) !== -1;
-      }
       return !!myGroupId && msg.group_id === myGroupId;
     }
     if (msg.sender_id === currentSession.user.id) return true;

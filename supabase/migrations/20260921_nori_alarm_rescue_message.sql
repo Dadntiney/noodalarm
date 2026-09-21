@@ -1,6 +1,7 @@
 -- Bij een écht noodalarm plaatst NORI één chatbericht in de kring van de
--- activator met locatie + medische reddingsinfo. Helpers lezen dat in de
--- chat i.p.v. grote kaarten die het typen blokkeren.
+-- activator én in de eigen kring van elk bevestigd noodcontact, met
+-- locatie + medische reddingsinfo. Helpers lezen dat in de chat i.p.v.
+-- grote kaarten die het typen blokkeren.
 -- test_mode: geen bericht (contacten merken niets).
 
 create or replace function public.nori_alarm_rescue_message_body(p_alarm_id uuid)
@@ -12,7 +13,6 @@ set search_path = public
 as $$
 declare
   a record;
-  p record;
   m record;
   prac record;
   v_name text;
@@ -146,6 +146,8 @@ declare
   v_nori uuid;
   v_body text;
   v_msg_id uuid;
+  v_first uuid;
+  r record;
 begin
   select * into a from public.alarms where id = p_alarm_id;
   if a.id is null then
@@ -162,7 +164,7 @@ begin
     return null;
   end if;
 
-  -- Idempotent: één reddingsbericht per alarm.
+  -- Idempotent: één reddingsronde per alarm.
   select id into v_msg_id
   from public.alarm_messages
   where alarm_id = p_alarm_id
@@ -178,11 +180,29 @@ begin
     return null;
   end if;
 
+  -- In de groep van de activator.
   insert into public.alarm_messages (group_id, sender_id, body, alarm_id)
   values (a.group_id, v_nori, v_body, p_alarm_id)
-  returning id into v_msg_id;
+  returning id into v_first;
 
-  return v_msg_id;
+  -- En in de eigen groep van elk bevestigd noodcontact (zelfde patroon
+  -- als dagelijkse NORI-updates), zodat helpers het in Berichten zien.
+  for r in
+    select g.id as group_id
+    from public.connections c
+    join public.alarm_groups g on g.owner_id = case
+      when c.requester_id = a.triggered_by then c.target_id
+      else c.requester_id
+    end
+    where c.status = 'accepted'
+      and (c.requester_id = a.triggered_by or c.target_id = a.triggered_by)
+      and g.id is distinct from a.group_id
+  loop
+    insert into public.alarm_messages (group_id, sender_id, body, alarm_id)
+    values (r.group_id, v_nori, v_body, p_alarm_id);
+  end loop;
+
+  return v_first;
 end;
 $$;
 
