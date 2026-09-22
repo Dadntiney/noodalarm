@@ -933,12 +933,28 @@
      niet ingeklemd in dezelfde smalle breedte als een kort berichtje. */
   .chat-bubble:has(.chat-media),
   .chat-bubble:has(.chat-video-wrap){ max-width:90%; }
-  /* NORI-uitlegvideo gebruikt dezelfde .chat-video-wrap als user-video’s.
-     Alleen de lead-tekst eronder heeft eigen typografie. */
+  /* NORI-uitlegvideo: zelfde chat-video-flow, maar vaste 16:9-preview.
+     Het echte bestand is portrait (1080×1920); zonder locked aspect-ratio
+     neemt de inline <video> na fullscreen die hoogte over. */
   .nori-intro-lead{
     margin:8px 0 0;
     font-size:1rem;
     line-height:1.45;
+  }
+  .chat-video-wrap.nori-intro-inline{
+    /* Één bron van waarheid voor de inline preview — onafhankelijk van
+       fullscreen/player-state of intrinsieke portrait-afmetingen. */
+    aspect-ratio:16 / 9;
+    /* -8px top bedekte “NORI / UITLEG”; -2px = alleen een lichte tuck. */
+    margin-top:-2px;
+  }
+  .chat-video-wrap.nori-intro-inline .chat-media{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    max-height:none;
+    object-fit:cover;
   }
   .chat-bubble.own{
     --bubble-bg:var(--accent);
@@ -960,6 +976,9 @@
     display:flex;
     align-items:center;
     gap:6px;
+    /* Blijft boven de video bij de lichte top-overlap. */
+    position:relative;
+    z-index:1;
   }
   .chat-system-badge{
     display:inline-flex;
@@ -5928,9 +5947,9 @@
   function noriIntroVideoPlayerHtml(){
       // Zelfde markup/flow als een door de gebruiker verstuurde chat-video:
       // <video class="chat-video"> in de bubbel + playVideoFullscreen bij tik.
-      // Geen aparte lightbox: die zette src pas bij openen en speelde pas na
-      // loadeddata — buiten de user-gesture → zwart scherm tot 2e tik.
-      return '<div class="chat-video-wrap">' +
+      // Extra class nori-intro-inline: locked 16:9 zodat portrait-intrinsics
+      // na openen/sluiten de chat-preview niet uitrekken.
+      return '<div class="chat-video-wrap nori-intro-inline">' +
         '<video src="' + escapeHtml(NORI_INTRO_VIDEO.src) + '"' +
         ' poster="' + escapeHtml(NORI_INTRO_VIDEO.poster) + '"' +
         ' class="chat-media chat-video" playsinline preload="metadata"' +
@@ -6318,6 +6337,8 @@
       };
       if (video.readyState >= 1) onMetadata();
       else video.addEventListener('loadedmetadata', onMetadata, { once: true });
+      // iOS: webkitEnterFullscreen vuurt géén document fullscreenchange.
+      video.addEventListener('webkitendfullscreen', () => resetInlineChatVideo(video));
     });
   }
 
@@ -7473,6 +7494,23 @@
   });
 
   // Tikken op een video speelt hem direct fullscreen af, net als WhatsApp.
+  // Na sluiten: wis player-/fullscreen-restanten zodat de inline preview
+  // (voor NORI-uitleg: vaste 16:9-wrap) niet de portrait-hoogte overneemt.
+  function resetInlineChatVideo(video){
+    if (!video) return;
+    video.controls = false;
+    try { video.pause(); } catch (e) { /* ignore */ }
+    video.style.removeProperty('width');
+    video.style.removeProperty('height');
+    video.style.removeProperty('max-width');
+    video.style.removeProperty('max-height');
+    video.style.removeProperty('aspect-ratio');
+    video.removeAttribute('width');
+    video.removeAttribute('height');
+    try {
+      if (video.currentTime > 0.05) video.currentTime = 0.01;
+    } catch (e) { /* ignore */ }
+  }
   function playVideoFullscreen(video){
     video.controls = true;
     if (video.webkitEnterFullscreen){
@@ -7496,7 +7534,7 @@
   });
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement){
-      els.chatMessages.querySelectorAll('.chat-video').forEach(v => { v.controls = false; });
+      els.chatMessages.querySelectorAll('.chat-video').forEach(resetInlineChatVideo);
     }
   });
 
