@@ -1,0 +1,125 @@
+{
+  "voice": "nl-NL-ColetteNeural",
+  "rate": "-15%",
+  "pitch": "+1Hz",
+  "segments": [
+    {
+      "id": "s1",
+      "scene": "welcome",
+      "text": "Welkom bij NORI.",
+      "onScreen": "Welkom bij NORI",
+      "pauseAfter": 0.55
+    },
+    {
+      "id": "s1b",
+      "scene": "welcome",
+      "text": "NORI helpt je om snel contact te maken met de mensen die jij vertrouwt.",
+      "onScreen": "Snel contact met wie jij kiest",
+      "pauseAfter": 0.65
+    },
+    {
+      "id": "s2",
+      "scene": "features",
+      "text": "Met NORI kun je drie dingen doen.",
+      "onScreen": "Wat kun je met NORI?",
+      "pauseAfter": 0.45
+    },
+    {
+      "id": "s2a",
+      "scene": "features",
+      "text": "Contacten toevoegen.",
+      "onScreen": "Contacten",
+      "feature": "contacts",
+      "pauseAfter": 0.4
+    },
+    {
+      "id": "s2b",
+      "scene": "features",
+      "text": "Berichten sturen.",
+      "onScreen": "Berichten",
+      "feature": "messages",
+      "pauseAfter": 0.4
+    },
+    {
+      "id": "s2c",
+      "scene": "features",
+      "text": "En bij nood op ALARM drukken.",
+      "onScreen": "ALARM",
+      "feature": "alarm",
+      "pauseAfter": 0.55
+    },
+    {
+      "id": "s3",
+      "scene": "example",
+      "text": "Stel: je voelt je niet goed, en wilt dat iemand even komt kijken.",
+      "onScreen": "Je voelt je niet goed",
+      "pauseAfter": 0.5
+    },
+    {
+      "id": "s3a",
+      "scene": "example",
+      "text": "Je opent NORI. Je drukt op ALARM.",
+      "onScreen": "Open NORI → ALARM",
+      "step": 1,
+      "pauseAfter": 0.4
+    },
+    {
+      "id": "s3b",
+      "scene": "example",
+      "text": "Je hebt nog vier seconden om te annuleren.",
+      "onScreen": "4 seconden om te annuleren",
+      "step": 2,
+      "pauseAfter": 0.4
+    },
+    {
+      "id": "s3c",
+      "scene": "example",
+      "text": "Daarna krijgt jouw noodcontact een melding. Met jouw locatie.",
+      "onScreen": "Noodcontact krijgt melding",
+      "step": 3,
+      "pauseAfter": 0.6
+    },
+    {
+      "id": "s4",
+      "scene": "contacts",
+      "text": "Contacten zijn de mensen die jij hebt gekozen.",
+      "onScreen": "Jouw Contacten",
+      "pauseAfter": 0.45
+    },
+    {
+      "id": "s4b",
+      "scene": "contacts",
+      "text": "Zij moeten eerst accepteren. Daarna staan jullie in elkaars lijst.",
+      "onScreen": "Toevoegen → Accepteren",
+      "pauseAfter": 0.6
+    },
+    {
+      "id": "s5",
+      "scene": "alarm",
+      "text": "De ALARM-knop is voor als je echt hulp nodig hebt.",
+      "onScreen": "ALARM bij nood",
+      "pauseAfter": 0.45
+    },
+    {
+      "id": "s5b",
+      "scene": "alarm",
+      "text": "Jouw noodcontacten krijgen meteen een melding. Jij ziet de reddingskaart.",
+      "onScreen": "Melding + reddingskaart",
+      "pauseAfter": 0.6
+    },
+    {
+      "id": "s6",
+      "scene": "outro",
+      "text": "Kort gezegd: NORI helpt je om snel de mensen te bereiken die voor jou belangrijk zijn.",
+      "onScreen": "Snel iemand bereiken",
+      "pauseAfter": 0.55
+    },
+    {
+      "id": "s6b",
+      "scene": "outro",
+      "text": "Je bent klaar om NORI te gebruiken.",
+      "onScreen": "Je bent klaar",
+      "pauseAfter": 0.8
+    }
+  ]
+}
